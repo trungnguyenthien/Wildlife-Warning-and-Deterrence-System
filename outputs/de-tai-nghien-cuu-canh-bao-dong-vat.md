@@ -128,9 +128,9 @@ flowchart TD
     Scan --> CheckMotion{"Có chuyển động đáng kể?"}
     
     CheckMotion -- No --> Scan
-    CheckMotion -- Yes --> SendImage["Gửi khung hình lên Server AI (mỗi 2s/lần)"]
+    CheckMotion -- Yes --> SendImage["Gửi khung hình có chuyển động lên Server AI"]
     
-    SendImage --> RunAI["Chạy nhận diện YOLOv8 trên Server"]
+    SendImage --> RunAI["Server AI quét nhận dạng (tần suất 2s/lần)"]
     RunAI --> CheckDetect{"Có phát hiện động vật hoang dã?"}
     
     CheckDetect -- No --> Scan
@@ -192,8 +192,8 @@ sequenceDiagram
     participant Server as Server Điều khiển (Backend & AI)
     participant Ranger as Trạm Kiểm lâm / Người dân / Ban quản lý cao tốc / Biên phòng
 
-    Cam->>Server: Truyền luồng dữ liệu hình ảnh (2s/lần)
-    Server->>Server: Chạy mô hình AI phát hiện vật thể (Độ tin cậy >= 50%)
+    Cam->>Server: Gửi khung hình khi phát hiện chuyển động
+    Server->>Server: Quét nhận dạng AI trên server (tần suất 2s/lần, Độ tin cậy >= 50%)
     Note over Server: Phân tích loài & Mức độ nguy hiểm (Chờ 10s xác nhận)
 
     alt Động vật nguy hiểm cao (Voi, Cọp, Hổ, Báo, Rắn, Cá sấu...)
