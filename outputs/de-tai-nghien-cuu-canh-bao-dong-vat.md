@@ -81,37 +81,39 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 ### 7.1. Kiến trúc hệ thống
 
-Hệ thống được thiết kế theo mô hình tích hợp gồm: Trạm Camera/Thiết bị xua đuổi ngoài trời, Server trung tâm chạy AI và ứng dụng di động Android làm giao diện tương tác người dùng.
+Hệ thống được thiết kế theo mô hình kiến trúc phân tán gồm 4 thành phần cốt lõi nhằm tối ưu hóa khả năng phản ứng và quản trị:
+
+- **Hệ thống camera kèm cảnh báo tại hiện trường:** Đảm nhận việc thu thập hình ảnh hồng ngoại thời gian thực và trực tiếp kích hoạt các thiết bị cảnh báo/xua đuổi tại chỗ (loa phát, đèn chớp nhấp nháy, hàng rào điện sinh học và đèn cảnh báo đi kèm).
+- **Server nhận dạng thú:** Nhận luồng dữ liệu hình ảnh từ hiện trường và chạy mô hình học sâu học máy (YOLOv8) để phân tích, nhận dạng loài, số lượng và độ tin cậy.
+- **Server Mobile:** Máy chủ dịch vụ di động đóng vai trò ghi nhận thông tin điều khiển ứng phó từ người dùng, quản lý tài khoản (Login/Đăng ký), lưu trữ và phân phối log lịch sử cũng như hình ảnh snapshot sự kiện.
+- **Ứng dụng di động Android (Android Mobile App):** Giao diện người dùng thực địa hỗ trợ đăng ký/đăng nhập, thực hiện điều khiển cấu hình phòng vệ từ xa và truy xuất xem log lịch sử trực quan.
 
 **Hình 1: Sơ đồ kiến trúc hệ thống**
 
 ```mermaid
 flowchart TB
-    subgraph UI["Giao diện người dùng (Android Mobile Application)"]
-        R["Màn hình đăng ký (DANG_KY)"]
-        A["Màn hình đăng nhập (LOGIN)"]
-        B["Màn hình chính (Gồm 3 Tab: Danh sách Camera, Thống kê, Điều khiển)"]
-        C["Chi tiết Camera (Giao diện dọc: Live feed & Điều khiển ghi đè)"]
-    end
-    subgraph Logic["Xử lý nghiệp vụ (AI & Control Server)"]
-        D["Bộ nhận diện động vật (YOLOv8)"]
-        E["Bộ phân loại mức độ nguy hiểm & Kích hoạt"]
-        F["Dịch vụ gửi thông báo (FCM - Push Notification / SMS & Loa AI)"]
-    end
-    subgraph Data["Lưu trữ dữ liệu (Database & Storage)"]
-        G["Cơ sở dữ liệu lưu log phát hiện (PostgreSQL)"]
-        H["Kho lưu trữ video/hình ảnh camera (MinIO)"]
+    subgraph Fields["Hiện trường (Field Devices)"]
+        Cam["Hệ thống Camera hồng ngoại\n(Thu thập hình ảnh)"]
+        WarningDevices["Thiết bị cảnh báo tại chỗ\n(Loa phát, Đèn nháy, Hàng rào điện\n& Đèn cảnh báo hoạt động)"]
+        Cam <--> WarningDevices
     end
 
-    R --> A
-    A --> B
-    B --> C
-    C --> D
-    D --> E
-    E --> F
-    E --> G
-    C --> G
-    C --> H
+    subgraph Backend["Hệ thống Máy chủ (Server Services)"]
+        AIServer["Server nhận dạng thú\n(Nhận diện YOLOv8)"]
+        MobileServer["Server Mobile\n(Ghi nhận điều khiển ứng phó,\nLogin/Đăng ký, lưu log & hình ảnh)"]
+    end
+
+    subgraph Android["Giao diện di động (Android App)"]
+        AppLogin["Đăng ký / Đăng nhập"]
+        AppControl["Điều khiển ứng phó\n(Tab DIEU_KHIEN & Presets)"]
+        AppLog["Xem log lịch sử & hình ảnh\n(Tab THONG_KE & CAMERA_LIST)"]
+    end
+
+    Cam -->|Truyền luồng hình ảnh 2s/lần| AIServer
+    AIServer -->|Gửi kết quả nhận dạng & Ảnh chụp nhanh| MobileServer
+    MobileServer -->|Gửi lệnh kích hoạt thiết bị ngoại vi| WarningDevices
+    
+    Android <-->|Yêu cầu API & Nhận thông báo FCM| MobileServer
 ```
 
 ### 7.2. Thuật toán nhận diện và xử lý phân cấp nguy hiểm
