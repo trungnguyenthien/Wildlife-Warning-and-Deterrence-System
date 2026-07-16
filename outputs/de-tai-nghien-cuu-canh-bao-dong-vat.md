@@ -27,14 +27,6 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 ---
 
-## 4. Mục lục
-
-- [Phần I: Giới thiệu / Đặt vấn đề](#5-phan-i-gioi-thieu--dat-van-de)
-- [Phần II: Tổng quan tài liệu (Literature Review)](#6-phan-ii-tong-quan-tai-lieu-literature-review)
-- [Phần III: Phương pháp nghiên cứu](#7-phan-iii-phuong-phap-nghien-cuu)
-- [Phần IV: Kết quả và Thảo luận](#8-phan-iv-ket-qua-va-thao-luan)
-- [Phần V: Kết luận và Hướng phát triển](#9-phan-v-ket-luan-va-huong-phat-trien)
-
 ---
 
 ## 5. Phần I: Giới thiệu / Đặt vấn đề
