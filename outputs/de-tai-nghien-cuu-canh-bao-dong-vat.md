@@ -10,9 +10,14 @@
 
 ## 2. Tóm tắt (Abstract)
 
-Đề tài "Ứng dụng hệ thống cảnh báo và xua đuổi động vật hoang dã" tập trung giải quyết vấn đề xung đột nghiêm trọng giữa con người và động vật hoang dã tại các khu vực ven rừng, đệm sinh thái. Dự án xây dựng một giải pháp tích hợp gồm cụm camera giám sát ngoài trời và **ứng dụng di động Android** dành cho người dân và lực lượng kiểm lâm. Hệ thống sử dụng trí tuệ nhân tạo (AI) để tự động nhận dạng các loài thú nguy hiểm (như Voi, Cọp) và các loài thường xuyên phá hoại hoa màu (như Nai, Khỉ).
+Đề tài "Ứng dụng hệ thống cảnh báo và xua đuổi động vật hoang dã" hướng tới xây dựng giải pháp công nghệ hiện đại nhằm giảm thiểu xung đột giữa con người và thú hoang dã ven rừng. Nội dung tóm tắt đề tài gồm các điểm chính sau:
 
-Khi phát hiện thú dữ, hệ thống tự động đưa ra các phương án cảnh báo phân cấp: thông báo bằng loa phát thanh AI khẩn trương tại chỗ đối với thú dữ nguy hại cao và gửi tin nhắn SMS/thông báo đẩy trên thiết bị di động đối với thú ít nguy hiểm hơn. Đồng thời, người dùng có thể tùy chỉnh các trạng thái phòng vệ và kích hoạt thiết bị xua đuổi đa phương thức bao gồm âm thanh tần số thấp, đèn LED flash nhấp nháy, hàng rào điện sinh học thông qua ứng dụng di động hỗ trợ hướng xoay dọc (Vertical orientation). Kết quả thử nghiệm giả lập chứng minh hệ thống đạt độ chính xác nhận diện trên 92% với thời gian phản hồi dưới 1.5 giây, góp phần bảo vệ an toàn tính mạng người dân và giảm thiểu thiệt hại mùa màng một cách nhân đạo.
+- **Bối cảnh và Vấn đề:** Giải quyết xung đột nghiêm trọng giữa người dân sinh sống vùng đệm ven rừng và các loài động vật hoang dã xâm lấn gây hại hoa màu, đe dọa tính mạng.
+- **Giải pháp tích hợp:** Thiết lập cụm camera hồng ngoại ngoài trời kết nối máy chủ phân tích AI trung tâm và **ứng dụng di động Android (hướng dọc - Vertical-only)** dành cho người dân và kiểm lâm để kiểm soát trạng thái phòng vệ.
+- **Mô hình nhận dạng AI:** Tích hợp mô hình học sâu nhận dạng tự động loài, số lượng và mức độ nguy hiểm của động vật trong thời gian thực với tần suất 2 giây/lần và độ tin cậy >= 50%.
+- **Cảnh báo phân cấp thông minh:** Sử dụng loa phát giọng AI khẩn trương tại hiện trường cho thú dữ lớn nguy hiểm cao (Voi, Hổ) và gửi tin nhắn SMS/thông báo đẩy trên điện thoại cho thú ít nguy hiểm (Nai, Khỉ).
+- **Xua đuổi đa phương thức chủ động:** Người dùng có thể cấu hình hoặc kích hoạt từ xa các thiết bị sóng âm tần số thấp, đèn LED flash chớp nhiều màu, hàng rào điện sinh học phân cấp để xua đuổi thú hoang dã một cách nhân đạo.
+- **Hiệu quả thực nghiệm:** Kết quả thử nghiệm đạt độ chính xác nhận diện trên 92%, thời gian phản hồi cảnh báo dưới 1.5 giây và tỷ lệ xua đuổi thành công đạt 90.1%, giúp bảo vệ mùa màng và tính mạng người dân an toàn.
 
 ---
 
@@ -37,9 +42,10 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 ### 5.1. Lý do chọn đề tài
 
-Sự suy giảm diện tích rừng tự nhiên cùng với sự mở rộng các khu định cư của con người đã làm gia tăng đáng kể xung đột giữa con người và động vật hoang dã (Human-Wildlife Conflict - HWC). Tại các khu vực ven rừng quốc gia ở Việt Nam (như Vườn quốc gia Cát Tiên, các huyện miền núi tỉnh Đồng Nai, Sơn La), các loài động vật hoang dã như voi rừng thường xuyên di chuyển vào khu dân cư để tìm kiếm thức ăn, tàn phá hoa màu của người dân, thậm chí tấn công đe dọa tính mạng con người.
-
-Các giải pháp truyền thống như dựng hàng rào thô sơ, đốt lửa hoặc tuần tra đêm thủ công không chỉ gây nguy hiểm cho tính mạng người canh gác mà còn kém hiệu quả khi động vật quen với tiếng động và ánh sáng tĩnh. Do đó, việc xây dựng một hệ thống tự động nhận diện sớm động vật hoang dã và đưa ra các giải pháp xua đuổi chủ động, nhân đạo thông qua công nghệ di động tiện lợi giúp người dân nhận cảnh báo thời gian thực ở mọi lúc, mọi nơi là vô cùng cấp thiết.
+- **Gia tăng xung đột giữa người và động vật hoang dã (HWC):** Do diện tích rừng tự nhiên suy giảm và sự mở rộng khu định cư của con người, các loài thú hoang dã thường xuyên di chuyển vào vùng rìa dân cư (như Vườn quốc gia Cát Tiên, các huyện ven rừng ở Đồng Nai, Sơn La) để kiếm ăn.
+- **Gây thiệt hại lớn về người và tài sản:** Động vật hoang dã tàn phá hoa màu, phá hủy nông sản và đe dọa trực tiếp đến tính mạng của người dân sinh sống ở vùng đệm ven rừng.
+- **Hạn chế của các biện pháp truyền thống:** Việc tuần tra thủ công, đốt lửa hay rào chắn thô sơ gây nguy hiểm trực tiếp cho người tuần tra, tốn kém công sức và giảm hiệu quả do động vật nhanh chóng quen thuộc với các kích thích tĩnh.
+- **Yêu cầu cấp thiết về giải pháp tự động hóa:** Cần xây dựng hệ thống tự động phát hiện sớm bằng AI và chủ động kích hoạt các phương thức xua đuổi nhân đạo, kết hợp gửi cảnh báo đẩy tức thời lên điện thoại di động Android giúp người dân phản ứng kịp thời ở mọi nơi.
 
 ### 5.2. Mục tiêu nghiên cứu
 

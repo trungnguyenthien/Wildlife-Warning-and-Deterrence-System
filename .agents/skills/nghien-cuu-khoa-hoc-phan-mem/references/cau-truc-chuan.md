@@ -65,12 +65,7 @@ Có thể để dạng danh sách liên kết nội bộ markdown (`- [Phần I.
 - Đóng góp/ý nghĩa của đề tài
 - Hướng phát triển tiếp theo
 
-## 10. Tài liệu tham khảo
-
-Theo chuẩn IEEE (phổ biến cho CS) hoặc APA nếu trường yêu cầu. Đánh số `[1]`, `[2]`...
-và trích dẫn trong bài bằng `[1]`.
-
-## 11. Phụ lục
+## 10. Phụ lục
 
 - Mã nguồn chính (rút gọn, dạng code block, không dán toàn bộ repo)
 - Sơ đồ chi tiết bổ sung (Mermaid)
