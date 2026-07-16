@@ -97,7 +97,8 @@ Hệ thống được thiết kế theo mô hình tích hợp gồm: Trạm Came
 ```mermaid
 flowchart TB
     subgraph UI["Giao diện người dùng (Android Mobile Application)"]
-        A["Trang đăng nhập"]
+        R["Màn hình đăng ký (DANG_KY)"]
+        A["Màn hình đăng nhập (LOGIN)"]
         B["Màn hình chính (Gồm 3 Tab: Danh sách Camera, Thống kê, Điều khiển)"]
         C["Chi tiết Camera (Giao diện dọc: Live feed & Điều khiển ghi đè)"]
     end
@@ -111,6 +112,7 @@ flowchart TB
         H["Kho lưu trữ video/hình ảnh camera (MinIO)"]
     end
 
+    R --> A
     A --> B
     B --> C
     C --> D
@@ -162,48 +164,58 @@ flowchart TD
 Nhằm phản ứng nhanh và chính xác với từng tình huống xâm nhập thực tế, hệ thống tự động phân loại đối tượng phát hiện để gửi cảnh báo đến các cơ quan chức năng có liên quan:
 
 - **Kịch bản Phát hiện động vật quý hiếm (ví dụ: Hổ, Báo, Tê giác):** Hệ thống tự động gửi báo cáo khẩn cấp đến **Hạt Kiểm lâm** để triển khai các biện pháp theo dõi, bảo vệ động vật hoang dã quý hiếm khỏi các nguy cơ săn bắn trái phép.
-- **Kịch bản Phát hiện động vật lớn (ví dụ: Voi) di chuyển gần khu vực hành lang đường cao tốc:** Hệ thống tự động gửi cảnh báo khẩn đến **Ban quản lý đường cao tốc** để kịp thời hiển thị biển cảnh báo giao thông điện tử, khuyến cáo các phương tiện giảm tốc độ để tránh va chạm.
-- **Kịch bản Phát hiện con người xuất hiện tại vùng rừng sâu biên giới:** Hệ thống tự động gửi cảnh báo khẩn cấp đến trạm trực của **Lực lượng Bộ đội Biên phòng** nhằm phát hiện sớm hành vi vượt biên trái phép hoặc phá hoại lâm sản.
+- **Kịch bản Phát hiện động vật lớn (ví dụ: Voi) di chuyển gần khu vực hành lang đường cao tốc:** Hệ thống tự động gửi cảnh báo khẩn đến **Ban quản lý đường cao tốc#### 7.4.2. Màn hình Đăng ký [DANG_KY]
 
-### 7.3. Luồng tương tác người dùng - hệ thống (Sequence Diagram)
+- **Mô tả:** Màn hình dành cho người dân hoặc kiểm lâm lần đầu sử dụng ứng dụng di động để đăng ký tài khoản mới trong hệ thống.
+- **Nội dung nhập liệu:**
+  - Họ và tên người sử dụng.
+  - Số điện thoại (dùng để nhận tin nhắn cảnh báo SMS).
+  - Lựa chọn vai trò công tác (Người dân địa phương / Kiểm lâm khu vực / Bộ đội Biên phòng / Ban quản lý đường cao tốc) để phân quyền nhận thông báo phù hợp.
+  - Mật khẩu bảo mật cá nhân.
+- **Flow:** Đăng ký thành công sẽ điều hướng người dùng quay lại màn hình đăng nhập **[LOGIN]**.
 
-Sơ đồ dưới đây mô tả quá trình tương tác giữa các thiết bị vật lý ngoài trời, máy chủ AI, ứng dụng di động Android và người nhận cảnh báo.
+#### 7.4.3. Màn hình Đăng nhập [LOGIN]
 
-**Hình 3: Luồng tương tác toàn hệ thống**
+- **Mô tả:** Giao diện tối giản. Người dùng đăng nhập bằng số điện thoại và mật khẩu đã đăng ký, hoặc mã PIN khẩn cấp do ban quản lý cấp.
+- **Flow:** Đăng nhập thành công sẽ đưa người dùng vào **Màn hình chính của App [MAIN]**. Có liên kết chuyển sang màn hình **[DANG_KY]** đối với người dùng mới.
 
-```mermaid
-sequenceDiagram
-    participant Cam as Trạm Camera & Thiết bị ngoại vi
-    participant App as Ứng dụng Android (Mobile App)
-    participant Server as Server Điều khiển (Backend & AI)
-    participant Ranger as Trạm Kiểm lâm / Người dân / Ban quản lý cao tốc / Biên phòng
+#### 7.4.4. Màn hình chính [MAIN] (Gồm 3 tab chính)
 
-    Cam->>Server: Truyền luồng dữ liệu hình ảnh (2s/lần)
-    Server->>Server: Chạy mô hình AI phát hiện vật thể (Độ tin cậy >= 50%)
-    Note over Server: Phân tích loài & Mức độ nguy hiểm (Chờ 10s xác nhận)
+Màn hình chính xuất hiện ngay sau khi đăng nhập thành công, bao gồm 3 tab điều hướng nằm dưới cùng (Bottom Navigation) hoặc trên cùng:
 
-    alt Động vật nguy hiểm cao (Voi, Cọp, Hổ, Báo...)
-        Server->>Cam: Kích hoạt hệ thống LOA tại chỗ với giọng AI khẩn trương
-        Server->>Ranger: Gửi thông báo khẩn cấp (Push Notification FCM) đến ứng dụng di động
-    else Phát hiện thú lớn gần cao tốc
-        Server->>Ranger: Gửi cảnh báo khẩn cấp tới Ban quản lý đường cao tốc
-    else Phát hiện con người vùng biên giới
-        Server->>Ranger: Gửi cảnh báo khẩn cấp tới Lực lượng Bộ đội Biên phòng
-    else Động vật ít nguy hiểm (Khỉ, Nai...)
-        Server->>Ranger: Gửi tin nhắn SMS cảnh báo: Cam 1 - Phát hiện lúc 9:04
-        Server->>Cam: Kích hoạt Âm thanh xua đuổi, Đèn LED hoặc Hàng rào điện (mặc định)
-    end
+1. **Tab [CAMERA_LIST] (Màn hình tổng quan giám sát):**
+   - **Mô tả:** Màn hình hỗ trợ hiển thị lưới tối đa 4 camera giám sát (hiện tại trong dự án đang chạy thực tế 2 camera). 
+   - **Nội dung:** Mỗi camera card hiển thị **hình ảnh cuối cùng ghi nhận được** (last captured frame - giúp tiết kiệm băng thông khi không cần xem trực tiếp), tên trạm camera, trạng thái kết nối (Online/Offline) và thời gian phát hiện thú gần nhất.
+   - **Flow:** Nhấp chọn vào một thẻ camera để mở **Màn hình chi tiết camera [CAMERA_VIEW]**.
 
-    Server-->>App: Cập nhật hình ảnh cuối cùng/Live feed lên tab CAMERA_LIST và log lịch sử lên tab THONG_KE
-    App->>Server: Người dùng thay đổi cấu hình xua đuổi tại Tab DIEU_KHIEN của App chính
-    Server->>Cam: Cập nhật trạng thái bật/tắt thiết bị ngoại vi
-```
+2. **Tab [THONG_KE] (Lịch sử phát hiện):**
+   - **Mô tả:** Hiển thị danh sách lịch sử phát hiện động vật hoang dã của toàn bộ hệ thống camera (log phát hiện trong tuần).
+   - **Nội dung:** Cho phép người dùng xem chi tiết thời gian phát hiện, loại động vật, độ tin cậy của AI (chỉ ghi nhận khi > 50%) và số lượng cá thể. Đồng thời phân tích số lần xuất hiện của động vật theo trạm để đưa ra xu hướng di chuyển.
 
-### 7.4. Thiết kế các màn hình chức năng của ứng dụng Android (Darkmode)
+3. **Tab [DIEU_KHIEN] (Cấu hình hệ thống phòng vệ):**
+   - **Mô tả:** Cho phép người dùng bật/tắt nhanh hoặc cấu hình chế độ phòng vệ của toàn hệ thống.
+   - **Nội dung:**
+     - Các nút **Tự set hành vi nhanh** (Quick Presets): _Cảnh cáo nhẹ, Ngăn chặn trung bình, Khẩn cấp tối đa (tất cả tính năng)_.
+     - Lối vào màn hình **Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI]** để tùy chỉnh sâu thông số phòng vệ của 9 loài động vật hoang dã.
 
-Giao diện ứng dụng di động được thiết kế chuyên biệt cho hệ điều hành Android, sử dụng chủ đề tối (Darkmode) để tiết kiệm pin cho màn hình AMOLED/OLED và giảm mỏi mắt cho người dùng khi sử dụng ban đêm ngoài thực địa.
+#### 7.4.5. Màn hình chi tiết camera [CAMERA_VIEW]
 
-#### 7.4.1. Hướng hiển thị của ứng dụng di động (Application Orientation)
+- **Mô tả:** Hiển thị luồng video trực tiếp (Live feed) thời gian thực chất lượng cao từ camera hồng ngoại được chọn.
+- **Tính năng cảnh báo tại chỗ:**
+  - Khi có động vật hoang dã xâm nhập, màn hình xuất hiện **Banner cảnh báo nhấp nháy khẩn cấp**: _Tên Camera · Loài phát hiện · Thời gian phát hiện_ (Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`).
+  - Phân tích AI bên dưới: Loài, Số lượng cá thể, Mức độ nguy hiểm, Độ tin cậy AI.
+  - Cho phép người dùng ghi đè (override) bật/tắt thủ công nhanh các thiết bị ngoại vi của riêng trạm camera đó (bật/tắt SMS, Loa phát thanh, Âm thanh xua đuổi, Đèn LED nhấp nháy, Hàng rào điện, báo Kiểm lâm).
+
+#### 7.4.6. Màn hình [SETTING]
+
+Cho phép người dùng thực hiện các tùy chỉnh cá nhân:
+
+- Tùy chỉnh ngôn ngữ giao diện (Mặc định: Tiếng Việt).
+- Chuyển đổi thủ công chế độ Sáng / Tối màn hình (mặc định theo hệ thống hoặc ép Darkmode).
+- Bật hoặc Tắt chuông điện thoại đối với tin nhắn SMS cảnh báo nhận được.
+- Lối vào cấu hình màn hình **Thiết lập hành vi ứng phó mặc định**.
+
+#### 7.4.7. Màn hình Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI] di động (Application Orientation)
 
 Ứng dụng di động được thiết kế khóa cứng hiển thị theo **hướng xoay dọc (Vertical Layout-only)** nhằm tối ưu hóa tính tiện dụng và khả năng thao tác nhanh bằng một tay khi kiểm lâm và người dân đang di chuyển ngoài thực địa:
 
@@ -299,11 +311,12 @@ Hệ thống ứng dụng di động Android đã được xây dựng và tối
 **Bảng 1: Trạng thái hoàn thành các tính năng của ứng dụng Android**
 | STT | Màn hình/Tính năng | Trạng thái | Ghi chú |
 |---|---|---|---|
-| 1 | Màn hình đăng nhập [LOGIN] | Hoàn thành | Xác thực mật khẩu bảo mật |
-| 2 | Màn hình chính [MAIN] | Hoàn thành | Gồm 3 Tab chính: CAMERA_LIST (hiển thị hình ảnh cuối cùng), THONG_KE (log tuần, độ tin cậy > 50%), DIEU_KHIEN (bật/tắt nhanh) |
-| 3 | Màn hình chi tiết [CAMERA_VIEW] | Hoàn thành | Tích hợp Live feed video thời gian thực, banner cảnh báo nhấp nháy AI và các nút điều khiển ghi đè ngoại vi |
-| 4 | Màn hình cấu hình [THIET_LAP_HANH_VI] | Hoàn thành | Thiết lập hành vi xua đuổi mặc định (âm thanh, đèn, hàng rào điện) cho 9 loài thú và 3 chế độ cài đặt nhanh |
-| 5 | Màn hình [SETTING] | Hoàn thành | Cấu hình ngôn ngữ, độ sáng màn hình, bật/tắt chuông tin nhắn SMS cảnh báo |
+| 1 | Màn hình đăng ký [DANG_KY] | Hoàn thành | Cho phép người dùng mới đăng ký họ tên, số điện thoại, mật khẩu và phân loại vai trò |
+| 2 | Màn hình đăng nhập [LOGIN] | Hoàn thành | Đăng nhập tài khoản bằng số điện thoại và mật khẩu |
+| 3 | Màn hình chính [MAIN] | Hoàn thành | Gồm 3 Tab chính: CAMERA_LIST (hiển thị hình ảnh cuối cùng), THONG_KE (log tuần, độ tin cậy > 50%), DIEU_KHIEN (bật/tắt nhanh) |
+| 4 | Màn hình chi tiết [CAMERA_VIEW] | Hoàn thành | Tích hợp Live feed video thời gian thực, banner cảnh báo nhấp nháy AI và các nút điều khiển ghi đè ngoại vi |
+| 5 | Màn hình cấu hình [THIET_LAP_HANH_VI] | Hoàn thành | Thiết lập hành vi xua đuổi mặc định theo trạm camera + loài vật |
+| 6 | Màn hình [SETTING] | Hoàn thành | Cấu hình ngôn ngữ, độ sáng màn hình, bật/tắt chuông tin nhắn SMS cảnh báo |
 
 ### 8.2. Kết quả thực nghiệm nhận diện và xua đuổi
 
