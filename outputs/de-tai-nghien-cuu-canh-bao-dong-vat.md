@@ -48,7 +48,7 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 ### 5.2. Mục tiêu nghiên cứu
 
-- Xây dựng một **ứng dụng di động Android** giám sát và cảnh báo trực quan với giao diện Darkmode, hiển thị luồng video (live feed) trực tiếp từ các camera hồng ngoại đặt ở rìa rừng, hỗ trợ tối ưu hướng màn hình xoay **Dọc (Vertical)**.
+- Xây dựng một **ứng dụng di động Android** giám sát và cảnh báo trực quan, hiển thị luồng video (live feed) trực tiếp từ các camera hồng ngoại đặt ở rìa rừng, hỗ trợ tối ưu hướng màn hình xoay **Dọc (Vertical)**.
 - Tích hợp mô hình AI để nhận diện, phân tích loài, số lượng và mức độ nguy hiểm của động vật xâm nhập trong thời gian thực.
 - Triển khai cơ chế điều khiển ngoại vi thông minh trên điện thoại di động, tự động hoặc thủ công kích hoạt các phương án cảnh báo (SMS/Thông báo đẩy, loa phát thanh AI) và các công cụ xua đuổi (âm thanh tần số thấp, đèn LED flash, hàng rào điện) dựa trên mức độ nguy hiểm của thú.
 
@@ -56,12 +56,11 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 - **Đối tượng nghiên cứu:** Các thuật toán nhận dạng vật thể bằng AI, luồng điều khiển thiết bị IoT ngoại vi, cơ chế thông báo đẩy (Push Notification) và giao diện di động chạy trên hệ điều hành Android.
 - **Phạm vi ứng dụng:** Áp dụng cho các hộ dân và ban quản lý rừng, trạm kiểm lâm tại vùng giáp ranh rừng quốc gia sử dụng thiết bị cầm tay Android (điện thoại thông minh, máy tính bảng).
-- **Giới hạn kỹ thuật:** Hệ thống client chạy trên nền tảng Android, ngôn ngữ giao diện tiếng Việt, được tối ưu hóa hiển thị dọc với giao diện tối (Darkmode).
+- **Giới hạn kỹ thuật:** Hệ thống client chạy trên nền tảng Android, ngôn ngữ giao diện tiếng Việt, được tối ưu hóa hiển thị dọc.
 
 ### 5.4. Câu hỏi nghiên cứu / Giả thuyết khoa học
 
-- **Câu hỏi nghiên cứu:** Liệu việc ứng dụng mô hình học sâu kết hợp ứng dụng di động Android điều khiển thiết bị ngoại vi đa phương thức có giúp người dân nhận tin cảnh báo trong vòng dưới 2 giây và giảm tỉ lệ xung đột vật lý xuống dưới 10% hay không?
-- **Giả thuyết khoa học:** Hệ thống cảnh báo tự động thông qua việc phân tích mức độ hung dữ của động vật bằng AI và thông báo đẩy trực tiếp lên điện thoại Android sẽ giúp tối ưu hóa phương thức xua đuổi (dùng loa phát thanh giọng AI khẩn cấp với thú dữ lớn như voi, cọp và dùng SMS/Thông báo đẩy kèm sóng âm tần số thấp với khỉ, nai), từ đó nâng cao hiệu quả phòng chống xâm nhập một cách kịp thời và nhân đạo.
+`[Tạm để trống]`
 
 ---
 
@@ -208,9 +207,9 @@ sequenceDiagram
     Server->>Cam: Cập nhật trạng thái bật/tắt thiết bị ngoại vi
 ```
 
-### 7.4. Thiết kế các màn hình chức năng của ứng dụng Android (Darkmode)
+### 7.4. Thiết kế các màn hình chức năng của ứng dụng Android
 
-Giao diện ứng dụng di động được thiết kế chuyên biệt cho hệ điều hành Android, sử dụng chủ đề tối (Darkmode) để tiết kiệm pin cho màn hình AMOLED/OLED và giảm mỏi mắt cho người dùng khi sử dụng ban đêm ngoài thực địa.
+Giao diện ứng dụng di động được thiết kế chuyên biệt cho hệ điều hành Android, tối ưu hóa các thành phần trực quan để người dùng dễ dàng theo dõi và thao tác nhanh ngoài thực địa.
 
 #### 7.4.1. Hướng hiển thị của ứng dụng di động (Application Orientation)
 
@@ -267,7 +266,6 @@ Màn hình chính xuất hiện ngay sau khi đăng nhập thành công, đượ
 Cho phép người dùng thực hiện các tùy chỉnh cá nhân:
 
 - Tùy chỉnh ngôn ngữ giao diện (Mặc định: Tiếng Việt).
-- Chuyển đổi thủ công chế độ Sáng / Tối màn hình (mặc định theo hệ thống hoặc ép Darkmode).
 - Bật hoặc Tắt chuông điện thoại đối với tin nhắn SMS cảnh báo nhận được.
 - Lối vào cấu hình màn hình **Thiết lập hành vi ứng phó mặc định**.
 
