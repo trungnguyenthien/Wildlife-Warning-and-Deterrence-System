@@ -124,19 +124,24 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    Start["Bắt đầu chu kỳ quét camera"] --> Capture["Lấy khung hình từ Camera (tần suất 2s)"]
-    Capture --> RunAI["Chạy nhận diện YOLOv8 trên Server"]
-    RunAI --> CheckDetect{"Có phát hiện động vật?"}
+    Start["Bắt đầu chu kỳ quét camera"] --> Scan["Quét và phân tích chuyển động liên tục tại trạm Camera"]
+    Scan --> CheckMotion{"Có chuyển động đáng kể?"}
     
-    CheckDetect -- No --> Start
+    CheckMotion -- No --> Scan
+    CheckMotion -- Yes --> SendImage["Gửi khung hình lên Server AI (mỗi 2s/lần)"]
+    
+    SendImage --> RunAI["Chạy nhận diện YOLOv8 trên Server"]
+    RunAI --> CheckDetect{"Có phát hiện động vật hoang dã?"}
+    
+    CheckDetect -- No --> Scan
     CheckDetect -- Yes --> CheckConfidence{"Độ tin cậy >= 50%?"}
     
-    CheckConfidence -- No --> LogLow["Ghi nhận log hệ thống độ tin cậy thấp"] --> Start
+    CheckConfidence -- No --> LogLow["Ghi nhận log hệ thống độ tin cậy thấp"] --> Scan
     CheckConfidence -- Yes --> StartTimer["Tích lũy thời gian phát hiện liên tục"]
     
     StartTimer --> Check10s{"Thời gian tích lũy >= 10s?"}
     
-    Check10s -- No --> Capture
+    Check10s -- No --> Scan
     Check10s -- Yes --> GetDanger{"Xác định mức độ nguy hiểm của loài"}
     
     GetDanger --> CheckHigh{"Mức độ nguy hiểm cao? (Voi, Hổ, Báo, Tê giác, Rắn, Cá sấu)"}
@@ -160,7 +165,8 @@ flowchart TD
 
 Để tối ưu hóa băng thông truyền tải và nâng cao độ chính xác của toàn hệ thống, thuật toán được cấu hình với các tham số kỹ thuật cụ thể:
 
-- **Tần suất ghi nhận dữ liệu:** Mô hình AI phân tích luồng video hồng ngoại thời gian thực, thực hiện ghi nhận và lưu trữ kết quả kiểm tra với tần suất **2 giây một lần** (cách 2 giây lưu 1 kết quả).
+- **Bộ lọc chuyển động tại hiện trường (Motion Filter):** Nhằm tối ưu hóa băng thông và tài nguyên tính toán của máy chủ, hệ thống camera tại hiện trường thực hiện quét ảnh liên tục. Chỉ khi phát hiện chuyển động đáng kể, camera mới gửi khung hình lên máy chủ AI.
+- **Tần suất kiểm tra của máy chủ AI (Check Frequency):** Máy chủ AI thực hiện nhận diện và kiểm tra khung hình nhận được từ trạm camera để xác định có thú rừng hay không với tần suất **2 giây một lần** (cách 2 giây kiểm tra 1 lần).
 - **Bộ lọc độ tin cậy AI:** Hệ thống chỉ ghi nhận log sự kiện xâm nhập vào cơ sở dữ liệu khi kết quả nhận dạng của mô hình AI đạt độ tin cậy **từ 50% trở lên** (độ tin cậy >= 50% mới ghi), loại bỏ các nhận diện sai lệch hoặc không rõ nét.
 - **Bộ đệm thời gian ra quyết định:** Khi phát hiện động vật hoang dã, hệ thống không kích hoạt các công cụ xua đuổi ngay lập tức mà duy trì theo dõi trong **10 giây liên tục** (duy trì phát hiện >= 10 giây mới lên phương án xử lý). Điều này giúp hạn chế tối đa báo động giả do sai lệch nhận diện nhất thời hoặc do gió thổi làm rung lắc cây cối xung quanh trạm camera.
 - **Thời gian ngắt tự động hàng rào điện:** Hàng rào điện sẽ tự động ngắt hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để đảm bảo an toàn sinh học và tiết kiệm nguồn năng lượng ắc-quy tại trạm.
