@@ -98,8 +98,11 @@ flowchart TB
         Cam <--> WarningDevices
     end
 
-    subgraph Backend["Hệ thống Máy chủ (Server Services)"]
+    subgraph AIServerBox["Hệ thống Máy chủ AI (AI Server)"]
         AIServer["Server nhận dạng thú\n(Nhận diện YOLOv8)"]
+    end
+
+    subgraph MobileServerBox["Hệ thống Máy chủ Di động (Mobile Server)"]
         MobileServer["Server Mobile\n(Ghi nhận điều khiển ứng phó,\nLogin/Đăng ký, lưu log & hình ảnh)"]
     end
 
