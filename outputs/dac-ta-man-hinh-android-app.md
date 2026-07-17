@@ -92,7 +92,7 @@ Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chư
 
 Được mở khi user nhấn `register_linkbutton` ở `[LOGIN_SCREEN]`. Form đăng ký gồm **Username + Email + Password** — đơn giản hơn phiên bản OTP nhưng có đầy đủ validation để đảm bảo tài khoản hợp lệ. Sau khi tạo thành công, user quay về `[LOGIN_SCREEN]` để đăng nhập.
 
-### Giao diện (Vertical)
+### Bố cục màn
 
 | Component ID | Type | Mô tả |
 |---|---|---|
@@ -119,9 +119,9 @@ Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chư
 | `password_confirm_input` | Phải khớp với `password_input`. | `Mật khẩu không khớp`. |
 
 **Quy tắc độ mật** cho `password_strength_indicator` (chỉ hiển thị, không chặn):
-- `Yếu` (đỏ): < 8 ký tự hoặc chỉ chữ hoặc chỉ số.
-- `Trung bình` (vàng): ≥ 8 ký tự và có cả chữ lẫn số.
-- `Mạnh` (xanh): ≥ 12 ký tự có cả chữ và số (có thể bổ sung chữ hoa và ký tự đặc biệt để đạt Mạnh, không bắt buộc).
+- `Yếu`: < 8 ký tự hoặc chỉ chữ hoặc chỉ số.
+- `Trung bình`: ≥ 8 ký tự và có cả chữ lẫn số.
+- `Mạnh`: ≥ 12 ký tự có cả chữ và số (có thể bổ sung chữ hoa và ký tự đặc biệt để đạt Mạnh, không bắt buộc).
 
 ### Hành vi
 
@@ -141,10 +141,7 @@ Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chư
 
 ## 3. `[MAIN_SCREEN]` — Trung tâm điều khiển (3 tab)
 
-Màn hình chính sau khi đăng nhập. **Mỗi tab có layout nội dung hoàn toàn khác nhau** — chuyển tab là chuyển hẳng sang "trang" mới, không phải lướt ngang:
-
-- **Dọc (Vertical — mặc định):** Thanh tab nằm ở **dưới cùng** màn hình (Bottom Tab Bar), nội dung tab chiếm phần còn lại phía trên.
-- **Ngang (Horizontal — chỉ preview thiết kế):** Thanh tab nằm **bên phải** (Right Tab Bar), nội dung tab chiếm phần còn lại bên trái.
+Màn hình chính sau khi đăng nhập. **Mỗi tab có layout nội dung hoàn toàn khác nhau** — chuyển tab là chuyển hẳng sang "trang" mới, không phải lướt ngang. Ở chế độ dọc (Portrait — mặc định), thanh tab nằm ở dưới cùng màn hình.
 
 | Tab | Mặc định | Mô tả ngắn |
 |---|---|---|
@@ -172,10 +169,10 @@ Tab này vừa quản lý camera, vừa hiển thị cảnh báo khẩn cấp.
 
 | Component ID | Type | Mô tả |
 |---|---|---|
-| `emergency_banner_container` | Container (clickable) | Có animation nhấp nháy đỏ/vàng. Nội dung label: `Tên camera · Phát hiện [LOÀI] · [giờ:phút]`. Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`. |
+| `emergency_banner_container` | Container (clickable) | Banner tóm tắt sự kiện mới nhất. Nội dung label: `Tên camera · Phát hiện [LOÀI] · [giờ:phút]`. Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`. |
 | `emergency_banner_analysis_text` | Text (caption) | Bên dưới banner hiển thị Loài, Số lượng cá thể, Mức độ nguy hiểm, Độ tin cậy AI (%). |
 
-**Hành vi:** Banner tự động xuất hiện khi server gửi sự kiện FCM tới thiết bị. Nhấn vào `emergency_banner_container` → chuyển sang `[CAMERA_VIEW_SCREEN]` của camera tương ứng. Vì mỗi Camera Card đã có `warning_badge_overlay` nhấp nháy riêng (phụ thuộc mức nguy hiểm), banner sticky trên đầu tab có thể *bỏ qua* nếu thấy dư thừa.
+**Hành vi:** Banner tự động xuất hiện khi server gửi sự kiện FCM tới thiết bị. Nhấn vào `emergency_banner_container` → chuyển sang `[CAMERA_VIEW_SCREEN]` của camera tương ứng. Vì mỗi camera card đã có `warning_badge_overlay` cảnh báo riêng (phụ thuộc mức nguy hiểm, xem mục Trạng thái của card), banner sticky trên đầu tab có thể *bỏ qua* nếu thấy dư thừa — designer quyết định bật/tắt trong mockup.
 
 #### a) Danh sách thẻ camera
 
@@ -191,10 +188,10 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 
 | Component ID | Thông tin | Type | Mô tả |
 |---|---|---|---|
-| `camera_status_indicator` | **Trạng thái kết nối** | Status indicator | Label `🟢 Online` (xanh lá) · `⚪ Offline` (xám). Khi offline ≥ 30s sẽ hiển thị rõ đi kèm icon offline. |
+| `camera_status_indicator` | **Trạng thái kết nối** | Status indicator | Label `🟢 Online` / `⚪ Offline`. Khi offline ≥ 30s sẽ hiển thị rõ kèm icon offline. |
 | `camera_name_text` | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_VIEW_SCREEN]` (vd: `Cam Khu A`) — nhấn `rename_camera_button` trên màn đó. |
 | `camera_location_text` | **Khu vực lắp đặt** | Text (caption) | Mô tả ngắn vị trí: `Rìa rừng phía B`, `Trạm 2 · Đồi cao`… Cắt bớt nếu dài. |
-| `camera_thumbnail_image` | **Ảnh thumbnail** | Image (16:9) | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera + nền xám. Nếu offline → overlay icon `⚪ Offline` + tối màu 50%. Khi đang tải → shimmer effect. |
+| `camera_thumbnail_image` | **Ảnh thumbnail** | Image | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera. Nếu offline → overlay icon `⚪ Offline`. Khi đang tải → trạng thái loading. |
 | `warning_badge_overlay` | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Label dạng `⚠️ [LOÀI] · [%]` (vd: `⚠️ VOI · 92%`). Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW_SCREEN]` của camera đó. |
 | `snapshot_timestamp_overlay` | **Thời gian ghi nhận hình ảnh** | TextOverlay | Mốc thời gian server **chụp ảnh snapshot**, không phải live. Định dạng `HH:mm · dd/MM` (vd: `9:04 · 16/07`); tooltip dài hơn `HH:mm:ss · dd/MM/yyyy`. Nếu ảnh > 1 giờ: thêm nhãn `cũ` hoặc icon `⏰` (vd: `9:04 · 16/07 · ⏰ cũ`); > 24 giờ: hiển thị cả ngày `16/07` rõ. Nếu chưa có ảnh → text `—`. |
 
@@ -208,43 +205,40 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 
 ##### Trạng thái của card (Card state)
 
-Trạng thái card gồm **hai chiều độc lập**, kết hợp để quyết định render:
+Trạng thái của `camera_card_clickable_container` kết hợp từ **hai chiều logic** độc lập — phần render UI cụ thể (màu sắc, animation) thuộc trách nhiệm của designer.
 
-> **Chiều 1 — Background chớp theo mức cảnh báo** *(do AI quyết định, dựa trên mức độ nguy hiểm của loài phát hiện gần nhất)*:
+> **Chiều 1 — Mức cảnh báo** *(do AI quyết định, theo mức độ nguy hiểm của loài phát hiện gần nhất)*:
 >
-> | Mức cảnh báo | Loài đại diện | Background card | Tần suất chớp |
-> |---|---|---|---|
-> | **Cao** | Voi, Hổ, Báo, Tê giác, Rắn, Cá sấu, Người lạ | Nền **đỏ** (đỏ chói #D32F2F) phủ 12-18% | Nhấp nháy **nhanh**: 1 nhịp / 1s, alpha dao động 12%-18%, kèm glow đỏ xung quanh border |
-> | **Trung bình** | Nai lớn, Khỉ đàn, Heo rừng | Nền **vàng / hổ phách** (#F9A825) phủ 10-14% | Nhấp nháy **vừa**: 1 nhịp / 1.5s, alpha dao động 10%-14%, không glow |
-> | **Thấp** | Sóc, chim, các loài ít nguy hại | Nền **xanh nhạt** (#43A047) phủ 6-8% (chỉ tint, không chớp) | Không chớp — chỉ tint nhẹ ổn định |
-> | **Không có sự kiện** | — | Nền trắng/kem bình thường | Không chớp |
+> | Mức | Loài đại diện |
+> |---|---|
+> | **Cao** | Voi, Hổ, Báo, Tê giác, Rắn, Cá sấu, Người lạ |
+> | **Trung bình** | Nai lớn, Khỉ đàn, Heo rừng |
+> | **Thấp** | Sóc, chim, các loài ít nguy hại |
+> | **Không có sự kiện** | Không có AI event nào trong vòng 30 phút |
 >
-> Quy tắc: chỉ áp dụng khi **ảnh snapshot có độ tin cậy ≥ 50%** và trong vòng **30 phút** gần đây. Quá 30 phút → tự động chuyển về "Thấp / không có sự kiện".
+> **Quy tắc áp dụng:** mức cảnh báo chỉ áp dụng khi **ảnh snapshot có độ tin cậy AI ≥ 50%** và sự kiện trong vòng **30 phút** gần đây. Quá 30 phút → tự động trở về `Không có sự kiện` (bất kể mức cũ).
 
 > **Chiều 2 — Đã xem / Chưa xem** *(do User quyết định)*:
 >
-> | Trạng thái | Điều kiện | Render |
-> |---|---|---|
-> | **Chưa xem** | User chưa mở `[CAMERA_VIEW_SCREEN]` của camera này. | Badge cảnh báo **có animation chớp** + border sáng. |
-> | **Đã xem** | User đã mở `[CAMERA_VIEW_SCREEN]`. | Badge vẫn hiện (giữ thông tin) nhưng **tắt animation chớp**, border giảm sáng xuống mức "đã xem". |
+> | Trạng thái | Điều kiện |
+> |---|---|
+> | **Chưa xem** | User chưa mở `[CAMERA_VIEW_SCREEN]` của camera này. |
+> | **Đã xem** | User đã mở `[CAMERA_VIEW_SCREEN]` của camera này. |
+>
+> Mục đích: khi đã xem, designer có thể giảm nhấp nháy / giảm độ nổi bật của các yếu tố cảnh báo để tránh gây chú ý liên tục; riêng `warning_badge_overlay` vẫn hiện để giữ thông tin.
 
-**Kết hợp 2 chiều** *(ma trận render cuối cùng của card)*:
+**Ma trận logic tổng hợp** (gợi ý cho designer; không quy định UI cụ thể):
 
-| Trạng thái tổng hợp | Background | Badge | Border |
-|---|---|---|---|
-| Có thú nguy hiểm cao + Chưa xem | Đỏ chớp nhanh + glow | `⚠️ [LOÀI] · [%]` chớp | Đỏ sáng |
-| Có thú nguy hiểm cao + Đã xem | Đỏ chớp nhanh (giữ để cảnh báo liên tục 30 phút) | `⚠️ [LOÀI] · [%]` tĩnh | Đỏ vừa |
-| Có thú TB + Chưa xem | Vàng chớp vừa | `⚠️ [LOÀI] · [%]` chớp | Vàng |
-| Có thú TB + Đã xem | Vàng chớp vừa | `⚠️ [LOÀI] · [%]` tĩnh | Vàng nhạt |
-| Có thú thấp / không có | Xanh nhạt (tĩnh) hoặc nền trắng | Không có | Xám nhạt |
-| **Offline** | Nền xám đậm 50% | Ảnh tối + overlay `⚪ Offline` | Xám đậm |
+| Mức cảnh báo | Đã xem | Gợi ý mức nhấp nháy |
+|---|---|---|
+| Cao / Trung bình | Chưa xem | Nhấp nháy tích cực nhất |
+| Cao / Trung bình | Đã xem | Nhấp nháy giảm cường độ (giữ để cảnh báo liên tục 30 phút) |
+| Thấp / không có | bất kỳ | Không nhấp nháy |
+| `camera_status_indicator` = Offline | bất kỳ | Rõ trạng thái offline (icon + tối màu) |
 
-##### Quy tắc render
+---
 
-- Grid 2 cột trên tablet/screen lớn; grid 2 cột trên điện thoại ≥ 360dp; rơi về 1 cột nếu < 320dp.
-- Aspect ratio ảnh thumbnail: **16:9** (khoảng 65% chiều cao card).
-- Border radius card: 12dp. Elevation: 2dp (shadow nhẹ).
-- Thumbnail đang tải: shimmer effect.
+> 📐 *Các chi tiết bố cục (grid 1/2 cột, tỷ lệ ảnh thumbnail, border radius, elevation, khoảng cách, font size, exact paused animation curves...) thuộc phạm vi designer, không quy định trong tài liệu này.*
 
 ---
 
@@ -294,7 +288,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 | `refresh_iconbutton` | IconButton (Top bar) | Label `↻`. Kéo xuống để refresh thủ công snapshot mới nhất. |
 | `rename_camera_button` | Button (text/icon `✏️`) | Label `Đổi tên`. Mở `rename_camera_dialog`. |
 | `rename_camera_dialog` | Dialog (Alert) | TextField `camera_name_input` cho phép sửa tên hiển thị (vd: `Cam 1` → `Cam Khu A`). Buttons: `rename_save_button` (label `Lưu`) / `rename_cancel_button` (label `Huỷ`). Thay đổi lưu xuống server và áp dụng cho `camera_name_title_text`. |
-| `snapshot_image` | Image (16:9) | Khung ảnh Snapshot giữa màn. |
+| `snapshot_image` | Image | Khung ảnh Snapshot chiếm phần lớn diện tích màn. |
 | `snapshot_timestamp_overlay` | TextOverlay | Timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái. |
 | `snapshot_relative_time_text` | TextOverlay | Dòng `Cách đây X phút/giây` góc dưới-phải (relative time tự cập nhật mỗi 10s). |
 | `snapshot_age_chip` | Chip (thông báo) | Label: nếu > 5 phút → `⏰ Ảnh cách đây X phút — có thể đã cũ`; nếu > 30 phút → `⚠️ Ảnh cũ — kiểm tra camera` (màu đỏ). |
@@ -443,5 +437,5 @@ flowchart TD
 ---
 
 > **Ghi chú tác giả:**
-> - File này là đặc tả *màn hình* (UI/UX), không bao gồm API/DB chi tiết — xem thêm tài liệu kỹ thuật trong `docs/`.
-> - Mọi giá trị nhấp nháy/thời lượng/tần suất có thể chỉnh trong `[SPECIES_CONFIG_DETAIL_SCREEN]`.
+> - File này là đặc tả **màn hình (UI/UX)** ở mức functional — nêu các control, hành vi, validation rules và luồng điều hướng. **Không** chứa quyết định thiết kế chi tiết (bố cục grid, tỷ lệ ảnh, border radius, elevation, màu sắc cụ thể, easing/animation curves, font size) — các mục đó thuộc trách nhiệm designer.
+> - File này cũng **không** chứa đặc tả API/DB — xem thêm tài liệu kỹ thuật trong `docs/`.
