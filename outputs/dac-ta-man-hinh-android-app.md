@@ -13,16 +13,15 @@
 ## Mục lục màn hình
 
 1. `[LOGIN]` — Màn hình đăng nhập
-2. `[MAIN]` — Trung tâm điều khiển với 3 tab `[CAMERA_LIST]` / `[STATISTICS]` / `[SETTING]` *(chỉ tab `[CAMERA_LIST]` hiển thị danh sách camera; tab `[CONTROL]` đã bỏ — cấu hình thiết bị ứng phó được thực hiện qua tab `[SETTING]` → `[SPECIES_CONFIG_LIST]` → `[SPECIES_CONFIG_DETAIL]`)**
-3. `[CAMERA_VIEW]` — Chi tiết một Camera *(kết hợp: xem ảnh hiện tại + đổi tên camera + danh sách log lịch sử)* — gộp các chức năng trước đây nằm ở `[CAMERA_SETUP_DETAIL]` và `[CAMERA_HISTORY]` đã lược bỏ
+2. `[MAIN]` — Trung tâm điều khiển với 3 tab `[CAMERA_LIST]` / `[STATISTICS]` / `[SETTING]`. Cấu hình thiết bị ứng phó thực hiện qua tab `[SETTING]` → `[SPECIES_CONFIG_LIST]` → `[SPECIES_CONFIG_DETAIL]`.
+3. `[CAMERA_VIEW]` — Chi tiết một Camera *(gồm: ảnh hiện tại, đổi tên camera, danh sách log lịch sử)*
 4. `[SPECIES_CONFIG_LIST]` — Danh sách loại thú cần thiết lập
 5. `[SPECIES_CONFIG_DETAIL]` — Thiết lập hành vi phòng vệ theo loài *(luôn áp dụng cho tất cả camera)*
 
-> ℹ️ **Bố cục tab hiện tại của `[MAIN]`:**
+> ℹ️ **Bố cục tab của `[MAIN]`:**
 > - Tab `[CAMERA_LIST]` *(mặc định)*: danh sách camera card.
 > - Tab `[STATISTICS]`: thống kê tổng hợp toàn hệ thống.
-> - Tab `[SETTING]`: cài đặt chung (ngôn ngữ, theme, đăng xuất) — **không còn** toggle thiết bị ứng phó toàn hệ thống (đã chuyển sang `[SPECIES_CONFIG_DETAIL]`).
-> - ~~Tab `[CONTROL]`~~: **đã xoá** — không tồn tại nữa.
+> - Tab `[SETTING]`: cài đặt chung (ngôn ngữ, theme, đăng xuất) + nút điều hướng sang `[SPECIES_CONFIG_LIST]` để cấu hình thiết bị ứng phó.
 
 ---
 
@@ -61,14 +60,15 @@ Màn hình chính sau khi đăng nhập. **Mỗi tab có layout nội dung hoàn
 
 > ❓ **Quan trọng:**
 >
-> 1. **Danh sách camera chỉ hiển thị ở tab `[CAMERA_LIST]`.** Hai tab `[STATISTICS]` và `[SETTING]` không có danh sách camera.
-> 2. **Tab `[CONTROL]` đã bỏ hẳn.** Trước đây tab `[CONTROL]` cho phép ghi đè nhanh *toàn hệ thống* các toggle thiết bị ứng phó (SMS/Loa/Âm thanh/LED/Hàng rào/Kiểm lâm). Thiết bị ứng phó thực chất **phụ thuộc vào loài phát hiện** (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), nên cấu hình chúng phải đi theo luồng **[SPECIES_CONFIG_LIST]** → chọn loài → **[SPECIES_CONFIG_DETAIL]** với scope `Áp dụng cho tất cả` camera. Đó là lý do dòng chữ điều hướng đã có sẵn trong tab `[SETTING]` ở mục 2.3.
+> **Danh sách camera chỉ hiển thị ở tab `[CAMERA_LIST]`.** Hai tab `[STATISTICS]` và `[SETTING]` không có danh sách camera.
+>
+> Thiết bị ứng phó **phụ thuộc vào loài phát hiện** (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), nên cấu hình chúng đi theo luồng **[SPECIES_CONFIG_LIST]** → chọn loài → **[SPECIES_CONFIG_DETAIL]** với scope `Áp dụng cho tất cả` camera. Nút điều hướng nằm trong tab `[SETTING]` ở mục 2.3.
 
 ---
 
 ### 2.1. `[CAMERA_LIST]` — Tab danh sách camera *(mặc định)*
 
-Tab `[CAMERA_LIST]` (trước đây có tên `[WARNING]`) — đổi tên vì ngữ nghĩa của nó là **danh sách quản lý camera**, không chỉ thuần tuý cảnh báo. Vẫn giữ chức năng cảnh báo khẩn cấp trong cùng tab.
+Tab này vừa quản lý camera, vừa hiển thị cảnh báo khẩn cấp.
 
 > ℹ️ **Lưu ý về vị trí các Icon / Nút trên từng Camera Card:**
 > - **Không có** bất kỳ icon/nút Cài đặt hay Lịch sử riêng nào ở thanh header/top bar của màn `[MAIN]` — kể cả FAB floating button.
@@ -170,14 +170,14 @@ Tab này **không có danh sách camera**. Chỉ hiển thị thống kê tổng
 
 ### 2.3. `[SETTING]` — Tab cài đặt
 
-Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ menu). Vì tab `[CONTROL]` đã được lược bỏ, **đây là nơi duy nhất** để user chỉnh cài đặt cá nhân và quản trị tài khoản.
+Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài khoản.
 
 | Thành phần | Kiểu | Mô tả |
 |---|---|---|
 | `Ngôn ngữ` | Dropdown | `Tiếng Việt` (mặc định) · `English`. |
 | `Giao diện sáng/tối` | Toggle | `Sáng` / `Tối` (theo system hoặc thủ công). |
 | `Thông báo SMS` | Toggle | Bật/tắt chuông điện thoại khi nhận SMS cảnh báo. |
-| `Thiết lập hành vi ứng phó mặc định cho tất cả camera` | Button | Mở `[SPECIES_CONFIG_LIST]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài sẽ được áp dụng cho mọi camera trong hệ thống. |
+| `Thiết lập hành vi ứng phó mặc định cho tất cả camera` | Button | Mở `[SPECIES_CONFIG_LIST]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài áp dụng cho mọi camera trong hệ thống. |
 | `Đăng xuất` | Button | Xoá session → về `[LOGIN]`. |
 
 > 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Hàng rào / Kiểm lâm) ngay trong tab `[SETTING]`. Cấu hình các thiết bị này thuộc về **`[SPECIES_CONFIG_DETAIL]`** và phải đi qua `[SPECIES_CONFIG_LIST]` để chọn loài — vì thiết bị ứng phó phụ thuộc vào loài phát hiện (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), không thể cấu hình tách rời khỏi ngữ cảnh loài.
@@ -186,7 +186,7 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
 
 ## 3. `[CAMERA_VIEW]` — Chi tiết một Camera
 
-Được mở khi user **nhấn vào một thẻ camera** từ `[MAIN]` (tab `[CAMERA_LIST]`). Đây là màn **duy nhất** cho mọi thao tác đặc thù của từng camera — gộp lại các chức năng trước đây nằm ở `[CAMERA_SETUP_DETAIL]` (đổi tên camera) và `[CAMERA_HISTORY]` (xem log), nay đã được lược bỏ.
+Được mở khi user **nhấn vào một thẻ camera** từ `[MAIN]` (tab `[CAMERA_LIST]`). Tại đây user xem ảnh hiện tại, đổi tên camera, và xem danh sách log.
 
 > ℹ️ **Màn này KHÔNG hiển thị live video streaming.** Nó hiển thị **ảnh snapshot** gần nhất từ camera. Theo thuật toán ở [de-tai-nghien-cuu-canh-bao-dong-vat.md:131-170](outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md#L131-L170), server AI chỉ ghi nhận snapshot mỗi 2 giây/lần khi có chuyển động đáng kể, do đó ảnh trong màn này có thể đã cũ vài giây đến vài phút tuỳ mức độ hoạt động của thú.
 
@@ -247,7 +247,7 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
                                                                          (scope cố định = ALL)
 ```
 
-Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất cả camera** trong hệ thống — không có tuỳ chọn cấu hình riêng từng camera theo loài nữa.
+Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất cả camera** trong hệ thống — chỉ có 1 scope duy nhất.
 
 > 🚫 Tuyệt đối không có điều hướng nào nhảy thẳng sang `[SPECIES_CONFIG_DETAIL]` mà không qua `[SPECIES_CONFIG_LIST]` — vì cấu hình ứng phó **luôn gắn với 1 loài cụ thể**.
 
@@ -301,10 +301,6 @@ Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất
 
 ---
 
-> ⛔ **Màn `[SETTING]` riêng (mở từ menu) đã bỏ.** Nội dung của nó đã được gộp vào **tab `[SETTING]` trong `[MAIN]`** (xem mục 2.3 phía trên).
-
----
-
 ## Phụ lục — Sơ đồ luồng chuyển màn hình
 
 ```mermaid
@@ -322,7 +318,7 @@ flowchart TD
     %% Nhấn thân card → mở CAMERA_VIEW (gộp ảnh + đổi tên + log)
     TabCL -->|"Nhấn thân card"| CamView["[CAMERA_VIEW]"]
 
-    %% Cấu hình ứng phó === đi từ tab SETTING (đã bỏ mọi đường khác)
+    %% Cấu hình ứng phó: đi từ tab SETTING → SPECIES_CONFIG_LIST → SPECIES_CONFIG_DETAIL
     SpList["[SPECIES_CONFIG_LIST]"]
     SpDetail["[SPECIES_CONFIG_DETAIL]<br/>(scope cố định = ALL)"]
     TabSet -->|"Thiết lập mặc định cho mọi camera"| SpList
@@ -331,8 +327,6 @@ flowchart TD
     %% Đăng xuất thẳng về LOGIN
     TabSet -->|"Đăng xuất"| Login
 ```
-
-> 💡 *Lưu ý về thuật ngữ*: Màn trung tâm điều khiển có 3 tab hiện mang tên `[MAIN]` (trước viết là `[CAMERA_LIST]` ở bản cũ). Tab danh sách camera mang tên `[CAMERA_LIST]` (trước viết là `[WARNING]`). Tài liệu này đã được chuẩn hoá.
 
 ---
 
