@@ -13,12 +13,10 @@
 ## Mục lục màn hình
 
 1. `[LOGIN]` — Màn hình đăng nhập
-2. `[MAIN]` — Trung tâm điều khiển với 3 tab `[CAMERA_LIST]` / `[STATISTICS]` / `[SETTING]` *(chỉ tab `[CAMERA_LIST]` hiển thị danh sách camera; tab `[CONTROL]` đã được bỏ — các toggle thiết bị ứng phó toàn hệ thống chuyển sang `[SPECIES_CONFIG_DETAIL]`)*
-3. `[CAMERA_VIEW]` — Xem chi tiết một Camera
-4. `[CAMERA_HISTORY]` — Lịch sử ghi hình của một Camera
-5. `[CAMERA_SETUP_DETAIL]` — Thiết lập chi tiết một Camera
-6. `[SPECIES_CONFIG_LIST]` — Danh sách loại thú cần thiết lập
-7. `[SPECIES_CONFIG_DETAIL]` — Thiết lập hành vi phòng vệ theo loài
+2. `[MAIN]` — Trung tâm điều khiển với 3 tab `[CAMERA_LIST]` / `[STATISTICS]` / `[SETTING]` *(chỉ tab `[CAMERA_LIST]` hiển thị danh sách camera; tab `[CONTROL]` đã bỏ — cấu hình thiết bị ứng phó được thực hiện qua tab `[SETTING]` → `[SPECIES_CONFIG_LIST]` → `[SPECIES_CONFIG_DETAIL]`)**
+3. `[CAMERA_VIEW]` — Chi tiết một Camera *(kết hợp: xem ảnh hiện tại + đổi tên camera + danh sách log lịch sử)* — gộp các chức năng trước đây nằm ở `[CAMERA_SETUP_DETAIL]` và `[CAMERA_HISTORY]` đã lược bỏ
+4. `[SPECIES_CONFIG_LIST]` — Danh sách loại thú cần thiết lập
+5. `[SPECIES_CONFIG_DETAIL]` — Thiết lập hành vi phòng vệ theo loài *(luôn áp dụng cho tất cả camera)*
 
 > ℹ️ **Bố cục tab hiện tại của `[MAIN]`:**
 > - Tab `[CAMERA_LIST]` *(mặc định)*: danh sách camera card.
@@ -64,7 +62,7 @@ Màn hình chính sau khi đăng nhập. **Mỗi tab có layout nội dung hoàn
 > ❓ **Quan trọng:**
 >
 > 1. **Danh sách camera chỉ hiển thị ở tab `[CAMERA_LIST]`.** Hai tab `[STATISTICS]` và `[SETTING]` không có danh sách camera.
-> 2. **Tab `[CONTROL]` đã bỏ hẳn.** Trước đây tab `[CONTROL]` cho phép ghi đè nhanh *toàn hệ thống* các toggle (SMS/Loa/Âm thanh/LED/Hàng rào/Kiểm lâm). Thay vào đó, các toggle này hiện được **chuyển toàn bộ sang `[SPECIES_CONFIG_DETAIL]`** (cấu hình theo loài × camera) — vì "cài đặt theo từng loài × từng camera" thực chất đã bao phủ toàn bộ thiết bị trong hệ thống, không cần một lớp ghi đè toàn cục riêng.
+> 2. **Tab `[CONTROL]` đã bỏ hẳn.** Trước đây tab `[CONTROL]` cho phép ghi đè nhanh *toàn hệ thống* các toggle thiết bị ứng phó (SMS/Loa/Âm thanh/LED/Hàng rào/Kiểm lâm). Thiết bị ứng phó thực chất **phụ thuộc vào loài phát hiện** (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), nên cấu hình chúng phải đi theo luồng **[SPECIES_CONFIG_LIST]** → chọn loài → **[SPECIES_CONFIG_DETAIL]** với scope `Áp dụng cho tất cả` camera. Đó là lý do dòng chữ điều hướng đã có sẵn trong tab `[SETTING]` ở mục 2.3.
 
 ---
 
@@ -73,8 +71,8 @@ Màn hình chính sau khi đăng nhập. **Mỗi tab có layout nội dung hoàn
 Tab `[CAMERA_LIST]` (trước đây có tên `[WARNING]`) — đổi tên vì ngữ nghĩa của nó là **danh sách quản lý camera**, không chỉ thuần tuý cảnh báo. Vẫn giữ chức năng cảnh báo khẩn cấp trong cùng tab.
 
 > ℹ️ **Lưu ý về vị trí các Icon / Nút trên từng Camera Card:**
-> - **Không có** bất kỳ icon/nút Cài đặt hay Lịch sử nào ở thanh header/top bar của màn `[MAIN]` — kể cả FAB floating button.
-> - Mọi điều khiển đặc thù cho 1 camera (xem `[CAMERA_VIEW]`, cài đặt, xem lịch sử…) đều **gắn ngay trên Camera Card** → nhấn sẽ nhảy thẳng vào màn tương ứng của camera đó, **không qua màn chọn camera trung gian**.
+> - **Không có** bất kỳ icon/nút Cài đặt hay Lịch sử riêng nào ở thanh header/top bar của màn `[MAIN]` — kể cả FAB floating button.
+> - Mọi thao tác đặc thù cho 1 camera (xem ảnh, đổi tên, xem danh sách log) đều thực hiện trong **[CAMERA_VIEW]** — user **nhấn vào card** sẽ nhảy thẳng vào màn đó của camera tương ứng, **không qua màn chọn camera trung gian**.
 
 #### b) Banner cảnh báo nhấp nháy *(tuỳ chọn UI; có thể bỏ nếu badge trên card đã đủ)*
 
@@ -100,7 +98,7 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 | # | Thông tin | Kiểu | Mô tả |
 |---|---|---|---|
 | 1 | **Trạng thái kết nối** | Status indicator | `🟢 Online` (xanh lá) · `⚪ Offline` (xám). Khi offline ≥ 30s sẽ hiển thị rõ đi kèm icon offline. |
-| 2 | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_SETUP_DETAIL]` (vd: `Cam Khu A`). |
+| 2 | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_VIEW]` (vd: `Cam Khu A`) — nhấn nút `✏️ Đổi tên` trên màn đó. |
 | 3 | **Khu vực lắp đặt** | Text (caption) | Mô tả ngắn vị trí: `Rìa rừng phía B`, `Trạm 2 · Đồi cao`… Cắt bớt nếu dài. |
 | 4 | **Ảnh thumbnail** | Image (16:9) | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera + nền xám. Nếu offline → overlay icon `⚪ Offline` + tối màu 50%. Khi đang tải → shimmer effect. |
 | 5 | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Nội dung: `⚠️ [LOÀI] · [%]` (vd: `⚠️ VOI · 92%`). Animation nhấp nháy đỏ-vàng nếu mức nguy hiểm cao. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW]` của camera đó (giữ nguyên badge để vẫn biết có sự kiện). |
@@ -110,13 +108,9 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 
 | # | Điều khiển | Vị trí trong card | Hành vi |
 |---|---|---|---|
-| C1 | **Nhấn vào thân card** *(ngoại trừ các icon điều khiển)* | Toàn bộ card | Mở `[CAMERA_VIEW]` của camera đó. |
-| C2 | **Icon `⚙️` Cài đặt** *(IconButton)* | Góc trên-phải card | Mở thẳng `[CAMERA_SETUP_DETAIL]` của camera đó. **Bắt buộc dừng propagation** để không kích hoạt nhầm C1. |
-| C3 | **Icon `🕐` Lịch sử** *(IconButton)* | Góc dưới-phải card (hoặc trên dòng `Tên camera + Khu vực`) | Mở thẳng `[CAMERA_HISTORY]` của camera đó. **Bắt buộc dừng propagation** để không kích hoạt nhầm C1. |
-| C4 | **Long-press** *(tuỳ chọn)* | Toàn bộ card | Hiện menu nhanh: `Mở cài đặt` (→ `[CAMERA_SETUP_DETAIL]`) · `Xem lịch sử` (→ `[CAMERA_HISTORY]`) · `Đánh dấu đã xem`. |
-| C5 | **Vuốt sang trái** *(tuỳ chọn)* | Toàn bộ card | Hiện 2 nút nhanh: `Lịch sử` (→ `[CAMERA_HISTORY]`) · `Cài đặt` (→ `[CAMERA_SETUP_DETAIL]`). |
+| C1 | **Nhấn vào thân card** *(bất kỳ vị trí nào trên card)* | Toàn bộ card | Mở `[CAMERA_VIEW]` của camera đó — tại đây có hình ảnh hiện tại, nút đổi tên camera, và danh sách log lịch sử. |
 
-> 💡 `C2` (`⚙️`) và `C3` (`🕐`) là **2 icon thường trực** của mỗi card — user luôn thấy và dùng được ngay. `C4`/`C5` là tuỳ chọn UX, có thể bỏ nếu thấy icon thường trực đã đủ.
+> 💡 Camera Card chỉ có **một điều khiển duy nhất: nhấn thân card**. Mọi thao tác khác (đổi tên, xem lịch sử) đều thực hiện bên trong `[CAMERA_VIEW]`.
 
 ##### Trạng thái của card (Card state)
 
@@ -170,7 +164,7 @@ Tab này **không có danh sách camera**. Chỉ hiển thị thống kê tổng
 | Khối `Phân tích theo từng camera` | Số lần xuất hiện, xu hướng (Chart line), khu vực di chuyển (sơ đồ/heatmap rừng). |
 | Bộ lọc | Theo khoảng thời gian (7 ngày / 30 ngày / tuỳ chỉnh) · theo loài · theo camera cụ thể. |
 
-> 💡 *Lưu ý:* Muốn xem **lịch sử chi tiết từng camera**, nhấn icon `🕐` trên Camera Card tương ứng ở tab `[CAMERA_LIST]` → `[CAMERA_HISTORY]`. Tab `[STATISTICS]` chỉ cung cấp cái nhìn tổng quan.
+> 💡 *Lưu ý:* Muốn xem **lịch sử chi tiết từng camera** (danh sách log theo thời gian), nhấn vào Camera Card tương ứng ở tab `[CAMERA_LIST]` → `[CAMERA_VIEW]` — phần "Danh sách log" nằm cuối màn đó. Tab `[STATISTICS]` chỉ cung cấp cái nhìn tổng quan.
 
 ---
 
@@ -183,72 +177,46 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
 | `Ngôn ngữ` | Dropdown | `Tiếng Việt` (mặc định) · `English`. |
 | `Giao diện sáng/tối` | Toggle | `Sáng` / `Tối` (theo system hoặc thủ công). |
 | `Thông báo SMS` | Toggle | Bật/tắt chuông điện thoại khi nhận SMS cảnh báo. |
-| `Thiết lập hành vi ứng phó mặc định cho toàn hệ thống` | Button | Mở `[SPECIES_CONFIG_DETAIL]` với kịch bản tổng (chọn `Áp dụng cho tất cả`). |
+| `Thiết lập hành vi ứng phó mặc định cho tất cả camera` | Button | Mở `[SPECIES_CONFIG_LIST]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài sẽ được áp dụng cho mọi camera trong hệ thống. |
 | `Đăng xuất` | Button | Xoá session → về `[LOGIN]`. |
 
-> 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Hàng rào / Kiểm lâm) ở đây — các toggle này **chuyển hẳn sang `[SPECIES_CONFIG_DETAIL]`** (xem mục 7 chi tiết hơn).
-> Lý do: vì SPECIES_CONFIG_DETAIL có hỗ trợ cấu hình `Áp dụng cho tất cả` camera, nó đã bao phủ toàn bộ phạm vi "cấu hình hệ thống"; không cần lớp ghi đè toàn cục riêng.
+> 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Hàng rào / Kiểm lâm) ngay trong tab `[SETTING]`. Cấu hình các thiết bị này thuộc về **`[SPECIES_CONFIG_DETAIL]`** và phải đi qua `[SPECIES_CONFIG_LIST]` để chọn loài — vì thiết bị ứng phó phụ thuộc vào loài phát hiện (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), không thể cấu hình tách rời khỏi ngữ cảnh loài.
 
 ---
 
-## 3. `[CAMERA_VIEW]` — Xem chi tiết một Camera
+## 3. `[CAMERA_VIEW]` — Chi tiết một Camera
 
-Được mở khi user nhấn vào một thẻ camera từ `[MAIN]` (tab `[CAMERA_LIST]`).
+Được mở khi user **nhấn vào một thẻ camera** từ `[MAIN]` (tab `[CAMERA_LIST]`). Đây là màn **duy nhất** cho mọi thao tác đặc thù của từng camera — gộp lại các chức năng trước đây nằm ở `[CAMERA_SETUP_DETAIL]` (đổi tên camera) và `[CAMERA_HISTORY]` (xem log), nay đã được lược bỏ.
 
 > ℹ️ **Màn này KHÔNG hiển thị live video streaming.** Nó hiển thị **ảnh snapshot** gần nhất từ camera. Theo thuật toán ở [de-tai-nghien-cuu-canh-bao-dong-vat.md:131-170](outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md#L131-L170), server AI chỉ ghi nhận snapshot mỗi 2 giây/lần khi có chuyển động đáng kể, do đó ảnh trong màn này có thể đã cũ vài giây đến vài phút tuỳ mức độ hoạt động của thú.
 
 **Bố cục màn hình (Vertical):**
 
-| Vị trí | Nội dung |
-|---|---|
-| Top bar | Nút `Back` ← về `[MAIN]` · Tên Camera · Trạng thái online/offline · Icon `↻` Refresh (kéo xuống để refresh thủ công snapshot mới nhất). |
-| Nửa trên | **Khung ảnh Snapshot** (không phải live video) + overlay timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái ảnh, và dòng "Cách đây X phút/giây" ở góc dưới-phải (relative time tự cập nhật mỗi 10s). |
-| Ngay dưới ảnh | **Thông báo độ mới của ảnh:** nếu > 5 phút hiển thị chip cảnh báo nhỏ: `⏰ Ảnh cách đây 12 phút — có thể đã cũ`. Nếu > 30 phút: chip đỏ `⚠️ Ảnh cũ — kiểm tra camera`. |
-| Nửa dưới | **Bảng thông tin AI:** Loài · Số lượng · Mức độ nguy hiểm · Độ tin cậy (%). |
-| Cuối | Các **nút ghi đè (override)** bật/tắt nhanh thiết bị ngoại vi của riêng trạm camera đó: SMS · Loa phát thanh · Âm thanh xua đuổi · Đèn LED nhấp nháy · Hàng rào điện · Báo Kiểm lâm. |
-
-**Hành vi:**
-- Ảnh snapshot tự động refresh mỗi ~2 giây khi AI phát hiện chuyển động đáng kể. Khi không có chuyển động → ảnh giữ nguyên cho đến khi có snapshot mới.
-- Pull-to-refresh → gửi yêu cầu lấy snapshot mới nhất từ server.
-- Relative time tự cập nhật định kỳ (`mỗi 10s`) nhưng timestamp tuyệt đối trên ảnh chỉ thay đổi khi nhận snapshot mới.
-- Banner cảnh báo có thể hiển thị phía trên khung ảnh khi vừa có sự kiện mới: `Cam 1 · Phát hiện VOI · 9:04`.
-- Nút `Back` → `[MAIN]`.
-
----
-
-## 4. `[CAMERA_HISTORY]` — Lịch sử ghi hình của một Camera
-
-Được mở khi user nhấn icon `🕐 Lịch sử` trên Camera Card tương ứng ở `[MAIN]` (tab `[CAMERA_LIST]`).
-
-| Thành phần | Mô tả |
-|---|---|
-| Top bar | Nút `Back` ← quay lại; Tên Camera; bộ lọc (khoảng thời gian, loài). |
-| Danh sách bản ghi | Mỗi bản ghi là 1 Card, gồm: Ảnh chụp snapshot · `giờ:phút:giây` · `Thứ, dd/MM/yyyy` · Độ tin cậy (%) · Số lượng · Loài. |
-
-**Hành vi:**
-- Nhấn vào 1 bản ghi → mở màn hình chi tiết (ảnh lớn, metadata đầy đủ).
-- Nút `Back` → về `[MAIN]` (tab `[CAMERA_LIST]`).
-
----
-
-## 5. `[CAMERA_SETUP_DETAIL]` — Thiết lập chi tiết một Camera
-
-Được mở khi user nhấn icon `⚙️ Cài đặt` trên một thẻ camera ở `[MAIN]` (tab `[CAMERA_LIST]`).
-
-| Thành phần | Kiểu | Mô tả |
+| Vị trí | Thành phần | Mô tả |
 |---|---|---|
-| Ô đổi `Tên camera` | TextField | Sửa tên hiển thị (vd: `Cam 1` → `Cam Khu A`). |
-| Ô đổi `Khu vực lắp đặt` | TextField | Sửa mô tả vị trí lắp đặt. |
-| Nút `Bật/Tắt camera` | Toggle | Bật hoặc tắt stream từ camera đó. |
-| Nút `Thiết lập loại thú` | Button | Mở `[SPECIES_CONFIG_LIST]`. |
-| Nút `Cấu hình kịch bản mặc định` | Button | Lối tắt tới `[SPECIES_CONFIG_DETAIL]` với kịch bản tổng. |
-| Nút `Lưu` | Button | Lưu thay đổi. |
+| Top bar | Nút `Back` ← `[MAIN]` · Tên Camera · Trạng thái online/offline · Icon `↻` Refresh. |
+| Ngay dưới top bar | **Nút `✏️ Đổi tên`** *(Button text/icon)* | Mở dialog `Đổi tên camera` cho phép sửa tên hiển thị (vd: `Cam 1` → `Cam Khu A`). Có nút `Lưu` / `Huỷ`. Thay đổi lưu xuống server. |
+| Giữa màn | **Khung ảnh Snapshot** + overlay timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái ảnh, và dòng "Cách đây X phút/giây" ở góc dưới-phải (relative time tự cập nhật mỗi 10s). | |
+| Ngay dưới ảnh | **Thông báo độ mới của ảnh:** nếu > 5 phút → chip `⏰ Ảnh cách đây X phút — có thể đã cũ`; nếu > 30 phút → chip đỏ `⚠️ Ảnh cũ — kiểm tra camera`. | |
+| Dưới chip | **Bảng thông tin AI:** Loài · Số lượng · Mức độ nguy hiểm · Độ tin cậy (%). | |
+| Cuối màn | **Danh sách log** *(List view)* — tiêu đề `Lịch sử ghi nhận`. Mỗi dòng log gồm: ảnh thumbnail nhỏ · `giờ:phút:giây · Thứ, dd/MM/yyyy` · Độ tin cậy (%) · Loài · Số lượng. | Sắp xếp **mới nhất trên đầu**, lazy load khi cuộn. |
+
+**Hành vi:**
+- Nhấn `✏️ Đổi tên` → mở dialog cho phép sửa tên → `Lưu` cập nhật server và cập nhật lại Top bar.
+- Ảnh snapshot tự động refresh mỗi ~2 giây khi AI phát hiện chuyển động đáng kể. Khi không có chuyển động → ảnh giữ nguyên cho đến khi có snapshot mới.
+- Pull-to-refresh → yêu cầu lấy snapshot mới nhất từ server.
+- Relative time tự cập nhật định kỳ (mỗi 10s) nhưng timestamp tuyệt đối trên ảnh chỉ thay đổi khi nhận snapshot mới.
+- Banner cảnh báo có thể hiện phía trên khung ảnh khi có sự kiện mới: `Cam 1 · Phát hiện VOI · 9:04`.
+- Nhấn vào 1 dòng log → mở dialog/lightbox xem ảnh lớn + metadata đầy đủ.
+- Nút `Back` → `[MAIN]` (Android Stack mặc định).
+
+> 🚫 Màn này **không có** nút bật/tắt stream camera, không có toggle thiết bị ngoại vi (SMS / Loa / LED / Hàng rào / Kiểm lâm). Cấu hình thiết bị ứng phó (kể cả bật/tắt thiết bị cho camera này) thuộc về `[SPECIES_CONFIG_DETAIL]` — mở từ nút `Thiết lập hành vi ứng phó mặc định cho tất cả camera` ở tab `[SETTING]` của `[MAIN]` (mục 2.3).
 
 ---
 
-## 6. `[SPECIES_CONFIG_LIST]` — Danh sách loại thú cần thiết lập
+## 4. `[SPECIES_CONFIG_LIST]` — Danh sách loại thú cần thiết lập
 
-Được mở khi user nhấn nút `Thiết lập loại thú` trong `[CAMERA_SETUP_DETAIL]`.
+Được mở khi user nhấn nút `Thiết lập hành vi ứng phó mặc định cho tất cả camera` ở tab `[SETTING]` của `[MAIN]` (mục 2.3).
 
 | Thành phần | Mô tả |
 |---|---|
@@ -269,19 +237,27 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
 
 ---
 
-## 7. `[SPECIES_CONFIG_DETAIL]` — Thiết lập hành vi phòng vệ theo loài
+## 5. `[SPECIES_CONFIG_DETAIL]` — Thiết lập hành vi phòng vệ theo loài
 
-Được mở khi:
-- User chọn bất kỳ loài từ `[SPECIES_CONFIG_LIST]`; **hoặc**
-- User nhấn nút `Thiết lập hành vi ứng phó mặc định cho toàn hệ thống` ở tab `[SETTING]` của `[MAIN]` *(mở với scope `Áp dụng cho tất cả` để cấu hình chung)*.
+**Màn này chỉ được mở qua `[SPECIES_CONFIG_LIST]`** (bắt buộc phải chọn loài trước). Luồng điều hướng duy nhất:
 
-### 7.1. Bộ chọn phạm vi áp dụng
+```
+[MAIN] ── tab [SETTING] ──► nút "Thiết lập hành vi ứng phó mặc định cho tất cả camera"
+                          └─► [SPECIES_CONFIG_LIST] ── chọn loài ──► [SPECIES_CONFIG_DETAIL]
+                                                                         (scope cố định = ALL)
+```
+
+Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất cả camera** trong hệ thống — không có tuỳ chọn cấu hình riêng từng camera theo loài nữa.
+
+> 🚫 Tuyệt đối không có điều hướng nào nhảy thẳng sang `[SPECIES_CONFIG_DETAIL]` mà không qua `[SPECIES_CONFIG_LIST]` — vì cấu hình ứng phó **luôn gắn với 1 loài cụ thể**.
+
+### 5.1. Loài đang cấu hình *(chỉ đọc)*
 
 | Thành phần | Mô tả |
 |---|---|
-| Chọn Camera (Dropdown/Chips) | Chọn trạm camera để áp dụng (bất kỳ cam nào có trong hệ thống hoặc `Áp dụng cho tất cả`). |
+| Label loài | Hiển thị tên loài vừa chọn ở `[SPECIES_CONFIG_LIST]` (vd: `VOI`, `CỌP`, `NAI`…) — không cho chỉnh tại đây. |
 
-### 7.2. Các nhóm cài đặt chi tiết (Defense Parameter Configurations)
+### 5.2. Các nhóm cài đặt chi tiết (Defense Parameter Configurations)
 
 **Âm thanh xua đuổi:**
 - Loại âm thanh: `Tiếng súng`, `Tiếng gầm`, `Tiếng chó sủa lớn`, `Tiếng nổ giả lập`, `Tần số siêu âm`.
@@ -307,27 +283,7 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
 - Toggle `Gửi SMS`.
 - Toggle `Gửi Push Notification`.
 
-### 7.3. Toggle thiết bị ứng phó toàn hệ thống *(chỉ hiện khi Bộ chọn Camera ở mục 7.1 = `Áp dụng cho tất cả`)*
-
-> 🔁 **Lưu lịch sử từ bản cũ:** Đây là phần nội dung **chuyển hẳn từ tab `[CONTROL]` cũ (đã xoá) sang đây**. Mục đích: cho phép bật/tắt nhanh 6 thiết bị ứng phó toàn hệ thống mà không cần vào từng loài.
-
-**Nhóm Thông báo:**
-| Điều khiển | Toggle |
-|---|---|
-| Gửi tin nhắn SMS | `CÓ` / `KHÔNG` |
-| Phát loa cảnh báo người dân | `CÓ` / `KHÔNG` |
-
-**Nhóm Xử lý:**
-| Điều khiển | Toggle |
-|---|---|
-| Âm thanh xua đuổi | `CÓ` / `KHÔNG` |
-| Đèn LED nhấp nháy | `CÓ` / `KHÔNG` |
-| Hàng rào điện | `CÓ` / `KHÔNG` |
-| Gửi cảnh báo cho kiểm lâm | `CÓ` / `KHÔNG` |
-
-> 💡 Các toggle ở đây tương đương với "Chế độ ghi đè nhanh toàn hệ thống": khi bật sẽ **che (override)** cấu hình riêng của từng loài × camera trong mục 7.2. Nếu muốn ưu tiên cấu hình riêng, đặt các toggle ở đây về `KHÔNG`.
-
-### 7.4. Tự thiết lập hành vi nhanh (Preset Scenarios)
+### 5.3. Tự thiết lập hành vi nhanh (Preset Scenarios)
 
 | Nút preset | Hành vi |
 |---|---|
@@ -336,7 +292,7 @@ Tab này là **phiên bản Bottom Tab** của màn `[SETTING]` cũ (mở từ m
 | `Thú cực kỳ nguy hiểm` | **Silent Alert** — không loa/đèn tại chỗ; chỉ gửi Push/SMS cho người dân di tản. |
 | `Tùy chỉnh` | Mở khoá các nhóm cài đặt chi tiết phía trên để chỉnh tay. |
 
-### 7.5. Lưu
+### 5.4. Lưu
 
 | Thành phần | Mô tả |
 |---|---|
@@ -363,21 +319,16 @@ flowchart TD
         TabSet["Tab [SETTING]<br/>(cài đặt cá nhân)"]
     end
 
-    %% Mỗi card có 3 điều khiển (thân card, ⚙️, 🕐) — nhảy thẳng vào màn tương ứng
+    %% Nhấn thân card → mở CAMERA_VIEW (gộp ảnh + đổi tên + log)
     TabCL -->|"Nhấn thân card"| CamView["[CAMERA_VIEW]"]
-    TabCL -->|"Nhấn ⚙️ trên card"| SetupDetail["[CAMERA_SETUP_DETAIL]"]
-    TabCL -->|"Nhấn 🕐 trên card"| CamHistory["[CAMERA_HISTORY]"]
 
-    %% Back navigation
-    CamView -->|"Back"| TabCL
-    CamHistory -->|"Back"| TabCL
-    SetupDetail -->|"Back"| TabCL
-    SetupDetail -->|"Thiết lập loại thú"| SpList["[SPECIES_CONFIG_LIST]"]
-    SpList -->|"Chọn loài"| SpDetail["[SPECIES_CONFIG_DETAIL]"]
-    SpDetail -->|"Quay lại"| SpList
+    %% Cấu hình ứng phó === đi từ tab SETTING (đã bỏ mọi đường khác)
+    SpList["[SPECIES_CONFIG_LIST]"]
+    SpDetail["[SPECIES_CONFIG_DETAIL]<br/>(scope cố định = ALL)"]
+    TabSet -->|"Thiết lập mặc định cho mọi camera"| SpList
+    SpList -->|"Chọn loài"| SpDetail
 
-    %% Tab SETTING: đăng xuất trực tiếp; cấu hình ứng phó mặc định → SPECIES_CONFIG_DETAIL (scope "ALL")
-    TabSet -->|"Thiết lập hành vi ứng phó mặc định (ALL)"| SpDetail
+    %% Đăng xuất thẳng về LOGIN
     TabSet -->|"Đăng xuất"| Login
 ```
 
