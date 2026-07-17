@@ -10,37 +10,20 @@
 
 **Ngôn ngữ tài liệu / control ID:** Tiếng Anh — mọi điều khiển trong bảng mô tả được đặt tên theo **snake_case** với hậu tố chỉ loại (`_button`, `_input`, `_toggle`, `_dropdown`, `_slider`, `_chip`, `_card`, `_dialog`, `_text`, `_image`, v.v.). UI label hiển thị trong app đặt trong backtick, dùng tiếng Việt (vd: `Label `Đăng nhập`` cho `login_button`).
 
-**Quy ước snake_case + postfix:**
-| Postfix | Loại điều khiển | Ví dụ |
-|---|---|---|
-| `_button` | Button (Primary/Secondary/Danger/Preset) | `login_button`, `logout_button`, `rename_camera_button` |
-| `_radiobutton` | RadioButton (nút chọn 1 trong nhóm loại trừ) | `preset_intruder_radiobutton`, `preset_custom_radiobutton` |
-| `_radio_group` | RadioGroup (group cha cho RadioButton loại trừ) | `preset_radio_group` |
-| `_linkbutton` | TextButton / text link | `register_linkbutton`, `login_linkbutton` |
-| `_iconbutton` | IconButton | `back_iconbutton`, `refresh_iconbutton` |
-| `_input` | TextField / NumberInput (kể cả Password, OTP) | `username_input`, `password_input`, `camera_name_input`, `led_duration_input` |
-| `_dialog` | Dialog / Alert | `rename_camera_dialog` |
-| `_dropdown` | Dropdown / Spinner | `language_dropdown`, `sound_type_dropdown` |
-| `_slider` | Slider / Seekbar | `sound_intensity_slider` |
-| `_toggle` | Toggle / Switch | `theme_toggle`, `sms_notification_toggle` |
-| `_segmented` | SegmentedControl | `led_color_segmented`, `speaker_voice_gender_segmented` |
-| `_chip` | Chip (small inline tag) | `snapshot_age_chip` |
-| `_image` | Image (Picture) | `app_logo_image`, `camera_thumbnail_image`, `snapshot_image` |
-| `_lightbox` | Image Viewer / Lightbox (dialog ảnh lớn) | `log_detail_lightbox` |
-| `_text` | Text / Label / Caption / Hint | `login_title_text`, `fence_auto_off_hint_text`, `species_behavior_text` |
-| `_section` | Section (Card nhóm nội dung) | `ai_analysis_section`, `weekly_detections_section` |
-| `_overlay` | TextOverlay / badge đặt trên Image | `snapshot_timestamp_overlay`, `warning_badge_overlay` |
-| `_indicator` | Status indicator / ProgressBar / LinearGauge | `camera_status_indicator`, `password_strength_indicator`, `aggression_gauge` |
-| `_gauge` | Gauge (thang đo dạng thanh/kim) | `aggression_gauge` |
-| `_list` / `_listview` | RecyclerView / List | `species_list_view`, `camera_log_list` |
-| `_item` | Item trong List (Card, Row) | `camera_log_item`, `species_card_item` |
-| `_filter` | Filter bar (chips + dropdown) | `statistics_filter` |
-| `_container` | Container (clickable/wrapper) | `emergency_banner_container`, `camera_card_clickable_container`, `defense_params_expandable_container`, `defense_params_toggle_container` |
-| `_snackbar` | Snackbar (thông báo) | `login_error_snackbar`, `register_success_snackbar` |
-
 **Quy ước Screen / Tab ID** đặt giữa `[` … `]` PascalCase có hậu tố:
 - Hậu tố `_SCREEN` — màn hình độc lập: `[LOGIN_SCREEN]`, `[REGISTER_SCREEN]`, `[CAMERA_VIEW_SCREEN]`, `[SPECIES_CONFIG_LIST_SCREEN]`, `[SPECIES_CONFIG_DETAIL_SCREEN]`.
 - Hậu tố `_TAB` — tab nằm trong `[MAIN_SCREEN]`: `[CAMERA_LIST_TAB]`, `[STATISTICS_TAB]`, `[SETTING_TAB]`.
+
+### Triết lý thiết kế *(note cho designer)*
+
+Nguyên tắc chỉ đạo khi designer phác thảo mockup dựa trên tài liệu này:
+
+- **Tuân thủ Material Design** về hệ thống màu sắc + theme.
+- **Đơn giản** — ưu tiên layout rõ ràng, tránh thành phần thừa.
+- **Việt hoá** — toàn bộ UI text, label, nhãn trong app dùng tiếng Việt (chỉ tên component ID là snake_case tiếng Anh để dev đặt tên code nhất quán).
+- **Ưu tiên các thiết kế component của iPhone** khi có xung đột giữa pattern iOS và Material Design mặc định. Vd: swipe-back gesture kiểu iOS, pull-to-refresh cảm giác "mềm", shadow subtle…
+
+> Triết lý này chỉ để designer tham khảo. Tài liệu này không quy định cụ thể spacing / color token / easing curve — đó là mockup & design system của designer.
 
 ---
 
