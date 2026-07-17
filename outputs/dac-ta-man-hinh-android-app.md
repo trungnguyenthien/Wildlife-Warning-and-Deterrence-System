@@ -8,6 +8,40 @@
 
 **Ngôn ngữ giao diện:** Tiếng Việt (mặc định)
 
+**Ngôn ngữ tài liệu / control ID:** Tiếng Anh — mọi điều khiển trong bảng mô tả được đặt tên theo **snake_case** với hậu tố chỉ loại (`_button`, `_input`, `_toggle`, `_dropdown`, `_slider`, `_chip`, `_card`, `_dialog`, `_text`, `_image`, v.v.). UI label hiển thị trong app đặt trong backtick, dùng tiếng Việt (vd: `Label `Đăng nhập`` cho `login_button`).
+
+**Quy ước snake_case + postfix:**
+| Postfix | Loại điều khiển | Ví dụ |
+|---|---|---|
+| `_button` | Button (Primary/Secondary/Danger/Preset) | `login_button`, `logout_button`, `rename_camera_button` |
+| `_radiobutton` | RadioButton (nút chọn 1 trong nhóm loại trừ) | `preset_intruder_radiobutton`, `preset_custom_radiobutton` |
+| `_radio_group` | RadioGroup (group cha cho RadioButton loại trừ) | `preset_radio_group` |
+| `_linkbutton` | TextButton / text link | `register_linkbutton`, `login_linkbutton` |
+| `_iconbutton` | IconButton | `back_iconbutton`, `refresh_iconbutton` |
+| `_input` | TextField / NumberInput (kể cả Password, OTP) | `username_input`, `password_input`, `camera_name_input`, `led_duration_input` |
+| `_dialog` | Dialog / Alert | `rename_camera_dialog` |
+| `_dropdown` | Dropdown / Spinner | `language_dropdown`, `sound_type_dropdown` |
+| `_slider` | Slider / Seekbar | `sound_intensity_slider` |
+| `_toggle` | Toggle / Switch | `theme_toggle`, `sms_notification_toggle` |
+| `_segmented` | SegmentedControl | `led_color_segmented`, `speaker_voice_gender_segmented` |
+| `_chip` | Chip (small inline tag) | `snapshot_age_chip` |
+| `_image` | Image (Picture) | `app_logo_image`, `camera_thumbnail_image`, `snapshot_image` |
+| `_lightbox` | Image Viewer / Lightbox (dialog ảnh lớn) | `log_detail_lightbox` |
+| `_text` | Text / Label / Caption / Hint | `login_title_text`, `fence_auto_off_hint_text`, `species_behavior_text` |
+| `_section` | Section (Card nhóm nội dung) | `ai_analysis_section`, `weekly_detections_section` |
+| `_overlay` | TextOverlay / badge đặt trên Image | `snapshot_timestamp_overlay`, `warning_badge_overlay` |
+| `_indicator` | Status indicator / ProgressBar / LinearGauge | `camera_status_indicator`, `password_strength_indicator`, `aggression_gauge` |
+| `_gauge` | Gauge (thang đo dạng thanh/kim) | `aggression_gauge` |
+| `_list` / `_listview` | RecyclerView / List | `species_list_view`, `camera_log_list` |
+| `_item` | Item trong List (Card, Row) | `camera_log_item`, `species_card_item` |
+| `_filter` | Filter bar (chips + dropdown) | `statistics_filter` |
+| `_container` | Container (clickable/wrapper) | `emergency_banner_container`, `camera_card_clickable_container`, `defense_params_expandable_container`, `defense_params_toggle_container` |
+| `_snackbar` | Snackbar (thông báo) | `login_error_snackbar`, `register_success_snackbar` |
+
+**Quy ước Screen / Tab ID** đặt giữa `[` … `]` PascalCase có hậu tố:
+- Hậu tố `_SCREEN` — màn hình độc lập: `[LOGIN_SCREEN]`, `[REGISTER_SCREEN]`, `[CAMERA_VIEW_SCREEN]`, `[SPECIES_CONFIG_LIST_SCREEN]`, `[SPECIES_CONFIG_DETAIL_SCREEN]`.
+- Hậu tố `_TAB` — tab nằm trong `[MAIN_SCREEN]`: `[CAMERA_LIST_TAB]`, `[STATISTICS_TAB]`, `[SETTING_TAB]`.
+
 ---
 
 ## Mục lục màn hình
@@ -30,76 +64,78 @@
 
 Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chưa có session hợp lệ). Form **đơn giản 2 ô**: Username + Password — phù hợp với phạm vi đề tài nghiên cứu của học sinh.
 
-| Thành phần | Kiểu | Mô tả |
+| Component ID | Type | Mô tả |
 |---|---|---|
-| Logo ứng dụng | Image | Logo dự án canh giữa phía trên cùng. |
-| Tiêu đề `Đăng nhập` | Text | Tiêu đề màn hình. |
-| Ô `Username` | TextField | Bắt buộc. Validate format ngay khi rời ô. |
-| Ô `Mật khẩu` | TextField (Password) | Bắt buộc. Có icon con mắt hiện/ẩn (mặc định ẩn). |
-| Nút `Đăng nhập` | Button (Primary, full-width) | Validate cả 2 ô → gọi API xác thực. Enable khi cả 2 ô không rỗng. |
-| Nút `Đăng ký` | Text link | Mở `[REGISTER_SCREEN]`. |
+| `app_logo_image` | Image | Logo dự án, canh giữa phía trên cùng. |
+| `login_title_text` | Text | Hiển thị label `Đăng nhập`. |
+| `username_input` | TextField | Label `Username`. Bắt buộc. Validate format ngay khi rời ô. |
+| `password_input` | TextField (Password) | Label `Mật khẩu`. Bắt buộc. Có icon con mắt hiện/ẩn (mặc định ẩn). |
+| `login_button` | Button (Primary, full-width) | Label `Đăng nhập`. Validate cả 2 ô → gọi API xác thực. Enable khi cả 2 ô không rỗng. |
+| `register_linkbutton` | TextButton | Label `Đăng ký`. Mở `[REGISTER_SCREEN]`. |
 
 **Luồng chính:**
-- `Đăng nhập` thành công → `[MAIN_SCREEN]` (tab `[CAMERA_LIST_TAB]` mặc định).
-- `Đăng nhập` thất bại → hiển thị Snackbar lỗi `Sai tên đăng nhập hoặc mật khẩu` (thông báo dạng chung, không phân biệt username/mật khẩu sai để tránh lộ thông tin).
+- `login_button` thành công → `[MAIN_SCREEN]` (tab `[CAMERA_LIST_TAB]` mặc định).
+- `login_button` thất bại → hiển thị `login_error_snackbar` với message `Sai tên đăng nhập hoặc mật khẩu` (thông báo dạng chung, không phân biệt username/mật khẩu sai để tránh lộ thông tin).
 
 ### Quy tắc validation (chỉ kiểm tra format — không qua server)
 
-| Trường | Quy tắc | Thông báo lỗi |
+| Field ID | Quy tắc | Thông báo lỗi hiển thị (tiếng Việt) |
 |---|---|---|
-| Username | Bắt buộc; 4–20 ký tự; chỉ gồm chữ cái (a–z, A–Z), số (0–9), dấu gạch dưới (`_`); không được bắt đầu bằng số; không được toàn số. | `Tên đăng nhập 4–20 ký tự, gồm chữ, số và gạch dưới, không bắt đầu bằng số`. |
-| Mật khẩu | Bắt buộc; 6–30 ký tự; không được chỉ toàn khoảng trắng. | `Mật khẩu 6–30 ký tự`. |
+| `username_input` | Bắt buộc; 4–20 ký tự; chỉ gồm chữ cái (a–z, A–Z), số (0–9), dấu gạch dưới (`_`); không được bắt đầu bằng số; không được toàn số. | `Tên đăng nhập 4–20 ký tự, gồm chữ, số và gạch dưới, không bắt đầu bằng số`. |
+| `password_input` | Bắt buộc; 6–30 ký tự; không được chỉ toàn khoảng trắng. | `Mật khẩu 6–30 ký tự`. |
 
-> Lưu ý: validation form chỉ chặn lỗi **định dạng** rỗng/sai trước khi bấm Đăng nhập. Sai thông tin thật (sai username/mật khẩu) do server phản hồi, hiển thị qua Snackbar ở `Hành vi`.
+> Lưu ý: validation form chỉ chặn lỗi **định dạng** rỗng/sai trước khi bấm `login_button`. Sai thông tin thật (sai username/mật khẩu) do server phản hồi, hiển thị qua `login_error_snackbar`.
 
 ---
 
 ## 2. `[REGISTER_SCREEN]` — Đăng ký tài khoản
 
-Được mở khi user nhấn **Đăng ký** ở `[LOGIN_SCREEN]`. Form đăng ký gồm **Username + Email + Password** — đơn giản hơn phiên bản OTP nhưng có đầy đủ validation để đảm bảo tài khoản hợp lệ. Sau khi tạo thành công, user quay về `[LOGIN_SCREEN]` để đăng nhập.
+Được mở khi user nhấn `register_linkbutton` ở `[LOGIN_SCREEN]`. Form đăng ký gồm **Username + Email + Password** — đơn giản hơn phiên bản OTP nhưng có đầy đủ validation để đảm bảo tài khoản hợp lệ. Sau khi tạo thành công, user quay về `[LOGIN_SCREEN]` để đăng nhập.
 
 ### Giao diện (Vertical)
 
-| Vị trí | Thành phần | Kiểu | Mô tả |
-|---|---|---|---|
-| Top bar | Nút `Back` ← `[LOGIN_SCREEN]` · Tiêu đề `Đăng ký tài khoản` | — | Back là Android Stack mặc định. |
-| Trên cùng | Tiêu đề phụ | Text | `Tạo tài khoản để quản lý hệ thống cảnh báo`. |
-| Form | Ô `Username` | TextField | Bắt buộc. Cùng quy tắc format với `[LOGIN_SCREEN]`. |
-| Form | Ô `Email` | TextField | Bắt buộc. Dùng để khôi phục tài khoản sau này. Hiển thị `✓` khi đúng định dạng. |
-| Form | Ô `Mật khẩu` | TextField (Password) | Bắt buộc. Có icon con mắt hiện/ẩn. Khi user gõ, hiển thị **thanh đo độ mật `Yếu / Trung bình / Mạnh`** ngay phía dưới (tính theo độ dài + có cả chữ lẫn số). |
-| Form | Ô `Xác nhận mật khẩu` | TextField (Password) | Bắt buộc. So sánh với ô trên ngay khi gõ. Hiển thị lỗi `Mật khẩu không khớp` nếu lệch. |
-| Form | Nút `Đăng ký` | Button (Primary, full-width) | Validate toàn bộ form khi bấm → gọi API tạo tài khoản. Enable khi cả 4 ô hợp lệ và mật khẩu khớp. |
-| Cuối màn | Text link `Đã có tài khoản? Đăng nhập` | Text link | Mở `[LOGIN_SCREEN]` (tương đương nút Back). |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `back_iconbutton` | IconButton (Top bar) | Label `←`. Back là Android Stack mặc định → `[LOGIN_SCREEN]`. |
+| `register_title_text` | Text (Top bar) | Label `Đăng ký tài khoản`. |
+| `subtitle_text` | Text | Label `Tạo tài khoản để quản lý hệ thống cảnh báo`. |
+| `username_input` | TextField | Label `Username`. Bắt buộc. Cùng quy tắc format với `[LOGIN_SCREEN]`. |
+| `email_input` | TextField | Label `Email`. Bắt buộc. Dùng để khôi phục tài khoản sau này. Hiển thị icon `✓` khi đúng định dạng. |
+| `password_input` | TextField (Password) | Label `Mật khẩu`. Bắt buộc. Có icon con mắt hiện/ẩn. Khi user gõ, hiển thị `password_strength_indicator` ngay phía dưới. |
+| `password_strength_indicator` | ProgressBar (3 mức) | Label `Yếu / Trung bình / Mạnh`. Tính theo độ dài + có cả chữ lẫn số. |
+| `password_confirm_input` | TextField (Password) | Label `Xác nhận mật khẩu`. Bắt buộc. So sánh với `password_input` ngay khi gõ. Hiển thị lỗi `Mật khẩu không khớp` nếu lệch. |
+| `register_button` | Button (Primary, full-width) | Label `Đăng ký`. Validate toàn bộ form khi bấm → gọi API tạo tài khoản. Enable khi cả 4 ô hợp lệ và mật khẩu khớp. |
+| `login_linkbutton` | TextButton | Label `Đã có tài khoản? Đăng nhập`. Mở `[LOGIN_SCREEN]` (tương đương `back_iconbutton`). |
 
 ### Quy tắc validation
 
-| Trường | Quy tắc | Thông báo lỗi |
+| Field ID | Quy tắc | Thông báo lỗi hiển thị (tiếng Việt) |
 |---|---|---|
-| Username | Bắt buộc; 4–20 ký tự; chỉ gồm chữ cái (a–z, A–Z), số (0–9), dấu gạch dưới (`_`); không bắt đầu bằng số; không toàn số. | `Tên đăng nhập 4–20 ký tự, gồm chữ, số và gạch dưới, không bắt đầu bằng số`. |
-| Username đã tồn tại | Server trả 409 khi bấm `Đăng ký`. | `Tên đăng nhập đã được sử dụng — chọn tên khác`. |
-| Email | Bắt buộc; theo cú pháp `local@domain.tld` — `local` gồm chữ cái/số/`._%+-`; `domain` và `tld` chỉ gồm chữ cái/số/`-`; phải có `.` ngăn `domain` và `tld`; `tld` tối thiểu 2 ký tự. | `Email không hợp lệ`. |
-| Email đã tồn tại | Server trả 409 khi bấm `Đăng ký`. | `Email đã được sử dụng — đăng nhập ngay?`. |
-| Mật khẩu | Bắt buộc; 8–30 ký tự; phải chứa cả chữ cái và chữ số; không được chỉ toàn khoảng trắng. | Lỗi riêng theo điều kiện: `Tối thiểu 8 ký tự` / `Phải có cả chữ và số` / `Tối đa 30 ký tự`. |
-| Xác nhận mật khẩu | Phải khớp với ô Mật khẩu. | `Mật khẩu không khớp`. |
+| `username_input` | Bắt buộc; 4–20 ký tự; chỉ gồm chữ cái (a–z, A–Z), số (0–9), dấu gạch dưới (`_`); không bắt đầu bằng số; không toàn số. | `Tên đăng nhập 4–20 ký tự, gồm chữ, số và gạch dưới, không bắt đầu bằng số`. |
+| `username_input` (đã tồn tại) | Server trả 409 khi bấm `register_button`. | `Tên đăng nhập đã được sử dụng — chọn tên khác`. |
+| `email_input` | Bắt buộc; theo cú pháp `local@domain.tld` — `local` gồm chữ cái/số/`._%+-`; `domain` và `tld` chỉ gồm chữ cái/số/`-`; phải có `.` ngăn `domain` và `tld`; `tld` tối thiểu 2 ký tự. | `Email không hợp lệ`. |
+| `email_input` (đã tồn tại) | Server trả 409 khi bấm `register_button`. | `Email đã được sử dụng — đăng nhập ngay?`. |
+| `password_input` | Bắt buộc; 8–30 ký tự; phải chứa cả chữ cái và chữ số; không được chỉ toàn khoảng trắng. | Lỗi riêng theo điều kiện: `Tối thiểu 8 ký tự` / `Phải có cả chữ và số` / `Tối đa 30 ký tự`. |
+| `password_confirm_input` | Phải khớp với `password_input`. | `Mật khẩu không khớp`. |
 
-**Quy tắc độ mật** (chỉ hiển thị thanh `Yếu/Trung bình/Mạnh`, không chặn):
-- `Yếu`: < 8 ký tự hoặc chỉ chữ hoặc chỉ số.
-- `Trung bình`: ≥ 8 ký tự và có cả chữ lẫn số.
-- `Mạnh`: ≥ 12 ký tự có cả chữ và số (có thể bổ sung chữ hoa và ký tự đặc biệt để đạt Mạnh, không bắt buộc).
+**Quy tắc độ mật** cho `password_strength_indicator` (chỉ hiển thị, không chặn):
+- `Yếu` (đỏ): < 8 ký tự hoặc chỉ chữ hoặc chỉ số.
+- `Trung bình` (vàng): ≥ 8 ký tự và có cả chữ lẫn số.
+- `Mạnh` (xanh): ≥ 12 ký tự có cả chữ và số (có thể bổ sung chữ hoa và ký tự đặc biệt để đạt Mạnh, không bắt buộc).
 
 ### Hành vi
 
-- Hiển thị lỗi validation **dạng inline** ngay dưới ô tương ứng khi user rời ô (on unfocus) hoặc khi bấm `Đăng ký`.
-- Khi bấm `Đăng ký` mà form không hợp lệ: focus vào ô lỗi đầu tiên + Snackbar `Vui lòng kiểm tra các ô bị lỗi`.
-- Trong khi chờ API (loading) → disable nút `Đăng ký`, hiển thị spinner nhỏ phía trước nhãn.
+- Hiển thị lỗi validation **dạng inline** ngay dưới ô tương ứng khi user rời ô (on unfocus) hoặc khi bấm `register_button`.
+- Khi bấm `register_button` mà form không hợp lệ: focus vào ô lỗi đầu tiên + `register_error_snackbar` với message `Vui lòng kiểm tra các ô bị lỗi`.
+- Trong khi chờ API (loading) → disable `register_button`, hiển thị spinner nhỏ phía trước nhãn.
 - Khi API trả 409 (username/email đã tồn tại) → hiện lỗi inline ngay dưới ô tương ứng + focus ô đó, **không load lại form**.
-- Khi thành công → chuyển về `[LOGIN_SCREEN]`, Snackbar `Đăng ký thành công — vui lòng đăng nhập`. Username đã nhập **tự fill** vào ô Username của `[LOGIN_SCREEN]` (giúp đăng nhập luôn, không phải gõ lại).
+- Khi thành công → chuyển về `[LOGIN_SCREEN]`, `register_success_snackbar` với message `Đăng ký thành công — vui lòng đăng nhập`. Username đã nhập **tự fill** vào `username_input` của `[LOGIN_SCREEN]` (giúp đăng nhập luôn, không phải gõ lại).
 
 ### Điều hướng
 
-- `Back` (Android Stack) → `[LOGIN_SCREEN]`.
-- Thành công → `[LOGIN_SCREEN]` + auto fill Username.
-- Text link `Đã có tài khoản? Đăng nhập` tương đương nút Back.
+- `back_iconbutton` (Android Stack) → `[LOGIN_SCREEN]`.
+- Thành công → `[LOGIN_SCREEN]` + auto fill `username_input`.
+- `login_linkbutton` tương đương `back_iconbutton`.
 
 ---
 
@@ -134,12 +170,12 @@ Tab này vừa quản lý camera, vừa hiển thị cảnh báo khẩn cấp.
 
 #### b) Banner cảnh báo nhấp nháy *(tuỳ chọn UI; có thể bỏ nếu badge trên card đã đủ)*
 
-| Thành phần | Mô tả |
-|---|---|
-| Banner | Có animation nhấp nháy đỏ/vàng. Nội dung: `Tên camera · Phát hiện [LOÀI] · [giờ:phút]`. Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`. |
-| Phân tích AI bên dưới banner | Loài, Số lượng cá thể, Mức độ nguy hiểm, Độ tin cậy AI (%). |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `emergency_banner_container` | Container (clickable) | Có animation nhấp nháy đỏ/vàng. Nội dung label: `Tên camera · Phát hiện [LOÀI] · [giờ:phút]`. Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`. |
+| `emergency_banner_analysis_text` | Text (caption) | Bên dưới banner hiển thị Loài, Số lượng cá thể, Mức độ nguy hiểm, Độ tin cậy AI (%). |
 
-**Hành vi:** Banner tự động xuất hiện khi server gửi sự kiện FCM tới thiết bị. Nhấn vào banner → chuyển sang `[CAMERA_VIEW_SCREEN]` của camera tương ứng. Vì mỗi Camera Card đã có badge cảnh báo nhấp nháy riêng (phụ thuộc mức nguy hiểm), banner sticky trên đầu tab có thể *bỏ qua* nếu thấy dư thừa.
+**Hành vi:** Banner tự động xuất hiện khi server gửi sự kiện FCM tới thiết bị. Nhấn vào `emergency_banner_container` → chuyển sang `[CAMERA_VIEW_SCREEN]` của camera tương ứng. Vì mỗi Camera Card đã có `warning_badge_overlay` nhấp nháy riêng (phụ thuộc mức nguy hiểm), banner sticky trên đầu tab có thể *bỏ qua* nếu thấy dư thừa.
 
 #### a) Danh sách thẻ camera
 
@@ -153,22 +189,22 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 
 ##### Thông tin hiển thị
 
-| # | Thông tin | Kiểu | Mô tả |
+| Component ID | Thông tin | Type | Mô tả |
 |---|---|---|---|
-| 1 | **Trạng thái kết nối** | Status indicator | `🟢 Online` (xanh lá) · `⚪ Offline` (xám). Khi offline ≥ 30s sẽ hiển thị rõ đi kèm icon offline. |
-| 2 | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_VIEW_SCREEN]` (vd: `Cam Khu A`) — nhấn nút `✏️ Đổi tên` trên màn đó. |
-| 3 | **Khu vực lắp đặt** | Text (caption) | Mô tả ngắn vị trí: `Rìa rừng phía B`, `Trạm 2 · Đồi cao`… Cắt bớt nếu dài. |
-| 4 | **Ảnh thumbnail** | Image (16:9) | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera + nền xám. Nếu offline → overlay icon `⚪ Offline` + tối màu 50%. Khi đang tải → shimmer effect. |
-| 5 | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Nội dung: `⚠️ [LOÀI] · [%]` (vd: `⚠️ VOI · 92%`). Animation nhấp nháy đỏ-vàng nếu mức nguy hiểm cao. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW_SCREEN]` của camera đó (giữ nguyên badge để vẫn biết có sự kiện). |
-| 6 | **Thời gian ghi nhận hình ảnh** *(timestamp snapshot)* | TextOverlay | Mốc thời gian server **chụp ảnh snapshot**, không phải live. Định dạng `HH:mm · dd/MM` (vd: `9:04 · 16/07`); tooltip dài hơn `HH:mm:ss · dd/MM/yyyy`. Hiển thị overlay góc dưới-trái của ảnh thumbnail, nền đen mờ 60% chữ trắng. Nếu ảnh > 1 giờ: thêm nhãn "cũ" hoặc icon `⏰` cảnh báo (vd: `9:04 · 16/07 · ⏰ cũ`); > 24 giờ: hiển thị cả ngày `16/07` rõ. Nếu chưa có ảnh → text gạch chân `—`. Khi user vào `[CAMERA_VIEW_SCREEN]` → xem thêm "Cách đây X phút" (relative time). |
+| `camera_status_indicator` | **Trạng thái kết nối** | Status indicator | Label `🟢 Online` (xanh lá) · `⚪ Offline` (xám). Khi offline ≥ 30s sẽ hiển thị rõ đi kèm icon offline. |
+| `camera_name_text` | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_VIEW_SCREEN]` (vd: `Cam Khu A`) — nhấn `rename_camera_button` trên màn đó. |
+| `camera_location_text` | **Khu vực lắp đặt** | Text (caption) | Mô tả ngắn vị trí: `Rìa rừng phía B`, `Trạm 2 · Đồi cao`… Cắt bớt nếu dài. |
+| `camera_thumbnail_image` | **Ảnh thumbnail** | Image (16:9) | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera + nền xám. Nếu offline → overlay icon `⚪ Offline` + tối màu 50%. Khi đang tải → shimmer effect. |
+| `warning_badge_overlay` | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Label dạng `⚠️ [LOÀI] · [%]` (vd: `⚠️ VOI · 92%`). Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW_SCREEN]` của camera đó. |
+| `snapshot_timestamp_overlay` | **Thời gian ghi nhận hình ảnh** | TextOverlay | Mốc thời gian server **chụp ảnh snapshot**, không phải live. Định dạng `HH:mm · dd/MM` (vd: `9:04 · 16/07`); tooltip dài hơn `HH:mm:ss · dd/MM/yyyy`. Nếu ảnh > 1 giờ: thêm nhãn `cũ` hoặc icon `⏰` (vd: `9:04 · 16/07 · ⏰ cũ`); > 24 giờ: hiển thị cả ngày `16/07` rõ. Nếu chưa có ảnh → text `—`. |
 
 ##### Điều khiển (Controls)
 
-| # | Điều khiển | Vị trí trong card | Hành vi |
-|---|---|---|---|
-| C1 | **Nhấn vào thân card** *(bất kỳ vị trí nào trên card)* | Toàn bộ card | Mở `[CAMERA_VIEW_SCREEN]` của camera đó — tại đây có hình ảnh hiện tại, nút đổi tên camera, và danh sách log lịch sử. |
+| Component ID | Type | Hành vi |
+|---|---|---|
+| `camera_card_clickable_container` | Container (clickable, bao trùm toàn bộ card) | Nhấn vào thân card (bất kỳ vị trí nào) → mở `[CAMERA_VIEW_SCREEN]` của camera đó. |
 
-> 💡 Camera Card chỉ có **một điều khiển duy nhất: nhấn thân card**. Mọi thao tác khác (đổi tên, xem lịch sử) đều thực hiện bên trong `[CAMERA_VIEW_SCREEN]`.
+> 💡 Camera Card chỉ có **một điều khiển duy nhất: `camera_card_clickable_container`**. Mọi thao tác khác (đổi tên, xem lịch sử) đều thực hiện bên trong `[CAMERA_VIEW_SCREEN]`.
 
 ##### Trạng thái của card (Card state)
 
@@ -216,11 +252,11 @@ Trạng thái card gồm **hai chiều độc lập**, kết hợp để quyết
 
 Tab này **không có danh sách camera**. Chỉ hiển thị thống kê tổng hợp toàn hệ thống:
 
-| Thành phần | Mô tả |
-|---|---|
-| Khối `Phát hiện trong tuần` | Danh sách các sự kiện: `Camera · Ngày giờ · Loài`. |
-| Khối `Phân tích theo từng camera` | Số lần xuất hiện, xu hướng (Chart line), khu vực di chuyển (sơ đồ/heatmap rừng). |
-| Bộ lọc | Theo khoảng thời gian (7 ngày / 30 ngày / tuỳ chỉnh) · theo loài · theo camera cụ thể. |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `statistics_filter` | Filter bar (Chips + Dropdown) | Lọc theo khoảng thời gian (7 ngày / 30 ngày / tuỳ chỉnh) · theo loài · theo camera cụ thể. Áp dụng cho toàn bộ tab. |
+| `weekly_detections_section` | Section (Card + List) | Tiêu đề `Phát hiện trong tuần`. Danh sách các sự kiện: `Camera · Ngày giờ · Loài`. |
+| `per_camera_analysis_section` | Section (Card + Charts) | Tiêu đề `Phân tích theo từng camera`. Số lần xuất hiện, xu hướng (Chart line), khu vực di chuyển (sơ đồ/heatmap rừng). |
 
 > 💡 *Lưu ý:* Muốn xem **lịch sử chi tiết từng camera** (danh sách log theo thời gian), nhấn vào Camera Card tương ứng ở tab `[CAMERA_LIST_TAB]` → `[CAMERA_VIEW_SCREEN]` — phần "Danh sách log" nằm cuối màn đó. Tab `[STATISTICS_TAB]` chỉ cung cấp cái nhìn tổng quan.
 
@@ -230,13 +266,13 @@ Tab này **không có danh sách camera**. Chỉ hiển thị thống kê tổng
 
 Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài khoản.
 
-| Thành phần | Kiểu | Mô tả |
+| Component ID | Type | Mô tả |
 |---|---|---|
-| `Ngôn ngữ` | Dropdown | `Tiếng Việt` (mặc định) · `English`. |
-| `Giao diện sáng/tối` | Toggle | `Sáng` / `Tối` (theo system hoặc thủ công). |
-| `Thông báo SMS` | Toggle | Bật/tắt chuông điện thoại khi nhận SMS cảnh báo. |
-| `Thiết lập hành vi ứng phó mặc định cho tất cả camera` | Button | Mở `[SPECIES_CONFIG_LIST_SCREEN]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL_SCREEN]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài áp dụng cho mọi camera trong hệ thống. |
-| `Đăng xuất` | Button | Xoá session → về `[LOGIN_SCREEN]`. |
+| `language_dropdown` | Dropdown | Label `Ngôn ngữ`. Lựa chọn `Tiếng Việt` (mặc định) · `English`. |
+| `theme_toggle` | Toggle | Label `Giao diện sáng/tối`. Lựa chọn `Sáng` / `Tối` (theo system hoặc thủ công). |
+| `sms_notification_toggle` | Toggle | Label `Thông báo SMS`. Bật/tắt chuông điện thoại khi nhận SMS cảnh báo. |
+| `configure_defense_default_button` | Button | Label `Thiết lập hành vi ứng phó mặc định cho tất cả camera`. Mở `[SPECIES_CONFIG_LIST_SCREEN]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL_SCREEN]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài áp dụng cho mọi camera trong hệ thống. |
+| `logout_button` | Button (Danger) | Label `Đăng xuất`. Xoá session → về `[LOGIN_SCREEN]`. |
 
 > 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Hàng rào / Kiểm lâm) ngay trong tab `[SETTING_TAB]`. Cấu hình các thiết bị này thuộc về **`[SPECIES_CONFIG_DETAIL_SCREEN]`** và phải đi qua `[SPECIES_CONFIG_LIST_SCREEN]` để chọn loài — vì thiết bị ứng phó phụ thuộc vào loài phát hiện (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), không thể cấu hình tách rời khỏi ngữ cảnh loài.
 
@@ -250,48 +286,55 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 
 **Bố cục màn hình (Vertical):**
 
-| Vị trí | Thành phần | Mô tả |
+| Component ID | Type | Mô tả |
 |---|---|---|
-| Top bar | Nút `Back` ← `[MAIN_SCREEN]` · Tên Camera · Trạng thái online/offline · Icon `↻` Refresh. |
-| Ngay dưới top bar | **Nút `✏️ Đổi tên`** *(Button text/icon)* | Mở dialog `Đổi tên camera` cho phép sửa tên hiển thị (vd: `Cam 1` → `Cam Khu A`). Có nút `Lưu` / `Huỷ`. Thay đổi lưu xuống server. |
-| Giữa màn | **Khung ảnh Snapshot** + overlay timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái ảnh, và dòng "Cách đây X phút/giây" ở góc dưới-phải (relative time tự cập nhật mỗi 10s). | |
-| Ngay dưới ảnh | **Thông báo độ mới của ảnh:** nếu > 5 phút → chip `⏰ Ảnh cách đây X phút — có thể đã cũ`; nếu > 30 phút → chip đỏ `⚠️ Ảnh cũ — kiểm tra camera`. | |
-| Dưới chip | **Bảng thông tin AI:** Loài · Số lượng · Mức độ nguy hiểm · Độ tin cậy (%). | |
-| Cuối màn | **Danh sách log** *(List view)* — tiêu đề `Lịch sử ghi nhận`. Mỗi dòng log gồm: ảnh thumbnail nhỏ · `giờ:phút:giây · Thứ, dd/MM/yyyy` · Độ tin cậy (%) · Loài · Số lượng. | Sắp xếp **mới nhất trên đầu**, lazy load khi cuộn. |
+| `back_iconbutton` | IconButton (Top bar) | Label `←`. Quay về `[MAIN_SCREEN]`. |
+| `camera_name_title_text` | Text (Top bar, Bold) | Tên hiện tại của camera. |
+| `camera_status_indicator` | Status indicator (Top bar) | Label `🟢 Online` / `⚪ Offline`. |
+| `refresh_iconbutton` | IconButton (Top bar) | Label `↻`. Kéo xuống để refresh thủ công snapshot mới nhất. |
+| `rename_camera_button` | Button (text/icon `✏️`) | Label `Đổi tên`. Mở `rename_camera_dialog`. |
+| `rename_camera_dialog` | Dialog (Alert) | TextField `camera_name_input` cho phép sửa tên hiển thị (vd: `Cam 1` → `Cam Khu A`). Buttons: `rename_save_button` (label `Lưu`) / `rename_cancel_button` (label `Huỷ`). Thay đổi lưu xuống server và áp dụng cho `camera_name_title_text`. |
+| `snapshot_image` | Image (16:9) | Khung ảnh Snapshot giữa màn. |
+| `snapshot_timestamp_overlay` | TextOverlay | Timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái. |
+| `snapshot_relative_time_text` | TextOverlay | Dòng `Cách đây X phút/giây` góc dưới-phải (relative time tự cập nhật mỗi 10s). |
+| `snapshot_age_chip` | Chip (thông báo) | Label: nếu > 5 phút → `⏰ Ảnh cách đây X phút — có thể đã cũ`; nếu > 30 phút → `⚠️ Ảnh cũ — kiểm tra camera` (màu đỏ). |
+| `ai_analysis_section` | Card (Bảng) | Hiển thị Loài · Số lượng · Mức độ nguy hiểm · Độ tin cậy (%). |
+| `camera_log_list` | List view | Tiêu đề `Lịch sử ghi nhận`. Mỗi dòng là `camera_log_item`: ảnh thumbnail nhỏ · `giờ:phút:giây · Thứ, dd/MM/yyyy` · Độ tin cậy (%) · Loài · Số lượng. Sắp xếp **mới nhất trên đầu**, lazy load khi cuộn. |
 
 **Hành vi:**
-- Nhấn `✏️ Đổi tên` → mở dialog cho phép sửa tên → `Lưu` cập nhật server và cập nhật lại Top bar.
-- Ảnh snapshot tự động refresh mỗi ~2 giây khi AI phát hiện chuyển động đáng kể. Khi không có chuyển động → ảnh giữ nguyên cho đến khi có snapshot mới.
+- Nhấn `rename_camera_button` → mở `rename_camera_dialog`. `rename_save_button` cập nhật server và refresh `camera_name_title_text`; `rename_cancel_button` đóng không lưu.
+- `snapshot_image` tự động refresh mỗi ~2 giây khi AI phát hiện chuyển động đáng kể. Khi không có chuyển động → ảnh giữ nguyên cho đến khi có snapshot mới.
 - Pull-to-refresh → yêu cầu lấy snapshot mới nhất từ server.
-- Relative time tự cập nhật định kỳ (mỗi 10s) nhưng timestamp tuyệt đối trên ảnh chỉ thay đổi khi nhận snapshot mới.
-- Banner cảnh báo có thể hiện phía trên khung ảnh khi có sự kiện mới: `Cam 1 · Phát hiện VOI · 9:04`.
-- Nhấn vào 1 dòng log → mở dialog/lightbox xem ảnh lớn + metadata đầy đủ.
-- Nút `Back` → `[MAIN_SCREEN]` (Android Stack mặc định).
+- `snapshot_relative_time_text` tự cập nhật định kỳ (mỗi 10s) nhưng `snapshot_timestamp_overlay` chỉ thay đổi khi nhận snapshot mới.
+- Banner cảnh báo (kiểu `emergency_banner_container` ở tab `[CAMERA_LIST_TAB]`) có thể hiện phía trên `snapshot_image` khi có sự kiện mới: `Cam 1 · Phát hiện VOI · 9:04`.
+- Nhấn vào 1 dòng `camera_log_item` → mở `log_detail_lightbox` xem ảnh lớn + metadata đầy đủ.
+- `back_iconbutton` → `[MAIN_SCREEN]` (Android Stack mặc định).
 
-> 🚫 Màn này **không có** nút bật/tắt stream camera, không có toggle thiết bị ngoại vi (SMS / Loa / LED / Hàng rào / Kiểm lâm). Cấu hình thiết bị ứng phó (kể cả bật/tắt thiết bị cho camera này) thuộc về `[SPECIES_CONFIG_DETAIL_SCREEN]` — mở từ nút `Thiết lập hành vi ứng phó mặc định cho tất cả camera` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 2.3).
+> 🚫 Màn này **không có** nút bật/tắt stream camera, không có toggle thiết bị ngoại vi (SMS / Loa / LED / Hàng rào / Kiểm lâm). Cấu hình thiết bị ứng phó (kể cả bật/tắt thiết bị cho camera này) thuộc về `[SPECIES_CONFIG_DETAIL_SCREEN]` — mở từ `configure_defense_default_button` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 3.3).
 
 ---
 
 ## 5. `[SPECIES_CONFIG_LIST_SCREEN]` — Danh sách loại thú cần thiết lập
 
-Được mở khi user nhấn nút `Thiết lập hành vi ứng phó mặc định cho tất cả camera` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 2.3).
+Được mở khi user nhấn `configure_defense_default_button` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 3.3).
 
-| Thành phần | Mô tả |
-|---|---|
-| Tiêu đề | `Thiết lập phòng vệ theo loài` |
-| Danh sách loài đã biết | Voi, Cọp, Nai, Khỉ, Heo rừng… |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `back_iconbutton` | IconButton (Top bar) | Label `←`. Quay về `[MAIN_SCREEN]`. |
+| `screen_title_text` | Text (Top bar, Bold) | Label `Thiết lập phòng vệ theo loài`. |
+| `species_list_view` | RecyclerView (List) | Danh sách loài đã biết: Voi, Cọp, Nai, Khỉ, Heo rừng… Mỗi dòng là `species_card_item`. |
 
-**Mỗi Card loài gồm:**
+**Mỗi `species_card_item` (Card loài):**
 
-| Trường | Mô tả |
-|---|---|
-| Tên loài | `VOI`, `CỌP`, `NAI`… |
-| Chỉ số hung dữ | `0/10` - `10/10` (thang đo nguy hiểm). |
-| Tập tính | Di chuyển theo bầy, hoạt động về đêm… |
-| Cách phòng vệ | Mô tả ngắn kịch bản mặc định: Silent Alert / Active Deterrent. |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `species_name_text` | Text (Bold) | Label `VOI`, `CỌP`, `NAI`… |
+| `aggression_gauge` | LinearGauge (0–10) | Label `Chỉ số hung dữ`. Thang đo nguy hiểm. |
+| `species_behavior_text` | Text (caption) | Mô tả tập tính: di chuyển theo bầy, hoạt động về đêm… |
+| `species_defense_summary_text` | Text (caption) | Mô tả ngắn kịch bản mặc định: `Silent Alert` / `Active Deterrent`. |
 
 **Hành vi:**
-- Nhấn vào 1 loài → highlight + mở `[SPECIES_CONFIG_DETAIL_SCREEN]`.
+- Nhấn vào 1 `species_card_item` → highlight + mở `[SPECIES_CONFIG_DETAIL_SCREEN]`.
 
 ---
 
@@ -300,7 +343,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 **Màn này chỉ được mở qua `[SPECIES_CONFIG_LIST_SCREEN]`** (bắt buộc phải chọn loài trước). Luồng điều hướng duy nhất:
 
 ```
-[MAIN_SCREEN] ── tab [SETTING_TAB] ──► nút "Thiết lập hành vi ứng phó mặc định cho tất cả camera"
+[MAIN_SCREEN] ── tab [SETTING_TAB] ──► configure_defense_default_button
                           └─► [SPECIES_CONFIG_LIST_SCREEN] ── chọn loài ──► [SPECIES_CONFIG_DETAIL_SCREEN]
                                                                          (scope cố định = ALL)
 ```
@@ -311,51 +354,62 @@ Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất
 
 ### 6.1. Loài đang cấu hình *(chỉ đọc)*
 
-| Thành phần | Mô tả |
-|---|---|
-| Label loài | Hiển thị tên loài vừa chọn ở `[SPECIES_CONFIG_LIST_SCREEN]` (vd: `VOI`, `CỌP`, `NAI`…) — không cho chỉnh tại đây. |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `species_name_readonly_text` | Text (read-only, Bold) | Hiển thị tên loài vừa chọn ở `[SPECIES_CONFIG_LIST_SCREEN]` (vd: `VOI`, `CỌP`, `NAI`…) — không cho chỉnh tại đây. |
 
-### 6.2. Các nhóm cài đặt chi tiết (Defense Parameter Configurations)
+### 6.2. Tự thiết lập hành vi nhanh (Preset Scenarios)
 
-**Âm thanh xua đuổi:**
-- Loại âm thanh: `Tiếng súng`, `Tiếng gầm`, `Tiếng chó sủa lớn`, `Tiếng nổ giả lập`, `Tần số siêu âm`.
-- Thanh trượt cường độ: `1 - 100`.
-- Nút `Nghe thử (Test Audio)`.
+User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — loại trừ). Chọn một preset non-custom sẽ **đồng thời ép `defense_params_expandable_container` thu gọn (collapsed)**; chọn `preset_custom_radiobutton` sẽ **đồng thời ép container mở rộng (expanded)**.
 
-**Đèn LED nhấp nháy:**
-- Tần suất: `2 lần/giây`, `4 lần/giây`, `Nhấp nháy ngẫu nhiên`.
-- Màu sắc: `Đỏ`, `Trắng`, `Đỏ xen kẽ Trắng`.
-- Thời lượng (giây).
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `preset_radio_group` | RadioGroup | Group cha, đảm bảo **chỉ 1 trong 4 `preset_*_radiobutton` active** tại 1 thời điểm. |
+| `preset_intruder_radiobutton` | RadioButton | Label `Người lạ đột nhập`. Hành vi mặc định: LED đỏ-trắng nhấp nháy + âm thanh báo động + push/SMS cho cơ quan chức năng. |
+| `preset_medium_animal_radiobutton` | RadioButton | Label `Thú vừa`. Hành vi mặc định: LED nhấp nháy + âm siêu âm/chó sủa + dòng điện nhẹ (Nai, Khỉ, Hươu cao cổ). |
+| `preset_high_risk_radiobutton` | RadioButton | Label `Thú cực kỳ nguy hiểm`. Hành vi mặc định: **Silent Alert** — không loa/đèn tại chỗ; chỉ gửi Push/SMS cho người dân di tản. |
+| `preset_custom_radiobutton` | RadioButton | Label `Tùy chỉnh`. Khi chọn → `defense_params_expandable_container` tự động mở rộng (expanded). |
 
-**Hàng rào điện:**
-- Mức dòng điện sinh học: `Thấp`, `Trung bình`, `Mạnh`.
-- Đèn cảnh báo đi kèm: Toggle bật/tắt đèn vàng/đỏ nhấp nháy.
-- Cơ chế thông báo: Toggle tự động gửi SMS/Push khi hàng rào hoạt động.
-- Tự ngắt: Sau **2 phút** không phát hiện thú → tự động ngắt.
+**Hành vi:**
+- Khi mở màn: server trả về cấu hình hiện tại. So khớp với 3 preset non-custom → tự chọn preset đó, container **collapsed**. Nếu không khớp → tự chọn `preset_custom_radiobutton`, container **expanded**.
+- Khi user chọn `preset_intruder_radiobutton` / `preset_medium_animal_radiobutton` / `preset_high_risk_radiobutton`:
+  - Fill toàn bộ control trong mục 6.3 theo bộ giá trị preset đó.
+  - **Đặt container = collapsed** (kể cả khi trước đó user đang mở rộng).
+- Khi user chọn `preset_custom_radiobutton`:
+  - **Đặt container = expanded** (kể cả khi trước đó user đang thu gọn).
+  - Không fill giá trị — giữ nguyên giá trị hiện tại trong container (user tự sửa).
+- Nếu user mở rộng container thủ công (nhấn `defense_params_toggle_container`) trong khi đang chọn preset non-custom → container hiện giá trị của preset đó; **preset vẫn active, không tự chuyển sang Custom**.
+- Nếu user đang ở `preset_custom_radiobutton` mà sửa 1 control bất kỳ trong container → preset vẫn là Custom (trạng thái không đổi cho đến khi user chọn rõ ràng).
 
-**Phát cảnh báo qua loa:**
-- Mẫu nội dung: `Mẫu 1 (Voi hoang dã)`, `Mẫu 2 (Thú dữ xâm lấn)`, `Mẫu 3 (Di tản lánh nạn)`.
-- Giới tính giọng nói: `Nam` / `Nữ`.
+### 6.3. Tuỳ chỉnh nâng cao — Defense Parameter Configurations *(collapsible)*
 
-**Thông báo:**
-- Toggle `Gửi SMS`.
-- Toggle `Gửi Push Notification`.
+`defense_params_expandable_container` mặc định **collapsed** khi mở màn (trừ khi `preset_custom_radiobutton` đang active — xem mục 6.2).
 
-### 6.3. Tự thiết lập hành vi nhanh (Preset Scenarios)
-
-| Nút preset | Hành vi |
-|---|---|
-| `Người lạ đột nhập` | LED đỏ-trắng nhấp nháy + âm thanh báo động + push/SMS cho cơ quan chức năng. |
-| `Thú vừa` | LED nhấp nháy + âm siêu âm/chó sủa + dòng điện nhẹ (Nai, Khỉ, Hươu cao cổ). |
-| `Thú cực kỳ nguy hiểm` | **Silent Alert** — không loa/đèn tại chỗ; chỉ gửi Push/SMS cho người dân di tản. |
-| `Tùy chỉnh` | Mở khoá các nhóm cài đặt chi tiết phía trên để chỉnh tay. |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `defense_params_toggle_container` | Container (clickable) | Header label `Tuỳ chỉnh nâng cao` + icon `expand_more` / `expand_less`. Nhấn để đổi trạng thái collapsed/expanded của `defense_params_expandable_container`. Khi collapsed, các control bên trong không hiển thị (chỉ thấy header). |
+| `defense_params_expandable_container` | Container (expandable) | Body collapsible — chứa toàn bộ control cài đặt chi tiết dưới đây. Trạng thái **bị ép** bởi `preset_radio_group` (xem mục 6.2). |
+| `sound_type_dropdown` | Dropdown | Label `Loại âm thanh xua đuổi`. Lựa chọn: `Tiếng súng` · `Tiếng gầm` · `Tiếng chó sủa lớn` · `Tiếng nổ giả lập` · `Tần số siêu âm`. |
+| `sound_intensity_slider` | Slider | Label `Cường độ âm thanh`. Range `1`–`100`. |
+| `sound_test_button` | Button (Secondary) | Label `Nghe thử (Test Audio)`. Phát âm thanh đã chọn ở mức cường độ hiện tại qua loa thiết bị. |
+| `led_frequency_dropdown` | Dropdown | Label `Tần suất LED`. Lựa chọn: `2 lần/giây` · `4 lần/giây` · `Nhấp nháy ngẫu nhiên`. |
+| `led_color_segmented` | SegmentedControl | Label `Màu sắc LED`. Lựa chọn: `Đỏ` · `Trắng` · `Đỏ xen kẽ Trắng`. |
+| `led_duration_input` | NumberInput | Label `Thời lượng LED (giây)`. |
+| `fence_current_level_dropdown` | Dropdown | Label `Mức dòng điện sinh học`. Lựa chọn: `Thấp` · `Trung bình` · `Mạnh`. |
+| `fence_warning_light_toggle` | Toggle | Label `Đèn cảnh báo vàng/đỏ nhấp nháy kèm theo`. |
+| `fence_notify_on_trigger_toggle` | Toggle | Label `Tự động gửi SMS/Push khi hàng rào hoạt động`. |
+| `fence_auto_off_hint_text` | Text (caption) | Label `Tự ngắt sau 2 phút không phát hiện thú` *(thông tin, không chỉnh)*. |
+| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lựa chọn: `Mẫu 1 (Voi hoang dã)` · `Mẫu 2 (Thú dữ xâm lấn)` · `Mẫu 3 (Di tản lánh nạn)`. |
+| `speaker_voice_gender_segmented` | SegmentedControl | Label `Giới tính giọng nói`. Lựa chọn: `Nam` · `Nữ`. |
+| `notify_sms_toggle` | Toggle | Label `Gửi SMS`. |
+| `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. |
 
 ### 6.4. Lưu
 
-| Thành phần | Mô tả |
-|---|---|
-| Nút `Lưu` | Ghi các thông số xuống server. |
-| Nút `Đặt lại` | Trả về giá trị mặc định. |
+| Component ID | Type | Mô tả |
+|---|---|---|
+| `save_config_button` | Button (Primary, full-width) | Label `Lưu`. Ghi các thông số xuống server. |
+| `reset_config_button` | Button (Secondary) | Label `Đặt lại`. Trả về giá trị mặc định. |
 
 ---
 
