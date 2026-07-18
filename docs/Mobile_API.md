@@ -160,6 +160,38 @@ Enum `Camera.status`: `ONLINE`, `OFFLINE`, `MAINTENANCE`.
 
 ---
 
+### 2.7. DefendAction (Schema cấu hình phòng vệ)
+
+Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện động vật.
+
+```json
+{
+  "audio": {
+    "type": "gunshot",                   // gunshot / growl / dog_bark / explosion / ultrasonic
+    "intensity": 75,                     // Cường độ âm thanh (1 - 100)
+    "sampleId": "gunshot"                // ID file âm thanh mẫu
+  },
+  "led": {
+    "flashRate": "4_per_sec",            // 2_per_sec / 4_per_sec / random
+    "color": "red_white_alt",            // red / white / red_white_alt
+    "durationSeconds": 60                // Thời lượng LED chớp (giây)
+  },
+  "fence": {
+    "level": "medium",                   // low / medium / high (mức dòng điện)
+    "warningLight": true,                // Có bật đèn cảnh báo màu hổ phách/đỏ tại hiện trường
+    "autoNotify": true,                  // Tự động SMS/Push khi kích hoạt hàng rào
+    "autoOffEnabled": true,              // Tự động tắt hàng rào sau 2 phút không có thú
+    "autoOffMinutes": 2                  // Thời gian tự ngắt (BẮT BUỘC >= 2)
+  },
+  "speaker": {
+    "templateId": "tpl-02"               // Mẫu nội dung phát loa (tpl-01 / tpl-02 / tpl-03)
+  },
+  "silentAlert": false                   // true => Cảnh báo âm thầm (không còi/đèn tại chỗ)
+}
+```
+
+---
+
 ## 3. Nhóm 1 — Xác thực & Tài khoản (`[LOGIN_SCREEN]`, `[REGISTER_SCREEN]`)
 
 ### 3.1. `POST /auth/register`
@@ -701,19 +733,20 @@ Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (n
     {
       "id": "intruder",
       "displayName": "Người lạ đột nhập",
-      "forSpecies": "HUMAN",
-      "config": { /* ResponseConfigSchema xem mục 8.2 */ }
+      "description": "Bật đèn LED nhấp nháy đỏ-trắng + phát còi báo động tiếng súng + báo Biên phòng/Kiểm lâm.",
+      "config": "@DefendAction"
     },
     {
       "id": "medium_danger",
       "displayName": "Thú vừa",
-      "description": "Áp dụng cho loài ít nguy hiểm (Nai, Khỉ, Hươu)"
+      "description": "Bật âm thanh xua đuổi tần số siêu âm/chó sủa + đèn LED nhấp nháy + hàng rào điện nhẹ (áp dụng cho loài ít nguy hiểm).",
+      "config": "@DefendAction"
     },
     {
       "id": "critical_danger",
       "displayName": "Thú cực kỳ nguy hiểm",
-      "description": "Silent Alert — không phát loa/LED tại chỗ",
-      "silentAlert": true
+      "description": "Silent Alert - Không phát còi/đèn tại chỗ; chỉ gửi Push/SMS khẩn cấp cho người dân di tản và báo Kiểm lâm.",
+      "config": "@DefendAction"
     }
   ]
 }
@@ -798,15 +831,105 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
 ```json
 {
   "items": [
-    { "id": "crocodile", "displayName": "Cá sấu", "dangerLevel":"HIGH" },
-    { "id": "deer",      "displayName": "Nai",   "dangerLevel":"LOW" },
-    { "id": "elephant",  "displayName": "Voi",   "dangerLevel":"CRITICAL" },
-    { "id": "giraffe",   "displayName": "Hươu cao cổ", "dangerLevel":"LOW" },
-    { "id": "leopard",   "displayName": "Báo",   "dangerLevel":"CRITICAL" },
-    { "id": "monkey",    "displayName": "Khỉ",  "dangerLevel":"LOW" },
-    { "id": "rhino",     "displayName": "Tê giác", "dangerLevel":"CRITICAL" },
-    { "id": "snake",     "displayName": "Rắn", "dangerLevel":"HIGH" },
-    { "id": "tiger",     "displayName": "Hổ",  "dangerLevel":"CRITICAL" }
+    {
+      "id": "crocodile",
+      "displayName": "Cá sấu",
+      "dangerLevel": "HIGH",
+      "aggressionLevel": 8,
+      "htmlDescription": "Loài bò sát lớn ăn thịt hoang dã, hoạt động chủ yếu ở <b>vùng nước ngọt lợ ven rừng</b>.<br/>Có tập tính săn mồi phục kích âm thầm ban đêm, lực cắn cực mạnh nguy hiểm cho con người và gia súc sát bờ nước.",
+      "defense": {
+        "recommend": "Kịch bản ngăn chặn bằng hàng rào điện sinh học mức trung bình kết hợp đèn LED chớp nháy màu đỏ-trắng.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "deer",
+      "displayName": "Nai",
+      "dangerLevel": "LOW",
+      "aggressionLevel": 2,
+      "htmlDescription": "Thú ăn cỏ lành tính, nhút nhát, thường đi kiếm ăn theo bầy nhỏ vào lúc <i>bình minh</i> hoặc <i>hoàng hôn</i>.<br/>Thích ăn chồi non, dễ bị giật mình bởi tiếng động lạ và có xu hướng bỏ chạy nhanh.",
+      "defense": {
+        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng, không gây hại hàng rào.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "elephant",
+      "displayName": "Voi",
+      "dangerLevel": "CRITICAL",
+      "aggressionLevel": 9,
+      "htmlDescription": "Thú lớn di chuyển theo đàn gia đình (5-15 cá thể), sức tàn phá hoa màu <u>rất cao</u> khi xung đột đất đai.<br/>Có khứu giác và thính giác cực nhạy, dễ nổi giận tấn công nếu bị kích động bởi ánh sáng chớp mạnh hoặc tiếng ồn lớn.",
+      "defense": {
+        "recommend": "Kịch bản cảnh báo âm thầm (Silent Alert) gửi SMS/Push tức thì cho người dân và kiểm lâm, tuyệt đối không dùng loa/đèn chớp tại hiện trường tránh kích động voi dữ phá hoại.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "giraffe",
+      "displayName": "Hươu cao cổ",
+      "dangerLevel": "LOW",
+      "aggressionLevel": 1,
+      "htmlDescription": "Động vật ăn lá cây trên cao, hiền lành, di chuyển chậm rãi và hầu như không gây ra xung đột hay phá hoại hoa màu.<br/>Hoạt động ban ngày, không có xu hướng tiếp cận khu dân cư.",
+      "defense": {
+        "recommend": "Loài lành tính, chỉ cần ghi nhận log và bật đèn cảnh báo nhẹ nếu di chuyển sát hàng rào.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "leopard",
+      "displayName": "Báo",
+      "dangerLevel": "CRITICAL",
+      "aggressionLevel": 9,
+      "htmlDescription": "Mèo lớn ăn thịt nguy hiểm, kỹ năng <b>leo trèo và ngụy trang</b> bậc thầy.<br/>Thường đi săn đơn độc về đêm, cực kỳ nhạy bén và có thể tấn công bất ngờ từ trên cao nếu cảm thấy bị đe dọa.",
+      "defense": {
+        "recommend": "Cảnh báo âm thầm: Gửi thông báo đẩy khẩn cấp cho kiểm lâm và người dân lân cận di tản, không kích hoạt loa còi tại chỗ.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "monkey",
+      "displayName": "Khỉ",
+      "dangerLevel": "LOW",
+      "aggressionLevel": 4,
+      "htmlDescription": "Động vật linh trưởng thông minh, sống theo đàn lớn.<br/>Rất nghịch ngợm, thường xuyên phá hoại nông sản, không sợ người và có khả năng leo trèo vượt qua các loại hàng rào thô sơ.",
+      "defense": {
+        "recommend": "Kịch bản xua đuổi chủ động: Sử dụng đèn LED chớp nhấp nháy ngẫu nhiên kết hợp tiếng chó sủa giả lập tần suất cao.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "rhino",
+      "displayName": "Tê giác",
+      "dangerLevel": "CRITICAL",
+      "aggressionLevel": 8,
+      "htmlDescription": "Động vật ăn cỏ cỡ lớn cực kỳ quý hiếm đang bị đe dọa tuyệt chủng.<br/>Thị lực <i>rất kém</i> nhưng thính giác và khứu giác nhạy bén; có thể lao vào tấn công điên cuồng nếu giật mình phát hiện vật lạ gần.",
+      "defense": {
+        "recommend": "Cảnh báo bảo vệ: Gửi tin nhắn khẩn cho Hạt Kiểm lâm triển khai bảo vệ tê giác, hạn chế các xung kích âm thanh đèn báo tại chỗ.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "snake",
+      "displayName": "Rắn",
+      "dangerLevel": "HIGH",
+      "aggressionLevel": 7,
+      "htmlDescription": "Bao gồm các loài rắn độc nguy hiểm bò sát sát đất. Ngụy trang tốt trong bụi rậm hoặc đống lá khô.<br/>Thường ẩn nấp gần chuồng trại kiếm mồi và sẽ cắn tự vệ nếu con người vô tình giẫm phải.",
+      "defense": {
+        "recommend": "Cảnh báo đề phòng: Tự động gửi SMS cảnh báo đề phòng có độc cho các hộ dân lân cận xung quanh khu vực phát hiện.",
+        "appSetting": "@DefendAction"
+      }
+    },
+    {
+      "id": "tiger",
+      "displayName": "Hổ",
+      "dangerLevel": "CRITICAL",
+      "aggressionLevel": 10,
+      "htmlDescription": "Thú ăn thịt đầu bảng, chúa tể rừng xanh cực kỳ hung dữ và nguy hiểm.<br/>Có tập tính lãnh thổ cao, đi săn đơn độc vào <u>ban đêm và rạng sáng</u>, có thể tấn công trực diện con người nếu phát hiện xâm nhập sâu.",
+      "defense": {
+        "recommend": "Nguy cấp - Cảnh báo âm thầm: Gửi thông báo đẩy và SMS khẩn cấp tức khắc cho kiểm lâm và toàn bộ người dân lân cận di tản lánh nạn, cấm tuyệt đối phát còi báo động tại trạm.",
+        "appSetting": "@DefendAction"
+      }
+    }
   ]
 }
 ```
@@ -823,29 +946,7 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
 
 **Request body** (full schema)
 ```json
-{
-  "audio": {
-    "type": "gunshot",
-    "intensity": 75,
-    "sampleId": "gunshot"
-  },
-  "led": {
-    "flashRate": "4_per_sec",
-    "color": "red_white_alt",
-    "durationSeconds": 60
-  },
-  "fence": {
-    "level": "medium",
-    "warningLight": true,
-    "autoNotify": true,
-    "autoOffEnabled": true,
-    "autoOffMinutes": 2                 // BẮT BUỘC >= 2 theo spec
-  },
-  "speaker": {
-    "templateId": "tpl-02"
-  },
-  "silentAlert": false                  // true => chỉ push notification
-}
+"@DefendAction"
 ```
 
 **Response 200**
@@ -853,7 +954,7 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
 {
   "cameraId": "cam-001",
   "speciesId": "elephant",
-  "config": { /* echo body */ },
+  "config": "@DefendAction",
   "updatedAt": "2026-07-16T09:30:00+07:00",
   "updatedBy": "9f3a"
 }
@@ -916,7 +1017,11 @@ Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerL
 }
 ```
 
-**Response 200** → trả về config đã merge preset + override.
+**Response 200**
+
+```json
+"@DefendAction"
+```
 
 ---
 
@@ -929,8 +1034,8 @@ Lấy tất cả cấu hình của 1 camera (cho các loài). Mapping: màn hìn
 {
   "cameraId": "cam-001",
   "configs": [
-    { "speciesId": "elephant", "config": {...}, "updatedAt":"..." },
-    { "speciesId": "tiger",    "config": {...}, "updatedAt":"..." }
+    { "speciesId": "elephant", "config": "@DefendAction", "updatedAt":"..." },
+    { "speciesId": "tiger",    "config": "@DefendAction", "updatedAt":"..." }
   ]
 }
 ```
@@ -1304,35 +1409,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
   "dangerLevel": "CRITICAL",
   "imageUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
   "detectedAt": "2026-07-19T04:55:00+07:00",
-  "responseAction": {
-    "silentAlert": false,
-    "audio": {
-      "enabled": true,
-      "type": "gunshot",
-      "intensity": 75,
-      "sampleId": "gunshot"
-    },
-    "led": {
-      "enabled": true,
-      "flashRate": "4_per_sec",
-      "color": "red_white_alt",
-      "durationSeconds": 60
-    },
-    "fence": {
-      "enabled": true,
-      "level": "medium",
-      "warningLight": true,
-      "autoNotify": true,
-      "autoOffEnabled": true,
-      "autoOffMinutes": 2
-    },
-    "speaker": {
-      "enabled": false,
-      "templateId": "tpl-02"
-    },
-    "smsNotify": true,
-    "pushNotify": true
-  }
+  "responseAction": "@DefendAction"
 }
 ```
 
@@ -1349,64 +1426,113 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 
 ---
 
-## 14. Phụ lục — Bảng tổng hợp
+## 14. Phụ lục — Bảng tổng hợp (Phân loại theo Màn hình Mobile)
 
-| # | Group | Method | Endpoint | Màn hình / Luồng (Hệ thống mới) |
-|---|---|---|---|---|
-| 3.1 | Auth | POST | `/auth/register` | `[REGISTER_SCREEN]` |
-| 3.2 | Auth | POST | `/auth/login` | `[LOGIN_SCREEN]` |
-| 3.3 | Auth | POST | `/auth/logout` | Tab `[SETTING_TAB]` |
-| 3.4 | Auth | POST | `/auth/refresh-token` | Tự động chạy ngầm |
-| 3.5 | Auth | POST | `/auth/forgot-password` | Màn hình ngoài spec (Login flow) |
-| 3.6 | Auth | POST | `/auth/reset-password` | Màn hình ngoài spec (Forgot Password flow) |
-| 4.1 | Push | POST | `/devices/push-token` | Chạy ngầm sau đăng nhập/đăng ký |
-| 4.2 | Push | DELETE | `/devices/push-token` | Chạy ngầm sau đăng xuất |
-| 4.3 | Push | GET | `/notifications/inbox` | Tải danh sách thông báo đẩy (không có màn hình trực tiếp) |
-| 5.1 | Camera | GET | `/cameras` | Tab `[CAMERA_LIST_TAB]` |
-| 5.2 | Camera | GET | `/cameras/{id}` | Màn hình `[CAMERA_VIEW_SCREEN]` |
-| 5.3 | Camera | GET | `/cameras/{id}/snapshot` | Tab `[CAMERA_LIST_TAB]` (thumbnail), Màn hình `[CAMERA_VIEW_SCREEN]` |
-| 5.4 | Camera | POST | `/cameras/{id}/snapshot/refresh` | Màn hình `[CAMERA_VIEW_SCREEN]` |
-| 5.5 | Camera | GET | `/cameras/{id}/detections/current` | Màn hình `[CAMERA_VIEW_SCREEN]` (bảng AI) |
-| 5.6 | Camera | GET | `/cameras/{id}/detections/stream` | Màn hình `[CAMERA_VIEW_SCREEN]` (realtime) |
-| 5.7 | Camera | PATCH | `/cameras/{id}` | Màn hình `[CAMERA_VIEW_SCREEN]` (đổi tên camera) |
-| 6.1 | Override | GET | `/cameras/{id}/devices/state` | Màn hình `[CAMERA_VIEW_SCREEN]` / `[SPECIES_CONFIG_DETAIL_SCREEN]` |
-| 6.2 | Override | POST | `/cameras/{id}/devices/{key}/override` | Màn hình `[CAMERA_VIEW_SCREEN]` (toggle thiết bị ngoại vi) |
-| 6.3 | Override | POST | `/cameras/{id}/devices/override-all` | Màn hình `[CAMERA_VIEW_SCREEN]` (phát báo động khẩn cấp) |
-| 6.4 | Override | POST | `/cameras/{id}/devices/{key}/test` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (nút nghe thử) |
-| 7.1 | Control | GET | `/control/system/status` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` / Chạy ngầm |
-| 7.2 | Control | POST | `/control/system/sms-notification/toggle` | Tích hợp tab `[SETTING_TAB]` (Chạy ngầm) |
-| 7.3 | Control | GET | `/control/presets` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (tải presets) |
-| 7.4 | Control | POST | `/control/presets/{id}/apply` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (chọn kịch bản nhanh) |
-| 7.5 | Control | GET | `/audio-samples` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (dropdown âm thanh) |
-| 7.6 | Control | GET | `/audio-samples/{id}/stream` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (nghe thử audio) |
-| 7.7 | Control | GET | `/speaker-templates` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (dropdown mẫu loa) |
-| 8.1 | Config | GET | `/species` | Màn hình `[SPECIES_CONFIG_LIST_SCREEN]`, `[SPECIES_CONFIG_DETAIL_SCREEN]` |
-| 8.2 | Config | PUT | `/response-configs/{cam}/{species}` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (Lưu) |
-| 8.3 | Config | GET | `/response-configs?cameraId=&speciesId=` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (Load config) |
-| 8.4 | Config | DELETE | `/response-configs/{cam}/{species}` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (Đặt lại) |
-| 8.5 | Config | POST | `/response-configs/{cam}/{species}/apply-preset/{id}` | Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (áp preset) |
-| 8.6 | Config | GET | `/response-configs/{cam}` | Màn hình `[SPECIES_CONFIG_LIST_SCREEN]` (danh sách config các loài) |
-| 9.1 | Settings | GET | `/users/me` | Tab `[SETTING_TAB]` |
-| 9.2 | Settings | PATCH | `/users/me` | Tab `[SETTING_TAB]` |
-| 9.3 | Settings | POST | `/users/me/change-password` | Tab `[SETTING_TAB]` |
-| 9.5 | Settings | POST | `/users/me/push-notifications/toggle` | Tab `[SETTING_TAB]` |
-| 10.1 | Stats | GET | `/events` | Tab `[STATISTICS_TAB]`, Màn hình `[CAMERA_VIEW_SCREEN]` (timeline log) |
-| 10.2 | Stats | GET | `/events/{id}` | Màn hình `[CAMERA_VIEW_SCREEN]` (log lightbox) |
-| 10.3 | Stats | GET | `/events/{id}/snapshots` | Màn hình `[CAMERA_VIEW_SCREEN]` (lightbox snapshots) |
-| 10.4 | Stats | POST | `/events/{id}/ack` | Màn hình `[CAMERA_VIEW_SCREEN]` (đọc log) |
-| 10.5 | Stats | GET | `/stats/summary` | Tab `[STATISTICS_TAB]` (biểu đồ thống kê) |
-| 11.1 | Role | GET | `/users/me/role` | Phân quyền (chạy ngầm sau đăng nhập) |
-| 11.2 | Role | GET | `/alerts/feed` | Tab `[STATISTICS_TAB]` |
-| 11.3 | Role | POST | `/alerts/{id}/forward` | Luồng liên ngành (không có UI trực tiếp) |
-| 12.1 | SMS | GET | `/users/me/sms-recipients` | Màn hình `[SMS_CONFIG_SCREEN]` |
-| 12.2 | SMS | POST | `/users/me/sms-recipients` | Màn hình `[SMS_CONFIG_SCREEN]` |
-| 12.3 | SMS | DELETE | `/users/me/sms-recipients/{id}` | Màn hình `[SMS_CONFIG_SCREEN]` |
-| 13.1 | Meta | GET | `/health` | Chạy ngầm / Monitor |
-| 13.2 | Meta | GET | `/app/version` | Khởi động (bắt buộc update) |
-| 13.3 | Meta | GET | `/reference-data/danger-levels` | Tab `[STATISTICS_TAB]`, Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` |
-| 13a.1 | Device | POST | `/cameras/{id}/detections` | Tích hợp thiết bị Camera & AI Server |
+### 14.1. Màn hình đăng nhập (`[LOGIN_SCREEN]`)
 
-**Tổng: 52 API (Đã bổ sung API đổi tên camera và API tích hợp camera, bỏ API ngôn ngữ).**
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 3.2 | POST | `/auth/login` | Đăng nhập tài khoản |
+| 3.5 | POST | `/auth/forgot-password` | Yêu cầu gửi OTP khôi phục mật khẩu |
+| 3.6 | POST | `/auth/reset-password` | Đặt lại mật khẩu mới bằng OTP |
+
+### 14.2. Màn hình đăng ký (`[REGISTER_SCREEN]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 3.1 | POST | `/auth/register` | Đăng ký tài khoản mới |
+
+### 14.3. Tab danh sách camera (`[CAMERA_LIST_TAB]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 5.1 | GET | `/cameras` | Lấy danh sách trạm camera |
+| 5.3 | GET | `/cameras/{id}/snapshot` | Tải ảnh snapshot thumbnail cho thẻ camera |
+
+### 14.4. Tab thống kê (`[STATISTICS_TAB]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 10.5 | GET | `/stats/summary` | Tải dữ liệu tổng hợp biểu đồ và bản đồ nhiệt (heatmap) |
+| 11.2 | GET | `/alerts/feed` | Lấy luồng tin tức cảnh báo liên ngành được phân luồng |
+
+### 14.5. Tab cài đặt (`[SETTING_TAB]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 3.3 | POST | `/auth/logout` | Đăng xuất tài khoản, hủy session |
+| 9.1 | GET | `/users/me` | Lấy thông tin cá nhân và thiết lập của user |
+| 9.2 | PATCH | `/users/me` | Cập nhật thông tin cá nhân và thiết lập chuông báo |
+| 9.3 | POST | `/users/me/change-password` | Thay đổi mật khẩu người dùng |
+| 9.5 | POST | `/users/me/push-notifications/toggle` | Bật/tắt nhanh các sự kiện push notification |
+| 7.2 | POST | `/control/system/sms-notification/toggle` | Bật/tắt gửi thông báo SMS cấp hệ thống |
+
+### 14.6. Màn hình chi tiết camera (`[CAMERA_VIEW_SCREEN]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 5.2 | GET | `/cameras/{id}` | Lấy chi tiết camera và trạng thái thiết bị ngoại vi |
+| 5.3 | GET | `/cameras/{id}/snapshot` | Tải ảnh snapshot chất lượng cao hiện tại ở nửa trên màn hình |
+| 5.4 | POST | `/cameras/{id}/snapshot/refresh` | Gửi yêu cầu bắt buộc camera chụp làm mới snapshot |
+| 5.5 | GET | `/cameras/{id}/detections/current` | Lấy kết quả AI phân tích động vật hiện tại |
+| 5.6 | GET | `/cameras/{id}/detections/stream` | Stream realtime sự kiện cập nhật bằng SSE |
+| 5.7 | PATCH | `/cameras/{id}` | Đổi tên hiển thị camera (`rename_camera_dialog`) |
+| 6.1 | GET | `/cameras/{id}/devices/state` | Xem chi tiết trạng thái và nguồn kích hoạt của 6 thiết bị |
+| 6.2 | POST | `/cameras/{id}/devices/{key}/override` | Điều khiển ghi đè (bật/tắt thủ công nhanh) từng thiết bị |
+| 6.3 | POST | `/cameras/{id}/devices/override-all` | Ghi đè bật/tắt đồng loạt toàn bộ thiết bị ngoại vi |
+| 10.1 | GET | `/events` | Lấy nhật ký sự kiện lịch sử ghi nhận của camera (`camera_log_list`) |
+| 10.2 | GET | `/events/{id}` | Lấy chi tiết sự kiện timeline để hiển thị lightbox |
+| 10.3 | GET | `/events/{id}/snapshots` | Tải danh sách các snapshot ghi lại trong sự kiện |
+| 10.4 | POST | `/events/{id}/ack` | Người dùng xác nhận đã xem cảnh báo |
+
+### 14.7. Màn hình danh sách cấu hình loài (`[SPECIES_CONFIG_LIST_SCREEN]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 8.1 | GET | `/species` | Tải danh sách loài kèm chỉ số hung dữ và đặc tính loài |
+| 8.6 | GET | `/response-configs/{cam}` | Tải toàn bộ danh sách cấu hình đang áp dụng trên camera |
+
+### 14.8. Màn hình thiết lập phòng vệ theo loài (`[SPECIES_CONFIG_DETAIL_SCREEN]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 6.4 | POST | `/cameras/{id}/devices/{key}/test` | Gửi lệnh test thiết bị còi/LED tại hiện trường (`sound_test_button`) |
+| 7.1 | GET | `/control/system/status` | Lấy preset ứng phó đang áp dụng trên trạm |
+| 7.3 | GET | `/control/presets` | Lấy danh sách 3 kịch bản phòng vệ mẫu mặc định |
+| 7.4 | POST | `/control/presets/{id}/apply` | Áp dụng nhanh preset phòng vệ mẫu cho camera |
+| 7.5 | GET | `/audio-samples` | Tải danh sách file âm thanh xua đuổi mẫu (`sound_type_dropdown`) |
+| 7.6 | GET | `/audio-samples/{id}/stream` | Stream nghe thử file âm thanh xua đuổi |
+| 7.7 | GET | `/speaker-templates` | Tải danh sách mẫu thông báo phát loa (`speaker_message_dropdown`) |
+| 8.1 | GET | `/species` | Hiển thị thông tin tên loài và đặc tính đang cấu hình |
+| 8.2 | PUT | `/response-configs/{cam}/{species}` | Lưu cấu hình ứng phó tự chọn (`save_config_button`) |
+| 8.3 | GET | `/response-configs?cameraId=&speciesId=` | Tải cấu hình hiện có của loài để đổ lên form |
+| 8.4 | DELETE | `/response-configs/{cam}/{species}` | Xóa cấu hình tự chọn của loài để quay về mặc định (`reset_config_button`) |
+| 8.5 | POST | `/response-configs/{cam}/{species}/apply-preset/{id}` | Áp nhanh preset mẫu vào cấu hình loài |
+
+### 14.9. Màn hình quản lý SĐT nhận cảnh báo (`[SMS_CONFIG_SCREEN]`)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 12.1 | GET | `/users/me/sms-recipients` | Lấy danh sách số điện thoại nhận tin nhắn cảnh báo bổ sung |
+| 12.2 | POST | `/users/me/sms-recipients` | Thêm số điện thoại nhận tin nhắn mới (`add_recipient_dialog`) |
+| 12.3 | DELETE | `/users/me/sms-recipients/{id}` | Xóa số điện thoại khỏi danh sách nhận tin nhắn |
+
+### 14.10. API hỗ trợ khác (Chạy ngầm / Hệ thống / Tích hợp)
+
+| # | Method | Endpoint | Mô tả chức năng |
+|---|---|---|---|
+| 3.4 | POST | `/auth/refresh-token` | Tự động chạy ngầm làm mới access token |
+| 4.1 | POST | `/devices/push-token` | Đăng ký token FCM nhận push notification khi đăng nhập |
+| 4.2 | DELETE | `/devices/push-token` | Hủy đăng ký token FCM khi đăng xuất |
+| 4.3 | GET | `/notifications/inbox` | Lấy danh sách thông báo đẩy nhận được trong app |
+| 11.1 | GET | `/users/me/role` | Phân quyền màn hình và chức năng dựa theo vai trò người dùng |
+| 11.3 | POST | `/alerts/{id}/forward` | Lực lượng forward thông tin cảnh báo phối hợp liên ngành |
+| 13.1 | GET | `/health` | Kiểm tra trạng thái hoạt động của hệ thống và AI server |
+| 13.2 | GET | `/app/version` | Kiểm tra phiên bản ứng dụng bắt buộc cập nhật khi khởi động |
+| 13.3 | GET | `/reference-data/danger-levels` | Lấy danh mục mức độ nguy hại để hỗ trợ hiển thị UI |
+| 13a.1 | POST | `/cameras/{id}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
+
+**Tổng cộng: 52 API di động + 1 API tích hợp thiết bị (Đã bổ sung API đổi tên camera và API tích hợp camera, bỏ API ngôn ngữ).**
 
 ---
 
