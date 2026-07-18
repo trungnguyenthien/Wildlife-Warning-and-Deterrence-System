@@ -284,7 +284,7 @@ Màn hình này cho phép người dùng tùy biến và thiết lập trước 
     - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi hàng rào điện được kích hoạt.
     - **Tự động ngắt hoạt động:** Hàng rào điện sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để đảm bảo an toàn và tiết kiệm điện năng.
   - **Gửi cảnh báo bằng loa:**
-    - Lựa chọn giới tính giọng nói AI phát qua loa: _Nam hoặc Nữ_.
+    - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.
 - **Tự thiết lập hành vi nhanh (Preset Scenarios):** Cung cấp 3 nút bấm thao tác nhanh để áp dụng kịch bản phòng vệ mẫu cho loài đang chọn:
   - Nút **Người lạ đột nhập**: Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (tiếng súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
   - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, đồng thời kích hoạt dòng điện sinh học nhẹ chạy dọc hàng rào điện nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.

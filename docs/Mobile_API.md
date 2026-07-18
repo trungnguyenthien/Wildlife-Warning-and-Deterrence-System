@@ -779,9 +779,9 @@ Mapping: dropdown chọn mẫu nội dung cảnh báo qua loa tại màn hình `
 ```json
 {
   "items": [
-    { "id": "tpl-01", "displayName": "Mẫu 1 - Cảnh báo voi hoang dã xuất hiện", "voiceGender": "female", "previewUrl": "..." },
-    { "id": "tpl-02", "displayName": "Mẫu 2 - Phát hiện thú dữ xâm lấn nguy cấp", "voiceGender": "male", "previewUrl": "..." },
-    { "id": "tpl-03", "displayName": "Mẫu 3 - Thông báo di tản & chỉ dẫn lánh nạn", "voiceGender": "female", "previewUrl": "..." }
+    { "id": "tpl-01", "displayName": "Mẫu 1 - Cảnh báo voi hoang dã xuất hiện", "previewUrl": "..." },
+    { "id": "tpl-02", "displayName": "Mẫu 2 - Phát hiện thú dữ xâm lấn nguy cấp", "previewUrl": "..." },
+    { "id": "tpl-03", "displayName": "Mẫu 3 - Thông báo di tản & chỉ dẫn lánh nạn", "previewUrl": "..." }
   ]
 }
 ```
@@ -842,7 +842,6 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
     "autoOffMinutes": 2                 // BẮT BUỘC >= 2 theo spec
   },
   "speaker": {
-    "voiceGender": "male",
     "templateId": "tpl-02"
   },
   "silentAlert": false                  // true => chỉ push notification
@@ -1286,6 +1285,81 @@ Cấp cao hơn forward alert (vd Kiểm lâm chi viện gửi Biên phòng).
 
 ---
 
+## 13a. Nhóm 12 — Tích hợp thiết bị & AI Server
+
+### 13a.1. `POST /cameras/{cameraId}/detections`
+
+Gửi dữ liệu hình ảnh chụp được, thông tin người dùng và kết quả phán đoán từ AI Server / thiết bị Camera lên Mobile Server. Server sẽ lưu trữ hình ảnh và phản hồi cấu hình hành vi ứng phó tương ứng cho loài động vật được phát hiện để thiết bị thực thi tại hiện trường.
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body (Form data)**
+
+| Field | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `image` | File (Binary) | Có | Ảnh snapshot chụp từ camera tại hiện trường |
+| `userId` | string | Có | ID của người dùng cấu hình / sở hữu trạm camera |
+| `speciesId` | string | Có | ID của loài phát hiện (ví dụ: `elephant`, `tiger`, `monkey`) |
+| `count` | int | Có | Số lượng cá thể phát hiện |
+| `confidence` | float | Có | Độ tin cậy nhận diện của mô hình AI (từ 0.0 đến 1.0) |
+
+**Response 201 (Created)**
+
+Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại hiện trường.
+
+```json
+{
+  "eventId": "evt-456",
+  "cameraId": "cam-001",
+  "speciesId": "elephant",
+  "dangerLevel": "CRITICAL",
+  "imageUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
+  "detectedAt": "2026-07-19T04:55:00+07:00",
+  "responseAction": {
+    "silentAlert": false,
+    "audio": {
+      "enabled": true,
+      "type": "gunshot",
+      "intensity": 75,
+      "sampleId": "gunshot"
+    },
+    "led": {
+      "enabled": true,
+      "flashRate": "4_per_sec",
+      "color": "red_white_alt",
+      "durationSeconds": 60
+    },
+    "fence": {
+      "enabled": true,
+      "level": "medium",
+      "warningLight": true,
+      "autoNotify": true,
+      "autoOffEnabled": true,
+      "autoOffMinutes": 2
+    },
+    "speaker": {
+      "enabled": false,
+      "templateId": "tpl-02"
+    },
+    "smsNotify": true,
+    "pushNotify": true
+  }
+}
+```
+
+**Side effects**
+- Lưu trữ ảnh snapshot vào CDN / Storage của Mobile Server.
+- Ghi nhận nhật ký sự kiện (`event`) vào DB PostgreSQL.
+- Bắn Push Notification và SMS khẩn cấp đến danh sách SĐT đăng ký nhận cảnh báo nếu cấu hình yêu cầu (`smsNotify` / `pushNotify`).
+- Đẩy dữ liệu realtime qua kết nối WebSocket/SSE đến các client Android đang mở app.
+
+**Lỗi hay gặp**
+- `400 ERR_VALIDATION_FAILED` -> File ảnh không hợp lệ hoặc thiếu tham số.
+- `404 ERR_CAMERA_NOT_FOUND` -> `cameraId` không tồn tại.
+- `404 ERR_USER_NOT_FOUND` -> `userId` không hợp lệ.
+
+---
+
 ## 14. Phụ lục — Bảng tổng hợp
 
 | # | Group | Method | Endpoint | Màn hình / Luồng (Hệ thống mới) |
@@ -1342,8 +1416,9 @@ Cấp cao hơn forward alert (vd Kiểm lâm chi viện gửi Biên phòng).
 | 13.1 | Meta | GET | `/health` | Chạy ngầm / Monitor |
 | 13.2 | Meta | GET | `/app/version` | Khởi động (bắt buộc update) |
 | 13.3 | Meta | GET | `/reference-data/danger-levels` | Tab `[STATISTICS_TAB]`, Màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` |
+| 13a.1 | Device | POST | `/cameras/{id}/detections` | Tích hợp thiết bị Camera & AI Server |
 
-**Tổng: 52 API (Đã bổ sung 1 API đổi tên camera).**
+**Tổng: 53 API (Đã bổ sung API đổi tên camera và API tích hợp camera).**
 
 ---
 

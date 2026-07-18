@@ -381,7 +381,6 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 | `fence_notify_on_trigger_toggle` | Toggle | Label `Tự động gửi SMS/Push khi hàng rào hoạt động`. |
 | `fence_auto_off_hint_text` | Text (caption) | Label `Tự ngắt sau 2 phút không phát hiện thú` *(thông tin, không chỉnh)*. |
 | `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lựa chọn: `Mẫu 1 (Voi hoang dã)` · `Mẫu 2 (Thú dữ xâm lấn)` · `Mẫu 3 (Di tản lánh nạn)`. |
-| `speaker_voice_gender_segmented` | SegmentedControl | Label `Giới tính giọng nói`. Lựa chọn: `Nam` · `Nữ`. |
 | `notify_sms_toggle` | Toggle | Label `Gửi SMS`. |
 | `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. |
 
