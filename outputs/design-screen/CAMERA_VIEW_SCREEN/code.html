@@ -1,0 +1,303 @@
+<!DOCTYPE html><html lang="vi" style=""><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed": "#2e150b",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#0d631b",
+                        "on-surface-variant": "#40493d",
+                        "on-background": "#191c1d",
+                        "secondary": "#7a5649",
+                        "primary-fixed": "#a3f69c",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffdbcf",
+                        "surface-tint": "#1b6d24",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-primary-fixed": "#002204",
+                        "surface-container": "#edeeef",
+                        "background": "#f8f9fa",
+                        "outline": "#707a6c",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "on-tertiary-fixed": "#311300",
+                        "surface-bright": "#f8f9fa",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-primary-container": "#cbffc2",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "secondary-container": "#fdcdbc",
+                        "outline-variant": "#bfcaba",
+                        "on-primary-fixed-variant": "#005312",
+                        "on-secondary-container": "#795548",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-container": "#ffeee6",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#88d982",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#884200",
+                        "inverse-primary": "#88d982",
+                        "primary-container": "#2e7d32",
+                        "tertiary-container": "#ad5600"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "16px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-background text-on-background min-h-screen flex flex-col font-body-lg">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim shadow-sm w-full top-0 sticky z-40">
+<div class="flex items-center h-16 px-container-padding w-full">
+<button class="w-12 h-12 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors active:scale-95 text-on-surface-variant dark:text-outline-variant mr-4">
+<span class="material-symbols-outlined text-2xl" data-icon="arrow_back" data-original-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex-1 flex items-center justify-between">
+<div class="flex flex-col">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Chi tiet Camera</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-primary">Trực tuyến</span>
+</div>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors active:scale-95 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto pb-24">
+<!-- Live Snapshot Section -->
+<section class="relative w-full aspect-video bg-black/90 sm:px-container-padding sm:py-4">
+<div class="w-full h-full relative sm:rounded-xl overflow-hidden group shadow-lg">
+<img class="w-full h-full object-cover" data-alt="A rugged, high-resolution wildlife camera snapshot showing a dense tropical forest environment during daylight. In the center frame, a wild Asian Elephant is partially visible among the thick foliage. The image has a subtle digital UI overlay aesthetic typical of security or trail cameras, emphasizing a corporate modern but rugged utility vibe. The lighting is natural but slightly overexposed in the highlights, typical of outdoor field cameras." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCniAzMAdz65L8CU-1uw0A8asyK5DkoB6uBYzPhsoHPSYcYIJpY-P6liwmuIbEFfQFenjvp969cHylDdVROasegDJ67PeAXfV7izsSdZVlAO7V7CF08aYUt_XVjRiifnXCXysltnl5fNJQZd6mn5-md5vSLQGm9OvnLXDzgWSijCh8Qhl1fn5R0xnm7YvOBPyHp-KS17Y06S98A5jCwOP5_9sUIOgBBLBEM787wh7KdeWvhLokNZyvO">
+<!-- Gradient Overlay for Legibility -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none"></div>
+<!-- Overlay Metadata -->
+<div class="absolute top-4 left-4 right-4 flex justify-between items-start">
+<div class="bg-black/50 backdrop-blur-sm rounded px-2.5 py-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-white text-[16px]" data-icon="videocam">videocam</span>
+<span class="font-label-md text-label-md text-white tracking-widest">REC</span>
+</div>
+<div class="bg-error rounded px-2.5 py-1 shadow-md">
+<span class="font-label-md text-label-md text-on-error font-bold tracking-wider">PHÁT HIỆN</span>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 right-4 flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-white drop-shadow-md">9:04:12</span>
+<span class="font-body-md text-body-md text-white/80 drop-shadow-md">16/07/2024</span>
+</div>
+<div class="flex items-center gap-1.5 text-white/90">
+<span class="material-symbols-outlined text-[14px]" data-icon="history">history</span>
+<span class="font-label-sm text-label-sm">Cách đây 2 phút</span>
+</div>
+</div>
+</div>
+</section>
+<div class="px-container-padding py-stack-md flex flex-col gap-stack-lg max-w-4xl mx-auto">
+<!-- Analysis Card -->
+<section>
+<h2 class="font-label-lg text-label-lg text-on-surface-variant mb-stack-sm uppercase tracking-wider">Phân tích hiện tại</h2>
+<div class="bg-surface-container-lowest rounded-xl p-4 shadow-[0_4px_24px_rgba(16,24,40,0.08)] border border-outline-variant/30 flex flex-col gap-4 relative overflow-hidden">
+<div class="absolute right-0 top-0 w-32 h-32 bg-error/5 rounded-bl-[100px] pointer-events-none"></div>
+<div class="flex items-start justify-between z-10">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Loài phát hiện</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">VOI (Elephant)</span>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Mức độ</span>
+<span class="font-label-lg text-label-lg text-error bg-error-container px-3 py-1 rounded-full">Cao</span>
+</div>
+</div>
+<div class="w-full h-[1px] bg-outline-variant/20 z-10"></div>
+<div class="flex items-center gap-6 z-10">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Số lượng ước tính</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface text-[20px]" data-icon="pets">pets</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">1</span>
+</div>
+</div>
+<div class="w-[1px] h-10 bg-outline-variant/20"></div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Độ tin cậy</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="check_circle">check_circle</span>
+<span class="font-headline-sm text-headline-sm text-primary">92%</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Actions -->
+
+<!-- Log List -->
+<section class="flex flex-col gap-stack-sm">
+<div class="flex items-center justify-between mb-2">
+<h2 class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider">Lịch sử ghi nhận</h2>
+<div class="flex gap-2">
+  <button class="px-3 py-1 rounded-full text-label-md font-semibold bg-primary-container text-on-primary-container border border-primary/20 transition-colors">
+    Hôm nay
+  </button>
+  <button class="px-3 py-1 rounded-full text-label-md font-medium bg-surface-container-low text-on-surface-variant border border-outline-variant/20 hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+  <span class="material-symbols-outlined text-[16px]" data-icon="calendar_today">calendar_today</span>
+  <span class="">Chọn ngày</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-0 bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(16,24,40,0.04)] border border-outline-variant/20 overflow-hidden">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 p-4 border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-variant">
+<img class="w-full h-full object-cover" data-alt="A small thumbnail showing a blurred shape moving through dense foliage at night, illuminated by an infrared trail camera flash. The style is rugged, high-contrast, black and white infrared imagery typical of conservation field equipment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsbjZIhF8satye26G2xG0NrIZx8bnTdNoPKLA3FcXckUZhUmx1GMnirsYUP43xrb9b1fzYlbEyTk7aFmJ15FSieD9U42etkANGInJB7o82PFy5ccBgoNmTNc0_j3U-_baaUPYu3WV-2NDVJ3aZ4qdt4gJICd4Th30yYSKxWCQGr60Pm1IRJjM3kXLZQjpmqlWBlVDGZcj6Ha-lDp3l6r5BcANUH6OkIjmikXxpUL5CjFTKzXCOxNfG">
+</div>
+<div class="flex-1 flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface truncate">KHỈ (Monkey)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">06:12:45</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="group">group</span>
+<span class="font-body-md text-body-md text-sm">Khoảng 3 cá thể</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary bg-primary-container/20 px-2 py-0.5 rounded-full w-fit mt-0.5">Tin cậy 85%</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors cursor-pointer border-b border-outline-variant/10">
+<div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-variant relative">
+<img class="w-full h-full object-cover" data-alt="A small daytime thumbnail from a trail camera showing an empty forest path with thick green vegetation. The image has a slight color cast typical of cheap field cameras. The rugged utility aesthetic is maintained." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUudGpjEp5FeKmZPWMO2nUatext6cI_kefPS0j6IXE94M2CoZ1G-ypVpSDX1EaCo0NCutaSespiSenpznvUY0b81MpFYTw0eET2OY6R29nTz7Jj2pEsl5aNdze661it7dsmQoMzd7bG9fBWkNL_5k4ltRGx1txpArjHXujxlia4WvW1k26jV9CVjQWVhtTRGG6lfuXcJ19Uoa2q3SiU8lQkyBP08o_6MEq7I7yTKSHDL8C3sQ_QqrM">
+<div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[20px]" data-icon="motion_sensor_active">motion_sensor_active</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg text-on-surface truncate">Phát hiện chuyển động</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">Hôm qua</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="question_mark">question_mark</span>
+<span class="font-body-md text-body-md text-sm">Không xác định loài</span>
+</div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 p-4 border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors cursor-pointer">
+  <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-variant">
+    <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1551893478-d726eaf0442c?q=80&amp;w=200&amp;h=200&amp;auto=format&amp;fit=crop" alt="Wild Boar">
+  </div>
+  <div class="flex-1 flex flex-col gap-1 min-w-0">
+    <div class="flex items-center justify-between">
+      <span class="font-label-lg text-label-lg text-on-surface truncate">LỢN RỪNG (Wild Boar)</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">04:20:15</span>
+    </div>
+    <div class="flex items-center gap-2 text-on-surface-variant">
+      <span class="material-symbols-outlined text-[14px]" data-icon="group">group</span>
+      <span class="font-body-md text-body-md text-sm">Khoảng 2 cá thể</span>
+    </div>
+    <div class="flex items-center justify-between mt-0.5">
+      <span class="font-label-sm text-label-sm text-primary bg-primary-container/20 px-2 py-0.5 rounded-full w-fit">Tin cậy 88%</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">Hôm qua</span>
+    </div>
+  </div>
+</div>
+<!-- Item 4 -->
+<div class="flex items-center gap-4 p-4 border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors cursor-pointer">
+  <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-variant">
+    <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1575550959106-5a7defe28b56?q=80&amp;w=200&amp;h=200&amp;auto=format&amp;fit=crop" alt="Leopard">
+  </div>
+  <div class="flex-1 flex flex-col gap-1 min-w-0">
+    <div class="flex items-center justify-between">
+      <span class="font-label-lg text-label-lg text-on-surface truncate">BÁO (Leopard)</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">22:15:30</span>
+    </div>
+    <div class="flex items-center gap-2 text-on-surface-variant">
+      <span class="material-symbols-outlined text-[14px]" data-icon="person">person</span>
+      <span class="font-body-md text-body-md text-sm">1 cá thể</span>
+    </div>
+    <div class="flex items-center justify-between mt-0.5">
+      <span class="font-label-sm text-label-sm text-primary bg-primary-container/20 px-2 py-0.5 rounded-full w-fit">Tin cậy 94%</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">15/07/2024</span>
+    </div>
+  </div>
+</div>
+<!-- Item 5 -->
+<div class="flex items-center gap-4 p-4 hover:bg-surface-container-low transition-colors cursor-pointer">
+  <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-surface-variant relative">
+    <img class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&amp;w=200&amp;h=200&amp;auto=format&amp;fit=crop" alt="Forest">
+    <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+      <span class="material-symbols-outlined text-white text-[20px]" data-icon="motion_sensor_active">motion_sensor_active</span>
+    </div>
+  </div>
+  <div class="flex-1 flex flex-col gap-1 min-w-0">
+    <div class="flex items-center justify-between">
+      <span class="font-label-lg text-label-lg text-on-surface truncate uppercase">Phát hiện chuyển động</span>
+      <span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">01:05:10</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[14px]" data-icon="question_mark">question_mark</span>
+        <span class="font-body-md text-body-md text-sm">Không xác định loài</span>
+      </div>
+      <span class="font-label-sm text-label-sm text-on-surface-variant">15/07/2024</span>
+    </div>
+  </div>
+</div></div>
+</section>
+</div>
+</main>
+
+
+
+
+
+
+</body></html>

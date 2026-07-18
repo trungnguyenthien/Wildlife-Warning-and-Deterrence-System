@@ -1,0 +1,235 @@
+<!DOCTYPE html><html lang="vi" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed": "#2e150b",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#0d631b",
+                        "on-surface-variant": "#40493d",
+                        "on-background": "#191c1d",
+                        "secondary": "#7a5649",
+                        "primary-fixed": "#a3f69c",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffdbcf",
+                        "surface-tint": "#1b6d24",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-primary-fixed": "#002204",
+                        "surface-container": "#edeeef",
+                        "background": "#f8f9fa",
+                        "outline": "#707a6c",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "on-tertiary-fixed": "#311300",
+                        "surface-bright": "#f8f9fa",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-primary-container": "#cbffc2",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "secondary-container": "#fdcdbc",
+                        "outline-variant": "#bfcaba",
+                        "on-primary-fixed-variant": "#005312",
+                        "on-secondary-container": "#795548",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-container": "#ffeee6",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#88d982",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#884200",
+                        "inverse-primary": "#88d982",
+                        "primary-container": "#2e7d32",
+                        "tertiary-container": "#ad5600"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "16px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    }catch(_e){}</script></head><body class="bg-background text-on-background font-body-lg antialiased">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface-dim shadow-sm z-50">
+<div class="flex items-center h-16 px-container-padding w-full">
+<button class="mr-4 p-2 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 text-on-surface-variant dark:text-outline-variant">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;" data-original-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary-fixed">Thiet lap phong ve</h1>
+</div>
+</header>
+<main class="px-container-padding py-stack-lg flex flex-col gap-stack-lg pb-32 max-w-2xl mx-auto">
+<!-- Preset Scenarios -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.08),0_4px_16px_-4px_rgba(16,24,40,0.06)] p-stack-md">
+<h2 class="font-label-lg text-label-lg text-on-surface mb-stack-md">Cấu hình nhanh</h2>
+<div class="flex flex-col gap-3">
+<label class="flex items-center p-3 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer">
+<input class="form-radio text-primary focus:ring-primary h-5 w-5 border-outline" name="scenario" type="radio">
+<span class="ml-3 font-body-md text-on-surface">Người lạ đột nhập</span>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer">
+<input class="form-radio text-primary focus:ring-primary h-5 w-5 border-outline" name="scenario" type="radio">
+<span class="ml-3 font-body-md text-on-surface">Thú vừa</span>
+</label>
+<label class="flex items-center p-3 rounded-lg border-2 border-primary bg-primary-container/10 hover:bg-primary-container/20 transition-colors cursor-pointer">
+<input checked="" class="form-radio text-primary focus:ring-primary h-5 w-5 border-primary" name="scenario" type="radio">
+<span class="ml-3 font-body-md text-on-surface font-semibold">Thú cực kỳ nguy hiểm</span>
+<span class="ml-auto material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">warning</span>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-outline-variant hover:bg-surface-container transition-colors cursor-pointer">
+<input class="form-radio text-primary focus:ring-primary h-5 w-5 border-outline" name="scenario" type="radio">
+<span class="ml-3 font-body-md text-on-surface">Tùy chỉnh</span>
+</label>
+</div>
+</section>
+<!-- Advanced Settings -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_2px_8px_-2px_rgba(16,24,40,0.08),0_4px_16px_-4px_rgba(16,24,40,0.06)] overflow-hidden">
+<details class="group" open="">
+<summary class="flex justify-between items-center p-stack-md cursor-pointer hover:bg-surface-container-low transition-colors list-none">
+<h2 class="font-label-lg text-label-lg text-on-surface">Tuỳ chỉnh nâng cao</h2>
+<span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform duration-300">expand_more</span>
+</summary>
+<div class="px-stack-md pb-stack-md border-t border-surface-variant flex flex-col gap-stack-md pt-stack-md"><!-- SECTION: ÂM THANH XUA ĐUỔI -->
+<div class="flex flex-col gap-stack-md">
+  <h3 class="font-headline-sm text-headline-sm text-primary uppercase tracking-wider font-bold">ÂM THANH XUA ĐUỔI</h3>
+  <div class="flex flex-col gap-stack-sm">
+    <label class="font-label-md text-label-md text-on-surface-variant">Loại âm thanh xua đuổi</label>
+    <select class="form-select w-full rounded-lg border-outline-variant bg-surface focus:border-primary focus:ring-primary font-body-md text-on-surface">
+      <option>Tiếng súng</option>
+      <option>Tiếng gầm</option>
+      <option>Tiếng chó sủa lớn</option>
+      <option>Tiếng nổ giả lập</option>
+      <option>Tần số siêu âm</option>
+    </select>
+    <button class="mt-2 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-primary text-primary font-label-md hover:bg-primary-container/10 transition-colors active:scale-95">
+      <span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 0;">volume_up</span>
+      Nghe thử
+    </button>
+  </div>
+</div>
+
+<hr class="border-surface-variant">
+
+<!-- SECTION: ĐÈN LED -->
+<div class="flex flex-col gap-stack-md">
+  <h3 class="font-headline-sm text-headline-sm text-primary uppercase tracking-wider font-bold">ĐÈN LED</h3>
+  <div class="flex flex-col gap-stack-sm">
+    <label class="font-label-md text-label-md text-on-surface-variant">Tần suất LED</label>
+    <div class="flex bg-surface-container p-1 rounded-lg">
+      <button class="flex-1 py-1.5 px-3 text-center rounded-md font-label-md bg-surface-container-lowest text-on-surface shadow-sm">2 lần/s</button>
+      <button class="flex-1 py-1.5 px-3 text-center rounded-md font-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors">4 lần/s</button>
+    </div>
+  </div>
+</div>
+
+<hr class="border-surface-variant">
+
+<!-- SECTION: HÀNG RÀO ĐIỆN -->
+<div class="flex flex-col gap-stack-md">
+  <h3 class="font-headline-sm text-headline-sm text-primary uppercase tracking-wider font-bold">HÀNG RÀO ĐIỆN</h3>
+  <div class="flex flex-col gap-stack-sm">
+    <label class="font-label-md text-label-md text-on-surface-variant">Mức dòng điện sinh học</label>
+    <div class="flex bg-surface-container p-1 rounded-lg">
+      <button class="flex-1 py-1.5 px-3 text-center rounded-md font-label-md text-on-surface-variant">Thấp</button>
+      <button class="flex-1 py-1.5 px-3 text-center rounded-md font-label-md text-on-surface-variant">TB</button>
+      <button class="flex-1 py-1.5 px-3 text-center rounded-md font-label-md bg-surface-container-lowest text-on-surface shadow-sm">Cao</button>
+    </div>
+  </div>
+  <div class="flex justify-between items-center">
+    <span class="font-body-md text-on-surface">Đèn cảnh báo vàng/đỏ nhấp nháy kèm theo</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input checked="" class="sr-only peer" type="checkbox">
+      <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-surface-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+    </label>
+  </div>
+  <div class="flex justify-between items-center">
+    <span class="font-body-md text-on-surface">Tự động gửi SMS/Push khi hàng rào hoạt động</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input checked="" class="sr-only peer" type="checkbox">
+      <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-surface-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+    </label>
+  </div>
+</div>
+
+<hr class="border-surface-variant">
+
+<!-- SECTION: PHÁT CẢNH BÁO -->
+<div class="flex flex-col gap-stack-md">
+  <h3 class="font-headline-sm text-headline-sm text-primary uppercase tracking-wider font-bold">PHÁT CẢNH BÁO</h3>
+  <div class="flex flex-col gap-stack-sm">
+    <label class="font-label-md text-label-md text-on-surface-variant">Mẫu nội dung loa</label>
+    <select class="form-select w-full rounded-lg border-outline-variant bg-surface focus:border-primary focus:ring-primary font-body-md text-on-surface">
+      <option>Mẫu 1</option>
+      <option>Mẫu 2</option>
+      <option>Mẫu 3</option>
+    </select>
+  </div>
+  <div class="flex justify-between items-center">
+    <span class="font-body-md text-on-surface">Gửi SMS</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input checked="" class="sr-only peer" type="checkbox">
+      <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-surface-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+    </label>
+  </div>
+  <div class="flex justify-between items-center">
+    <span class="font-body-md text-on-surface">Gửi Push Notification</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input checked="" class="sr-only peer" type="checkbox">
+      <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-surface-variant after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+    </label>
+  </div>
+</div></div>
+</details>
+</section>
+<!-- Actions -->
+<div class="flex flex-col gap-stack-md mt-stack-md">
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary font-label-lg text-label-lg py-4 rounded-lg shadow-sm transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
+                Lưu
+            </button>
+</div></main>
+
+
+
+</body></html>

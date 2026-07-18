@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="vi"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Thong bao day (Push Notifications)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#723600",
+                        "inverse-primary": "#88d982",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#311300",
+                        "surface": "#f8f9fa",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-container": "#795548",
+                        "secondary-container": "#fdcdbc",
+                        "primary-fixed": "#a3f69c",
+                        "on-primary-container": "#cbffc2",
+                        "surface-variant": "#e1e3e4",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#ffeee6",
+                        "secondary-fixed": "#ffdbcf",
+                        "primary-fixed-dim": "#88d982",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-secondary-fixed": "#2e150b",
+                        "surface-tint": "#1b6d24",
+                        "on-surface": "#191c1d",
+                        "surface-container-highest": "#e1e3e4",
+                        "primary-container": "#2e7d32",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "inverse-surface": "#2e3132",
+                        "surface-container-low": "#f3f4f5",
+                        "primary": "#0d631b",
+                        "outline": "#707a6c",
+                        "on-surface-variant": "#40493d",
+                        "surface-container": "#edeeef",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f8f9fa",
+                        "background": "#f8f9fa",
+                        "tertiary": "#884200",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#ffdcc6",
+                        "error-container": "#ffdad6",
+                        "secondary": "#7a5649",
+                        "surface-dim": "#d9dadb",
+                        "on-primary-fixed-variant": "#005312",
+                        "on-primary-fixed": "#002204",
+                        "tertiary-container": "#ad5600",
+                        "on-background": "#191c1d",
+                        "outline-variant": "#bfcaba",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary": "#ffffff",
+                        "alert-critical": "#dc2626",
+                        "alert-warning": "#d97706",
+                        "alert-info": "#059669"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem"
+                    },
+                    "spacing": {
+                        "gutter": "12px",
+                        "stack-sm": "4px",
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "container-padding": "16px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(248, 249, 250, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(16, 24, 40, 0.12);
+        }
+        
+        .notification-stack {
+            perspective: 1000px;
+        }
+
+        .notification-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+
+        .notification-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden min-h-screen relative">
+<!-- Lock Screen Background -->
+<div class="absolute inset-0 z-0 bg-cover bg-center" data-alt="A lush, dense tropical forest viewed through a slightly frosted glass pane. The scene is illuminated by soft, natural morning sunlight filtering through the canopy, creating a peaceful, muted, and blurred backdrop perfect for a modern mobile lock screen interface. The dominant colors are deep greens, earthy browns, and soft atmospheric haze." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAlS9MXAwKhLlowrQmBBXbyGgBGl4n9VxX7MD21cn_pwjDssKb7ujfdl3eINyOQWWwbsZJwbpH8cEEre9qtLgceMlqmvt0zM9RNcmzL-NwxySKvxn2s_9-zKFH4Y1zSmOpVKfkWPw-TqOnTIa3Jyov7GiB2uD7RvzotUNFv2Hu-H02OzuOTmjjRccZYsWG9srP1lReTsZYU95bwzvWtKLMdK08Y1H8fju-TOW-wjaFddMTCXJVJT9oF')">
+<div class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+</div>
+<!-- Lock Screen UI Wrapper -->
+<main class="relative z-10 w-full h-full min-h-screen flex flex-col pt-12 pb-safe px-container-padding max-w-md mx-auto">
+<!-- Time/Date (Simulated Lock Screen Header) -->
+<header class="flex flex-col items-center justify-center pt-8 pb-12 text-white drop-shadow-md">
+<h1 class="text-6xl font-semibold tracking-tighter">14:05</h1>
+<p class="font-body-lg opacity-90 mt-2">Thứ Tư, 24 tháng 5</p>
+</header>
+<!-- Notification Stack -->
+<div class="flex flex-col gap-stack-sm flex-1 notification-stack mt-4">
+<!-- 1. Top Notification (Critical) -->
+<article class="glass-panel rounded-3xl p-4 flex flex-col gap-3 notification-card relative overflow-hidden ring-2 ring-error/50 shadow-xl z-30">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<header class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+<img alt="Elephant silhouette" class="w-5 h-5 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtKcm_UxK5rohDfv9AyaVz0OVxaEQ2sNwORwdNVrc2H2_3tob3lSgQcn0Up31fz3RYSVjnzaXW4HmXBrhw-cRvRkqSQ-peEzUkx_PgtIR9FvYc9NTOqpbN7ZT-lFO4PZw0J76NSQpmn09I_7EDiCe50O9jEbAFScsKg4c3FK9unG2o8pSv0oT5mX8pSc883tZrOFL5JtMr0sdPxLp_Q7f8gKALUaauh0HoPgnviMKeKpqcRxadwCp5npgE">
+</div>
+<div>
+<h2 class="font-label-sm text-error uppercase tracking-wider font-bold">CẢNH BÁO NGUY HIỂM</h2>
+<p class="font-label-md text-on-surface-variant opacity-80 text-[10px]">Bây giờ</p>
+</div>
+</div>
+</header>
+<div class="pl-10">
+<p class="font-body-md text-on-surface leading-snug">
+<strong class="font-semibold text-on-surface">Phát hiện VOI (Chỉ số 9/10)</strong> tại Camera 02 - Khu vực A1. Chạm để kích hoạt kịch bản xua đuổi.
+                    </p>
+<button class="mt-3 w-full bg-error hover:bg-error/90 text-on-error font-label-lg py-2.5 px-4 rounded-full transition-colors active:scale-95 flex items-center justify-center gap-2 shadow-sm">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">campaign</span>
+                        XUA ĐUỔI NGAY
+                    </button>
+</div>
+</article>
+<!-- 2. Middle Notification (Warning) -->
+<article class="glass-panel rounded-3xl p-4 flex flex-col gap-2 notification-card relative overflow-hidden shadow-lg z-20 translate-y-1 scale-[0.98] opacity-95">
+<div class="absolute top-0 left-0 w-1 h-full bg-alert-warning"></div>
+<header class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-alert-warning">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<h2 class="font-label-sm text-alert-warning uppercase tracking-wider font-bold">Hàng rào điện hoạt động</h2>
+<p class="font-label-md text-on-surface-variant opacity-80 text-[10px]">2 phút trước</p>
+</div>
+</div>
+</header>
+<div class="pl-10">
+<p class="font-body-md text-on-surface leading-snug text-sm">
+                        Hàng rào khu vực phía Bắc vừa được kích hoạt do có vật chạm.
+                    </p>
+</div>
+</article>
+<!-- 3. Bottom Notification (Info) -->
+<article class="glass-panel rounded-3xl p-4 flex flex-col gap-2 notification-card relative overflow-hidden shadow-md z-10 translate-y-2 scale-[0.96] opacity-90">
+<div class="absolute top-0 left-0 w-1 h-full bg-alert-info"></div>
+<header class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-alert-info">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<h2 class="font-label-sm text-alert-info uppercase tracking-wider font-bold">Hệ thống cập nhật</h2>
+<p class="font-label-md text-on-surface-variant opacity-80 text-[10px]">15 phút trước</p>
+</div>
+</div>
+</header>
+<div class="pl-10">
+<p class="font-body-md text-on-surface leading-snug text-sm">
+                        Camera 04 đã hoàn tất cập nhật phần mềm.
+                    </p>
+</div>
+</article>
+</div>
+<!-- Lock Screen Footer Hint -->
+<footer class="mt-auto pt-8 pb-4 flex justify-center text-white/80">
+<div class="flex flex-col items-center gap-2">
+<span class="material-symbols-outlined animate-bounce">keyboard_arrow_up</span>
+<span class="font-label-sm tracking-wide">Vuốt lên để mở khóa</span>
+</div>
+</footer>
+</main>
+
+
+
+</body></html>

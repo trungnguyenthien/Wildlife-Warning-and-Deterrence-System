@@ -1,0 +1,204 @@
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "inverse-on-surface": "#f0f1f2",
+                      "surface-variant": "#e1e3e4",
+                      "on-secondary-fixed-variant": "#603f33",
+                      "surface-container-highest": "#e1e3e4",
+                      "on-secondary-fixed": "#2e150b",
+                      "secondary-fixed-dim": "#ebbcac",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#d9dadb",
+                      "primary": "#0d631b",
+                      "on-surface-variant": "#40493d",
+                      "on-background": "#191c1d",
+                      "secondary": "#7a5649",
+                      "primary-fixed": "#a3f69c",
+                      "on-tertiary-fixed-variant": "#723600",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#ffdbcf",
+                      "surface-tint": "#1b6d24",
+                      "tertiary-fixed": "#ffdcc6",
+                      "on-primary-fixed": "#002204",
+                      "surface-container": "#edeeef",
+                      "background": "#f8f9fa",
+                      "outline": "#707a6c",
+                      "surface-container-low": "#f3f4f5",
+                      "surface": "#f8f9fa",
+                      "on-tertiary-fixed": "#311300",
+                      "surface-bright": "#f8f9fa",
+                      "surface-container-lowest": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "tertiary-fixed-dim": "#ffb786",
+                      "on-primary-container": "#cbffc2",
+                      "on-tertiary": "#ffffff",
+                      "on-surface": "#191c1d",
+                      "secondary-container": "#fdcdbc",
+                      "outline-variant": "#bfcaba",
+                      "on-primary-fixed-variant": "#005312",
+                      "on-secondary-container": "#795548",
+                      "surface-container-high": "#e7e8e9",
+                      "inverse-surface": "#2e3132",
+                      "on-tertiary-container": "#ffeee6",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#88d982",
+                      "on-error-container": "#93000a",
+                      "tertiary": "#884200",
+                      "inverse-primary": "#88d982",
+                      "primary-container": "#2e7d32",
+                      "tertiary-container": "#ad5600"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "container-padding": "16px",
+                      "stack-sm": "4px",
+                      "gutter": "12px",
+                      "base": "8px",
+                      "stack-lg": "24px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "headline-sm": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-lg": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-sm": ["11px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              },
+              "animation": {
+                'pulse-border': 'pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              },
+              "keyframes": {
+                'pulse-border': {
+                  '0%, 100%': { borderColor: 'transparent' },
+                  '50%': { borderColor: 'theme("colors.error")' },
+                }
+              }
+            },
+          }
+        }
+    }catch(_e){}</script><meta charset="utf-8"></head><body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-surface-dim shadow-sm z-40">
+<div class="flex items-center h-16 px-container-padding w-full">
+
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed flex-1">Danh sach Camera</h1>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-container-padding py-stack-md pb-28 space-y-stack-md">
+<!-- Active Threat Camera Card (Pulsing) -->
+<article class="bg-surface-container-lowest rounded-[16px] overflow-hidden card-shadow border-2 border-transparent animate-pulse-border relative transition-transform active:scale-[0.98]">
+<div class="relative w-full h-48">
+<img class="w-full h-full object-cover" data-alt="A rugged, wide-angle trail camera shot capturing a dense, foggy forest scene in southeast Asia. A large, majestic elephant is partially visible moving through the underbrush. The image has a slightly grainy, high-contrast night-vision style aesthetic, but rendered in muted daylight colors, emphasizing the tension of wildlife monitoring." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpor5H2xOnD7WaV2xTkl15dmmL7XfEMuRjyP0llohpfYn1_4Rybl2Ssvvq1kxuh0zdT33e6UFifzJMAjtzWSLiLxiXTDfe6CniKd3DbftWjx10wvP9_P_e86Ue0Mv89EzYDPtU1j4UojH7-1V0T1VoSIDHChQKwtUrHU3d0ktJlxYIs35x2Ij9GWrlN6cP7v5THD0We6YDj5BMNyQhVCBk4iZnSS5xC2K4ldiNPxmbr362ztJcG2sW">
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-error text-on-error font-label-sm text-label-sm px-2 py-1 rounded-md flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                        PHÁT HIỆN VOI · 92%
+                    </span>
+</div>
+<div class="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-sm">
+<div class="w-2 h-2 rounded-full bg-[#34C759]"></div>
+<span class="font-label-sm text-label-sm text-on-surface">Online</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest flex justify-between items-center border-t border-outline-variant/30">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cam 1 - Rừng Tràm</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 9:04 · 16/07
+                    </p>
+</div>
+<button class="w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center hover:bg-error hover:text-on-error transition-colors">
+<span class="material-symbols-outlined">notification_important</span>
+</button>
+</div>
+</article>
+<!-- Standard Camera Card -->
+<article class="bg-surface-container-lowest rounded-[16px] overflow-hidden card-shadow transition-transform active:scale-[0.98]">
+<div class="relative w-full h-48">
+<img class="w-full h-full object-cover" data-alt="A clear, daylight trail camera shot of a quiet, empty dirt path winding through lush tropical foliage. The lighting is bright and even, indicating daytime monitoring. No wildlife is present. The style is realistic, high-resolution field surveillance photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNPVKFoGAcLeZP4amuvRGIP7gU4wTYCJCdibcrrS2pKl0YQeCG7HkmY0TX5jPcqXRLs7dgA024zukJl1NIYthnrb3B7P3ZzU_Lx-HkDrNQipbmWHVmrwiYhtOmxmS53sILRlnOvTHxT8A07CQNcLAb_zdUsHRvmJMLwOSkbwXzF066jG4_yB3V9v-eBL5eDIH19sjhHtYcSiaNlOxYZ6fCohm51KUNkAl2imbjewCouT9ZbiDXjGqm">
+<div class="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-sm">
+<div class="w-2 h-2 rounded-full bg-[#34C759]"></div>
+<span class="font-label-sm text-label-sm text-on-surface">Online</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest flex justify-between items-center border-t border-outline-variant/30">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cam 2 - Đường Mòn ĐB</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">schedule</span> 8:15 · 16/07
+                    </p>
+</div>
+</div>
+</article>
+<!-- Standard Camera Card (Offline) -->
+<article class="bg-surface-container-lowest rounded-[16px] overflow-hidden card-shadow transition-transform active:scale-[0.98] opacity-75 grayscale-[50%]">
+<div class="relative w-full h-48 bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant/50">videocam_off</span>
+<div class="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 shadow-sm">
+<div class="w-2 h-2 rounded-full bg-error"></div>
+<span class="font-label-sm text-label-sm text-on-surface">Offline</span>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest flex justify-between items-center border-t border-outline-variant/30">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Cam 3 - Suối Cạn</h2>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[16px]">history</span> Mất kết nối 2h trước
+                    </p>
+</div>
+</div>
+</article>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface-container dark:bg-surface-container-lowest shadow-lg">
+<div class="flex justify-around items-center h-20 px-4 w-full">
+<!-- Active Tab: Máy ảnh -->
+<button class="flex flex-col items-center justify-center active:scale-90 transition-all duration-200">
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-5 py-1 mb-1">
+<span class="material-symbols-outlined fill">photo_camera</span>
+</div>
+<span class="font-label-md text-label-md text-primary dark:text-primary-fixed">Máy ảnh</span>
+</button>
+<!-- Inactive Tab: Thống kê -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-high rounded-xl p-2 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined mb-1">monitoring</span>
+<span class="font-label-md text-label-md">Thống kê</span>
+</button>
+<!-- Inactive Tab: Cài đặt -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-variant dark:hover:bg-surface-container-high rounded-xl p-2 active:scale-90 transition-all duration-200">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-md text-label-md">Cài đặt</span>
+</button>
+</div>
+</nav>
+
+
+
+
+
+
+
+</body></html>

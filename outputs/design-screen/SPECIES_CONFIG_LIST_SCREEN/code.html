@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Thiết lập phòng vệ theo loài</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#f8f9fa",
+                        "surface-bright": "#f8f9fa",
+                        "surface-container": "#edeeef",
+                        "secondary": "#7a5649",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#884200",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "error": "#ba1a1a",
+                        "on-primary-container": "#cbffc2",
+                        "primary": "#0d631b",
+                        "outline": "#707a6c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "surface-variant": "#e1e3e4",
+                        "outline-variant": "#bfcaba",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "on-primary-fixed-variant": "#005312",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2e3132",
+                        "tertiary-container": "#ad5600",
+                        "inverse-primary": "#88d982",
+                        "surface-container-highest": "#e1e3e4",
+                        "surface-container-low": "#f3f4f5",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#002204",
+                        "background": "#f8f9fa",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-background": "#191c1d",
+                        "secondary-fixed": "#ffdbcf",
+                        "on-secondary-container": "#795548",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#40493d",
+                        "surface-dim": "#d9dadb",
+                        "on-tertiary-container": "#ffeee6",
+                        "primary-fixed": "#a3f69c",
+                        "primary-container": "#2e7d32",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "surface-container-high": "#e7e8e9",
+                        "on-secondary-fixed": "#2e150b",
+                        "secondary-container": "#fdcdbc",
+                        "primary-fixed-dim": "#88d982",
+                        "on-tertiary-fixed": "#311300",
+                        "on-error-container": "#93000a",
+                        "surface-tint": "#1b6d24"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "12px",
+                        "stack-sm": "4px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px",
+                        "container-padding": "16px"
+                    },
+                    "fontFamily": {
+                        "label-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.1px", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-sm": ["11px", { "lineHeight": "16px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .card-press:active {
+            transform: scale(0.98);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface shadow-sm z-40">
+<div class="flex items-center h-16 px-container-padding w-full">
+<button aria-label="Back" class="w-12 h-12 flex items-center justify-center -ml-2 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 text-primary">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="ml-2 font-headline-md text-headline-md font-bold text-primary">Thiết lập phòng vệ</h1>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-container-padding py-stack-md pb-24 overflow-y-auto">
+<p class="font-body-md text-body-md text-on-surface-variant mb-stack-md">
+            Cấu hình chiến lược phòng vệ và mức độ cảnh báo cho từng loài động vật đặc thù trong khu vực.
+        </p>
+<!-- Species Cards List -->
+<div class="flex flex-col gap-stack-md">
+<!-- Card: VOI -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(16,24,40,0.08)] p-stack-md flex flex-col gap-base transition-transform card-press cursor-pointer border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-error/5 rounded-bl-full -z-0"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">pets</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">VOI</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="mt-2 relative z-10">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Chỉ số hung dữ</span>
+<span class="font-label-lg text-label-lg text-error">9/10</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 90%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-70">info</span>
+                        Di chuyển theo bầy, phá hoại hoa màu mạnh.
+                    </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface">Chiến lược:</span>
+<span class="font-label-md text-label-md text-primary">Còi báo động lớn + Đèn chớp</span>
+</div>
+</div>
+</div>
+<!-- Card: CỌP -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(16,24,40,0.08)] p-stack-md flex flex-col gap-base transition-transform card-press cursor-pointer border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-error/5 rounded-bl-full -z-0"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-error-container text-error flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">cruelty_free</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">CỌP</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="mt-2 relative z-10">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Chỉ số hung dữ</span>
+<span class="font-label-lg text-label-lg text-error">10/10</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-70">info</span>
+                        Hoạt động về đêm, săn mồi nguy hiểm.
+                    </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface">Chiến lược:</span>
+<span class="font-label-md text-label-md text-error">Phát âm thanh súng + Cảnh báo SMS</span>
+</div>
+</div>
+</div>
+<!-- Card: HEO RỪNG -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(16,24,40,0.08)] p-stack-md flex flex-col gap-base transition-transform card-press cursor-pointer border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary/5 rounded-bl-full -z-0"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">pest_control</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">HEO RỪNG</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="mt-2 relative z-10">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Chỉ số hung dữ</span>
+<span class="font-label-lg text-label-lg text-tertiary">6/10</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 60%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-70">info</span>
+                        Phá hoại rễ cây, có thể tấn công khi hoảng sợ.
+                    </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface">Chiến lược:</span>
+<span class="font-label-md text-label-md text-tertiary">Âm thanh siêu âm + Báo cáo im lặng</span>
+</div>
+</div>
+</div>
+<!-- Card: KHỈ -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(16,24,40,0.08)] p-stack-md flex flex-col gap-base transition-transform card-press cursor-pointer border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary/5 rounded-bl-full -z-0"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-tertiary-container text-on-tertiary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">KHỈ</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="mt-2 relative z-10">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Chỉ số hung dữ</span>
+<span class="font-label-lg text-label-lg text-tertiary">4/10</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 40%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-70">info</span>
+                        Hoạt động ban ngày, ăn cắp trái cây.
+                    </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface">Chiến lược:</span>
+<span class="font-label-md text-label-md text-primary">Theo dõi thụ động + Còi báo động ngắn</span>
+</div>
+</div>
+</div>
+<!-- Card: NAI -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_16px_rgba(16,24,40,0.08)] p-stack-md flex flex-col gap-base transition-transform card-press cursor-pointer border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -z-0"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-base">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">flutter_dash</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">NAI</h2>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</div>
+<div class="mt-2 relative z-10">
+<div class="flex justify-between items-end mb-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Chỉ số hung dữ</span>
+<span class="font-label-lg text-label-lg text-primary">2/10</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 20%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mt-2 relative z-10">
+<p class="font-body-md text-body-md text-on-surface-variant flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-70">info</span>
+                        Nhút nhát, thường xuất hiện bìa rừng.
+                    </p>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container rounded-md font-label-sm text-label-sm text-on-surface">Chiến lược:</span>
+<span class="font-label-md text-label-md text-primary">Chỉ ghi nhận hình ảnh</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

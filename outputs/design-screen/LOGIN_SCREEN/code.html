@@ -1,0 +1,164 @@
+<!DOCTYPE html><html class="light" lang="vi" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">try{
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-variant": "#e1e3e4",
+                        "on-secondary-fixed-variant": "#603f33",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed": "#2e150b",
+                        "secondary-fixed-dim": "#ebbcac",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d9dadb",
+                        "primary": "#0d631b",
+                        "on-surface-variant": "#40493d",
+                        "on-background": "#191c1d",
+                        "secondary": "#7a5649",
+                        "primary-fixed": "#a3f69c",
+                        "on-tertiary-fixed-variant": "#723600",
+                        "on-primary": "#ffffff",
+                        "secondary-fixed": "#ffdbcf",
+                        "surface-tint": "#1b6d24",
+                        "tertiary-fixed": "#ffdcc6",
+                        "on-primary-fixed": "#002204",
+                        "surface-container": "#edeeef",
+                        "background": "#f8f9fa",
+                        "outline": "#707a6c",
+                        "surface-container-low": "#f3f4f5",
+                        "surface": "#f8f9fa",
+                        "on-tertiary-fixed": "#311300",
+                        "surface-bright": "#f8f9fa",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb786",
+                        "on-primary-container": "#cbffc2",
+                        "on-tertiary": "#ffffff",
+                        "on-surface": "#191c1d",
+                        "secondary-container": "#fdcdbc",
+                        "outline-variant": "#bfcaba",
+                        "on-primary-fixed-variant": "#005312",
+                        "on-secondary-container": "#795548",
+                        "surface-container-high": "#e7e8e9",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-container": "#ffeee6",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#88d982",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#884200",
+                        "inverse-primary": "#88d982",
+                        "primary-container": "#2e7d32",
+                        "tertiary-container": "#ad5600"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "container-padding": "16px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-md": "16px"
+                    }
+                }
+            }
+        };
+    }catch(_e){}</script></head><body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col justify-center items-center px-container-padding">
+<main class="w-full max-w-md bg-surface-container-lowest rounded-xl shadow-lg p-stack-lg flex flex-col gap-stack-lg border border-surface-variant/50">
+<!-- Header -->
+<header class="flex flex-col items-center gap-stack-md text-center">
+<div class="w-24 h-24 rounded-2xl overflow-hidden bg-primary-container/10 flex items-center justify-center p-2"><div class="flex flex-col items-center gap-1"><img alt="Elephant Silhouette Logo" class="w-16 h-16 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLtKcm_UxK5rohDfv9AyaVz0OVxaEQ2sNwORwdNVrc2H2_3tob3lSgQcn0Up31fz3RYSVjnzaXW4HmXBrhw-cRvRkqSQ-peEzUkx_PgtIR9FvYc9NTOqpbN7ZT-lFO4PZw0J76NSQpmn09I_7EDiCe50O9jEbAFScsKg4c3FK9unG2o8pSv0oT5mX8pSc883tZrOFL5JtMr0sdPxLp_Q7f8gKALUaauh0HoPgnviMKeKpqcRxadwCp5npgE"><span class="font-label-lg text-primary tracking-widest">FOREST</span></div></div>
+<div class="flex flex-col gap-stack-sm">
+<h1 class="font-headline-md text-on-surface">Dang nhap</h1>
+<p class="font-body-md text-on-surface-variant">Truy cập hệ thống cảnh báo động vật hoang dã.</p>
+</div>
+</header>
+<!-- Form -->
+<form class="flex flex-col gap-stack-md" id="loginForm" novalidate="">
+<!-- Username Input -->
+<div class="flex flex-col gap-stack-sm relative group">
+<label class="font-label-md text-on-surface-variant group-focus-within:text-primary transition-colors" for="username">Username</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline group-focus-within:text-primary pointer-events-none transition-colors">person</span>
+<input class="w-full h-12 pl-10 pr-4 bg-surface-container-lowest border border-outline rounded-lg font-body-lg text-on-surface placeholder:text-outline-variant focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200 peer" id="username" name="username" pattern=".{4,20}" placeholder="Nhập tên đăng nhập" required="" type="text">
+</div>
+<p class="font-label-sm text-error hidden peer-invalid:peer-focus:block peer-[.is-dirty]:peer-invalid:block h-4">Tên đăng nhập 4-20 ký tự.</p>
+</div>
+<!-- Password Input -->
+<div class="flex flex-col gap-stack-sm relative group">
+<label class="font-label-md text-on-surface-variant group-focus-within:text-primary transition-colors" for="password">Mật khẩu</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-outline group-focus-within:text-primary pointer-events-none transition-colors">lock</span>
+<input class="w-full h-12 pl-10 pr-12 bg-surface-container-lowest border border-outline rounded-lg font-body-lg text-on-surface placeholder:text-outline-variant focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200 peer" id="password" minlength="6" name="password" placeholder="Nhập mật khẩu" required="" type="password">
+<button aria-label="Toggle password visibility" class="absolute right-3 p-1 rounded-full text-outline hover:text-on-surface-variant hover:bg-surface-container transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50" id="togglePassword" type="button">
+<span class="material-symbols-outlined" id="eyeIcon">visibility</span>
+</button>
+</div>
+<p class="font-label-sm text-error hidden peer-invalid:peer-focus:block peer-[.is-dirty]:peer-invalid:block h-4">Mật khẩu ít nhất 6 ký tự.</p>
+</div>
+<div class="flex justify-end mt-stack-sm">
+<a class="font-label-md text-primary hover:text-on-primary-fixed-variant hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded-sm transition-colors" href="#">Quên mật khẩu?</a>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col gap-stack-md mt-stack-md">
+<button class="w-full h-12 bg-primary hover:bg-primary-container text-on-primary font-label-lg rounded-full flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed" type="submit">
+                    Đăng nhập
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center justify-center gap-1 font-body-md text-on-surface-variant">
+<span class="">Chưa có tài khoản?</span>
+<a class="font-label-lg text-primary hover:text-on-primary-fixed-variant hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded-sm transition-colors px-1 py-0.5" href="#">Đăng ký</a>
+</div>
+</div>
+</form>
+</main>
+<!-- Ambient Background Elements -->
+<div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+<div class="absolute -top-[20%] -left-[10%] w-[50vw] h-[50vw] rounded-full bg-primary-container/20 blur-[100px] opacity-50 mix-blend-multiply"></div>
+<div class="absolute top-[60%] -right-[20%] w-[60vw] h-[60vw] rounded-full bg-tertiary-container/10 blur-[120px] opacity-40 mix-blend-multiply"></div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePasswordBtn = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const form = document.getElementById('loginForm');
+            const inputs = form.querySelectorAll('input');
+
+            // Password visibility toggle
+            togglePasswordBtn.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                eyeIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
+            });
+
+            // Mark inputs as dirty for validation styling
+            inputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    input.classList.add('is-dirty');
+                });
+            });
+
+            // Handle form submission (prevent default for demo)
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                inputs.forEach(input => input.classList.add('is-dirty'));
+                if (form.checkValidity()) {
+                    // Simulate login action
+                    const btn = form.querySelector('button[type="submit"]');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Đang xử lý...';
+                    btn.disabled = true;
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = '<span class="material-symbols-outlined">check</span> Thành công';
+                        btn.classList.replace('bg-primary', 'bg-[#2e7d32]'); // Slightly darker green to indicate success
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false</script></body></html>
