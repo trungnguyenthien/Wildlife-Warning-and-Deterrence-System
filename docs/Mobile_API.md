@@ -578,6 +578,46 @@ Cập nhật thông tin chi tiết của camera (ví dụ: đổi tên hiển th
 
 ---
 
+### 5.8. `POST /cameras/{cameraId}/snapshots`
+
+Tải lên hình ảnh snapshot thủ công của camera tại hiện trường. Mapping: màn hình `[CAMERA_VIEW_SCREEN]` (tính năng tải lên hình ảnh từ thiết bị người dùng).
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body (Form data)**
+
+| Field | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `image` | File (Binary) | Có | File ảnh chụp snapshot từ camera |
+| `userId` | string | Có | ID người dùng thực hiện tải lên (mã hex 4 ký tự, ví dụ: `9f3a`) |
+
+**Response 201 (Created)**
+
+```json
+{
+  "id": "snap-987",
+  "url": "https://cdn.example.com/snapshots/cam-001_1721345678.jpg",
+  "deviceId": "cam-001",
+  "userId": "9f3a",
+  "uploadedAt": "2026-07-19T07:05:00+07:00"
+}
+```
+
+**Validate nghiệp vụ**
+- Kiểm tra file upload có phải định dạng ảnh hợp lệ (jpg/png) và dung lượng không vượt quá 5MB.
+- `cameraId` và `userId` phải tồn tại trong hệ thống.
+
+**Side effects**
+- Lưu trữ ảnh vào CDN / Storage của Mobile Server.
+- Lưu thông tin chi tiết (url, deviceId, userId, thời gian upload) vào cơ sở dữ liệu.
+
+**Lỗi hay gặp**
+- `400 ERR_VALIDATION_FAILED` -> File ảnh không hợp lệ hoặc thiếu trường bắt buộc.
+- `404 ERR_CAMERA_NOT_FOUND` -> `cameraId` không tồn tại.
+- `404 ERR_USER_NOT_FOUND` -> `userId` không hợp lệ.
+
+---
+
 ## 6. Nhóm 4 — Override thiết bị ngoại vi (`[CAMERA_VIEW_SCREEN]` action bar)
 
 ### 6.1. `GET /cameras/{cameraId}/devices/state`
@@ -1477,6 +1517,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 | 5.5 | GET | `/cameras/{id}/detections/current` | Lấy kết quả AI phân tích động vật hiện tại |
 | 5.6 | GET | `/cameras/{id}/detections/stream` | Stream realtime sự kiện cập nhật bằng SSE |
 | 5.7 | PATCH | `/cameras/{id}` | Đổi tên hiển thị camera (`rename_camera_dialog`) |
+| 5.8 | POST | `/cameras/{id}/snapshots` | Tải lên hình ảnh snapshot thủ công kèm thông tin chi tiết |
 | 6.1 | GET | `/cameras/{id}/devices/state` | Xem chi tiết trạng thái và nguồn kích hoạt của 6 thiết bị |
 | 6.2 | POST | `/cameras/{id}/devices/{key}/override` | Điều khiển ghi đè (bật/tắt thủ công nhanh) từng thiết bị |
 | 6.3 | POST | `/cameras/{id}/devices/override-all` | Ghi đè bật/tắt đồng loạt toàn bộ thiết bị ngoại vi |
@@ -1532,7 +1573,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 | 13.3 | GET | `/reference-data/danger-levels` | Lấy danh mục mức độ nguy hại để hỗ trợ hiển thị UI |
 | 13a.1 | POST | `/cameras/{id}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
 
-**Tổng cộng: 52 API di động + 1 API tích hợp thiết bị (Đã bổ sung API đổi tên camera và API tích hợp camera, bỏ API ngôn ngữ).**
+**Tổng cộng: 53 API di động + 1 API tích hợp thiết bị (Đã bổ sung API đổi tên camera, API tải lên snapshot và API tích hợp camera, bỏ API ngôn ngữ).**
 
 ---
 
