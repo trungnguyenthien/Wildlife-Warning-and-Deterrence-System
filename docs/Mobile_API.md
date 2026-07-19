@@ -308,35 +308,6 @@ App tự gọi khi access token còn < 5 phút.
 
 ---
 
-### 3.5. `POST /auth/forgot-password` *(đề xuất thêm ngoài spec UI)*
-
-**Request body**
-```json
-{ "phoneNumber": "0901234567" }
-```
-
-**Response 200** (luôn trả 200 để tránh leak SĐT có tồn tại hay không)
-```json
-{ "message": "Nếu SĐT tồn tại, OTP đã được gửi qua SMS." }
-```
-
----
-
-### 3.6. `POST /auth/reset-password` *()
-
-**Request body**
-```json
-{
-  "phoneNumber": "0901234567",
-  "otp": "123456",
-  "newPassword": "NewP@ss1!"
-}
-```
-
-**Response 200** `{ "message": "Đặt lại mật khẩu thành công." }`
-
----
-
 ## 4. Nhóm 2 — Push Token & Thông báo
 
 ### 4.1. `POST /devices/push-token`
@@ -1120,24 +1091,7 @@ Cập nhật thông tin + preferences.
 
 ---
 
-### 9.3. `POST /users/me/change-password`
-
-**Request body**
-```json
-{
-  "oldPassword": "OldP@ss1",
-  "newPassword": "NewP@ss2!"
-}
-```
-
-**Response 200** `{ "message": "Đổi mật khẩu thành công." }`
-
-**Side effects**
-- Vô hiệu hoá refresh tokens cũ → user phải login lại trên các thiết bị khác.
-
----
-
-### 9.5. `POST /users/me/push-notifications/toggle` *(khuyến nghị tách)*
+### 9.3. `POST /users/me/push-notifications/toggle` *(khuyến nghị tách)*
 
 Mapping: cài đặt tắt/bật push notification trong tab `[SETTING_TAB]`.
 
@@ -1473,8 +1427,6 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 | # | Method | Endpoint | Mô tả chức năng |
 |---|---|---|---|
 | 3.2 | POST | `/auth/login` | Đăng nhập tài khoản |
-| 3.5 | POST | `/auth/forgot-password` | Yêu cầu gửi OTP khôi phục mật khẩu |
-| 3.6 | POST | `/auth/reset-password` | Đặt lại mật khẩu mới bằng OTP |
 
 ### 14.2. Màn hình đăng ký (`[REGISTER_SCREEN]`)
 
@@ -1503,8 +1455,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 | 3.3 | POST | `/auth/logout` | Đăng xuất tài khoản, hủy session |
 | 9.1 | GET | `/users/me` | Lấy thông tin cá nhân và thiết lập của user |
 | 9.2 | PATCH | `/users/me` | Cập nhật thông tin cá nhân và thiết lập chuông báo |
-| 9.3 | POST | `/users/me/change-password` | Thay đổi mật khẩu người dùng |
-| 9.5 | POST | `/users/me/push-notifications/toggle` | Bật/tắt nhanh các sự kiện push notification |
+| 9.3 | POST | `/users/me/push-notifications/toggle` | Bật/tắt nhanh các sự kiện push notification |
 | 7.2 | POST | `/control/system/sms-notification/toggle` | Bật/tắt gửi thông báo SMS cấp hệ thống |
 
 ### 14.6. Màn hình chi tiết camera (`[CAMERA_VIEW_SCREEN]`)
@@ -1573,7 +1524,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 | 13.3 | GET | `/reference-data/danger-levels` | Lấy danh mục mức độ nguy hại để hỗ trợ hiển thị UI |
 | 13a.1 | POST | `/cameras/{id}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
 
-**Tổng cộng: 53 API di động + 1 API tích hợp thiết bị (Đã bổ sung API đổi tên camera, API tải lên snapshot và API tích hợp camera, bỏ API ngôn ngữ).**
+**Tổng cộng: 50 API di động + 1 API tích hợp thiết bị (Đã bổ sung API đổi tên camera, API tải lên snapshot và API tích hợp camera, bỏ các chức năng ngôn ngữ, đổi mật khẩu và khôi phục mật khẩu).**
 
 ---
 
