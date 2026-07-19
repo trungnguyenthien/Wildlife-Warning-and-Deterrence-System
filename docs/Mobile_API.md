@@ -1,6 +1,6 @@
 # Mobile_API — Đặc tả API cho Ứng dụng Android
 
-> **Phạm vi tài liệu:** Đặc tả HTTP API mà **ứng dụng Android (Mobile App)** sử dụng để tương tác với **Mobile Server**. Tài liệu này dùng cho đội phát triển Backend & Mobile để thống nhất contract; không lặp lại các quy tắc nghiệp vụ đã nêu trong [de-tai-nghien-cuu-canh-bao-dong-vat.md](../outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md).
+> **Phạm vi tài liệu:** Đặc tả HTTP API mà **ứng dụng Android (Mobile App)** sử dụng để tương tác với **Mobile Server**. Tài liệu này dùng cho đội phát triển Backend & Mobile để thống nhất contract; không lặp lại các quy tắc nghiệp vụ đã nêu trong [de-tai-nghien-cuu-canh-bao-dong-vat.md](./de-tai-nghien-cuu-canh-bao-dong-vat.md).
 
 ---
 
@@ -196,7 +196,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 
 ### 3.1. `POST /auth/register`
 
-Đăng ký tài khoản mới. Mapping: màn hình `[REGISTER_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-bao-dong-vat.md](../outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md)).
+Đăng ký tài khoản mới. Mapping: màn hình `[REGISTER_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-bao-dong-vat.md](./de-tai-nghien-cuu-canh-bao-dong-vat.md)).
 
 **Request body**
 ```json
@@ -242,7 +242,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 
 ### 3.2. `POST /auth/login`
 
-Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-bao-dong-vat.md](../outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md)).
+Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-bao-dong-vat.md](./de-tai-nghien-cuu-canh-bao-dong-vat.md)).
 
 **Request body**
 ```json

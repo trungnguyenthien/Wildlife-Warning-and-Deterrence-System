@@ -263,7 +263,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 
 Được mở khi user **nhấn vào một thẻ camera** từ `[MAIN_SCREEN]` (tab `[CAMERA_LIST_TAB]`). Tại đây user xem ảnh hiện tại, đổi tên camera, và xem danh sách log.
 
-> ℹ️ **Màn này KHÔNG hiển thị live video streaming.** Nó hiển thị **ảnh snapshot** gần nhất từ camera. Theo thuật toán ở [de-tai-nghien-cuu-canh-bao-dong-vat.md:131-170](outputs/de-tai-nghien-cuu-canh-bao-dong-vat.md#L131-L170), hệ thống chỉ ghi nhận snapshot mỗi 2 giây/lần khi có chuyển động đáng kể, do đó ảnh trong màn này có thể đã cũ vài giây đến vài phút tuỳ mức độ hoạt động của thú.
+> ℹ️ **Màn này KHÔNG hiển thị live video streaming.** Nó hiển thị **ảnh snapshot** gần nhất từ camera. Theo thuật toán ở [de-tai-nghien-cuu-canh-bao-dong-vat.md:131-170](./de-tai-nghien-cuu-canh-bao-dong-vat.md#L131-L170), hệ thống chỉ ghi nhận snapshot mỗi 2 giây/lần khi có chuyển động đáng kể, do đó ảnh trong màn này có thể đã cũ vài giây đến vài phút tuỳ mức độ hoạt động của thú.
 
 **Bố cục màn hình (Vertical):**
 
