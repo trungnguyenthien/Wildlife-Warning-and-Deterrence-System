@@ -74,7 +74,7 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị thông báo & chuyển về màn đăng nhập
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /auth/register](./Mobile_API.md#31-post-authregister)
+    *   [POST /auth/register](./03-mobile_api.md#31-post-authregister)
 
 ---
 
@@ -118,8 +118,8 @@ sequenceDiagram
     Mobile->>Mobile: Chuyển hướng người dùng vào màn hình chính [MAIN_SCREEN]
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /auth/login](./Mobile_API.md#32-post-authlogin)
-    *   [POST /devices/push-token](./Mobile_API.md#41-post-devicespush-token)
+    *   [POST /auth/login](./03-mobile_api.md#32-post-authlogin)
+    *   [POST /devices/push-token](./03-mobile_api.md#41-post-devicespush-token)
 
 ---
 
@@ -148,7 +148,7 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị danh sách trạm & ảnh thumbnail snapshot
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /cameras](./Mobile_API.md#51-get-cameras)
+    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
 ### 3.1.2. Action: Đăng ký & Lắng nghe sự kiện cập nhật qua SSE
 
@@ -174,7 +174,7 @@ sequenceDiagram
     deactivate Mobile_Server
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /cameras/stream](./Mobile_API.md#54-get-camerasstream)
+    *   [GET /cameras/stream](./03-mobile_api.md#54-get-camerasstream)
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
 
@@ -216,9 +216,9 @@ sequenceDiagram
     Mobile->>Mobile: Vẽ biểu đồ, bản đồ nhiệt (heatmap) và danh sách cảnh báo tin tức
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /stats/summary](./Mobile_API.md#105-get-statssummary)
-    *   [GET /alerts/feed](./Mobile_API.md#112-get-alertsfeed)
-    *   [GET /reference-data/danger-levels](./Mobile_API.md#133-get-reference-datadanger-levels)
+    *   [GET /stats/summary](./03-mobile_api.md#105-get-statssummary)
+    *   [GET /alerts/feed](./03-mobile_api.md#112-get-alertsfeed)
+    *   [GET /reference-data/danger-levels](./03-mobile_api.md#133-get-reference-datadanger-levels)
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
@@ -243,7 +243,7 @@ sequenceDiagram
     Mobile->>Mobile: Đổ thông tin lên giao diện cài đặt cá nhân
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /users/me](./Mobile_API.md#91-get-usersme)
+    *   [GET /users/me](./03-mobile_api.md#91-get-usersme)
 
 ### 3.3.2. Action: Đăng xuất tài khoản
 
@@ -274,8 +274,8 @@ sequenceDiagram
     Mobile->>Mobile: Xóa tokens khỏi bộ nhớ máy & chuyển về màn đăng nhập
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /auth/logout](./Mobile_API.md#33-post-authlogout)
-    *   [DELETE /devices/push-token](./Mobile_API.md#42-delete-devicespush-token)
+    *   [POST /auth/logout](./03-mobile_api.md#33-post-authlogout)
+    *   [DELETE /devices/push-token](./03-mobile_api.md#42-delete-devicespush-token)
 
 ---
 
@@ -312,8 +312,8 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị thông tin camera, ảnh lớn snapshot, phân tích AI và nhật ký sự kiện
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /cameras/{cameraId}](./Mobile_API.md#52-get-camerascameraid)
-    *   [GET /events](./Mobile_API.md#101-get-events)
+    *   [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
+    *   [GET /events](./03-mobile_api.md#101-get-events)
 
 ### 4.2. Action: Điều khiển ghi đè thủ công thiết bị ngoại vi [🤖AI_SERVER🤖]
 
@@ -349,8 +349,8 @@ sequenceDiagram
     Mobile->>Mobile: Cập nhật trạng thái nút công tắc (Toggle Button UI)
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/devices/{deviceKey}/override](./Mobile_API.md#62-post-camerascameraiddevicesdevicekeyoverride)
-    *   [override-all](./Mobile_API.md#63-post-camerascameraiddevicesoverride-all)
+    *   [POST /cameras/{cameraId}/devices/{deviceKey}/override](./03-mobile_api.md#62-post-camerascameraiddevicesdevicekeyoverride)
+    *   [override-all](./03-mobile_api.md#63-post-camerascameraiddevicesoverride-all)
 
 ### 4.3. Action: Thay đổi tên hiển thị của trạm camera
 
@@ -373,7 +373,7 @@ sequenceDiagram
     Mobile->>Mobile: Đóng Dialog & cập nhật tiêu đề camera trên thanh Top bar
 ```
 *   **Chi tiết đặc tả API:**
-    *   [PATCH /cameras/{cameraId}](./Mobile_API.md#53--patch-camerascameraid)
+    *   [PATCH /cameras/{cameraId}](./03-mobile_api.md#53--patch-camerascameraid)
 
 ---
 
@@ -410,8 +410,8 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị danh sách loài kèm trạng thái cấu hình (Đang hoạt động/Mặc định)
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /species](./Mobile_API.md#81-get-species)
-    *   [GET /response-configs/{cameraId}](./Mobile_API.md#86-get-response-configscameraid-helper)
+    *   [GET /species](./03-mobile_api.md#81-get-species)
+    *   [GET /response-configs/{cameraId}](./03-mobile_api.md#86-get-response-configscameraid-helper)
 
 ---
 
@@ -455,9 +455,9 @@ sequenceDiagram
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /response-configs?cameraId=&speciesId=](./Mobile_API.md#83-get-response-configscameraidspeciesid)
-    *   [GET /control/presets](./Mobile_API.md#73-get-controlpresets)
-    *   [GET /audio-samples](./Mobile_API.md#75-get-audio-samples)
+    *   [GET /response-configs?cameraId=&speciesId=](./03-mobile_api.md#83-get-response-configscameraidspeciesid)
+    *   [GET /control/presets](./03-mobile_api.md#73-get-controlpresets)
+    *   [GET /audio-samples](./03-mobile_api.md#74-get-audio-samples)
 
 ### 6.2. Action: Lưu cấu hình ứng phó tự chỉnh của loài
 
@@ -480,8 +480,8 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị thông báo lưu thành công & quay về màn hình trước
 ```
 *   **Chi tiết đặc tả API:**
-    *   [PUT /response-configs/{cameraId}/{speciesId}](./Mobile_API.md#82-put-response-configscameraidspeciesid)
-    *   [DELETE /response-configs/{cameraId}/{speciesId}](./Mobile_API.md#84-delete-response-configscameraidspeciesid)
+    *   [PUT /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#82-put-response-configscameraidspeciesid)
+    *   [DELETE /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#84-delete-response-configscameraidspeciesid)
 
 ### 6.3. Action: Phát âm thanh test thử loa tại trạm hiện trường [🤖AI_SERVER🤖]
 
@@ -512,7 +512,7 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị thông báo "Phát âm thanh kiểm thử thành công"
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./Mobile_API.md#64-post-camerascameraiddevicesdevicekeytest)
+    *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#64-post-camerascameraiddevicesdevicekeytest)
 
 ---
 
@@ -539,7 +539,7 @@ sequenceDiagram
     Mobile->>Mobile: Đổ danh sách SĐT (tối đa 3 số) lên màn hình
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /users/me/sms-recipients](./Mobile_API.md#121-get-usersmesms-recipients)
+    *   [GET /users/me/sms-recipients](./03-mobile_api.md#121-get-usersmesms-recipients)
 
 ### 7.2. Action: Thêm / Xóa số điện thoại nhận tin nhắn SMS
 
@@ -578,8 +578,8 @@ sequenceDiagram
     Mobile->>Mobile: Cập nhật lại danh sách SĐT hiển thị trên màn hình
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /users/me/sms-recipients](./Mobile_API.md#122-post-usersmesms-recipients)
-    *   [DELETE /users/me/sms-recipients/{recipientId}](./Mobile_API.md#123-delete-usersmesms-recipientsrecipientid)
+    *   [POST /users/me/sms-recipients](./03-mobile_api.md#122-post-usersmesms-recipients)
+    *   [DELETE /users/me/sms-recipients/{recipientId}](./03-mobile_api.md#123-delete-usersmesms-recipientsrecipientid)
 
 ---
 
@@ -633,4 +633,4 @@ sequenceDiagram
     Note over Camera: Thực thi phòng vệ tại chỗ (Phát loa xua đuổi, nháy LED, bật hàng rào điện)
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/detections](./Mobile_API.md#13a1-post-camerascameraiddetections)
+    *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
