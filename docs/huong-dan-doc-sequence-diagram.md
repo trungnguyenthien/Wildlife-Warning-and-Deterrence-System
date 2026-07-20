@@ -1,96 +1,272 @@
 # Hướng dẫn đọc Sơ đồ trình tự (Sequence Diagram) cho Học sinh
 
-Tài liệu này được viết nhằm giúp các bạn học sinh tham gia đề tài Nghiên cứu Khoa học Kỹ thuật (KHKT) hiểu rõ cách đọc, vẽ và giải thích các sơ đồ trình tự (Sequence Diagram) có trong dự án của mình (cụ thể là tệp [04-sequence-diagram.md](./04-sequence-diagram.md)).
+Tài liệu này giúp các bạn học sinh tham gia đề tài Nghiên cứu Khoa học Kỹ thuật (KHKT) hiểu rõ cách đọc, vẽ và giải thích các sơ đồ trình tự có trong dự án (cụ thể là tệp [04-sequence-diagram.md](./04-sequence-diagram.md)).
 
 ---
 
-## 1. Sơ đồ trình tự (Sequence Diagram) là gì?
+## Mermaid là gì?
 
-Hãy tưởng tượng sơ đồ trình tự giống như **kịch bản của một cuộc hội thoại** giữa các nhân vật (các thành phần phần mềm và phần cứng) theo chiều thời gian trôi từ trên xuống dưới. 
+**Mermaid** là một ngôn ngữ văn bản nhẹ (text-based diagramming language) cho phép vẽ sơ đồ trực tiếp bằng code, không cần phần mềm đồ họa. Bạn chỉ cần viết mã theo cú pháp quy định, và công cụ (GitHub, VS Code, Notion...) sẽ tự động render thành hình ảnh sơ đồ.
+
+```
+GitHub Markdown / VS Code
+        ↓
+  ```mermaid           ← Khai báo loại block
+  sequenceDiagram      ← Loại sơ đồ: trình tự
+      A->>B: Hello     ← Nội dung sơ đồ
+  ```
+        ↓
+  [Hình ảnh sơ đồ được render tự động]
+```
+
+> **Tại sao dùng Mermaid?** Vì sơ đồ được lưu dưới dạng văn bản thuần, dễ chỉnh sửa, dễ quản lý phiên bản bằng Git — rất phù hợp cho tài liệu kỹ thuật của đề tài KHKT.
+
+---
+
+## 1. Sơ đồ trình tự là gì?
+
+Hãy tưởng tượng sơ đồ trình tự giống như **kịch bản của một cuộc hội thoại** giữa các nhân vật (các thành phần phần mềm và phần cứng) theo chiều thời gian trôi từ **trên xuống dưới**.
 
 Nó trả lời cho các câu hỏi:
-*   Ai gửi thông điệp cho ai?
-*   Gửi cái gì (dữ liệu gì)?
-*   Nhận lại kết quả gì và khi nào?
+- Ai gửi thông điệp cho ai?
+- Gửi cái gì (dữ liệu gì)?
+- Nhận lại kết quả gì và khi nào?
 
 ---
 
 ## 2. Các thành phần tham gia (Participants / Lifelines)
 
-Ở đỉnh sơ đồ, bạn sẽ thấy các ô hình chữ nhật đại diện cho các thành phần trong hệ thống của chúng ta:
+Ở đỉnh sơ đồ, bạn sẽ thấy các ô hình chữ nhật đại diện cho các thành phần trong hệ thống. Mỗi thành phần có một **đường đời (Lifeline)** là đường nét đứt chạy thẳng xuống dưới, thể hiện sự tồn tại của nó theo thời gian.
 
-*   `Mobile`: Ứng dụng Android trên điện thoại của người dân/kiểm lâm.
-*   `Mobile_Server`: Máy chủ trung tâm (Backend) nhận lệnh, lưu cơ sở dữ liệu và điều phối hệ thống.
-*   `Database`: Cơ sở dữ liệu lưu trữ thông tin tài khoản, nhật ký sự kiện, cấu hình.
-*   `AI_Server`: Máy chủ trí tuệ nhân tạo nhận ảnh từ Camera, chạy YOLOv8 để nhận diện loài thú.
-*   `Camera`: Thiết bị camera chụp ảnh thực địa và các thiết bị ngoại vi vật lý (loa, đèn LED, hàng rào điện).
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+    participant AI_Server
+    participant Camera
 
-> 📊 **Lifeline (Đường đời):** Là đường đứt nét đi thẳng từ trên xuống dưới dưới mỗi đối tượng. Thời gian trôi dần từ trên xuống dưới theo đường này.
+    Note over Mobile: Ứng dụng Android trên điện thoại
+    Note over Mobile_Server: Máy chủ trung tâm (Backend)
+    Note over Database: Cơ sở dữ liệu lưu trữ
+    Note over AI_Server: Máy chủ AI chạy YOLOv8
+    Note over Camera: Camera + thiết bị ngoại vi vật lý
+```
 
----
-
-## 3. Các loại mũi tên và Ký hiệu thông dụng
-
-Trong sơ đồ trình tự Mermaid ở tệp đặc tả của chúng ta, các ký hiệu mũi tên mang ý nghĩa kỹ thuật rất cụ thể:
-
-### a) Gửi yêu cầu (Request / Call)
-*   **Ký hiệu:** `A ->> B: Lời gọi API` (Mũi tên nét liền, đầu nhọn đặc).
-*   **Ý nghĩa:** Đối tượng A chủ động gửi một yêu cầu (ví dụ: gửi một HTTP Request GET/POST) đến đối tượng B và chờ B xử lý.
-
-### b) Phản hồi kết quả (Response / Return)
-*   **Ký hiệu:** `B -->> A: Response 200 OK` (Mũi tên nét đứt, đầu nhọn hở).
-*   **Ý nghĩa:** Đối tượng B đã xử lý xong và gửi trả lại kết quả (dữ liệu) về cho đối tượng A.
-
-### c) Hộp kích hoạt (Activation Bar)
-*   **Ký hiệu:** `activate B` và `deactivate B`.
-*   **Hình ảnh hiển thị:** Một dải hình chữ nhật đứng màu xám/trắng đè lên đường nét đứt của đối tượng B.
-*   **Ý nghĩa:** Thể hiện khoảng thời gian mà đối tượng B đang bận xử lý tác vụ (chờ tính toán hoặc truy vấn cơ sở dữ liệu) trước khi trả lại kết quả.
+> **Giải thích các thành phần trong dự án:**
+> - `Mobile`: Ứng dụng Android trên điện thoại của người dân/kiểm lâm.
+> - `Mobile_Server`: Máy chủ trung tâm nhận lệnh, lưu cơ sở dữ liệu và điều phối hệ thống.
+> - `Database`: Cơ sở dữ liệu lưu trữ thông tin tài khoản, nhật ký sự kiện, cấu hình.
+> - `AI_Server`: Máy chủ trí tuệ nhân tạo chạy YOLOv8 để nhận diện loài thú.
+> - `Camera`: Thiết bị camera chụp ảnh thực địa và các thiết bị ngoại vi (loa, đèn LED, hàng rào điện).
 
 ---
 
-## 4. Các cấu trúc nâng cao có trong dự án của chúng ta
+## 3. Các loại mũi tên và ký hiệu thông dụng
 
-Trong tệp đặc tả [04-sequence-diagram.md](./04-sequence-diagram.md), có một số khối lệnh đặc biệt của Mermaid mà các bạn cần lưu ý khi thuyết trình đề tài:
+### a) Gửi yêu cầu — Request (`->>`)
 
-### a) Khối chạy song song (`par` ... `and` ... `end`)
-*   **Từ khóa trong Mermaid:** 
-    ```mermaid
-    par Tác vụ 1
-        A->>B: Request 1
-    and Tác vụ 2
-        A->>B: Request 2
+Mũi tên **nét liền, đầu nhọn đặc**: đối tượng A chủ động gửi một yêu cầu (HTTP Request) đến đối tượng B.
+
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: POST /auth/login (username, password)
+```
+
+---
+
+### b) Phản hồi kết quả — Response (`-->>`)
+
+Mũi tên **nét đứt, đầu nhọn hở**: đối tượng B đã xử lý xong và gửi trả kết quả về cho A.
+
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: POST /auth/login (username, password)
+    Mobile_Server-->>Mobile: Response 200 OK (accessToken, user)
+```
+
+---
+
+### c) Hộp kích hoạt — Activation Bar (`activate` / `deactivate`)
+
+Một dải hình chữ nhật đứng màu xám đè lên đường lifeline, thể hiện khoảng thời gian đối tượng đang **bận xử lý** (ví dụ: truy vấn DB, tính toán AI) trước khi trả kết quả.
+
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    Mobile->>Mobile_Server: GET /cameras
+    activate Mobile_Server
+    Mobile_Server->>Database: SELECT * FROM cameras
+    activate Database
+    Database-->>Mobile_Server: Danh sách camera
+    deactivate Database
+    Mobile_Server-->>Mobile: Response 200 OK (cameras[])
+    deactivate Mobile_Server
+```
+
+---
+
+### d) Tự gọi chính mình — Self-call
+
+Khi một đối tượng tự thực hiện một hành động nội bộ (không cần gửi đến ai khác), mũi tên sẽ quay ngược lại chính nó.
+
+```mermaid
+sequenceDiagram
+    participant AI_Server
+
+    AI_Server->>AI_Server: Phân tích ảnh bằng mô hình YOLOv8
+```
+
+---
+
+### e) Ghi chú — Note (`Note over` / `Note right of`)
+
+Dùng để ghi chú giải thích ngữ cảnh, trạng thái hệ thống, hoặc một hành động vật lý ngoài đời thực.
+
+```mermaid
+sequenceDiagram
+    participant Camera
+    participant AI_Server
+
+    Note over Camera: Cảm biến hồng ngoại phát hiện chuyển động
+    Camera->>AI_Server: Gửi ảnh chụp được (Binary)
+    Note right of AI_Server: AI đang xử lý, có thể mất 1-2 giây
+```
+
+---
+
+## 4. Các cấu trúc nâng cao có trong dự án
+
+### a) Khối chạy song song — `par ... and ... end`
+
+Thể hiện việc hệ thống thực hiện nhiều hành động **cùng một lúc** (song song), thay vì tuần tự từng bước một.
+
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: Vào tab Thống kê
+    activate Mobile_Server
+    par Tải dữ liệu song song
+        Mobile_Server-->>Mobile: GET /stats/summary → Biểu đồ sự kiện
+    and
+        Mobile_Server-->>Mobile: GET /alerts/feed → Tin tức mới
+    and
+        Mobile_Server-->>Mobile: GET /reference-data/danger-levels → Cấp độ nguy hiểm
     end
-    ```
-*   **Ý nghĩa:** Thể hiện việc ứng dụng di động gửi nhiều yêu cầu cùng một lúc (song song) để tiết kiệm thời gian, thay vì phải đợi yêu cầu 1 xong mới gửi yêu cầu 2.
-*   **Ví dụ thực tế trong dự án:** Khi bạn mở tab Thống kê, app gửi song song 3 yêu cầu: tải biểu đồ (`GET /stats/summary`), tải tin tức (`GET /alerts/feed`), và tải danh mục độ nguy hại (`GET /reference-data/danger-levels`).
+    deactivate Mobile_Server
+```
 
-### b) Hộp ghi chú (`Note over A, B` hoặc `Note right of A`)
-*   **Ý nghĩa:** Dùng để ghi chú thích giải thích ngữ cảnh, trạng thái hệ thống, hoặc một hành động vật lý xảy ra ngoài đời thực.
-*   **Ví dụ thực tế:** `Note over Camera, AI_Server: Phát hiện chuyển động vật lý tại thực địa` (Camera tự động chụp ảnh khi cảm biến hồng ngoại phát hiện có thú di chuyển).
-
-### c) Tự động đánh số (`autonumber`)
-*   Hệ thống tự động đánh số các bước `1, 2, 3...` từ trên xuống để các bạn dễ dàng gọi tên các bước khi viết báo cáo hoặc thuyết trình trước hội đồng giám khảo KHKT.
-
-### d) Vùng đóng khung tô màu (`rect rgb(...)` ... `end`)
-*   Dùng để nhóm các hành động có liên quan mật thiết lại với nhau (ví dụ: nhóm toàn bộ luồng thêm số điện thoại nhận SMS vào một khung riêng để dễ nhìn).
+> **Ý nghĩa thực tế:** Khi bạn mở tab Thống kê, app gửi **3 yêu cầu song song** để tiết kiệm thời gian chờ, thay vì phải đợi từng yêu cầu một.
 
 ---
 
-## 5. Ví dụ cụ thể: Đọc luồng Nhận diện YOLO (Action II - 1.1)
+### b) Vùng đóng khung tô màu — `rect rgb(...) ... end`
 
-Hãy cùng phân tích một đoạn sơ đồ quan trọng nhất trong đề tài của bạn:
+Dùng để nhóm các hành động có liên quan mật thiết lại với nhau, giúp người đọc dễ nhận biết các luồng xử lý riêng biệt.
 
+```mermaid
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    rect rgb(200, 240, 200)
+        Note over Mobile,Database: Luồng: Thêm số điện thoại nhận SMS
+        Mobile->>Mobile_Server: POST /sms-recipients (phone)
+        Mobile_Server->>Database: INSERT sms_recipients
+        Database-->>Mobile_Server: OK
+        Mobile_Server-->>Mobile: Response 201 Created
+    end
 ```
-Camera ->> AI_Server: Gửi hình ảnh chụp được (File Binary)
-AI_Server ->> AI_Server: Phân tích bằng mô hình YOLOv8
-AI_Server ->> Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
-Mobile_Server -->> AI_Server: Response 201 Created (eventId, "DefendAction")
-AI_Server ->> Camera: Truyền lệnh điều khiển thiết bị vật lý ("DefendAction")
+
+---
+
+### c) Đánh số tự động — `autonumber`
+
+Hệ thống tự đánh số thứ tự `1, 2, 3...` cho từng bước, giúp các bạn dễ gọi tên bước khi thuyết trình.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    Mobile->>Mobile_Server: POST /auth/login
+    Mobile_Server->>Database: Kiểm tra tài khoản
+    Database-->>Mobile_Server: Trả về thông tin user
+    Mobile_Server-->>Mobile: Response 200 OK (accessToken)
 ```
 
-**Cách giải thích:**
-1.  **Bước 1:** Khi có chuyển động, thiết bị **Camera** chụp ảnh và gửi dữ liệu ảnh (Binary) đến trạm xử lý **AI_Server**.
-2.  **Bước 2:** **AI_Server** tự thực hiện một hành động nội bộ (tự gọi chính nó) để chạy mô hình mạng nơ-ron **YOLOv8** nhằm phát hiện loài vật và độ tin cậy.
-3.  **Bước 3:** **AI_Server** gửi kết quả nhận diện lên **Mobile_Server** qua API REST `POST /detections`.
-4.  **Bước 4:** **Mobile_Server** lưu sự kiện vào cơ sở dữ liệu, tính toán cấp độ nguy hiểm và trả về cấu hình phòng vệ phù hợp (`@DefendAction` - ví dụ: cần bật còi hú, chớp đèn LED).
-5.  **Bước 5:** **AI_Server** nhận phản hồi và ngay lập tức truyền lệnh vật lý tương ứng xuống **Camera** để kích hoạt loa/còi hú/LED chớp tại thực địa nhằm xua đuổi thú.
+> **Cách đọc khi thuyết trình:** *"Ở bước 1, ứng dụng Mobile gửi yêu cầu đăng nhập lên Server..."*
+
+---
+
+## 5. Ví dụ tổng hợp: Luồng nhận diện động vật (Action 1.1)
+
+Đây là đoạn sơ đồ quan trọng nhất trong đề tài — mô tả toàn bộ quá trình từ khi Camera phát hiện thú rừng đến khi kích hoạt thiết bị xua đuổi:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Camera
+    participant AI_Server
+    participant Mobile_Server
+    participant Database
+
+    Note over Camera: Cảm biến phát hiện chuyển động tại thực địa
+    Camera->>AI_Server: Gửi ảnh chụp được (Binary)
+
+    activate AI_Server
+    AI_Server->>AI_Server: Phân tích bằng YOLOv8
+    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections
+    activate Mobile_Server
+    Mobile_Server->>Database: Lưu sự kiện, tính resolvedDangerLevel
+    Database-->>Mobile_Server: eventId
+    Mobile_Server-->>AI_Server: Response 201 Created (DefendAction)
+    deactivate Mobile_Server
+    deactivate AI_Server
+
+    rect rgb(255, 220, 200)
+        Note over AI_Server,Camera: Kích hoạt thiết bị xua đuổi
+        AI_Server->>Camera: Truyền lệnh điều khiển (DefendAction)
+    end
+```
+
+**Cách giải thích từng bước:**
+
+| Bước | Đối tượng | Hành động |
+|------|-----------|-----------|
+| 1 | Camera | Phát hiện chuyển động, chụp ảnh và gửi đến AI_Server |
+| 2 | AI_Server | **Self-call**: chạy YOLOv8 nhận diện loài thú |
+| 3 | AI_Server → Mobile_Server | Gửi kết quả nhận diện (`detections[]`) qua REST API |
+| 4 | Mobile_Server → Database | Lưu sự kiện, tính `resolvedDangerLevel` |
+| 5 | Mobile_Server → AI_Server | Trả về cấu hình phòng vệ (`DefendAction`) |
+| 6 | AI_Server → Camera | Truyền lệnh vật lý kích hoạt loa/đèn tại thực địa |
+
+---
+
+## 6. Tóm tắt bảng ký hiệu
+
+| Ký hiệu Mermaid | Hình ảnh hiển thị | Ý nghĩa |
+|---|---|---|
+| `A->>B: msg` | Mũi tên nét liền, đầu đặc | Gửi yêu cầu / Request |
+| `B-->>A: msg` | Mũi tên nét đứt, đầu hở | Phản hồi kết quả / Response |
+| `activate B` / `deactivate B` | Dải hình chữ nhật trên lifeline | Đang bận xử lý tác vụ |
+| `A->>A: msg` | Mũi tên vòng lại chính mình | Hành động nội bộ (self-call) |
+| `Note over A,B: ...` | Hộp ghi chú nằm ngang | Chú thích ngữ cảnh / giải thích |
+| `par ... and ... end` | Khối nền có nhãn `par` | Các hành động chạy song song |
+| `rect rgb(...) ... end` | Khung nền tô màu | Nhóm các hành động có liên quan |
+| `autonumber` | Số thứ tự trên mỗi mũi tên | Đánh số tự động các bước |
+
