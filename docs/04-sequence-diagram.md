@@ -315,44 +315,7 @@ sequenceDiagram
     *   [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
     *   [GET /events](./03-mobile_api.md#101-get-events)
 
-### 4.2. Action: Điều khiển ghi đè thủ công thiết bị ngoại vi [🤖AI_SERVER🤖]
-
-- **Mô tả:** Người dùng bật/tắt thủ công nhanh còi, LED, hàng rào điện sinh học hoặc kích hoạt báo động khẩn cấp toàn trạm.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
-    participant Database as Database
-    participant AI_Server as AI_Server
-    participant Camera as Camera
-
-    Note over AI_Server, Mobile_Server: Kết nối WS /ws/cameras đã được AI_Server thiết lập và duy trì
-    Note over Mobile, Camera: Người dùng bật/tắt thiết bị ngoại vi thủ công (ví dụ: LED)
-    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/led_flash/override (overrideState: true/false)
-    activate Mobile_Server
-    Mobile_Server->>Database: Cập nhật trạng thái ghi đè (USER_OVERRIDE)
-    Database-->>Mobile_Server: Ghi nhận thành công
-
-    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, deviceKey: "led_flash", action: "ON/OFF")
-    activate AI_Server
-    AI_Server->>Camera: Phát lệnh kích hoạt/ngắt rơ-le LED vật lý
-    activate Camera
-    Camera-->>AI_Server: Phản hồi xác nhận trạng thái thiết bị đã đổi
-    deactivate Camera
-    AI_Server-->>Mobile_Server: WebSocket: Phản hồi COMMAND_ACK (commandId, status: "SUCCESS")
-    deactivate AI_Server
-
-    Mobile_Server-->>Mobile: Response 200 OK (trạng thái thiết bị mới)
-    deactivate Mobile_Server
-    Mobile->>Mobile: Cập nhật trạng thái nút công tắc (Toggle Button UI)
-```
-*   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/devices/{deviceKey}/override](./03-mobile_api.md#62-post-camerascameraiddevicesdevicekeyoverride)
-    *   [override-all](./03-mobile_api.md#63-post-camerascameraiddevicesoverride-all)
-
-### 4.3. Action: Thay đổi tên hiển thị của trạm camera
+### 4.2. Action: Thay đổi tên hiển thị của trạm camera
 
 - **Mô tả:** Người dùng bấm nút sửa tên hiển thị trên màn hình chi tiết, nhập tên mới và lưu lại để đồng bộ lên DB.
 
@@ -512,7 +475,7 @@ sequenceDiagram
     Mobile->>Mobile: Hiển thị thông báo "Phát âm thanh kiểm thử thành công"
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#64-post-camerascameraiddevicesdevicekeytest)
+    *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#61-post-camerascameraiddevicesdevicekeytest)
 
 ---
 
