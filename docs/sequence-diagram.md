@@ -497,9 +497,9 @@ sequenceDiagram
 
     Note over AI_Server, Mobile_Server: Kết nối WS /ws/cameras đã được AI_Server thiết lập và duy trì
     Note over Mobile, Camera: Người dùng bấm nút "Nghe thử" tại app
-    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/speaker/test (audioSampleId, volume)
+    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (sampleId, durationSeconds)
     activate Mobile_Server
-    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, deviceKey: "speaker", action: "TEST", params)
+    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, deviceKey, action: "TEST", params)
     activate AI_Server
     AI_Server->>Camera: Ra lệnh cho Loa phát thanh phát file âm thanh mẫu
     activate Camera

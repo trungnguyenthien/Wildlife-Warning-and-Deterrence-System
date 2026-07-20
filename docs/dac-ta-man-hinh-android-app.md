@@ -375,9 +375,9 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 |---|---|---|
 | `defense_params_toggle_container` | Container (clickable) | Header label `Tuỳ chỉnh nâng cao` + icon `expand_more` / `expand_less`. Nhấn để đổi trạng thái collapsed/expanded của `defense_params_expandable_container`. Khi collapsed, các control bên trong không hiển thị (chỉ thấy header). |
 | `defense_params_expandable_container` | Container (expandable) | Body collapsible — chứa toàn bộ control cài đặt chi tiết dưới đây. Trạng thái **bị ép** bởi `preset_radio_group` (xem mục 6.2). |
-| `sound_type_dropdown` | Dropdown | Label `Loại âm thanh xua đuổi`. Lựa chọn: `Tiếng súng` · `Tiếng gầm` · `Tiếng chó sủa lớn` · `Tiếng nổ giả lập` · `Tần số siêu âm`. |
+| `sound_type_dropdown` | Dropdown | Label `Loại âm thanh xua đuổi`. Lấy danh sách ID âm thanh nạp sẵn trong phần cứng từ mảng `animalDeterrentSounds` của API `GET /audio-samples` (ID bắt đầu bằng prefix `A_`, ví dụ mặc định: `Tiếng súng` · `Tiếng gầm` · `Tiếng chó sủa lớn` · `Tiếng nổ giả lập` · `Tần số siêu âm`). |
 | `sound_intensity_slider` | Slider | Label `Cường độ âm thanh`. Range `1`–`100`. |
-| `sound_test_button` | Button (Secondary) | Label `Nghe thử (Test Audio)`. Phát âm thanh đã chọn ở mức cường độ hiện tại qua loa thiết bị. |
+| `sound_test_button` | Button (Secondary) | Label `Nghe thử (Test Audio)`. Gửi lệnh kích hoạt qua API để phát thử đồng thời âm thanh xua đuổi đã chọn (prefix `A_`) và âm thanh cảnh báo người dân (prefix `N_`) tại trạm camera thực địa. |
 | `led_frequency_dropdown` | Dropdown | Label `Tần suất LED`. Lựa chọn: `2 lần/giây` · `4 lần/giây` · `Nhấp nháy ngẫu nhiên`. |
 | `led_color_segmented` | SegmentedControl | Label `Màu sắc LED`. Lựa chọn: `Đỏ` · `Trắng` · `Đỏ xen kẽ Trắng`. |
 | `led_duration_input` | NumberInput | Label `Thời lượng LED (giây)`. |
@@ -385,7 +385,7 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 | `fence_warning_light_toggle` | Toggle | Label `Đèn cảnh báo vàng/đỏ nhấp nháy kèm theo`. |
 | `fence_notify_on_trigger_toggle` | Toggle | Label `Tự động gửi SMS/Push khi hàng rào hoạt động`. |
 | `fence_auto_off_hint_text` | Text (caption) | Label `Tự ngắt sau 2 phút không phát hiện thú` *(thông tin, không chỉnh)*. |
-| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lựa chọn: `Mẫu 1 (Voi hoang dã)` · `Mẫu 2 (Thú dữ xâm lấn)` · `Mẫu 3 (Di tản lánh nạn)`. |
+| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lấy danh sách ID mẫu phát loa nạp sẵn trong phần cứng từ mảng `citizenAlertSounds` của API `GET /audio-samples` (ID bắt đầu bằng prefix `N_`, ví dụ mặc định: `Mẫu 1 (Voi hoang dã)` · `Mẫu 2 (Thú dữ xâm lấn)` · `Mẫu 3 (Di tản lánh nạn)`). |
 | `notify_sms_toggle` | Toggle | Label `Gửi SMS`. |
 | `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. |
 
