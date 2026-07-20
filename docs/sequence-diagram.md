@@ -52,7 +52,7 @@ _(Không có action load dữ liệu ban đầu)_
 
 ### 1.1. Action: Đăng ký tài khoản mới
 
-- **Mô tả:** Người dùng nhập các thông tin đăng ký (họ tên, số điện thoại, mật khẩu, vai trò) để tạo tài khoản mới trong hệ thống.
+- **Mô tả:** Người dùng nhập các thông tin đăng ký (tên đăng nhập, họ tên, số điện thoại, mật khẩu, vai trò, và email tùy chọn) để tạo tài khoản mới trong hệ thống.
 
 ```mermaid
 sequenceDiagram
@@ -62,9 +62,9 @@ sequenceDiagram
     participant Database as Database
 
     Note over Mobile, Database: Tiến trình Đăng ký tài khoản mới
-    Mobile->>Mobile_Server: POST /auth/register (fullName, phoneNumber, password, role)
+    Mobile->>Mobile_Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
     activate Mobile_Server
-    Mobile_Server->>Database: Truy vấn số điện thoại trùng lặp
+    Mobile_Server->>Database: Truy vấn tên đăng nhập / số điện thoại trùng lặp
     Database-->>Mobile_Server: Kết quả (Chưa tồn tại)
     Mobile_Server->>Mobile_Server: Băm mật khẩu (Bcrypt/Argon2)
     Mobile_Server->>Database: Tạo bản ghi người dùng mới (mã hex 4 ký tự)
@@ -84,7 +84,7 @@ _(Không có action load dữ liệu ban đầu)_
 
 ### 2.1. Action: Đăng nhập hệ thống & Đăng ký Push Token
 
-- **Mô tả:** Người dùng đăng nhập bằng số điện thoại và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
+- **Mô tả:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
 
 ```mermaid
 sequenceDiagram
@@ -95,9 +95,9 @@ sequenceDiagram
     participant FCM_SDK as FCM_SDK
 
     Note over Mobile, Database: Tiến trình Đăng nhập tài khoản
-    Mobile->>Mobile_Server: POST /auth/login (phoneNumber, password)
+    Mobile->>Mobile_Server: POST /auth/login (username, password)
     activate Mobile_Server
-    Mobile_Server->>Database: Truy vấn thông tin người dùng theo số điện thoại
+    Mobile_Server->>Database: Truy vấn thông tin người dùng theo tên đăng nhập
     Database-->>Mobile_Server: Trả về mật khẩu đã băm & thông tin người dùng
     Mobile_Server->>Mobile_Server: Xác thực mật khẩu
     Mobile_Server->>Mobile_Server: Tạo JWT Access Token & Refresh Token

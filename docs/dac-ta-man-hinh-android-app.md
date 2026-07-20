@@ -88,11 +88,11 @@ Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chư
 | `register_title_text` | Text (Top bar) | Label `Đăng ký tài khoản`. |
 | `subtitle_text` | Text | Label `Tạo tài khoản để quản lý hệ thống cảnh báo`. |
 | `username_input` | TextField | Label `Username`. Bắt buộc. Cùng quy tắc format với `[LOGIN_SCREEN]`. |
-| `email_input` | TextField | Label `Email`. Bắt buộc. Dùng để khôi phục tài khoản sau này. Hiển thị icon `✓` khi đúng định dạng. |
+| `email_input` | TextField | Label `Email`. Không bắt buộc (Tùy chọn). Dùng để khôi phục tài khoản hoặc nhận thông báo. Hiển thị icon `✓` khi đúng định dạng. |
 | `password_input` | TextField (Password) | Label `Mật khẩu`. Bắt buộc. Có icon con mắt hiện/ẩn. Khi user gõ, hiển thị `password_strength_indicator` ngay phía dưới. |
 | `password_strength_indicator` | ProgressBar (3 mức) | Label `Yếu / Trung bình / Mạnh`. Tính theo độ dài + có cả chữ lẫn số. |
 | `password_confirm_input` | TextField (Password) | Label `Xác nhận mật khẩu`. Bắt buộc. So sánh với `password_input` ngay khi gõ. Hiển thị lỗi `Mật khẩu không khớp` nếu lệch. |
-| `register_button` | Button (Primary, full-width) | Label `Đăng ký`. Validate toàn bộ form khi bấm → tiến hành tạo tài khoản. Enable khi cả 4 ô hợp lệ và mật khẩu khớp. |
+| `register_button` | Button (Primary, full-width) | Label `Đăng ký`. Validate toàn bộ form khi bấm → tiến hành tạo tài khoản. Enable khi các ô bắt buộc hợp lệ (username, password, confirmPassword) và mật khẩu khớp. |
 | `login_linkbutton` | TextButton | Label `Đã có tài khoản? Đăng nhập`. Mở `[LOGIN_SCREEN]` (tương đương `back_iconbutton`). |
 
 ### Quy tắc validation
@@ -101,7 +101,7 @@ Màn hình khởi đầu khi người dùng mở ứng dụng lần đầu (chư
 |---|---|---|
 | `username_input` | Bắt buộc; 4–20 ký tự; chỉ gồm chữ cái (a–z, A–Z), số (0–9), dấu gạch dưới (`_`); không bắt đầu bằng số; không toàn số. | `Tên đăng nhập 4–20 ký tự, gồm chữ, số và gạch dưới, không bắt đầu bằng số`. |
 | `username_input` (đã tồn tại) | Hệ thống phát hiện username đã được đăng ký. | `Tên đăng nhập đã được sử dụng — chọn tên khác`. |
-| `email_input` | Bắt buộc; theo cú pháp `local@domain.tld` — `local` gồm chữ cái/số/`._%+-`; `domain` và `tld` chỉ gồm chữ cái/số/`-`; phải có `.` ngăn `domain` và `tld`; `tld` tối thiểu 2 ký tự. | `Email không hợp lệ`. |
+| `email_input` | Không bắt buộc (Tùy chọn); nếu nhập, phải theo cú pháp `local@domain.tld` — `local` gồm chữ cái/số/`._%+-`; `domain` và `tld` chỉ gồm chữ cái/số/`-`; phải có `.` ngăn `domain` và `tld`; `tld` tối thiểu 2 ký tự. | `Email không hợp lệ`. |
 | `email_input` (đã tồn tại) | Hệ thống phát hiện email đã được đăng ký. | `Email đã được sử dụng — đăng nhập ngay?`. |
 | `password_input` | Bắt buộc; 8–30 ký tự; phải chứa cả chữ cái và chữ số; không được chỉ toàn khoảng trắng. | Lỗi riêng theo điều kiện: `Tối thiểu 8 ký tự` / `Phải có cả chữ và số` / `Tối đa 30 ký tự`. |
 | `password_confirm_input` | Phải khớp với `password_input`. | `Mật khẩu không khớp`. |

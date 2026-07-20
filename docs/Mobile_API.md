@@ -201,8 +201,10 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 **Request body**
 ```json
 {
+  "username": "nguyenvana",
   "fullName": "Nguyễn Văn A",
   "phoneNumber": "0901234567",
+  "email": "nguyenvana@example.com", // Tùy chọn (Optional)
   "role": "CITIZEN",
   "password": "P@ssw0rd!",
   "confirmPassword": "P@ssw0rd!"
@@ -214,8 +216,10 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 {
   "user": {
     "id": "9f3a",
+    "username": "nguyenvana",
     "fullName": "Nguyễn Văn A",
     "phoneNumber": "+84901234567",
+    "email": "nguyenvana@example.com", // null nếu không nhập
     "role": "CITIZEN",
     "createdAt": "2026-07-16T08:30:00+07:00"
   },
@@ -226,7 +230,9 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 ```
 
 **Validation format (client-side, fail → 400)**
+- `username`: Bắt buộc, 4-20 ký tự, gồm chữ cái, số và dấu gạch dưới, không bắt đầu bằng số.
 - `phoneNumber`: regex `^0[0-9]{9}$` (SĐT Việt Nam 10 số).
+- `email`: Không bắt buộc. Nếu có nhập, phải đúng định dạng email tiêu chuẩn (`local@domain.tld`).
 - `password`: ≥ 8 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt.
 - `role`: 1 trong 4 enum trên — UI là Dropdown.
 
@@ -236,7 +242,9 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 - Tự động thực hiện đăng nhập → chuyển sang `MAIN`.
 
 **Lỗi hay gặp**
+- `409 ERR_USERNAME_ALREADY_USED` → hiện lỗi inline tại field Username.
 - `409 ERR_PHONE_ALREADY_USED` → hiện lỗi inline tại field SĐT.
+- `409 ERR_EMAIL_ALREADY_USED` → hiện lỗi inline tại field Email (nếu email được gửi).
 
 ---
 
@@ -247,7 +255,7 @@ Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-
 **Request body**
 ```json
 {
-  "phoneNumber": "0901234567",
+  "username": "nguyenvana",
   "password": "P@ssw0rd!"
 }
 ```
@@ -255,7 +263,14 @@ Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-
 **Response 200**
 ```json
 {
-  "user": { "id":"...", "fullName":"...", "phoneNumber":"...", "role":"CITIZEN" },
+  "user": { 
+    "id": "9f3a", 
+    "username": "nguyenvana", 
+    "fullName": "Nguyễn Văn A", 
+    "phoneNumber": "+84901234567", 
+    "email": "nguyenvana@example.com",
+    "role": "CITIZEN" 
+  },
   "accessToken": "...",
   "refreshToken": "...",
   "expiresIn": 3600
@@ -263,8 +278,8 @@ Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [de-tai-nghien-cuu-canh-
 ```
 
 **Lỗi hay gặp**
-- `401 ERR_INVALID_CREDENTIALS` → banner đỏ: "Số điện thoại hoặc mật khẩu không đúng." Sau 5 lần sai liên tiếp → `429` (rate limit 1 phút).
-- `404 ERR_PHONE_NOT_REGISTERED` → "Số điện thoại chưa đăng ký" + link "Đăng ký ngay".
+- `401 ERR_INVALID_CREDENTIALS` → banner đỏ: "Tên đăng nhập hoặc mật khẩu không đúng." Sau 5 lần sai liên tiếp → `429` (rate limit 1 phút).
+- `404 ERR_USERNAME_NOT_REGISTERED` → "Tên đăng nhập chưa đăng ký" + link "Đăng ký ngay".
 
 **Side effects**
 - Reset rate-limit counter khi đăng nhập thành công.
