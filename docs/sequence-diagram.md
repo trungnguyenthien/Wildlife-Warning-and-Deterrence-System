@@ -543,7 +543,7 @@ sequenceDiagram
 
 ### 7.2. Action: Thêm / Xóa số điện thoại nhận tin nhắn SMS
 
-- **Mô tả:** Người dùng thực hiện thêm số điện thoại mới (qua dialog) hoặc nhấn xóa một số điện thoại khỏi danh sách nhận cảnh báo.
+- **Mô tả:** Người dùng thực hiện thêm số điện thoại mới (qua dialog) hoặc nhấn xóa một số điện thoại khỏi danh sách nhận cảnh báo. Mỗi tài khoản người dùng được thêm tối đa 3 số điện thoại nhận tin.
 
 ```mermaid
 sequenceDiagram
@@ -555,8 +555,10 @@ sequenceDiagram
     %% THÊM SĐT
     rect rgb(240, 248, 255)
         Note over Mobile, Database: Người dùng nhập SĐT mới và bấm Lưu
-        Mobile->>Mobile_Server: POST /users/me/sms-recipients (phoneNumber, label)
+        Mobile->>Mobile_Server: POST /users/me/sms-recipients (fullName, phoneNumber, relation)
         activate Mobile_Server
+        Mobile_Server->>Database: Đếm số lượng SĐT đã đăng ký của user
+        Database-->>Mobile_Server: Kết quả (nếu < 3)
         Mobile_Server->>Database: Thêm bản ghi SĐT nhận tin mới
         Database-->>Mobile_Server: Lưu thành công
         Mobile_Server-->>Mobile: Response 201 Created (SĐT mới)
@@ -603,13 +605,13 @@ sequenceDiagram
     Note over Camera, AI_Server: Phát hiện chuyển động vật lý tại thực địa
     Camera->>AI_Server: Gửi hình ảnh chụp được (File Binary)
     activate AI_Server
-    AI_Server->>AI_Server: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng loài, số lượng, độ tin cậy)
+    AI_Server->>AI_Server: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
 
-    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections (image, speciesId, count, confidence)
+    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
     activate Mobile_Server
     Mobile_Server->>Mobile_Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
     Mobile_Server->>Database: Ghi nhận sự kiện phát hiện động vật hoang dã (events)
-    Mobile_Server->>Database: Truy vấn cấu hình phòng vệ tương ứng (cameraId, speciesId)
+    Mobile_Server->>Database: Truy vấn cấu hình phòng vệ cho loài nguy hiểm nhất trong danh sách
     Database-->>Mobile_Server: Trả về cấu hình phòng vệ (response-configs: "@DefendAction")
 
     par Đẩy thông báo khẩn cấp đa kênh
@@ -622,7 +624,7 @@ sequenceDiagram
         Mobile_Server-->>Mobile: Đẩy camera-update qua kết nối SSE đang hoạt động
     end
 
-    Mobile_Server-->>AI_Server: Response 201 Created (phản hồi cấu hình "@DefendAction")
+    Mobile_Server-->>AI_Server: Response 201 Created (eventId, detections, resolvedDangerLevel, "@DefendAction")
     deactivate Mobile_Server
 
     AI_Server->>Camera: Truyền lệnh điều khiển thiết bị vật lý ("@DefendAction")

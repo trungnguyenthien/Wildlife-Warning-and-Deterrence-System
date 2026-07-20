@@ -180,7 +180,7 @@ Mỗi card là **đơn vị nhỏ nhất** của danh sách, đại diện cho 1
 | `camera_name_text` | **Tên camera** | Text (Bold) | `Cam 1`, `Cam 2`… (đánh số tự động); có thể đổi sang tên tuỳ chỉnh trong `[CAMERA_VIEW_SCREEN]` (vd: `Cam Khu A`) — nhấn `rename_camera_button` trên màn đó. |
 | `camera_location_text` | **Khu vực lắp đặt** | Text (caption) | Mô tả ngắn vị trí: `Rìa rừng phía B`, `Trạm 2 · Đồi cao`… Cắt bớt nếu dài. |
 | `camera_thumbnail_image` | **Ảnh thumbnail** | Image | Ảnh snapshot gần nhất có **độ tin cậy AI ≥ 50%**. Nếu chưa có → placeholder icon camera. Nếu offline → overlay icon `⚪ Offline`. Khi đang tải → trạng thái loading. |
-| `warning_badge_overlay` | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Label dạng `⚠️ [LOÀI] · [%]` (vd: `⚠️ VOI · 92%`). Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW_SCREEN]` của camera đó. |
+| `warning_badge_overlay` | **Badge cảnh báo trên ảnh** *(tuỳ trạng thái)* | Animated badge | Label hiển thị loài nguy hiểm nhất kèm số lượng loài khác nếu có, định dạng: `⚠️ [LOÀI_NGUY_HIỂM_NHẤT] (+X loài) · [%]` (ví dụ: `⚠️ VOI (+1 loài) · 92%`). Chỉ hiện khi camera có sự kiện AI mới trong 30 phút chưa xem. Tắt nhấp nháy khi user đã mở `[CAMERA_VIEW_SCREEN]` của camera đó. |
 | `snapshot_timestamp_overlay` | **Thời gian ghi nhận hình ảnh** | TextOverlay | Mốc thời gian **hệ thống ghi nhận ảnh snapshot**, không phải live. Định dạng `HH:mm · dd/MM` (vd: `9:04 · 16/07`); tooltip dài hơn `HH:mm:ss · dd/MM/yyyy`. Nếu ảnh > 1 giờ: thêm nhãn `cũ` hoặc icon `⏰` (vd: `9:04 · 16/07 · ⏰ cũ`); > 24 giờ: hiển thị cả ngày `16/07` rõ. Nếu chưa có ảnh → text `—`. |
 
 ##### Điều khiển (Controls)
@@ -282,8 +282,8 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 | `snapshot_timestamp_overlay` | TextOverlay | Timestamp `HH:mm:ss · dd/MM/yyyy` góc dưới-trái. |
 | `snapshot_relative_time_text` | TextOverlay | Dòng `Cách đây X phút/giây` góc dưới-phải (relative time tự cập nhật mỗi 10s). |
 | `snapshot_age_chip` | Chip (thông báo) | Label: nếu > 5 phút → `⏰ Ảnh cách đây X phút — có thể đã cũ`; nếu > 30 phút → `⚠️ Ảnh cũ — kiểm tra camera` (màu đỏ). |
-| `ai_analysis_section` | Card (Bảng) | Hiển thị Loài · Số lượng · Mức độ nguy hiểm · Độ tin cậy (%). |
-| `camera_log_list` | List view | Tiêu đề `Lịch sử ghi nhận`. Mỗi dòng là `camera_log_item`: ảnh thumbnail nhỏ · `giờ:phút:giây · Thứ, dd/MM/yyyy` · Độ tin cậy (%) · Loài · Số lượng. Sắp xếp **mới nhất trên đầu**, lazy load khi cuộn. |
+| `ai_analysis_section` | Card (Danh sách) | Hiển thị danh sách các con vật phát hiện được trong khung hình dưới dạng lưới/danh sách (mỗi dòng hiển thị: Loài · Độ tin cậy %). Mức độ nguy hiểm tổng hợp cao nhất (resolved danger level) được làm nổi bật ở góc trên của thẻ. |
+| `camera_log_list` | List view | Tiêu đề `Lịch sử ghi nhận`. Mỗi dòng là `camera_log_item`: ảnh thumbnail nhỏ · `giờ:phút:giây · Thứ, dd/MM/yyyy` · Danh sách các loài phát hiện. Sắp xếp **mới nhất trên đầu**, lazy load khi cuộn. |
 
 **Hành vi:**
 - Nhấn `rename_camera_button` → mở `rename_camera_dialog`. `rename_save_button` ghi nhận thay đổi và refresh `camera_name_title_text`; `rename_cancel_button` đóng không lưu.
