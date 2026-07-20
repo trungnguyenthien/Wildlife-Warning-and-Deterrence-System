@@ -315,7 +315,7 @@ sequenceDiagram
     *   [GET /cameras/{cameraId}](./Mobile_API.md#52-get-camerascameraid)
     *   [GET /events](./Mobile_API.md#101-get-events)
 
-### 4.2. Action: Điều khiển ghi đè thủ công thiết bị ngoại vi
+### 4.2. Action: Điều khiển ghi đè thủ công thiết bị ngoại vi [🤖AI_SERVER🤖]
 
 - **Mô tả:** Người dùng bật/tắt thủ công nhanh còi, LED, hàng rào điện sinh học hoặc kích hoạt báo động khẩn cấp toàn trạm.
 
@@ -483,7 +483,7 @@ sequenceDiagram
     *   [PUT /response-configs/{cameraId}/{speciesId}](./Mobile_API.md#82-put-response-configscameraidspeciesid)
     *   [DELETE /response-configs/{cameraId}/{speciesId}](./Mobile_API.md#84-delete-response-configscameraidspeciesid)
 
-### 6.3. Action: Phát âm thanh test thử loa tại trạm hiện trường
+### 6.3. Action: Phát âm thanh test thử loa tại trạm hiện trường [🤖AI_SERVER🤖]
 
 - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
@@ -587,7 +587,7 @@ sequenceDiagram
 
 ## 1. Không phân chia màn hình (Thực thi ngầm & Tích hợp)
 
-### 1.1. Action: Gửi hình ảnh snapshot và phán đoán nhận dạng của AI Server
+### 1.1. Action: Gửi hình ảnh snapshot và phán đoán nhận dạng của AI Server [🤖AI_SERVER🤖]
 
 - **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/hàng rào tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 
