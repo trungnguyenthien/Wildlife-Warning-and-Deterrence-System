@@ -185,7 +185,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
     "autoOffMinutes": 2                  // Thời gian tự ngắt (BẮT BUỘC >= 2)
   },
   "speaker": {
-    "templateId": "N_warning_thu"        // ID âm thanh cảnh báo người dân (bắt đầu bằng prefix 'N_')
+    "sampleId": "N_warning_thu"          // ID âm thanh cảnh báo người dân (bắt đầu bằng prefix 'N_')
   },
   "silentAlert": false                   // true => Cảnh báo âm thầm (không còi/đèn tại chỗ)
 }
@@ -622,7 +622,7 @@ POST /cameras/cam-001/devices/deterrent_audio/test
 **Request body**
 ```json
 {
-  "sampleId": "gunshot",
+  "sampleId": "A_gunshot",
   "durationSeconds": 3
 }
 ```
@@ -1350,7 +1350,7 @@ Khi người dùng từ Mobile App kích hoạt chế độ ghi đè (`override`
     "action": "ON | OFF | TEST", // ON: kích hoạt phát âm thanh, OFF: ngắt/dừng phát, TEST: phát thử 3 giây
     "params": {
       "volume": 80,
-      "audioSampleId": "A_gunshot" // ID âm thanh bắt đầu bằng prefix A_ hoặc N_ (ví dụ: A_gunshot hoặc N_warning_voi)
+      "sampleId": "A_gunshot" // ID âm thanh bắt đầu bằng prefix A_ hoặc N_ (ví dụ: A_gunshot hoặc N_warning_voi)
     }
   }
 }
