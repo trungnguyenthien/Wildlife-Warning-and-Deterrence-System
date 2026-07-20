@@ -224,6 +224,10 @@ Trạng thái của `camera_card_clickable_container` kết hợp từ **hai chi
 | Thấp / không có | bất kỳ | Không nhấp nháy |
 | `camera_status_indicator` = Offline | bất kỳ | Rõ trạng thái offline (icon + tối màu) |
 
+**Hành vi hoạt động thời gian thực (SSE):**
+- Khi ứng dụng đang mở ở chế độ nổi (foreground) và ở tab `[CAMERA_LIST_TAB]`, ứng dụng sẽ tự động mở và duy trì kết nối SSE đến `GET /cameras/stream`.
+- Khi nhận được sự kiện `camera-update` từ kết nối SSE, ứng dụng kiểm tra và tự động kích hoạt gọi API `GET /cameras` chạy ngầm để reload lại toàn bộ danh sách trạm camera nhằm cập nhật ảnh thumbnail, trạng thái ONLINE/OFFLINE và badge cảnh báo động vật mới nhất lên các thẻ tương ứng.
+
 ---
 
 > 📐 *Các chi tiết bố cục (grid 1/2 cột, tỷ lệ ảnh thumbnail, border radius, elevation, khoảng cách, font size, exact paused animation curves...) thuộc phạm vi designer, không quy định trong tài liệu này.*
@@ -243,7 +247,6 @@ Tab này **không có danh sách camera**. Chỉ hiển thị thống kê tổng
 > 💡 *Lưu ý:* Muốn xem **lịch sử chi tiết từng camera** (danh sách log theo thời gian), nhấn vào Camera Card tương ứng ở tab `[CAMERA_LIST_TAB]` → `[CAMERA_VIEW_SCREEN]` — phần "Danh sách log" nằm cuối màn đó. Tab `[STATISTICS_TAB]` chỉ cung cấp cái nhìn tổng quan.
 
 ---
-
 ### 3.3. `[SETTING_TAB]` — Tab cài đặt
 
 Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài khoản.
@@ -284,9 +287,11 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 
 **Hành vi:**
 - Nhấn `rename_camera_button` → mở `rename_camera_dialog`. `rename_save_button` ghi nhận thay đổi và refresh `camera_name_title_text`; `rename_cancel_button` đóng không lưu.
-- `snapshot_image` tự động refresh mỗi ~2 giây khi AI phát hiện chuyển động đáng kể. Khi không có chuyển động → ảnh giữ nguyên cho đến khi có snapshot mới.
-- Pull-to-refresh → làm mới ảnh snapshot hiện tại.
-- `snapshot_relative_time_text` tự cập nhật định kỳ (mỗi 10s) nhưng `snapshot_timestamp_overlay` chỉ thay đổi khi nhận snapshot mới.
+- **Cập nhật dữ liệu thời gian thực (SSE):** Khi ứng dụng ở chế độ foreground tại màn hình `[CAMERA_VIEW_SCREEN]`, nó sẽ lắng nghe các cập nhật qua kênh kết nối SSE `GET /cameras/stream`. Khi nhận được sự kiện `camera-update` có `cameraId` trùng khớp với camera đang xem:
+  - Ứng dụng tự động gửi lại yêu cầu REST API `GET /cameras/{cameraId}` để cập nhật ảnh lớn snapshot mới nhất và thẻ phân tích AI (`ai_analysis_section`).
+  - Gửi lại yêu cầu `GET /events?cameraId={cameraId}` để lấy danh sách sự kiện mới và nạp thêm vào đầu danh sách lịch sử ghi nhận (`camera_log_list`).
+- Ngoài ra, dữ liệu và `snapshot_image` cũng sẽ tự động làm mới khi ứng dụng nhận được thông báo đẩy (FCM) ở chế độ chạy ngầm/nền (background) báo có sự kiện phát hiện mới, hoặc khi người dùng thực hiện vuốt kéo để làm mới (Pull-to-refresh).
+- `snapshot_relative_time_text` tự cập nhật định kỳ (mỗi 10s) nhưng `snapshot_timestamp_overlay` chỉ thay đổi khi dữ liệu camera được làm mới.
 - Banner cảnh báo (kiểu `emergency_banner_container` ở tab `[CAMERA_LIST_TAB]`) có thể hiện phía trên `snapshot_image` khi có sự kiện mới: `Cam 1 · Phát hiện VOI · 9:04`.
 - Nhấn vào 1 dòng `camera_log_item` → mở `log_detail_lightbox` xem ảnh lớn + metadata đầy đủ.
 - `back_iconbutton` → `[MAIN_SCREEN]` (Android Stack mặc định).
