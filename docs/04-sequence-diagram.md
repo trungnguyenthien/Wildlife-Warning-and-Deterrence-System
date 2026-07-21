@@ -178,9 +178,9 @@ sequenceDiagram
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
 
-### 3.2.1. Action: Load dữ liệu biểu đồ thống kê & feed tin tức
+### 3.2.1. Action: Khởi tạo bộ lọc & Áp dụng lọc dữ liệu (`statistics_filter`)
 
-- **Mô tả:** Khi chuyển sang tab Thống kê, app thực hiện tải dữ liệu để vẽ biểu đồ tần suất phát hiện, sơ đồ nhiệt (heatmap) phân bố động vật và danh sách tin tức cảnh báo của các cơ quan kiểm lâm khu vực.
+- **Mô tả:** Khi mở tab Thống kê, app thực hiện tải danh sách loài và trạm camera để đổ vào các dropdown bộ lọc. Khi người dùng thay đổi bộ lọc (Thời gian, Loài, Camera), app gọi lại API lấy dữ liệu thống kê tổng hợp để vẽ lại biểu đồ/heatmap.
 
 ```mermaid
 sequenceDiagram
@@ -189,36 +189,83 @@ sequenceDiagram
     participant Mobile_Server as Mobile_Server
     participant Database as Database
 
-    Note over Mobile, Database: Chuyển sang tab Thống kê
-    Note over Mobile, Mobile_Server: Gửi các yêu cầu tải dữ liệu song song
-    par Tải biểu đồ thống kê
-        Mobile->>Mobile_Server: GET /stats/summary
+    Note over Mobile, Database: A. Khởi tạo bộ lọc (Tải danh mục dropdowns)
+    par Tải danh mục loài
+        Mobile->>Mobile_Server: GET /species
         activate Mobile_Server
-        Mobile_Server->>Database: Truy vấn dữ liệu thống kê sự kiện
-        Database-->>Mobile_Server: Kết quả tổng hợp
-        Mobile_Server-->>Mobile: Response 200 OK (biểu đồ & heatmap)
+        Mobile_Server->>Database: Truy vấn danh sách loài
+        Database-->>Mobile_Server: Danh sách loài
+        Mobile_Server-->>Mobile: Response 200 OK
         deactivate Mobile_Server
-    and Tải luồng tin tức liên ngành
-        Mobile->>Mobile_Server: GET /alerts/feed
+    and Tải danh sách trạm camera
+        Mobile->>Mobile_Server: GET /cameras
         activate Mobile_Server
-        Mobile_Server->>Database: Truy vấn danh sách tin tức cảnh báo vùng lân cận
-        Database-->>Mobile_Server: Danh sách feed cảnh báo
-        Mobile_Server-->>Mobile: Response 200 OK (items)
-        deactivate Mobile_Server
-    and Tải danh mục mức độ nguy hại
-        Mobile->>Mobile_Server: GET /reference-data/danger-levels
-        activate Mobile_Server
-        Mobile_Server->>Database: Truy vấn danh mục nguy hiểm & phân loài
-        Database-->>Mobile_Server: Danh mục danger levels
-        Mobile_Server-->>Mobile: Response 200 OK (items)
+        Mobile_Server->>Database: Truy vấn danh sách trạm camera
+        Database-->>Mobile_Server: Danh sách camera
+        Mobile_Server-->>Mobile: Response 200 OK
         deactivate Mobile_Server
     end
-    Mobile->>Mobile: Vẽ biểu đồ, bản đồ nhiệt (heatmap) và danh sách cảnh báo tin tức
+
+    Note over Mobile, Database: B. Khi thay đổi bộ lọc
+    Mobile->>Mobile: Chọn camera_id, species_id, thời gian (from, to)
+    Mobile->>Mobile_Server: GET /stats/summary?cameraId={camId}&speciesId={specId}&from={from}&to={to}
+    activate Mobile_Server
+    Mobile_Server->>Database: Lấy thống kê & heatmap theo bộ lọc
+    Database-->>Mobile_Server: Dữ liệu thống kê đã lọc
+    Mobile_Server-->>Mobile: Response 200 OK (data summary)
+    deactivate Mobile_Server
+    Mobile->>Mobile: Vẽ lại biểu đồ và heatmap theo bộ lọc mới
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /stats/summary](./03-mobile_api.md#103-get-statssummary)
+    *   [GET /species](./03-mobile_api.md#81-get-species)
+    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
+    *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
+
+### 3.2.2. Action: Tải danh sách phát hiện gần đây (`weekly_detections_section`)
+
+- **Mô tả:** App tải danh sách các tin cảnh báo khẩn cấp/phát hiện động vật hoang dã gần đây nhất bằng cách gọi API `GET /alerts/feed`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Mobile as Mobile
+    participant Mobile_Server as Mobile_Server
+    participant Database as Database
+
+    Note over Mobile, Database: Tải danh sách phát hiện trong tuần
+    Mobile->>Mobile_Server: GET /alerts/feed?page=0&size=20
+    activate Mobile_Server
+    Mobile_Server->>Database: Truy vấn danh sách tin tức cảnh báo gần đây
+    Database-->>Mobile_Server: Danh sách tin cảnh báo (alerts)
+    Mobile_Server-->>Mobile: Response 200 OK (items)
+    deactivate Mobile_Server
+    Mobile->>Mobile: Hiển thị danh sách tin tức phát hiện lên giao diện
+```
+*   **Chi tiết đặc tả API:**
     *   [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
-    *   [GET /reference-data/danger-levels](./03-mobile_api.md#132-get-reference-datadanger-levels)
+
+### 3.2.3. Action: Tải biểu đồ xu hướng & bản đồ nhiệt di chuyển (`per_camera_analysis_section`)
+
+- **Mô tả:** Tải dữ liệu phân tích thống kê tổng hợp (tổng số lần xuất hiện, tọa độ di chuyển) để vẽ biểu đồ đường xu hướng và sơ đồ nhiệt (heatmap) phân bố động vật.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Mobile as Mobile
+    participant Mobile_Server as Mobile_Server
+    participant Database as Database
+
+    Note over Mobile, Database: Tải dữ liệu tổng hợp phân tích theo trạm
+    Mobile->>Mobile_Server: GET /stats/summary
+    activate Mobile_Server
+    Mobile_Server->>Database: Truy vấn số lần xuất hiện, tọa độ di chuyển
+    Database-->>Mobile_Server: Dữ liệu tổng hợp (số lượng, xu hướng, heatmap)
+    Mobile_Server-->>Mobile: Response 200 OK (summary data)
+    deactivate Mobile_Server
+    Mobile->>Mobile: Vẽ biểu đồ xu hướng (Line Chart) và sơ đồ nhiệt di chuyển (Heatmap)
+```
+*   **Chi tiết đặc tả API:**
+    *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
