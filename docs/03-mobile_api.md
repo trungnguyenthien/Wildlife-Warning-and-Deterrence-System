@@ -772,11 +772,7 @@ Lấy tất cả cấu hình của 1 camera (cho các loài). Mapping: màn hìn
   "id": "9f3a",
   "fullName": "Nguyễn Văn A",
   "phoneNumber": "+84901234567",
-  "role": "CITIZEN",
-  "preferences": {
-    "smsRingtoneEnabled": true,
-    "pushNotificationEnabled": true
-  }
+  "role": "CITIZEN"
 }
 ```
 
@@ -784,19 +780,17 @@ Lấy tất cả cấu hình của 1 camera (cho các loài). Mapping: màn hìn
 
 ### 9.2. `PATCH /users/me`
 
-Cập nhật thông tin + preferences.
+Cập nhật thông tin tài khoản.
 
 **Request body** (partial)
 ```json
 {
-  "fullName": "Nguyễn Văn A",
-  "preferences": {
-    "smsRingtoneEnabled": false
-  }
+  "fullName": "Nguyễn Văn A"
 }
 ```
 
 **Response 200** → trả về user mới.
+
 
 
 

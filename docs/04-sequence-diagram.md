@@ -224,7 +224,7 @@ sequenceDiagram
 
 ### 3.3.1. Action: Load thông tin cá nhân của người dùng
 
-- **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) và các thiết lập preferences chuông báo để hiển thị lên form cài đặt chung.
+- **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung.
 
 ```mermaid
 sequenceDiagram
@@ -237,7 +237,7 @@ sequenceDiagram
     Mobile->>Mobile_Server: GET /users/me
     activate Mobile_Server
     Mobile_Server->>Database: Truy vấn hồ sơ cá nhân người dùng
-    Database-->>Mobile_Server: Hồ sơ user (fullName, role, preferences...)
+    Database-->>Mobile_Server: Hồ sơ user (fullName, role, phoneNumber...)
     Mobile_Server-->>Mobile: Response 200 OK
     deactivate Mobile_Server
     Mobile->>Mobile: Đổ thông tin lên giao diện cài đặt cá nhân
