@@ -504,6 +504,7 @@ sequenceDiagram
     participant Mobile_Server as Mobile_Server
     participant AI_Server as AI_Server
     participant Camera as Camera
+    participant Database as Database
 
     Note over AI_Server, Mobile_Server: Kết nối WS /ws/cameras đã được AI_Server thiết lập và duy trì
     Note over Mobile, Camera: Người dùng bấm nút "Nghe thử" tại app
@@ -517,6 +518,8 @@ sequenceDiagram
     deactivate Camera
     AI_Server-->>Mobile_Server: WebSocket: Phản hồi COMMAND_ACK (commandId, status: "SUCCESS")
     deactivate AI_Server
+    Mobile_Server->>Database: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vật lý (device_logs)
+    Database-->>Mobile_Server: Lưu thành công
     Mobile_Server-->>Mobile: Response 200 OK
     deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị thông báo "Phát âm thanh kiểm thử thành công"
@@ -620,9 +623,12 @@ sequenceDiagram
     AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
     activate Mobile_Server
     Mobile_Server->>Mobile_Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
-    Mobile_Server->>Database: Ghi nhận sự kiện phát hiện động vật hoang dã (events)
+    Mobile_Server->>Database: Ghi nhận sự kiện phát hiện động vật hoang dã (events & event_detections)
     Mobile_Server->>Database: Truy vấn cấu hình phòng vệ cho loài nguy hiểm nhất trong danh sách
-    Database-->>Mobile_Server: Trả về cấu hình phòng vệ (response-configs: "@DefendAction")
+    Database-->>Mobile_Server: Trả về cấu hình phòng vệ (response_configs: "@DefendAction")
+
+    Mobile_Server->>Database: Truy vấn danh sách Push Token và SĐT đăng ký nhận SMS lân cận (push_tokens & sms_recipients)
+    Database-->>Mobile_Server: Trả về danh sách Push Tokens và Số điện thoại nhận SMS
 
     par Đẩy thông báo khẩn cấp đa kênh
         Mobile_Server->>FCM: Yêu cầu đẩy thông báo khẩn cấp (Push alert)
@@ -633,6 +639,9 @@ sequenceDiagram
     and Gửi tín hiệu cập nhật qua SSE (Foreground)
         Mobile_Server-->>Mobile: Đẩy camera-update qua kết nối SSE đang hoạt động
     end
+
+    Mobile_Server->>Database: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vật lý (device_logs)
+    Database-->>Mobile_Server: Lưu thành công
 
     Mobile_Server-->>AI_Server: Response 201 Created (eventId, detections, resolvedDangerLevel, "@DefendAction")
     deactivate Mobile_Server
