@@ -347,8 +347,7 @@ Danh sách camera user được phép xem. Mapping: tab `[CAMERA_LIST_TAB]` (ph�
         "detections": [
           { "speciesId": "elephant", "speciesName": "Voi", "confidence": 0.92, "dangerLevel": "CRITICAL" }
         ],
-        "resolvedDangerLevel": "CRITICAL",
-        "firstDetectedAt": "2026-07-16T09:04:12+07:00"
+        "detectedAt": "2026-07-16T09:04:12+07:00"
       },
       "snapshotUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg"
     }
@@ -386,8 +385,7 @@ Chi tiết 1 camera bao gồm thông tin camera, ảnh snapshot gần nhất và
     "detections": [
       { "speciesId": "elephant", "speciesName": "Voi", "confidence": 0.92, "dangerLevel": "CRITICAL" }
     ],
-    "resolvedDangerLevel": "CRITICAL",
-    "firstDetectedAt": "2026-07-16T09:04:12+07:00"
+    "detectedAt": "2026-07-16T09:04:12+07:00"
   },
   "updatedAt": "2026-07-19T04:40:00+07:00"
 }
@@ -827,10 +825,7 @@ Phân trang + lọc.
       "detections": [
         { "speciesId": "elephant", "speciesName": "Voi", "confidence": 0.92, "dangerLevel": "CRITICAL" }
       ],
-      "resolvedDangerLevel": "CRITICAL",
-      "firstDetectedAt": "2026-07-16T09:04:12+07:00",
-      "resolvedAt": "2026-07-16T09:18:45+07:00",
-      "responseMode": "SILENT_ALERT",            // SILENT_ALERT / ACTIVE_DETERRENCE
+      "detectedAt": "2026-07-16T09:04:12+07:00",
       "snapshotThumbnails": ["..."]
     }
   ],
@@ -1001,7 +996,6 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
     { "speciesId": "elephant", "confidence": 0.92 },
     { "speciesId": "elephant", "confidence": 0.70 }
   ],
-  "resolvedDangerLevel": "CRITICAL",
   "imageUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
   "detectedAt": "2026-07-19T04:55:00+07:00",
   "responseAction": "@DefendAction"

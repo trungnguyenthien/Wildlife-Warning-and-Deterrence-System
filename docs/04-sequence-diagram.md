@@ -50,7 +50,7 @@ graph TD
 
 _(Không có action load dữ liệu ban đầu)_
 
-### 1.1. Action: Đăng ký tài khoản mới
+### 1.1. Action: Register a new account
 
 - **Mô tả:** Người dùng nhập các thông tin đăng ký (tên đăng nhập, họ tên, số điện thoại, mật khẩu, vai trò, và email tùy chọn) để tạo tài khoản mới trong hệ thống.
 
@@ -82,7 +82,7 @@ sequenceDiagram
 
 _(Không có action load dữ liệu ban đầu)_
 
-### 2.1. Action: Đăng nhập hệ thống & Đăng ký Push Token
+### 2.1. Action: Login & Register Push Token
 
 - **Mô tả:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
 
@@ -127,7 +127,7 @@ sequenceDiagram
 
 ### 3.1. Tab Danh sách Camera (`[CAMERA_LIST_TAB]`)
 
-### 3.1.1. Action: Load danh sách trạm camera & snapshot ban đầu
+### 3.1.1. Action: Load camera list & initial snapshots
 
 - **Mô tả:** Khi mở tab hoặc vào màn hình chính, app tự động gọi API lấy danh sách các trạm camera trực thuộc quyền quản lý kèm theo trạng thái hoạt động và ảnh snapshot thumbnail gần nhất để hiển thị.
 
@@ -150,7 +150,7 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
-### 3.1.2. Action: Đăng ký & Lắng nghe sự kiện cập nhật qua SSE
+### 3.1.2. Action: Register & Listen for updates via SSE
 
 - **Mô tả:** Song song với việc tải danh sách, ứng dụng tự động mở kết nối Server-Sent Events (SSE) để duy trì kênh lắng nghe sự kiện từ xa. Khi có cập nhật mới (ảnh chụp mới, thay đổi trạng thái hoạt động), server đẩy tin nhắn `camera-update` báo cho client tự động fetch lại thông tin mới.
 
@@ -178,7 +178,7 @@ sequenceDiagram
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
 
-### 3.2.1. Action: Khởi tạo bộ lọc & Áp dụng lọc dữ liệu (`statistics_filter`)
+### 3.2.1. Action: Initialize filter & Apply filter (`statistics_filter`)
 
 - **Mô tả:** Khi mở tab Thống kê, app thực hiện tải danh sách loài và trạm camera để đổ vào các dropdown bộ lọc. Khi người dùng thay đổi bộ lọc (Thời gian, Loài, Camera), app gọi lại API lấy dữ liệu thống kê tổng hợp để vẽ lại biểu đồ/heatmap.
 
@@ -221,7 +221,7 @@ sequenceDiagram
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
     *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
 
-### 3.2.2. Action: Tải danh sách phát hiện gần đây (`weekly_detections_section`)
+### 3.2.2. Action: Load weekly detections list (`weekly_detections_section`)
 
 - **Mô tả:** App tải danh sách các tin cảnh báo khẩn cấp/phát hiện động vật hoang dã gần đây nhất bằng cách gọi API `GET /alerts/feed`.
 
@@ -244,7 +244,7 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
 
-### 3.2.3. Action: Tải biểu đồ xu hướng & bản đồ nhiệt di chuyển (`per_camera_analysis_section`)
+### 3.2.3. Action: Load trend chart & movement heatmap (`per_camera_analysis_section`)
 
 - **Mô tả:** Tải dữ liệu phân tích thống kê tổng hợp (tổng số lần xuất hiện, tọa độ di chuyển) để vẽ biểu đồ đường xu hướng và sơ đồ nhiệt (heatmap) phân bố động vật.
 
@@ -269,7 +269,7 @@ sequenceDiagram
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
-### 3.3.1. Action: Load thông tin cá nhân của người dùng
+### 3.3.1. Action: Load user profile
 
 - **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung.
 
@@ -292,7 +292,7 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /users/me](./03-mobile_api.md#91-get-usersme)
 
-### 3.3.2. Action: Đăng xuất tài khoản
+### 3.3.2. Action: Logout
 
 - **Mô tả:** Người dùng nhấn nút Đăng xuất, app gửi yêu cầu hủy session trên server, đồng thời hủy FCM Push Token trên thiết bị để ngưng nhận thông báo và đưa người dùng trở lại màn hình đăng nhập.
 
@@ -328,7 +328,7 @@ sequenceDiagram
 
 ## 4. Màn hình Chi tiết Camera (`[CAMERA_VIEW_SCREEN]`)
 
-### 4.1. Action: Load chi tiết trạm camera, snapshot & lịch sử nhật ký
+### 4.1. Action: Load camera details & history logs
 
 - **Mô tả:** Khi người dùng chọn một camera, Mobile sẽ đồng thời tải: thông tin chi tiết camera (bao gồm thông tin trạm, ảnh snapshot gần nhất, phán đoán AI hiện tại) và danh sách lịch sử nhật ký sự kiện ghi nhận của camera đó.
 
@@ -362,7 +362,7 @@ sequenceDiagram
     *   [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
     *   [GET /events](./03-mobile_api.md#101-get-events)
 
-### 4.2. Action: Thay đổi tên hiển thị của trạm camera
+### 4.2. Action: Update camera name
 
 - **Mô tả:** Người dùng bấm nút sửa tên hiển thị trên màn hình chi tiết, nhập tên mới và lưu lại để đồng bộ lên DB.
 
@@ -389,7 +389,7 @@ sequenceDiagram
 
 ## 5. Màn hình Danh sách Cấu hình Loài (`[SPECIES_CONFIG_LIST_SCREEN]`)
 
-### 5.1. Action: Load danh sách loài & tổng quan cấu hình đang áp dụng
+### 5.1. Action: Load species list & configuration overview
 
 - **Mô tả:** Khi người dùng mở màn hình thiết lập ứng phó mặc định, app tải danh sách toàn bộ các loài động vật trong hệ thống (kèm chỉ số hung dữ, đặc tính htmlDescription) và tình trạng cấu hình tương ứng đang được áp dụng tại trạm camera đã chọn.
 
@@ -427,7 +427,7 @@ sequenceDiagram
 
 ## 6. Màn hình Thiết lập Phòng vệ theo Loài (`[SPECIES_CONFIG_DETAIL_SCREEN]`)
 
-### 6.1. Action: Load cấu hình hiện tại của loài & danh mục dữ liệu mẫu
+### 6.1. Action: Load species configuration & sample lists
 
 - **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi và các mẫu nội dung phát loa) để phục vụ dropdown lựa chọn của người dùng.
 
@@ -469,7 +469,7 @@ sequenceDiagram
     *   [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
     *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
 
-### 6.2. Action: Lưu cấu hình ứng phó tự chỉnh của loài
+### 6.2. Action: Update species configuration
 
 - **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, cấp độ hàng rào điện, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình hoặc Đặt lại về mặc định.
 
@@ -493,7 +493,7 @@ sequenceDiagram
     *   [PUT /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#82-put-response-configscameraidspeciesid)
     *   [DELETE /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#84-delete-response-configscameraidspeciesid)
 
-### 6.3. Action: Phát âm thanh test thử loa tại trạm hiện trường [🤖AI_SERVER🤖]
+### 6.3. Action: Test speaker sound at camera station (AI_SERVER)
 
 - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
@@ -531,7 +531,7 @@ sequenceDiagram
 
 ## 7. Màn hình Quản lý SĐT Nhận Cảnh Báo (`[SMS_CONFIG_SCREEN]`)
 
-### 7.1. Action: Load danh sách số điện thoại nhận SMS bổ sung
+### 7.1. Action: Load SMS recipients list
 
 - **Mô tả:** Tải danh sách tối đa 3 số điện thoại đăng ký nhận cảnh báo bổ sung khi mở màn hình quản lý SMS.
 
@@ -554,7 +554,7 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /users/me/sms-recipients](./03-mobile_api.md#121-get-usersmesms-recipients)
 
-### 7.2. Action: Thêm / Xóa số điện thoại nhận tin nhắn SMS
+### 7.2. Action: Add / Remove SMS recipient
 
 - **Mô tả:** Người dùng thực hiện thêm số điện thoại mới (qua dialog) hoặc nhấn xóa một số điện thoại khỏi danh sách nhận cảnh báo. Mỗi tài khoản người dùng được thêm tối đa 3 số điện thoại nhận tin.
 
@@ -600,7 +600,7 @@ sequenceDiagram
 
 ## 1. Không phân chia màn hình (Thực thi ngầm & Tích hợp)
 
-### 1.1. Action: Gửi hình ảnh snapshot và phán đoán nhận dạng của AI Server [🤖AI_SERVER🤖]
+### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
 - **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/hàng rào tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 
@@ -643,7 +643,7 @@ sequenceDiagram
     Mobile_Server->>Database: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vật lý (device_logs)
     Database-->>Mobile_Server: Lưu thành công
 
-    Mobile_Server-->>AI_Server: Response 201 Created (eventId, detections, resolvedDangerLevel, "@DefendAction")
+    Mobile_Server-->>AI_Server: Response 201 Created (eventId, detections, "@DefendAction")
     deactivate Mobile_Server
 
     AI_Server->>Camera: Truyền lệnh điều khiển thiết bị vật lý ("@DefendAction")
