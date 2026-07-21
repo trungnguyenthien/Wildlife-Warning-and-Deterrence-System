@@ -216,9 +216,9 @@ sequenceDiagram
     Mobile->>Mobile: Vẽ biểu đồ, bản đồ nhiệt (heatmap) và danh sách cảnh báo tin tức
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /stats/summary](./03-mobile_api.md#105-get-statssummary)
-    *   [GET /alerts/feed](./03-mobile_api.md#112-get-alertsfeed)
-    *   [GET /reference-data/danger-levels](./03-mobile_api.md#133-get-reference-datadanger-levels)
+    *   [GET /stats/summary](./03-mobile_api.md#103-get-statssummary)
+    *   [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
+    *   [GET /reference-data/danger-levels](./03-mobile_api.md#132-get-reference-datadanger-levels)
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
@@ -336,7 +336,7 @@ sequenceDiagram
     Mobile->>Mobile: Đóng Dialog & cập nhật tiêu đề camera trên thanh Top bar
 ```
 *   **Chi tiết đặc tả API:**
-    *   [PATCH /cameras/{cameraId}](./03-mobile_api.md#53--patch-camerascameraid)
+    *   [PATCH /cameras/{cameraId}](./03-mobile_api.md#53-patch-camerascameraid)
 
 ---
 
@@ -419,8 +419,8 @@ sequenceDiagram
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /response-configs?cameraId=&speciesId=](./03-mobile_api.md#83-get-response-configscameraidspeciesid)
-    *   [GET /control/presets](./03-mobile_api.md#73-get-controlpresets)
-    *   [GET /audio-samples](./03-mobile_api.md#74-get-audio-samples)
+    *   [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
+    *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
 
 ### 6.2. Action: Lưu cấu hình ứng phó tự chỉnh của loài
 
