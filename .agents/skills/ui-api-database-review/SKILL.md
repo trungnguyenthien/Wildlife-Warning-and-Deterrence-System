@@ -30,3 +30,11 @@ Kỹ năng này giúp AI Agent thực hiện rà soát chéo giữa 4 tài liệ
 *   **Hành động:**
     *   Đối chiếu dữ liệu trả về của các API với các cột tương ứng trong bảng.
     *   Phát hiện các trường lưu trữ tính toán động (ví dụ: trạng thái online/offline có thể suy ra từ sự kiện) hoặc các trường dư thừa có thể join từ bảng khác (ví dụ: `danger_level` trong bảng con có thể lấy từ bảng danh mục cha).
+
+### 4. Rà soát API (Tài liệu 03) vs UI (Tài liệu 02)
+*   **Mục tiêu:** Đảm bảo mọi API nghiệp vụ trong `docs/03-mobile_api.md` (ngoại trừ các API tích hợp phần cứng/AI Server hoặc các API chạy ngầm hệ thống) đều được kích hoạt bởi một hành động người dùng hoặc hiển thị dữ liệu trên một màn hình cụ thể được mô tả trong `docs/02-dac-ta-man-hinh-android-app.md`.
+*   **Hành động:**
+    *   Lấy danh sách các API nghiệp vụ từ tệp `03`.
+    *   Đối chiếu xem có nút bấm, danh sách, hay trường dữ liệu nào trên UI của màn hình ở tệp `02` gọi đến hoặc tiêu thụ dữ liệu của API này không.
+    *   Nếu phát hiện API nghiệp vụ không liên kết với bất kỳ giao diện người dùng nào, cảnh báo và đề xuất loại bỏ hoặc bổ sung đặc tả giao diện.
+
