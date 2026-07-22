@@ -51,7 +51,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...payload, username: '' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('username');
+    expect(res.body.error).toBe('missed_username');
   });
 
   it('TC_AUTH_REG_FAILURE_02: Register missing password', async () => {
@@ -60,7 +60,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...payload, password: '' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('password');
+    expect(res.body.error).toBe('missed_password');
   });
 
   it('TC_AUTH_REG_FAILURE_03: Register missing fullName', async () => {
@@ -69,7 +69,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...payload, fullName: '' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('fullName');
+    expect(res.body.error).toBe('missed_fullName');
   });
 
   it('TC_AUTH_REG_FAILURE_04: Register missing phoneNumber', async () => {
@@ -78,7 +78,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...payload, phoneNumber: '' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('phoneNumber');
+    expect(res.body.error).toBe('missed_phoneNumber');
   });
 
   it('TC_AUTH_REG_FAILURE_05: Register missing role', async () => {
@@ -87,7 +87,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...payload, role: '' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('role');
+    expect(res.body.error).toBe('missed_role');
   });
 
   it('TC_AUTH_REG_FAILURE_06: Register with invalid phone number format', async () => {
@@ -95,7 +95,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...validUser, username: 'ranger2', phoneNumber: '0901234567' }); // Không bắt đầu bằng +
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('số điện thoại không hợp lệ');
+    expect(res.body.error).toBe('invalid_phone_number');
   });
 
   it('TC_AUTH_REG_FAILURE_07: Register password less than 6 characters', async () => {
@@ -103,7 +103,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send({ ...validUser, username: 'ranger3', password: '123' });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('ít nhất 6 ký tự');
+    expect(res.body.error).toBe('invalid_password');
   });
 
   it('TC_AUTH_REG_FAILURE_08: Register duplicate username or phone number', async () => {
@@ -111,7 +111,7 @@ describe('TC_AUTH_REGISTER - Đăng ký tài khoản', () => {
       .post('/auth/register')
       .send(validUser); // Gửi lại thông tin trùng
     expect(res.status).toBe(409);
-    expect(res.body.error).toContain('tồn tại');
+    expect(res.body.error).toBe('duplicate_user');
   });
 });
 
@@ -137,7 +137,7 @@ describe('TC_AUTH_LOGIN - Đăng nhập tài khoản', () => {
         password: 'wrongpassword'
       });
     expect(res.status).toBe(401);
-    expect(res.body.error).toContain('Sai tài khoản hoặc mật khẩu');
+    expect(res.body.error).toBe('unauthorized_credentials');
   });
 
   it('TC_AUTH_LOGIN_FAILURE_02: Login with non-existing username', async () => {
@@ -148,7 +148,7 @@ describe('TC_AUTH_LOGIN - Đăng nhập tài khoản', () => {
         password: 'password123'
       });
     expect(res.status).toBe(401);
-    expect(res.body.error).toContain('Sai tài khoản hoặc mật khẩu');
+    expect(res.body.error).toBe('unauthorized_credentials');
   });
 });
 

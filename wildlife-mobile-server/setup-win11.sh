@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Script setup môi trường dev tự động trên Windows 11 (Chạy qua Git Bash)
-# Yêu cầu mở Git Bash bằng quyền Administrator và chạy: ./setup-win11.sh
+# Tự động điều hướng đến thư mục chứa script
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+cd "$SCRIPT_DIR" || exit 1
 
 echo "========================================="
 echo "BẮT ĐẦU THIẾT LẬP MÔI TRƯỜNG DEV CHO WINDOWS 11"
@@ -31,14 +33,50 @@ else
     echo "[3/5] VS Code đã được cài đặt sẵn."
 fi
 
-# 4. Cài đặt PostgreSQL qua winget
+# 4. Cài đặt và Khởi tạo PostgreSQL
 if ! command -v psql &> /dev/null; then
     echo "[4/5] Đang cài đặt PostgreSQL Server..."
     cmd.exe /c "winget install PostgreSQL.PostgreSQL --silent --accept-source-agreements --accept-package-agreements"
-    echo "Lưu ý: EDB PostgreSQL Installer sẽ chạy ngầm, vui lòng làm theo hướng dẫn trên màn hình Windows để đặt password và cài đặt cổng mặc định 5432."
+    echo "Lưu ý: EDB PostgreSQL Installer đang cài đặt ngầm. Khi hoàn thành, vui lòng làm theo hướng dẫn trên màn hình Windows để cài đặt mật khẩu mặc định là 'password' và cổng mặc định 5432."
 else
     echo "[4/5] PostgreSQL đã được cài đặt sẵn."
 fi
+
+# Tự động nạp thư mục cài đặt PostgreSQL vào PATH tạm thời để chạy lệnh psql
+PG_BIN=""
+for v in 16 15 14; do
+    if [ -d "/c/Program Files/PostgreSQL/$v/bin" ]; then
+        PG_BIN="/c/Program Files/PostgreSQL/$v/bin"
+        break
+    fi
+done
+
+if [ -n "$PG_BIN" ]; then
+    export PATH="$PG_BIN:$PATH"
+fi
+
+echo "Đang khởi động dịch vụ PostgreSQL..."
+cmd.exe /c "net start postgresql-x64-16" &>/dev/null || \
+cmd.exe /c "net start postgresql-x64-15" &>/dev/null || \
+cmd.exe /c "net start postgresql-x64-14" &>/dev/null || true
+
+echo "Đang chờ dịch vụ PostgreSQL sẵn sàng..."
+if command -v pg_isready &> /dev/null; then
+    until pg_isready -h localhost -p 5432 &>/dev/null; do
+        sleep 1
+    done
+else
+    sleep 5
+fi
+echo "PostgreSQL đã sẵn sàng."
+
+# Khởi tạo database nếu chưa tồn tại
+echo "Khởi tạo cơ sở dữ liệu..."
+PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_dev'" | grep -q 1 &>/dev/null || \
+PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_dev;" &>/dev/null || true
+
+PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_test'" | grep -q 1 &>/dev/null || \
+PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_test;" &>/dev/null || true
 
 # 5. Cấu hình Dự án & Cài đặt Node Modules
 echo "[5/5] Đang cài đặt các thư viện Node.js của dự án..."
@@ -70,6 +108,14 @@ if [ ! -f .env.test ]; then
     echo 'CLOUDINARY_API_KEY="test_api_key"' >> .env.test
     echo 'CLOUDINARY_API_SECRET="test_api_secret"' >> .env.test
     echo 'SMS_API_KEY="test_sms_key"' >> .env.test
+fi
+
+# Đẩy cấu trúc bảng (schema) lên local db
+echo "Khởi tạo cấu trúc bảng (schema) trên database local..."
+if command -v npx &> /dev/null; then
+    npx dotenv-cli -e .env.local -- npx prisma db push
+elif command -v npx.cmd &> /dev/null; then
+    npx.cmd dotenv-cli -e .env.local -- npx.cmd prisma db push
 fi
 
 # Sinh static Prisma client

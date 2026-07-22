@@ -16,6 +16,7 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   *Không gom chung lỗi vi phạm ràng buộc nghiệp vụ (Business logic/Bounds validation):* Lỗi logic (như ngày bắt đầu lớn hơn ngày kết thúc, giá trị vượt quá khoảng giới hạn 0-100%, hoặc đăng ký vượt hạn mức DB) được kiểm thử trong các ca riêng biệt.
 *   **Một testcase chỉ kiểm tra một lỗi duy nhất (Single Responsibility Test):** Tránh thiết kế các ca kiểm thử "phức hợp" kiểm tra nhiều lỗi đồng thời trên cùng một request payload để đảm bảo khi test báo đỏ, lập trình viên/AI xác định ngay lập tức nguyên nhân lỗi cụ thể.
 *   **Quản lý Vòng đời Testcase bằng thẻ `[DELETED]` (Soft Delete):** Khi một kịch bản kiểm thử không còn phù hợp và cần được loại bỏ, **không được xóa bỏ hoàn toàn dòng/mã của testcase đó** khỏi tài liệu. Hãy thêm tiền tố `[DELETED]` vào ngay trước mã định danh ID (ví dụ: `[DELETED] TC_AUTH_REG_SUCCESS_02`). Việc này giúp giữ nguyên hệ thống đánh số ID và giúp AI Agent nhận biết chính xác để xóa bỏ testcase tương ứng trong code hoặc cập nhật nhanh chóng.
+*   **Phản hồi Lỗi Chuẩn hóa (Standardized Error Responses):** Tất cả các kết quả mong đợi của ca kiểm thử lỗi (Validation Failures, Bad Requests) phải có cấu trúc phản hồi dạng: `{ error: string, message: string }`. Trường `error` chứa mã lỗi snake_case cụ thể mô tả rõ bản chất lỗi (ví dụ: `missed_username`, `missed_password`, `invalid_phone_number`, `invalid_led_color`, `limit_reached`, `not_found`, `forbidden`) chứ không chỉ trả về mã HTTP và thông báo chung chung.
 
 ---
 

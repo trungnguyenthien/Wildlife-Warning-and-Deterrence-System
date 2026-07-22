@@ -55,7 +55,7 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
   const { cameraId } = req.params;
 
   if (cameraId.length > 50) {
-    return res.status(400).json({ error: 'Mã camera quá dài. Giới hạn tối đa 50 ký tự.' });
+    return res.status(400).json({ error: 'invalid_camera_id', message: 'Mã camera quá dài. Giới hạn tối đa 50 ký tự.' });
   }
 
   try {
@@ -64,7 +64,7 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
     // Tìm sự kiện hoạt động gần nhất trong vòng 5 phút trước
@@ -109,7 +109,7 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi lấy chi tiết camera:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
@@ -120,15 +120,15 @@ export async function renameCamera(req: AuthenticatedRequest, res: Response) {
 
   // Lấy vai trò user
   if (req.user?.role !== 'RANGER') {
-    return res.status(403).json({ error: 'Quyền truy cập bị từ chối: Chỉ kiểm lâm mới có thể đổi tên camera.' });
+    return res.status(403).json({ error: 'forbidden_ranger_only', message: 'Quyền truy cập bị từ chối: Chỉ kiểm lâm mới có thể đổi tên camera.' });
   }
 
   if (name === undefined || name === '') {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: name không được để trống.' });
+    return res.status(400).json({ error: 'missed_name', message: 'Thiếu thông tin bắt buộc: name không được để trống.' });
   }
 
   if (name.length > 100) {
-    return res.status(400).json({ error: 'Tên camera vượt quá giới hạn tối đa 100 ký tự.' });
+    return res.status(400).json({ error: 'invalid_camera_name', message: 'Tên camera vượt quá giới hạn tối đa 100 ký tự.' });
   }
 
   try {
@@ -137,7 +137,7 @@ export async function renameCamera(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
     const updatedCamera = await prisma.camera.update({
@@ -199,24 +199,24 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
 
   // Validation: Thiếu các trường bắt buộc
   if (durationSeconds === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: durationSeconds.' });
+    return res.status(400).json({ error: 'missed_duration_seconds', message: 'Thiếu thông tin bắt buộc: durationSeconds.' });
   }
   if (intensity === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: intensity.' });
+    return res.status(400).json({ error: 'missed_intensity', message: 'Thiếu thông tin bắt buộc: intensity.' });
   }
 
   // Validation: Sai định dạng khoảng giá trị
   if (intensity < 0 || intensity > 100) {
-    return res.status(400).json({ error: 'Cường độ thiết bị (intensity) phải nằm trong khoảng từ 0 đến 100.' });
+    return res.status(400).json({ error: 'invalid_intensity', message: 'Cường độ thiết bị (intensity) phải nằm trong khoảng từ 0 đến 100.' });
   }
   if (durationSeconds < 0) {
-    return res.status(400).json({ error: 'Thời gian chạy thử (durationSeconds) phải lớn hơn hoặc bằng 0.' });
+    return res.status(400).json({ error: 'invalid_duration_seconds', message: 'Thời gian chạy thử (durationSeconds) phải lớn hơn hoặc bằng 0.' });
   }
 
   // Validation: Thiết bị ngoại vi không được hỗ trợ
   const validKeys = ['led', 'speaker', 'fence'];
   if (!validKeys.includes(deviceKey)) {
-    return res.status(404).json({ error: 'Thiết bị ngoại vi yêu cầu không tồn tại tại trạm camera này.' });
+    return res.status(404).json({ error: 'not_found_device', message: 'Thiết bị ngoại vi yêu cầu không tồn tại tại trạm camera này.' });
   }
 
   try {
@@ -225,7 +225,7 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
     // Tìm sự kiện gần nhất của camera này để liên kết log.

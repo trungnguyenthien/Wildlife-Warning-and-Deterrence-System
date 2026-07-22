@@ -159,7 +159,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('detections');
+    expect(res.body.error).toBe('missed_detections');
   });
 
   it('TC_EVT_DETECTION_FAILURE_02: AI Webhook missing imageUrl', async () => {
@@ -169,7 +169,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('imageUrl');
+    expect(res.body.error).toBe('missed_image_url');
   });
 
   it('TC_EVT_DETECTION_FAILURE_03: AI Webhook missing detectedAt', async () => {
@@ -179,7 +179,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('detectedAt');
+    expect(res.body.error).toBe('missed_detected_at');
   });
 
   it('TC_EVT_DETECTION_FAILURE_04: AI Webhook with empty detections array', async () => {
@@ -188,7 +188,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send({ ...validAiPayload, detections: [] });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('không được để trống');
+    expect(res.body.error).toBe('invalid_detections');
   });
 
   it('TC_EVT_DETECTION_FAILURE_05: AI Webhook with negative confidence', async () => {
@@ -200,6 +200,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_confidence');
   });
 
   it('TC_EVT_DETECTION_FAILURE_06: AI Webhook with confidence exceeds 1', async () => {
@@ -211,6 +212,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_confidence');
   });
 
   it('TC_EVT_DETECTION_FAILURE_07: AI Webhook with invalid imageUrl URL format', async () => {
@@ -219,6 +221,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send({ ...validAiPayload, imageUrl: 'ftp-not-valid-url' });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_image_url');
   });
 
   it('TC_EVT_DETECTION_FAILURE_08: AI Webhook with invalid detectedAt format', async () => {
@@ -227,6 +230,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .send({ ...validAiPayload, detectedAt: '22-07-2026' }); // Sai ISO 8601
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_detected_at');
   });
 
   // 3. GET /alerts/feed & GET /alerts/feed/{alertId}/read
@@ -271,6 +275,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .set('Authorization', `Bearer ${rangerToken}`);
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_page');
   });
 
   it('TC_EVT_FEED_FAILURE_02: Retrieve feed with negative size number', async () => {
@@ -280,6 +285,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .set('Authorization', `Bearer ${rangerToken}`);
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_size');
   });
 
   it('TC_EVT_READ_SUCCESS_01: Mark alert notification as read successfully', async () => {

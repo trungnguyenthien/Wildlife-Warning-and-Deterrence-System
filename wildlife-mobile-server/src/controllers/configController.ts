@@ -112,7 +112,7 @@ export async function listConfigs(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
     const configs = await prisma.responseConfig.findMany({
@@ -122,7 +122,7 @@ export async function listConfigs(req: AuthenticatedRequest, res: Response) {
     return res.status(200).json(configs);
   } catch (error) {
     console.error('Lỗi khi tải cấu hình camera:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
@@ -131,10 +131,10 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
   const { cameraId, speciesId } = req.query;
 
   if (!cameraId) {
-    return res.status(400).json({ error: 'Thiếu tham số bắt buộc: cameraId.' });
+    return res.status(400).json({ error: 'missed_camera_id', message: 'Thiếu tham số bắt buộc: cameraId.' });
   }
   if (!speciesId) {
-    return res.status(400).json({ error: 'Thiếu tham số bắt buộc: speciesId.' });
+    return res.status(400).json({ error: 'missed_species_id', message: 'Thiếu tham số bắt buộc: speciesId.' });
   }
 
   try {
@@ -142,14 +142,14 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
       where: { id: cameraId as string }
     });
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
     const species = await prisma.species.findUnique({
       where: { id: speciesId as string }
     });
     if (!species) {
-      return res.status(404).json({ error: 'Không tìm thấy loài yêu cầu.' });
+      return res.status(404).json({ error: 'not_found_species', message: 'Không tìm thấy loài yêu cầu.' });
     }
 
     // Tìm cấu hình tùy chọn
@@ -188,7 +188,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
     });
   } catch (error) {
     console.error('Lỗi khi lấy chi tiết cấu hình:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
@@ -209,44 +209,44 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
 
   // Validation: Thiếu trường required
   if (ledFlash === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: ledFlash.' });
+    return res.status(400).json({ error: 'missed_led_flash', message: 'Thiếu thông tin bắt buộc: ledFlash.' });
   }
   if (speakerWarn === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: speakerWarn.' });
+    return res.status(400).json({ error: 'missed_speaker_warn', message: 'Thiếu thông tin bắt buộc: speakerWarn.' });
   }
   if (electricFence === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: electricFence.' });
+    return res.status(400).json({ error: 'missed_electric_fence', message: 'Thiếu thông tin bắt buộc: electricFence.' });
   }
   if (silentAlert === undefined) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: silentAlert.' });
+    return res.status(400).json({ error: 'missed_silent_alert', message: 'Thiếu thông tin bắt buộc: silentAlert.' });
   }
 
   // Validation: Sai cấu trúc Led Color Enum (RED, YELLOW, WHITE, STROBE)
   const validColors = ['RED', 'YELLOW', 'WHITE', 'STROBE'];
   if (ledColor && !validColors.includes(ledColor)) {
-    return res.status(400).json({ error: `Màu LED không hợp lệ. Phải thuộc: ${validColors.join(', ')}.` });
+    return res.status(400).json({ error: 'invalid_led_color', message: `Màu LED không hợp lệ. Phải thuộc: ${validColors.join(', ')}.` });
   }
 
   // Validation: Sai khoảng giá trị (intensity: 0-100, duration >= 0)
   if (ledIntensity !== undefined && (ledIntensity < 0 || ledIntensity > 100)) {
-    return res.status(400).json({ error: 'Cường độ LED (ledIntensity) phải nằm trong khoảng từ 0 đến 100.' });
+    return res.status(400).json({ error: 'invalid_led_intensity', message: 'Cường độ LED (ledIntensity) phải nằm trong khoảng từ 0 đến 100.' });
   }
   if (audioIntensity !== undefined && (audioIntensity < 0 || audioIntensity > 100)) {
-    return res.status(400).json({ error: 'Cường độ âm lượng loa (audioIntensity) phải nằm trong khoảng từ 0 đến 100.' });
+    return res.status(400).json({ error: 'invalid_audio_intensity', message: 'Cường độ âm lượng loa (audioIntensity) phải nằm trong khoảng từ 0 đến 100.' });
   }
   if (electricFenceDuration !== undefined && electricFenceDuration < 0) {
-    return res.status(400).json({ error: 'Thời gian hàng rào điện (electricFenceDuration) phải lớn hơn hoặc bằng 0.' });
+    return res.status(400).json({ error: 'invalid_electric_fence_duration', message: 'Thời gian hàng rào điện (electricFenceDuration) phải lớn hơn hoặc bằng 0.' });
   }
 
   try {
     const camera = await prisma.camera.findUnique({ where: { id: cameraId } });
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera.' });
     }
 
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
-      return res.status(404).json({ error: 'Không tìm thấy loài động vật.' });
+      return res.status(404).json({ error: 'not_found_species', message: 'Không tìm thấy loài động vật.' });
     }
 
     // Upsert cấu hình tùy chỉnh vào database
@@ -288,7 +288,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi lưu cấu hình:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
@@ -304,7 +304,7 @@ export async function resetConfig(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!existingConfig) {
-      return res.status(404).json({ error: 'Không tìm thấy cấu hình tùy chỉnh để xóa.' });
+      return res.status(404).json({ error: 'not_found_config', message: 'Không tìm thấy cấu hình tùy chỉnh để xóa.' });
     }
 
     await prisma.responseConfig.delete({
@@ -316,7 +316,7 @@ export async function resetConfig(req: AuthenticatedRequest, res: Response) {
     return res.status(204).send();
   } catch (error) {
     console.error('Lỗi khi đặt lại cấu hình mặc định:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
@@ -326,18 +326,18 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
 
   const preset = PRESET_SCENARIOS[presetId];
   if (!preset) {
-    return res.status(404).json({ error: 'Không tìm thấy preset mẫu yêu cầu.' });
+    return res.status(404).json({ error: 'not_found_preset', message: 'Không tìm thấy preset mẫu yêu cầu.' });
   }
 
   try {
     const camera = await prisma.camera.findUnique({ where: { id: cameraId } });
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera.' });
     }
 
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
-      return res.status(404).json({ error: 'Không tìm thấy loài động vật.' });
+      return res.status(404).json({ error: 'not_found_species', message: 'Không tìm thấy loài động vật.' });
     }
 
     // Ghi cấu hình áp preset

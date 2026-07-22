@@ -105,7 +105,8 @@ describe('CAMERA TESTING SUITE', () => {
       .set('Authorization', `Bearer ${rangerToken}`);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('quá dài');
+    expect(res.body.error).toBe('invalid_camera_id');
+    expect(res.body.message).toContain('quá dài');
   });
 
   // PATCH /cameras/{cameraId}
@@ -175,7 +176,7 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ intensity: 80 });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('durationSeconds');
+    expect(res.body.error).toBe('missed_duration_seconds');
   });
 
   it('TC_CAM_TEST_FAILURE_02: Device test missing intensity', async () => {
@@ -186,7 +187,7 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ durationSeconds: 10 });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('intensity');
+    expect(res.body.error).toBe('missed_intensity');
   });
 
   it('TC_CAM_TEST_FAILURE_03: Device test with negative duration', async () => {
@@ -197,6 +198,7 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ durationSeconds: -5, intensity: 80 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_duration_seconds');
   });
 
   it('TC_CAM_TEST_FAILURE_04: Device test with intensity negative', async () => {
@@ -207,6 +209,7 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ durationSeconds: 10, intensity: -10 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_intensity');
   });
 
   it('TC_CAM_TEST_FAILURE_05: Device test with intensity exceeds 100', async () => {
@@ -217,6 +220,7 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ durationSeconds: 10, intensity: 150 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_intensity');
   });
 
   it('TC_CAM_TEST_FAILURE_06: Device test with unsupported device key', async () => {
@@ -227,5 +231,6 @@ describe('CAMERA TESTING SUITE', () => {
       .send({ durationSeconds: 10, intensity: 80 });
 
     expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_device');
   });
 });

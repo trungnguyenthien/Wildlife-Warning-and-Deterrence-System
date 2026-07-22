@@ -133,7 +133,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('ledFlash');
+    expect(res.body.error).toBe('missed_led_flash');
   });
 
   it('TC_CFG_SAVE_FAILURE_02: Save config missing speakerWarn', async () => {
@@ -145,7 +145,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('speakerWarn');
+    expect(res.body.error).toBe('missed_speaker_warn');
   });
 
   it('TC_CFG_SAVE_FAILURE_03: Save config missing electricFence', async () => {
@@ -157,7 +157,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('electricFence');
+    expect(res.body.error).toBe('missed_electric_fence');
   });
 
   it('TC_CFG_SAVE_FAILURE_04: Save config missing silentAlert', async () => {
@@ -169,7 +169,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send(payload);
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('silentAlert');
+    expect(res.body.error).toBe('missed_silent_alert');
   });
 
   it('TC_CFG_SAVE_FAILURE_05: Save config with invalid LED color', async () => {
@@ -180,6 +180,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, ledColor: 'BLUE' }); // BLUE không có trong enum
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_led_color');
   });
 
   it('TC_CFG_SAVE_FAILURE_06: Save config with negative LED intensity', async () => {
@@ -190,6 +191,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, ledIntensity: -1 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_led_intensity');
   });
 
   it('TC_CFG_SAVE_FAILURE_07: Save config with LED intensity exceeds 100', async () => {
@@ -200,6 +202,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, ledIntensity: 120 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_led_intensity');
   });
 
   it('TC_CFG_SAVE_FAILURE_08: Save config with negative audio intensity', async () => {
@@ -210,6 +213,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, audioIntensity: -5 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_audio_intensity');
   });
 
   it('TC_CFG_SAVE_FAILURE_09: Save config with audio intensity exceeds 100', async () => {
@@ -220,6 +224,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, audioIntensity: 110 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_audio_intensity');
   });
 
   it('TC_CFG_SAVE_FAILURE_10: Save config with negative electric fence duration', async () => {
@@ -230,6 +235,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       .send({ ...validConfigPayload, electricFenceDuration: -10 });
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_electric_fence_duration');
   });
 
   // 5. POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}

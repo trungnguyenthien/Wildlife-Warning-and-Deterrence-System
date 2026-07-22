@@ -10,16 +10,16 @@ export async function getSummary(req: AuthenticatedRequest, res: Response) {
 
   // Validation: Thiếu các trường required
   if (!startDate) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: startDate.' });
+    return res.status(400).json({ error: 'missed_start_date', message: 'Thiếu thông tin bắt buộc: startDate.' });
   }
   if (!endDate) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: endDate.' });
+    return res.status(400).json({ error: 'missed_end_date', message: 'Thiếu thông tin bắt buộc: endDate.' });
   }
 
   // Validation: Định dạng ngày sai ISO 8601
   const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
   if (!isoDateRegex.test(startDate as string) || !isoDateRegex.test(endDate as string)) {
-    return res.status(400).json({ error: 'Định dạng ngày tháng không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD.' });
+    return res.status(400).json({ error: 'invalid_date_format', message: 'Định dạng ngày tháng không hợp lệ. Vui lòng sử dụng định dạng YYYY-MM-DD.' });
   }
 
   const start = new Date(startDate as string);
@@ -27,7 +27,7 @@ export async function getSummary(req: AuthenticatedRequest, res: Response) {
 
   // Validation: Lỗi logic ngày bắt đầu sau ngày kết thúc
   if (start.getTime() > end.getTime()) {
-    return res.status(400).json({ error: 'Lỗi logic dữ liệu: ngày bắt đầu (startDate) không được lớn hơn ngày kết thúc (endDate).' });
+    return res.status(400).json({ error: 'invalid_date_range', message: 'Lỗi logic dữ liệu: ngày bắt đầu (startDate) không được lớn hơn ngày kết thúc (endDate).' });
   }
 
   try {

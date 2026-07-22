@@ -75,7 +75,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ ...payload, fullName: '' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('fullName');
+    expect(res.body.error).toBe('missed_fullName');
   });
 
   it('TC_SMS_ADD_FAILURE_02: Register recipient missing phoneNumber', async () => {
@@ -87,7 +87,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ ...payload, phoneNumber: '' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('phoneNumber');
+    expect(res.body.error).toBe('missed_phoneNumber');
   });
 
   it('TC_SMS_ADD_FAILURE_03: Register recipient missing relation', async () => {
@@ -99,7 +99,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ ...payload, relation: '' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('relation');
+    expect(res.body.error).toBe('missed_relation');
   });
 
   it('TC_SMS_ADD_FAILURE_04: Register recipient with invalid phone number format', async () => {
@@ -110,7 +110,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ ...recipientData, phoneNumber: '0908888883' }); // Không khớp E.164
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('số điện thoại không hợp lệ');
+    expect(res.body.error).toBe('invalid_phone_number');
   });
 
   it('TC_SMS_ADD_FAILURE_05: Register recipient with invalid relation value', async () => {
@@ -121,6 +121,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ ...recipientData, relation: 'friend' }); // friend không nằm trong enum
 
     expect(res.status).toBe(400);
+    expect(res.body.error).toBe('invalid_relation');
   });
 
   it('TC_SMS_ADD_FAILURE_06: Register recipient violates the limit of 3 secondary numbers', async () => {
@@ -144,7 +145,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .send({ fullName: 'Nguoi 4', phoneNumber: '+84908888886', relation: 'other' });
 
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain('tối đa 3 số điện thoại');
+    expect(res.body.error).toBe('limit_reached');
   });
 
   // DELETE /users/me/sms-recipients/{recipientId}

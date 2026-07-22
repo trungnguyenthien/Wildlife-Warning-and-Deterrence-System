@@ -12,36 +12,36 @@ export async function register(req: Request, res: Response) {
 
   // Validation: Thiếu các trường bắt buộc
   if (!username) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: username.' });
+    return res.status(400).json({ error: 'missed_username', message: 'Thiếu thông tin bắt buộc: username.' });
   }
   if (!password) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: password.' });
+    return res.status(400).json({ error: 'missed_password', message: 'Thiếu thông tin bắt buộc: password.' });
   }
   if (!fullName) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: fullName.' });
+    return res.status(400).json({ error: 'missed_fullName', message: 'Thiếu thông tin bắt buộc: fullName.' });
   }
   if (!phoneNumber) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: phoneNumber.' });
+    return res.status(400).json({ error: 'missed_phoneNumber', message: 'Thiếu thông tin bắt buộc: phoneNumber.' });
   }
   if (!role) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: role.' });
+    return res.status(400).json({ error: 'missed_role', message: 'Thiếu thông tin bắt buộc: role.' });
   }
 
   // Validation: Số điện thoại phải đúng chuẩn E.164
   const e164Regex = /^\+[1-9]\d{1,14}$/;
   if (!e164Regex.test(phoneNumber)) {
-    return res.status(400).json({ error: 'Định dạng số điện thoại không hợp lệ. Phải đúng chuẩn E.164 (ví dụ: +84901234567).' });
+    return res.status(400).json({ error: 'invalid_phone_number', message: 'Định dạng số điện thoại không hợp lệ. Phải đúng chuẩn E.164 (ví dụ: +84901234567).' });
   }
 
   // Validation: Mật khẩu tối thiểu 6 ký tự
   if (password.length < 6) {
-    return res.status(400).json({ error: 'Mật khẩu phải chứa ít nhất 6 ký tự.' });
+    return res.status(400).json({ error: 'invalid_password', message: 'Mật khẩu phải chứa ít nhất 6 ký tự.' });
   }
 
   // Validation: Vai trò (role) không hợp lệ
   const validRoles = Object.values(Role);
   if (!validRoles.includes(role as Role)) {
-    return res.status(400).json({ error: `Vai trò không hợp lệ. Phải thuộc: ${validRoles.join(', ')}.` });
+    return res.status(400).json({ error: 'invalid_role', message: `Vai trò không hợp lệ. Phải thuộc: ${validRoles.join(', ')}.` });
   }
 
   try {
@@ -56,7 +56,7 @@ export async function register(req: Request, res: Response) {
     });
 
     if (existingUser) {
-      return res.status(409).json({ error: 'Username hoặc số điện thoại đã tồn tại trong hệ thống.' });
+      return res.status(409).json({ error: 'duplicate_user', message: 'Username hoặc số điện thoại đã tồn tại trong hệ thống.' });
     }
 
     // Mã hóa mật khẩu
@@ -94,10 +94,10 @@ export async function login(req: Request, res: Response) {
 
   // Validation: Thiếu các trường bắt buộc
   if (!username) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: username.' });
+    return res.status(400).json({ error: 'missed_username', message: 'Thiếu thông tin bắt buộc: username.' });
   }
   if (!password) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: password.' });
+    return res.status(400).json({ error: 'missed_password', message: 'Thiếu thông tin bắt buộc: password.' });
   }
 
   try {
@@ -107,13 +107,13 @@ export async function login(req: Request, res: Response) {
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu.' });
+      return res.status(401).json({ error: 'unauthorized_credentials', message: 'Sai tài khoản hoặc mật khẩu.' });
     }
 
     // Kiểm tra mật khẩu
     const isPasswordMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordMatch) {
-      return res.status(401).json({ error: 'Sai tài khoản hoặc mật khẩu.' });
+      return res.status(401).json({ error: 'unauthorized_credentials', message: 'Sai tài khoản hoặc mật khẩu.' });
     }
 
     // Sinh token ngẫu nhiên (sử dụng uuid hoặc một token ngẫu nhiên an toàn)
@@ -134,7 +134,7 @@ export async function login(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi đăng nhập tài khoản:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ trong quá trình đăng nhập.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình đăng nhập.' });
   }
 }
 
@@ -144,7 +144,7 @@ export async function logout(req: AuthenticatedRequest, res: Response) {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối: Thiếu token xác thực.' });
+    return res.status(401).json({ error: 'missed_token', message: 'Truy cập bị từ chối: Thiếu token xác thực.' });
   }
 
   try {
@@ -156,14 +156,14 @@ export async function logout(req: AuthenticatedRequest, res: Response) {
     return res.status(200).json({ message: 'Đăng xuất và hủy token thành công.' });
   } catch (error) {
     console.error('Lỗi khi đăng xuất:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ trong quá trình đăng xuất.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình đăng xuất.' });
   }
 }
 
 // Lấy thông tin tài khoản hiện tại
 export async function me(req: AuthenticatedRequest, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối: Không tìm thấy thông tin phiên.' });
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối: Không tìm thấy thông tin phiên.' });
   }
 
   try {
@@ -180,7 +180,7 @@ export async function me(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'Người dùng không tồn tại.' });
+      return res.status(404).json({ error: 'not_found_user', message: 'Người dùng không tồn tại.' });
     }
 
     return res.status(200).json({
@@ -193,14 +193,14 @@ export async function me(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi lấy thông tin cá nhân:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
 // Cập nhật thông tin cá nhân (Chỉ dùng để kiểm thử)
 export async function updateMe(req: AuthenticatedRequest, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối.' });
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
   }
 
   const { fullName, phoneNumber } = req.body;
@@ -210,7 +210,7 @@ export async function updateMe(req: AuthenticatedRequest, res: Response) {
     if (phoneNumber) {
       const e164Regex = /^\+[1-9]\d{1,14}$/;
       if (!e164Regex.test(phoneNumber)) {
-        return res.status(400).json({ error: 'Số điện thoại không hợp lệ.' });
+        return res.status(400).json({ error: 'invalid_phone_number', message: 'Số điện thoại không hợp lệ.' });
       }
 
       // Kiểm tra trùng SĐT
@@ -221,7 +221,7 @@ export async function updateMe(req: AuthenticatedRequest, res: Response) {
         }
       });
       if (existingUser) {
-        return res.status(409).json({ error: 'Số điện thoại đã được đăng ký bởi tài khoản khác.' });
+        return res.status(409).json({ error: 'duplicate_phone_number', message: 'Số điện thoại đã được đăng ký bởi tài khoản khác.' });
       }
     }
 
@@ -242,6 +242,6 @@ export async function updateMe(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi cập nhật tài khoản:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }

@@ -20,7 +20,7 @@ export async function authenticateToken(
   const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
 
   if (!token) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối: Thiếu token xác thực.' });
+    return res.status(401).json({ error: 'missed_token', message: 'Truy cập bị từ chối: Thiếu token xác thực.' });
   }
 
   try {
@@ -31,7 +31,7 @@ export async function authenticateToken(
     });
 
     if (!pushTokenRecord || !pushTokenRecord.user) {
-      return res.status(403).json({ error: 'Token không hợp lệ hoặc đã hết hạn.' });
+      return res.status(401).json({ error: 'invalid_token', message: 'Token không hợp lệ hoặc đã hết hạn.' });
     }
 
     req.user = {
@@ -43,6 +43,6 @@ export async function authenticateToken(
     return next();
   } catch (error) {
     console.error('Lỗi xác thực Token:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ trong quá trình xác thực.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình xác thực.' });
   }
 }

@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Script setup môi trường dev tự động trên macOS (M-chip/Intel)
-# Yêu cầu chạy script từ thư mục gốc của project: ./setup-mac.sh
+# Tự động điều hướng đến thư mục chứa script
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+cd "$SCRIPT_DIR" || exit 1
 
 echo "========================================="
 echo "BẮT ĐẦU THIẾT LẬP MÔI TRƯỜNG DEV CHO MAC"
@@ -47,15 +49,45 @@ else
     echo "[4/6] VS Code đã được cài đặt sẵn."
 fi
 
-# 5. Cài đặt PostgreSQL
+# 5. Cài đặt và Khởi tạo PostgreSQL
 if ! command -v psql &> /dev/null; then
     echo "[5/6] Đang cài đặt PostgreSQL Server..."
     brew install postgresql@16
-    
     echo "Khởi động dịch vụ PostgreSQL..."
     brew services start postgresql@16
 else
     echo "[5/6] PostgreSQL đã được cài đặt sẵn."
+    echo "Khởi động dịch vụ PostgreSQL..."
+    brew services start postgresql@16 || brew services start postgresql
+fi
+
+echo "Đang chờ dịch vụ PostgreSQL sẵn sàng..."
+until pg_isready -h localhost -p 5432 &>/dev/null; do
+    sleep 1
+done
+echo "PostgreSQL đã sẵn sàng."
+
+CURRENT_USER=$(whoami)
+
+echo "Đảm bảo role postgres với mật khẩu là 'password' tồn tại..."
+psql -h localhost -U "$CURRENT_USER" -d postgres -c "DO \$\$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'postgres') THEN
+    CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'password';
+  ELSE
+    ALTER ROLE postgres WITH PASSWORD 'password';
+  END IF;
+END \$\$;" &>/dev/null || true
+
+# Tạo database nếu chưa tồn tại
+if ! psql -h localhost -U "$CURRENT_USER" -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_dev'" | grep -q 1 &>/dev/null; then
+    echo "Tạo cơ sở dữ liệu wildlife_dev..."
+    psql -h localhost -U "$CURRENT_USER" -d postgres -c "CREATE DATABASE wildlife_dev OWNER postgres;"
+fi
+
+if ! psql -h localhost -U "$CURRENT_USER" -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_test'" | grep -q 1 &>/dev/null; then
+    echo "Tạo cơ sở dữ liệu wildlife_test..."
+    psql -h localhost -U "$CURRENT_USER" -d postgres -c "CREATE DATABASE wildlife_test OWNER postgres;"
 fi
 
 # 6. Cấu hình Dự án & Cài đặt Node Modules
@@ -82,6 +114,10 @@ if [ ! -f .env.test ]; then
     echo 'CLOUDINARY_API_SECRET="test_api_secret"' >> .env.test
     echo 'SMS_API_KEY="test_sms_key"' >> .env.test
 fi
+
+# Đẩy schema database lên
+echo "Khởi tạo cấu trúc bảng (schema) trên database local..."
+npx dotenv-cli -e .env.local -- npx prisma db push
 
 # Sinh static Prisma client
 npx prisma generate

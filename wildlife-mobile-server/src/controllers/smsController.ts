@@ -25,32 +25,32 @@ export async function listSmsRecipients(req: AuthenticatedRequest, res: Response
 // 2. POST /users/me/sms-recipients - Thêm người nhận SMS phụ mới
 export async function addSmsRecipient(req: AuthenticatedRequest, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối.' });
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
   }
 
   const { fullName, phoneNumber, relation } = req.body;
 
   // Validation: Thiếu trường required
   if (!fullName) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: fullName.' });
+    return res.status(400).json({ error: 'missed_fullName', message: 'Thiếu thông tin bắt buộc: fullName.' });
   }
   if (!phoneNumber) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: phoneNumber.' });
+    return res.status(400).json({ error: 'missed_phoneNumber', message: 'Thiếu thông tin bắt buộc: phoneNumber.' });
   }
   if (!relation) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: relation.' });
+    return res.status(400).json({ error: 'missed_relation', message: 'Thiếu thông tin bắt buộc: relation.' });
   }
 
   // Validation: Sai định dạng số điện thoại E.164
   const e164Regex = /^\+[1-9]\d{1,14}$/;
   if (!e164Regex.test(phoneNumber)) {
-    return res.status(400).json({ error: 'Định dạng số điện thoại không hợp lệ. Phải đúng chuẩn E.164 (ví dụ: +84908888888).' });
+    return res.status(400).json({ error: 'invalid_phone_number', message: 'Định dạng số điện thoại không hợp lệ. Phải đúng chuẩn E.164 (ví dụ: +84908888888).' });
   }
 
   // Validation: Mối quan hệ sai enum (self, family, neighbor, other)
   const validRelations = Object.values(SmsRelation);
   if (!validRelations.includes(relation as SmsRelation)) {
-    return res.status(400).json({ error: `Mối quan hệ không hợp lệ. Phải thuộc: ${validRelations.join(', ')}.` });
+    return res.status(400).json({ error: 'invalid_relation', message: `Mối quan hệ không hợp lệ. Phải thuộc: ${validRelations.join(', ')}.` });
   }
 
   try {
@@ -60,7 +60,7 @@ export async function addSmsRecipient(req: AuthenticatedRequest, res: Response) 
     });
 
     if (count >= 3) {
-      return res.status(400).json({ error: 'Đã đạt giới hạn đăng ký tối đa 3 số điện thoại nhận cảnh báo.' });
+      return res.status(400).json({ error: 'limit_reached', message: 'Đã đạt giới hạn đăng ký tối đa 3 số điện thoại nhận cảnh báo.' });
     }
 
     // Đề phòng số điện thoại trùng lặp
@@ -68,7 +68,7 @@ export async function addSmsRecipient(req: AuthenticatedRequest, res: Response) 
       where: { phoneNumber }
     });
     if (existing) {
-      return res.status(409).json({ error: 'Số điện thoại này đã được đăng ký nhận SMS cảnh báo.' });
+      return res.status(409).json({ error: 'duplicate_phone_number', message: 'Số điện thoại này đã được đăng ký nhận SMS cảnh báo.' });
     }
 
     const newRecipient = await prisma.smsRecipient.create({
@@ -83,14 +83,14 @@ export async function addSmsRecipient(req: AuthenticatedRequest, res: Response) 
     return res.status(201).json(newRecipient);
   } catch (error) {
     console.error('Lỗi khi thêm người nhận SMS:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
 // 3. DELETE /users/me/sms-recipients/{recipientId} - Xóa số điện thoại
 export async function deleteSmsRecipient(req: AuthenticatedRequest, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối.' });
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
   }
 
   const { recipientId } = req.params;
@@ -104,7 +104,7 @@ export async function deleteSmsRecipient(req: AuthenticatedRequest, res: Respons
     });
 
     if (!recipient) {
-      return res.status(404).json({ error: 'Không tìm thấy thông tin người nhận SMS hoặc bạn không có quyền xóa.' });
+      return res.status(404).json({ error: 'not_found_recipient', message: 'Không tìm thấy thông tin người nhận SMS hoặc bạn không có quyền xóa.' });
     }
 
     await prisma.smsRecipient.delete({

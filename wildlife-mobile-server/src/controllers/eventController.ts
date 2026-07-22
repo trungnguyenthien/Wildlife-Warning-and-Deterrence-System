@@ -65,10 +65,10 @@ export async function listAlertFeed(req: AuthenticatedRequest, res: Response) {
   const skip = (pageNum - 1) * sizeNum;
 
   if (page !== undefined && (isNaN(pageNum) || pageNum <= 0)) {
-    return res.status(400).json({ error: 'Tham số page không hợp lệ.' });
+    return res.status(400).json({ error: 'invalid_page', message: 'Tham số page không hợp lệ.' });
   }
   if (size !== undefined && (isNaN(sizeNum) || sizeNum <= 0)) {
-    return res.status(400).json({ error: 'Tham số size không hợp lệ.' });
+    return res.status(400).json({ error: 'invalid_size', message: 'Tham số size không hợp lệ.' });
   }
 
   try {
@@ -108,14 +108,14 @@ export async function listAlertFeed(req: AuthenticatedRequest, res: Response) {
     return res.status(200).json(result);
   } catch (error) {
     console.error('Lỗi khi tải luồng cảnh báo:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
 // 3. POST /alerts/feed/{alertId}/read - Đánh dấu đã đọc cảnh báo
 export async function readAlert(req: AuthenticatedRequest, res: Response) {
   if (!req.user) {
-    return res.status(401).json({ error: 'Truy cập bị từ chối.' });
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
   }
 
   const { alertId } = req.params;
@@ -126,24 +126,31 @@ export async function readAlert(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!alert) {
-      return res.status(404).json({ error: 'Không tìm thấy cảnh báo.' });
+      return res.status(404).json({ error: 'not_found_alert', message: 'Không tìm thấy cảnh báo.' });
     }
 
     // Ghi nhận trạng thái đọc tin
-    await prisma.alertRead.upsert({
+    const existingRead = await prisma.alertRead.findFirst({
       where: {
-        id: `${req.user.id}_${alertId}` // Tạo ID duy nhất ghép cặp
-      },
-      create: {
-        id: `${req.user.id}_${alertId}`,
         userId: req.user.id,
-        alertId,
-        readAt: new Date()
-      },
-      update: {
-        readAt: new Date()
+        alertId
       }
     });
+
+    if (existingRead) {
+      await prisma.alertRead.update({
+        where: { id: existingRead.id },
+        data: { readAt: new Date() }
+      });
+    } else {
+      await prisma.alertRead.create({
+        data: {
+          userId: req.user.id,
+          alertId,
+          readAt: new Date()
+        }
+      });
+    }
 
     return res.status(200).json({ message: 'Đã đánh dấu đọc cảnh báo.' });
   } catch (error) {
@@ -159,37 +166,37 @@ export async function processDetection(req: Request, res: Response) {
 
   // Validation: Thiếu trường bắt buộc
   if (!detections) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: detections.' });
+    return res.status(400).json({ error: 'missed_detections', message: 'Thiếu thông tin bắt buộc: detections.' });
   }
   if (!imageUrl) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: imageUrl.' });
+    return res.status(400).json({ error: 'missed_image_url', message: 'Thiếu thông tin bắt buộc: imageUrl.' });
   }
   if (!detectedAt) {
-    return res.status(400).json({ error: 'Thiếu thông tin bắt buộc: detectedAt.' });
+    return res.status(400).json({ error: 'missed_detected_at', message: 'Thiếu thông tin bắt buộc: detectedAt.' });
   }
 
   // Validation: Mảng detections trống rỗng
   if (!Array.isArray(detections) || detections.length === 0) {
-    return res.status(400).json({ error: 'Dữ liệu nhận dạng (detections) phải là mảng và không được để trống.' });
+    return res.status(400).json({ error: 'invalid_detections', message: 'Dữ liệu nhận dạng (detections) phải là mảng và không được để trống.' });
   }
 
   // Validation: Sai khoảng độ tin cậy confidence
   for (const det of detections) {
     if (det.confidence === undefined || det.confidence < 0 || det.confidence > 1) {
-      return res.status(400).json({ error: 'Độ tin cậy nhận diện (confidence) phải nằm trong khoảng từ 0 đến 1.' });
+      return res.status(400).json({ error: 'invalid_confidence', message: 'Độ tin cậy nhận diện (confidence) phải nằm trong khoảng từ 0 đến 1.' });
     }
   }
 
   // Validation: Sai định dạng imageUrl
   const urlRegex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
   if (!urlRegex.test(imageUrl)) {
-    return res.status(400).json({ error: 'Đường dẫn hình ảnh (imageUrl) không đúng định dạng URL.' });
+    return res.status(400).json({ error: 'invalid_image_url', message: 'Đường dẫn hình ảnh (imageUrl) không đúng định dạng URL.' });
   }
 
   // Validation: Sai định dạng ISO 8601 của detectedAt
   const dateVal = Date.parse(detectedAt);
   if (isNaN(dateVal)) {
-    return res.status(400).json({ error: 'Định dạng thời gian detectedAt không hợp lệ. Vui lòng dùng định dạng chuẩn ISO 8601.' });
+    return res.status(400).json({ error: 'invalid_detected_at', message: 'Định dạng thời gian detectedAt không hợp lệ. Vui lòng dùng định dạng chuẩn ISO 8601.' });
   }
 
   try {
@@ -198,7 +205,7 @@ export async function processDetection(req: Request, res: Response) {
     });
 
     if (!camera) {
-      return res.status(404).json({ error: 'Không tìm thấy trạm camera.' });
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera.' });
     }
 
     const detectionTime = new Date(detectedAt);
