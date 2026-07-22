@@ -14,13 +14,18 @@ Trước khi viết mã nguồn hoặc viết testcase, bạn BẮT BUỘC phả
 *   **Database Schema:** Mọi thay đổi về cấu trúc bảng phải được cập nhật trước vào `prisma/schema.prisma` dựa theo Đặc tả Database và chạy lệnh `npx prisma db push`.
 *   **Kiểm tra cú pháp tĩnh:** Sau mỗi lần sinh code, bạn phải chạy lệnh `npm run build` để kiểm tra lỗi cú pháp TypeScript, không được để code lỗi biên dịch.
 
-## 3. Quy trình tự động chạy test và sửa lỗi (Self-Healing Loop)
-Khi phát triển một tính năng hoặc API endpoint, bạn phải tuân thủ quy trình vòng lặp tự động sau:
-1.  **Viết Testcase:** Tạo tệp test tương ứng trong thư mục `tests/` sử dụng Jest + Supertest giả lập các case thành công và thất bại của API theo đúng đặc tả tài liệu 03.
-2.  **Chạy Test:** Thực thi lệnh `npm run test` (chạy trên database PostgreSQL cục bộ độc lập `wildlife_test`).
-3.  **Tự sửa lỗi (Fix Loop):**
-    *   Nếu có testcase thất bại (`FAIL`), bạn phải tự đọc log lỗi từ terminal đầu ra.
-    *   Xác định nguyên nhân (sai cấu trúc response, thiếu validate đầu vào, sai logic DB, v.v.).
-    *   Tiến hành sửa mã nguồn trực tiếp tại các file controller liên quan.
+## 3. Quy trình tự động đồng bộ tài liệu, chạy test và sửa lỗi (Self-Healing Loop)
+Khi phát triển, cập nhật tính năng hoặc API endpoint, bạn BẮT BUỘC phải thực hiện đúng theo trình tự 4 bước sau đây:
+
+1.  **Đồng bộ tài liệu kiểm thử (Sync Test Spec):** Sao chép đè nội dung từ tệp đặc tả kiểm thử bên ngoài dự án `../docs/06-test-mobile-api.md` vào tệp cục bộ `test-mobile-api.md` nằm ở thư mục gốc của server (nếu chưa có thì tự động tạo mới).
+2.  **Kiểm tra thay đổi (Check Git Diff):** Sử dụng các lệnh Git (`git diff`) hoặc so sánh nội dung của tệp `test-mobile-api.md` hiện tại với commit trước đó để xác định những ca kiểm thử nào mới được thêm vào, cập nhật, hoặc bị gắn thẻ `[DELETED]`.
+3.  **Cập nhật mã nguồn Testcase (Update Test Code):**
+    *   Tiến hành cập nhật hoặc viết thêm các file test Jest + Supertest tương ứng trong thư mục `tests/` dựa trên kết quả diff vừa phân tích.
+    *   Nếu một testcase trong tài liệu bị gắn thẻ `[DELETED]`, hãy gỡ bỏ testcase tương ứng đó ra khỏi mã nguồn test Jest.
+4.  **Chạy kiểm thử và tự động sửa lỗi (Self-Healing Fix Loop):**
+    *   Thực thi lệnh `npm run test` (chạy trên database PostgreSQL cục bộ độc lập `wildlife_test`).
+    *   Nếu có testcase thất bại (`FAIL`), bạn phải tự đọc log lỗi chi tiết từ terminal đầu ra.
+    *   Xác định nguyên nhân (sai cấu trúc response, thiếu validate đầu vào, sai logic DB, v.v.) và sửa trực tiếp tại các file controller liên quan.
     *   Lặp lại việc chạy test (`npm run test`) cho đến khi toàn bộ test suite báo màu xanh (`PASS 100%`).
-4.  **Xác thực tổng thể:** Chạy lệnh `npm run validate` để đảm bảo code sạch lỗi cú pháp, compile thành công và pass toàn bộ test trước khi báo cáo hoàn thành cho người dùng.
+5.  **Xác thực tổng thể:** Chạy lệnh `npm run validate` để đảm bảo code sạch lỗi cú pháp, compile thành công và pass toàn bộ test trước khi báo cáo hoàn thành cho người dùng.
+
