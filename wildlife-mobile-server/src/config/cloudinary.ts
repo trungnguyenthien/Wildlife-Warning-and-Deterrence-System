@@ -10,3 +10,16 @@ cloudinary.config({
 });
 
 export { cloudinary };
+
+/**
+ * Upload ảnh lên Cloudinary
+ * @param filePath Đường dẫn file cục bộ hoặc link ảnh
+ * @param folder Thư mục chứa ảnh trên Cloudinary
+ */
+export async function uploadImage(filePath: string, folder = 'manual_snapshots'): Promise<string> {
+  const result = await cloudinary.uploader.upload(filePath, {
+    folder,
+    resource_type: 'image',
+  });
+  return result.secure_url;
+}

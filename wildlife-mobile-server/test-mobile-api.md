@@ -169,6 +169,26 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Header:** Trống hoặc token sai.
     *   **Kết quả mong đợi (Expected Response):** `401 Unauthorized` hoặc `403 Forbidden`.
 
+#### 7b. `POST /cameras/{cameraId}/snapshots` (Tải lên hình ảnh snapshot thủ công)
+*   **TC_SNAP_UPL_SUCCESS_01: Upload manual camera snapshot successfully to Cloudinary**
+    *   **Mô tả:** Tải lên hình ảnh snapshot chụp thủ công lên Cloudinary thành công và tạo bản ghi lưu trữ trong DB.
+    *   **Dữ liệu gửi đi (Multipart/form-data):** `image` (tệp tin f4.png), `userId` (mã uuid người dùng hợp lệ).
+    *   **Kết quả mong đợi (Expected Response):** `201 Created` trả về ID ảnh, url Cloudinary, deviceId, userId, và thời điểm tải lên.
+    *   **Xác thực Database (DB Verification):** Một bản ghi mới được tạo trong bảng `snapshots` chứa đúng url và deviceId/userId.
+*   **TC_SNAP_UPL_FAILURE_01: Fail to upload manual camera snapshot due to missing image file**
+    *   **Mô tả:** Gửi yêu cầu tải ảnh thủ công nhưng không đính kèm file ảnh.
+    *   **Dữ liệu gửi đi (Multipart/form-data):** `userId` (uuid người dùng hợp lệ).
+    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request` kèm mã lỗi `missed_image`.
+*   **TC_SNAP_UPL_FAILURE_02: Fail to upload manual camera snapshot with non-existent userId**
+    *   **Mô tả:** Tải ảnh lên với mã userId không tồn tại trong hệ thống.
+    *   **Dữ liệu gửi đi (Multipart/form-data):** `image` (tệp tin f4.png), `userId` = "non-existent-user-uuid".
+    *   **Kết quả mong đợi (Expected Response):** `404 Not Found` kèm mã lỗi `not_found_user`.
+*   **TC_SNAP_UPL_FAILURE_03: Fail to upload manual camera snapshot for non-existent cameraId**
+    *   **Mô tả:** Tải ảnh lên với mã cameraId của camera không tồn tại trong hệ thống.
+    *   **Dữ liệu gửi đi (Multipart/form-data):** `image` (tệp tin f4.png), `userId` (uuid người dùng hợp lệ).
+    *   **Đường dẫn gọi:** `/cameras/CAM_NON_EXIST_9999/snapshots`
+    *   **Kết quả mong đợi (Expected Response):** `404 Not Found` kèm mã lỗi `not_found_camera`.
+
 ---
 
 ### 2.3. Nhóm Tab thống kê & Bản tin cảnh báo (`[STATISTICS_TAB]`)
