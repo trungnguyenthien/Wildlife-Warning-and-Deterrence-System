@@ -66,7 +66,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.relation).toBe(recipientData.relation);
   });
 
-  it('TC_SMS_ADD_FAILURE_01: Register recipient missing fullName', async () => {
+  it('TC_SMS_ADD_FAILURE_02: Register recipient missing fullName', async () => {
     if (!token) return;
     const { fullName: _, ...payload } = recipientData;
     const res = await request(app)
@@ -78,7 +78,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_fullName');
   });
 
-  it('TC_SMS_ADD_FAILURE_02: Register recipient missing phoneNumber', async () => {
+  it('TC_SMS_ADD_FAILURE_03: Register recipient missing phoneNumber', async () => {
     if (!token) return;
     const { phoneNumber: _, ...payload } = recipientData;
     const res = await request(app)
@@ -90,7 +90,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_phoneNumber');
   });
 
-  it('TC_SMS_ADD_FAILURE_03: Register recipient missing relation', async () => {
+  it('TC_SMS_ADD_FAILURE_04: Register recipient missing relation', async () => {
     if (!token) return;
     const { relation: _, ...payload } = recipientData;
     const res = await request(app)
@@ -102,7 +102,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_relation');
   });
 
-  it('TC_SMS_ADD_FAILURE_04: Register recipient with invalid phone number format', async () => {
+  it('TC_SMS_ADD_FAILURE_05: Register recipient with invalid phone number format', async () => {
     if (!token) return;
     const res = await request(app)
       .post('/users/me/sms-recipients')
@@ -113,7 +113,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_phone_number');
   });
 
-  it('TC_SMS_ADD_FAILURE_05: Register recipient with invalid relation value', async () => {
+  it('TC_SMS_ADD_FAILURE_06: Register recipient with invalid relation value', async () => {
     if (!token) return;
     const res = await request(app)
       .post('/users/me/sms-recipients')
@@ -124,7 +124,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_relation');
   });
 
-  it('TC_SMS_ADD_FAILURE_06: Register recipient violates the limit of 3 secondary numbers', async () => {
+  it('TC_SMS_ADD_FAILURE_01: Register recipient violates the limit of 3 secondary numbers', async () => {
     if (!token) return;
     // Thêm số thứ 2
     await request(app)
@@ -149,7 +149,7 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
   });
 
   // DELETE /users/me/sms-recipients/{recipientId}
-  it('TC_SMS_DELETE_SUCCESS_01: Delete SMS recipient registration successfully', async () => {
+  it('TC_SMS_DEL_SUCCESS_01: Delete SMS recipient registration successfully', async () => {
     if (!token) return;
     // Tìm recipient đầu tiên trong DB
     const list = await prisma.smsRecipient.findMany();
@@ -160,5 +160,15 @@ describe('SMS ALERT RECIPIENTS TESTING SUITE', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(204);
+  });
+
+  it('TC_SMS_DEL_FAILURE_01: Fail to delete SMS recipient that does not belong to current user', async () => {
+    if (!token) return;
+    const res = await request(app)
+      .delete('/users/me/sms-recipients/non-existent-id-9999')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_recipient');
   });
 });

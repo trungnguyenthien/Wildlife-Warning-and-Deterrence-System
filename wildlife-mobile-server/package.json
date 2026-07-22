@@ -12,6 +12,7 @@
     "db:studio": "prisma studio",
     "test": "npx dotenv-cli -e .env.test -- jest --runInBand --detectOpenHandles",
     "test:report": "npx dotenv-cli -e .env.test -- jest --runInBand --detectOpenHandles --json --outputFile=test-report.json",
+    "test:check": "node scripts/check-testcases.js",
     "validate": "npm run lint && npm run build && npm run test && npm run test:report"
   },
   "dependencies": {

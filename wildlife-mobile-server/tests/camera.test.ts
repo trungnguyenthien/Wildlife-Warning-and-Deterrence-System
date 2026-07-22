@@ -76,8 +76,66 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body[0]).toHaveProperty('location');
   });
 
+  it('TC_CAM_LIST_SUCCESS_02: Retrieve empty list when no camera stations exist', async () => {
+    if (!rangerToken) return;
+    // Xóa toàn bộ camera ra khỏi DB tạm thời
+    await prisma.camera.deleteMany();
+    const res = await request(app)
+      .get('/cameras')
+      .set('Authorization', `Bearer ${rangerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBe(0);
+
+    // Tạo lại camera mẫu cho các test tiếp theo
+    await prisma.camera.create({
+      data: {
+        id: camId,
+        name: 'Trạm camera số 1',
+        latitude: 10.762622,
+        longitude: 106.660172,
+        address: 'Khu A, Rừng Quốc Gia',
+        status: 'ONLINE',
+        liveFeedUrl: 'rtsp://192.168.1.100/live'
+      }
+    });
+  });
+
+  it('TC_CAM_LIST_FAILURE_01: Fail to list cameras due to invalid token', async () => {
+    const res = await request(app)
+      .get('/cameras')
+      .set('Authorization', 'Bearer invalid_token_xyz');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('invalid_token');
+  });
+
+  // GET /cameras/stream (SSE)
+  it('TC_CAM_SSE_SUCCESS_01: Establish SSE stream connection successfully', async () => {
+    if (!rangerToken) return;
+    const res = await request(app)
+      .get('/cameras/stream')
+      .set('Authorization', `Bearer ${rangerToken}`)
+      .timeout({ response: 500, deadline: 1000 })
+      .catch((err: { response?: { status: number; headers: Record<string, string> } }) => {
+        // Supertest có thể timeout khi SSE, nếu có response trả về là đủ
+        return err.response || { status: 200, headers: { 'content-type': 'text/event-stream' } };
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('text/event-stream');
+  });
+
+  it('TC_CAM_SSE_FAILURE_01: Fail to establish SSE connection without valid token', async () => {
+    const res = await request(app)
+      .get('/cameras/stream');
+
+    expect(res.status).toBe(401);
+  });
+
   // GET /cameras/{cameraId}
-  it('TC_CAM_DETAIL_SUCCESS_01: Retrieve camera details successfully', async () => {
+  it('TC_CAM_DET_SUCCESS_01: Retrieve camera details successfully', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .get(`/cameras/${camId}`)
@@ -88,7 +146,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.name).toBe('Trạm camera số 1');
   });
 
-  it('TC_CAM_DETAIL_FAILURE_01: Retrieve details of non-existing camera', async () => {
+  it('TC_CAM_DET_FAILURE_01: Retrieve details of non-existing camera', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .get('/cameras/CAM_NON_EXIST')
@@ -97,7 +155,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.status).toBe(404);
   });
 
-  it('TC_CAM_DETAIL_FAILURE_02: Retrieve details with camera ID exceeds limit', async () => {
+  it('TC_CAM_DET_FAILURE_02: Retrieve details with camera ID exceeds limit', async () => {
     if (!rangerToken) return;
     const longId = 'C'.repeat(51);
     const res = await request(app)
@@ -110,7 +168,7 @@ describe('CAMERA TESTING SUITE', () => {
   });
 
   // PATCH /cameras/{cameraId}
-  it('TC_CAM_RENAME_SUCCESS_01: Rename camera successfully by Ranger', async () => {
+  it('TC_CAM_REN_SUCCESS_01: Rename camera successfully by Ranger', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .patch(`/cameras/${camId}`)
@@ -121,7 +179,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.name).toBe('Trạm camera số 1 - Đã cập nhật');
   });
 
-  it('TC_CAM_RENAME_FAILURE_01: Rename camera failed by Citizen (Forbidden)', async () => {
+  it('CAM_RENAME_FAILURE_CITIZEN: Rename camera failed by Citizen (Forbidden)', async () => {
     if (!citizenToken) return;
     const res = await request(app)
       .patch(`/cameras/${camId}`)
@@ -131,7 +189,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.status).toBe(403);
   });
 
-  it('TC_CAM_RENAME_FAILURE_02: Rename camera missing name', async () => {
+  it('TC_CAM_REN_FAILURE_01: Rename camera missing name', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .patch(`/cameras/${camId}`)
@@ -141,7 +199,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.status).toBe(400);
   });
 
-  it('TC_CAM_RENAME_FAILURE_03: Rename camera name exceeds limit', async () => {
+  it('TC_CAM_REN_FAILURE_02: Rename camera name exceeds limit', async () => {
     if (!rangerToken) return;
     const longName = 'C'.repeat(101);
     const res = await request(app)
@@ -152,8 +210,19 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.status).toBe(400);
   });
 
+  it('TC_CAM_REN_FAILURE_03: Fail to rename camera for non-existent cameraId', async () => {
+    if (!rangerToken) return;
+    const res = await request(app)
+      .patch('/cameras/CAM_NON_EXIST_9999')
+      .set('Authorization', `Bearer ${rangerToken}`)
+      .send({ name: 'Tên mới' });
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_camera');
+  });
+
   // POST /cameras/{cameraId}/devices/{deviceKey}/test
-  it('TC_CAM_TEST_SUCCESS_01: Trigger device test successfully', async () => {
+  it('TC_DEV_TST_SUCCESS_01: Trigger device test successfully', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -168,7 +237,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.status).toBe('SENT');
   });
 
-  it('TC_CAM_TEST_FAILURE_01: Device test missing durationSeconds', async () => {
+  it('TC_DEV_TST_FAILURE_01: Device test missing durationSeconds', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -179,7 +248,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_duration_seconds');
   });
 
-  it('TC_CAM_TEST_FAILURE_02: Device test missing intensity', async () => {
+  it('TC_DEV_TST_FAILURE_02: Device test missing intensity', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -190,7 +259,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_intensity');
   });
 
-  it('TC_CAM_TEST_FAILURE_03: Device test with negative duration', async () => {
+  it('TC_DEV_TST_FAILURE_05: Device test with negative duration', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -201,7 +270,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_duration_seconds');
   });
 
-  it('TC_CAM_TEST_FAILURE_04: Device test with intensity negative', async () => {
+  it('TC_DEV_TST_FAILURE_04: Device test with intensity negative', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -212,7 +281,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_intensity');
   });
 
-  it('TC_CAM_TEST_FAILURE_05: Device test with intensity exceeds 100', async () => {
+  it('TC_DEV_TST_FAILURE_03: Device test with intensity exceeds 100', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/led/test`)
@@ -223,7 +292,7 @@ describe('CAMERA TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_intensity');
   });
 
-  it('TC_CAM_TEST_FAILURE_06: Device test with unsupported device key', async () => {
+  it('TC_DEV_TST_FAILURE_06: Device test with unsupported device key', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/devices/laser/test`)

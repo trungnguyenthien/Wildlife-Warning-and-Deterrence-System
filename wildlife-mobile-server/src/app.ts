@@ -8,6 +8,7 @@ import { listCameras, getCamera, renameCamera, streamCameras, testDevice } from 
 import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples } from './controllers/configController';
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
 import { listEvents, listAlertFeed, readAlert, processDetection } from './controllers/eventController';
+import { getSummary } from './controllers/statsController';
 
 const app = express();
 
@@ -73,5 +74,10 @@ app.post('/alerts/feed/:alertId/read', authenticateToken, readAlert);
 // 8. API TÍCH HỢP THIẾT BỊ / AI SERVER
 // ==========================================
 app.post('/cameras/:cameraId/detections', processDetection); // Webhook không cần JWT Token
+
+// ==========================================
+// 9. ENDPOINTS THỐNG KÊ
+// ==========================================
+app.get('/stats/summary', authenticateToken, getSummary);
 
 export default app;

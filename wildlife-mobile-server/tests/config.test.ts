@@ -63,7 +63,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   });
 
   // 1. GET /species
-  it('TC_CFG_SPECIES_LIST_SUCCESS_01: Retrieve species dictionary successfully', async () => {
+  it('TC_SPC_LIST_SUCCESS_01: Retrieve species directory successfully', async () => {
     if (!token) return;
     const res = await request(app)
       .get('/species')
@@ -86,9 +86,53 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  // 3. GET /response-configs
-  it('TC_CFG_DETAIL_SUCCESS_01: Retrieve custom config details or fallback preset', async () => {
+  it('TC_CFG_LIST_FAILURE_01: Fail to retrieve config list for non-existent camera', async () => {
     if (!token) return;
+    const res = await request(app)
+      .get('/response-configs/CAM_NON_EXIST_9999')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_camera');
+  });
+
+  // 3. GET /response-configs
+  it('TC_CFG_DET_SUCCESS_01: Retrieve custom configuration successfully when custom record exists', async () => {
+    if (!token) return;
+    // Trước tiên, lưu cấu hình tùy chỉnh vào DB
+    await request(app)
+      .put(`/response-configs/${camId}/${speciesId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ledFlash: true,
+        ledColor: 'RED',
+        ledIntensity: 90,
+        speakerWarn: true,
+        audioSampleId: 'A_gunshot',
+        audioIntensity: 85,
+        electricFence: false,
+        electricFenceDuration: 0,
+        silentAlert: false
+      });
+
+    const res = await request(app)
+      .get(`/response-configs?cameraId=${camId}&speciesId=${speciesId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    // Kiểm tra trường `id` của cấu hình tùy chỉnh (khác với fallback preset)
+    expect(res.body).toHaveProperty('id');
+    expect(res.body).toHaveProperty('cameraId');
+    expect(res.body).toHaveProperty('speciesId');
+  });
+
+  it('TC_CFG_DET_SUCCESS_02: Retrieve custom config details or fallback preset', async () => {
+    if (!token) return;
+    // Xóa cấu hình tùy chỉnh để test fallback
+    await request(app)
+      .delete(`/response-configs/${camId}/${speciesId}`)
+      .set('Authorization', `Bearer ${token}`);
+
     const res = await request(app)
       .get(`/response-configs?cameraId=${camId}&speciesId=${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
@@ -97,6 +141,36 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     // Voi châu á có dangerLevel = CRITICAL -> fallback preset
     expect(res.body.ledColor).toBe('STROBE');
     expect(res.body.electricFence).toBe(true);
+  });
+
+  it('TC_CFG_DET_FAILURE_01: Fail to retrieve config when cameraId query parameter is missing', async () => {
+    if (!token) return;
+    const res = await request(app)
+      .get(`/response-configs?speciesId=${speciesId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('missed_camera_id');
+  });
+
+  it('TC_CFG_DET_FAILURE_02: Fail to retrieve config when speciesId query parameter is missing', async () => {
+    if (!token) return;
+    const res = await request(app)
+      .get(`/response-configs?cameraId=${camId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('missed_species_id');
+  });
+
+  it('TC_CFG_DET_FAILURE_03: Fail to retrieve config when speciesId is invalid', async () => {
+    if (!token) return;
+    const res = await request(app)
+      .get(`/response-configs?cameraId=${camId}&speciesId=non_existent_species`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_species');
   });
 
   // 4. PUT /response-configs/{cameraId}/{speciesId}
@@ -183,7 +257,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_led_color');
   });
 
-  it('TC_CFG_SAVE_FAILURE_06: Save config with negative LED intensity', async () => {
+  it('TC_CFG_SAVE_FAILURE_07: Save config with negative LED intensity', async () => {
     if (!token) return;
     const res = await request(app)
       .put(`/response-configs/${camId}/${speciesId}`)
@@ -194,7 +268,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_led_intensity');
   });
 
-  it('TC_CFG_SAVE_FAILURE_07: Save config with LED intensity exceeds 100', async () => {
+  it('TC_CFG_SAVE_FAILURE_06: Save config with LED intensity exceeds 100', async () => {
     if (!token) return;
     const res = await request(app)
       .put(`/response-configs/${camId}/${speciesId}`)
@@ -205,7 +279,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_led_intensity');
   });
 
-  it('TC_CFG_SAVE_FAILURE_08: Save config with negative audio intensity', async () => {
+  it('TC_CFG_SAVE_FAILURE_09: Save config with negative audio intensity', async () => {
     if (!token) return;
     const res = await request(app)
       .put(`/response-configs/${camId}/${speciesId}`)
@@ -216,7 +290,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_audio_intensity');
   });
 
-  it('TC_CFG_SAVE_FAILURE_09: Save config with audio intensity exceeds 100', async () => {
+  it('TC_CFG_SAVE_FAILURE_08: Save config with audio intensity exceeds 100', async () => {
     if (!token) return;
     const res = await request(app)
       .put(`/response-configs/${camId}/${speciesId}`)
@@ -239,7 +313,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   });
 
   // 5. POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}
-  it('TC_CFG_APPLY_PRESET_SUCCESS_01: Apply danger level preset successfully', async () => {
+  it('TC_CFG_PRE_SUCCESS_01: Apply danger level preset successfully', async () => {
     if (!token) return;
     const res = await request(app)
       .post(`/response-configs/${camId}/${speciesId}/apply-preset/critical_danger`)
@@ -249,13 +323,49 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.ledColor).toBe('STROBE');
   });
 
-  // 6. DELETE /response-configs/{cameraId}/{speciesId}
-  it('TC_CFG_RESET_SUCCESS_01: Reset custom config to fallback presets successfully', async () => {
+  it('TC_CFG_PRE_FAILURE_01: Fail to apply preset with invalid presetId', async () => {
     if (!token) return;
+    const res = await request(app)
+      .post(`/response-configs/${camId}/${speciesId}/apply-preset/non_existent_preset`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_preset');
+  });
+
+  // 6. DELETE /response-configs/{cameraId}/{speciesId}
+  it('TC_CFG_DEL_SUCCESS_01: Reset custom config to fallback presets successfully', async () => {
+    if (!token) return;
+    // Đảm bảo có cấu hình tùy chỉnh trước khi xóa
+    await request(app)
+      .put(`/response-configs/${camId}/${speciesId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        ledFlash: true,
+        ledColor: 'RED',
+        ledIntensity: 90,
+        speakerWarn: false,
+        audioIntensity: 0,
+        electricFence: false,
+        electricFenceDuration: 0,
+        silentAlert: false
+      });
+
     const res = await request(app)
       .delete(`/response-configs/${camId}/${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(204);
+  });
+
+  it('TC_CFG_DEL_FAILURE_01: Fail to delete non-existent custom configuration', async () => {
+    if (!token) return;
+    // Lún này đã xóa ở test trước, nên xóa lần nữa phải trả về 404
+    const res = await request(app)
+      .delete(`/response-configs/${camId}/${speciesId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_config');
   });
 });

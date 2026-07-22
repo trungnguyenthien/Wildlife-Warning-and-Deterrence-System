@@ -92,7 +92,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   });
 
   // 1. GET /events
-  it('TC_EVT_LIST_SUCCESS_01: Retrieve event history logs successfully', async () => {
+  it('EVT_LIST_SUCCESS_01: Retrieve event history logs successfully', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .get(`/events?cameraId=${camId}`)
@@ -111,7 +111,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     detectedAt: '2026-07-22T10:00:00Z'
   };
 
-  it('TC_EVT_DETECTION_SUCCESS_01: Create new event and alert from AI webhook', async () => {
+  it('TC_AI_DET_SUCCESS_01: Create new event and alert from AI webhook', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
@@ -123,7 +123,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.responseAction.electricFence).toBe(true); // Voi -> CRITICAL -> Fence true
   });
 
-  it('TC_EVT_DETECTION_SUCCESS_02: Append to active event if duration is under 5 minutes', async () => {
+  it('TC_AI_DET_SUCCESS_02: Append to active event if duration is under 5 minutes', async () => {
     if (!rangerToken) return;
     // Gửi tiếp nhận diện lúc 10h02 (cách 2 phút)
     const res = await request(app)
@@ -138,7 +138,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.detections.length).toBe(1);
   });
 
-  it('TC_EVT_DETECTION_SUCCESS_03: Split into new event if duration exceeds 5 minutes', async () => {
+  it('TC_AI_DET_SUCCESS_03: Split into new event if duration exceeds 5 minutes', async () => {
     if (!rangerToken) return;
     // Gửi tiếp nhận diện lúc 10h10 (cách 8 phút)
     const res = await request(app)
@@ -152,7 +152,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.status).toBe(201); // Tạo sự kiện mới cách biệt
   });
 
-  it('TC_EVT_DETECTION_FAILURE_01: AI Webhook missing detections', async () => {
+  it('TC_AI_DET_FAILURE_01: AI Webhook missing detections', async () => {
     const { detections: _, ...payload } = validAiPayload;
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
@@ -162,7 +162,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('missed_detections');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_02: AI Webhook missing imageUrl', async () => {
+  it('TC_AI_DET_FAILURE_02: AI Webhook missing imageUrl', async () => {
     const { imageUrl: _, ...payload } = validAiPayload;
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
@@ -172,7 +172,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('missed_image_url');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_03: AI Webhook missing detectedAt', async () => {
+  it('TC_AI_DET_FAILURE_03: AI Webhook missing detectedAt', async () => {
     const { detectedAt: _, ...payload } = validAiPayload;
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
@@ -182,7 +182,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('missed_detected_at');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_04: AI Webhook with empty detections array', async () => {
+  it('TC_AI_DET_FAILURE_04: AI Webhook with empty detections array', async () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({ ...validAiPayload, detections: [] });
@@ -191,7 +191,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_detections');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_05: AI Webhook with negative confidence', async () => {
+  it('TC_AI_DET_FAILURE_06: AI Webhook with negative confidence', async () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
@@ -203,7 +203,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_confidence');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_06: AI Webhook with confidence exceeds 1', async () => {
+  it('TC_AI_DET_FAILURE_05: AI Webhook with confidence exceeds 1', async () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
@@ -215,7 +215,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_confidence');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_07: AI Webhook with invalid imageUrl URL format', async () => {
+  it('TC_AI_DET_FAILURE_07: AI Webhook with invalid imageUrl URL format', async () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({ ...validAiPayload, imageUrl: 'ftp-not-valid-url' });
@@ -224,7 +224,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_image_url');
   });
 
-  it('TC_EVT_DETECTION_FAILURE_08: AI Webhook with invalid detectedAt format', async () => {
+  it('TC_AI_DET_FAILURE_08: AI Webhook with invalid detectedAt format', async () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({ ...validAiPayload, detectedAt: '22-07-2026' }); // Sai ISO 8601
@@ -234,7 +234,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   });
 
   // 3. GET /alerts/feed & GET /alerts/feed/{alertId}/read
-  it('TC_EVT_FEED_SUCCESS_01: Ranger reads alert feed including security alerts', async () => {
+  it('TC_ALT_FEED_SUCCESS_01: Ranger reads alert feed including security alerts', async () => {
     if (!rangerToken) return;
 
     // Gửi cảnh báo người xâm nhập biên phòng từ AI
@@ -256,7 +256,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(humanAlert).toBeDefined();
   });
 
-  it('TC_EVT_FEED_SUCCESS_02: Citizen reads alert feed without security alerts', async () => {
+  it('TC_ALT_FEED_SUCCESS_02: Citizen reads alert feed without security alerts', async () => {
     if (!citizenToken) return;
     const res = await request(app)
       .get('/alerts/feed')
@@ -268,7 +268,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(humanAlert).toBeUndefined();
   });
 
-  it('TC_EVT_FEED_FAILURE_01: Retrieve feed with negative page number', async () => {
+  it('TC_ALT_FEED_FAILURE_01: Retrieve feed with negative page number', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .get('/alerts/feed?page=-1')
@@ -278,7 +278,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_page');
   });
 
-  it('TC_EVT_FEED_FAILURE_02: Retrieve feed with negative size number', async () => {
+  it('TC_ALT_FEED_FAILURE_02: Retrieve feed with negative size number', async () => {
     if (!rangerToken) return;
     const res = await request(app)
       .get('/alerts/feed?size=-5')
@@ -288,7 +288,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('invalid_size');
   });
 
-  it('TC_EVT_READ_SUCCESS_01: Mark alert notification as read successfully', async () => {
+  it('EVT_READ_SUCCESS_01: Mark alert notification as read successfully', async () => {
     if (!rangerToken) return;
     // Lấy tin cảnh báo đầu tiên
     const feed = await request(app)
