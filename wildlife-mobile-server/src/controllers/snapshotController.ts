@@ -99,7 +99,7 @@ export async function uploadSnapshot(req: Request, res: Response) {
       uploadedAt: newSnapshot.uploadedAt.toISOString()
     });
 
-  } catch (error) {
+  } catch (error: any) {
     // Đảm bảo dọn dẹp file tạm khi có lỗi bất kỳ xảy ra
     if (file && fs.existsSync(file.path)) {
       fs.unlinkSync(file.path);
@@ -107,7 +107,7 @@ export async function uploadSnapshot(req: Request, res: Response) {
     console.error('Lỗi khi tải lên snapshot:', error);
     return res.status(500).json({
       error: 'server_error',
-      message: 'Lỗi máy chủ nội bộ trong quá trình tải ảnh snapshot.'
+      message: `Lỗi máy chủ nội bộ trong quá trình tải ảnh snapshot: ${error?.message || String(error)}`
     });
   }
 }
