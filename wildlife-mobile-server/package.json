@@ -4,6 +4,7 @@
   "description": "Backend API for Wildlife Warning and Deterrence System",
   "main": "dist/src/index.js",
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "lint": "eslint 'src/**/*.ts'",
