@@ -1,0 +1,216 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CITIZEN
+  RANGER
+  BORDER_GUARD
+  HIGHWAY_ADMIN
+}
+
+enum SmsRelation {
+  self
+  family
+  neighbor
+  other
+}
+
+enum CameraStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum DangerLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertType {
+  ANIMAL_RARE
+  HIGHWAY_NEARBY
+  HUMAN_BORDER
+  INTRUDER
+}
+
+model User {
+  id              String           @id @default(uuid()) @db.VarChar(50)
+  username        String           @unique @db.VarChar(50)
+  passwordHash    String           @map("password_hash") @db.VarChar(255)
+  fullName        String           @map("full_name") @db.VarChar(100)
+  phoneNumber     String           @unique @map("phone_number") @db.VarChar(20)
+  email           String?          @db.VarChar(100)
+  role            Role
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  
+  smsRecipients   SmsRecipient[]
+  pushTokens      PushToken[]
+  alertReads      AlertRead[]
+  responseConfigs ResponseConfig[]
+
+  @@map("users")
+}
+
+model SmsRecipient {
+  id          String      @id @default(uuid()) @db.VarChar(50)
+  userId      String      @map("user_id") @db.VarChar(50)
+  fullName    String      @map("full_name") @db.VarChar(100)
+  phoneNumber String      @unique @map("phone_number") @db.VarChar(20)
+  relation    SmsRelation
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sms_recipients")
+}
+
+model PushToken {
+  id        String   @id @default(uuid()) @db.VarChar(50)
+  userId    String   @map("user_id") @db.VarChar(50)
+  token     String   @unique @db.VarChar(255)
+  platform  String   @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_tokens")
+}
+
+model Camera {
+  id          String       @id @db.VarChar(50)
+  name        String       @db.VarChar(100)
+  latitude    Float        @db.DoublePrecision
+  longitude   Float        @db.DoublePrecision
+  address     String       @db.VarChar(255)
+  status      CameraStatus
+  liveFeedUrl String       @map("live_feed_url") @db.VarChar(255)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  responseConfigs ResponseConfig[]
+  events          Event[]
+  alerts          Alert[]
+
+  @@map("cameras")
+}
+
+model Species {
+  id               String      @id @db.VarChar(50)
+  displayName      String      @map("display_name") @db.VarChar(100)
+  dangerLevel      DangerLevel @map("danger_level")
+  isHuman          Boolean     @map("is_human")
+  htmlDescription  String      @map("html_description") @db.Text
+  aggressionLevel  Int         @map("aggression_level")
+  recommendAction  String      @map("recommend_action") @db.Text
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  responseConfigs ResponseConfig[]
+  eventDetections EventDetection[]
+
+  @@map("species")
+}
+
+model ResponseConfig {
+  id                    String   @id @default(uuid()) @db.VarChar(50)
+  cameraId              String   @map("camera_id") @db.VarChar(50)
+  speciesId             String   @map("species_id") @db.VarChar(50)
+  lastModifiedBy        String   @map("last_modified_by") @db.VarChar(50)
+  audioSampleId         String?  @map("audio_sample_id") @db.VarChar(50)
+  audioIntensity        Int?     @map("audio_intensity")
+  ledFlashRate          String?  @map("led_flash_rate") @db.VarChar(20)
+  ledColor              String?  @map("led_color") @db.VarChar(20)
+  ledDurationSeconds    Int?     @map("led_duration_seconds")
+  fenceLevel            String?  @map("fence_level") @db.VarChar(20)
+  fenceWarningLight     Boolean? @map("fence_warning_light")
+  fenceAutoNotify       Boolean? @map("fence_auto_notify")
+  fenceAutoOffEnabled   Boolean? @map("fence_auto_off_enabled")
+  fenceAutoOffMinutes   Int?     @map("fence_auto_off_minutes")
+  speakerSampleId       String?  @map("speaker_sample_id") @db.VarChar(50)
+  silentAlert           Boolean  @map("silent_alert")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  camera        Camera  @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  species       Species @relation(fields: [speciesId], references: [id], onDelete: Cascade)
+  user          User    @relation(fields: [lastModifiedBy], references: [id], onDelete: Restrict)
+
+  @@unique([cameraId, speciesId])
+  @@map("response_configs")
+}
+
+model Event {
+  id          String   @id @db.VarChar(50)
+  cameraId    String   @map("camera_id") @db.VarChar(50)
+  detectedAt  DateTime @map("detected_at")
+  snapshotUrl String   @map("snapshot_url") @db.VarChar(255)
+
+  camera          Camera           @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  eventDetections EventDetection[]
+  deviceLogs      DeviceLog[]
+  alerts          Alert[]
+
+  @@map("events")
+}
+
+model EventDetection {
+  id         String   @id @default(uuid()) @db.VarChar(50)
+  eventId    String   @map("event_id") @db.VarChar(50)
+  speciesId  String   @map("species_id") @db.VarChar(50)
+  confidence Float    @db.DoublePrecision
+  detectedAt DateTime @map("detected_at")
+
+  event   Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  species Species @relation(fields: [speciesId], references: [id], onDelete: Cascade)
+
+  @@map("event_detections")
+}
+
+model DeviceLog {
+  id               String    @id @default(uuid()) @db.VarChar(50)
+  eventId          String    @map("event_id") @db.VarChar(50)
+  deviceKey        String    @map("device_key") @db.VarChar(20)
+  action           String    @db.VarChar(20)
+  actionAt         DateTime  @map("action_at")
+  autoOffAt        DateTime? @map("auto_off_at")
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("device_logs")
+}
+
+model Alert {
+  id          String      @id @db.VarChar(50)
+  type        AlertType
+  title       String      @db.VarChar(255)
+  dangerLevel DangerLevel @map("danger_level")
+  cameraId    String      @map("camera_id") @db.VarChar(50)
+  eventId     String      @map("event_id") @db.VarChar(50)
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  camera     Camera      @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  event      Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  alertReads AlertRead[]
+
+  @@map("alerts")
+}
+
+model AlertRead {
+  id      String   @id @default(uuid()) @db.VarChar(50)
+  userId  String   @map("user_id") @db.VarChar(50)
+  alertId String   @map("alert_id") @db.VarChar(50)
+  readAt  DateTime @map("read_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alert Alert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@map("alert_reads")
+}

@@ -23,7 +23,7 @@ Tài liệu này phác thảo kế hoạch xây dựng, cấu trúc thư mục, 
 | **Git** | Bắt buộc | Quản lý mã nguồn và kết nối tự động để deploy lên Vercel. | Mở Terminal chạy:<br>`git --version`<br>(Nhấp *Install* khi hộp thoại hiện ra) | Tải bản cài đặt từ [git-scm.com](https://git-scm.com) (tích hợp kèm *Git Bash*). |
 | **VS Code** | Bắt buộc | Trình soạn thái viết code chính, hỗ trợ debug và tự báo lỗi cú pháp. | Tải bản cài đặt Mac (Apple Silicon) từ [code.visualstudio.com](https://code.visualstudio.com). | Tải bản cài đặt Windows từ [code.visualstudio.com](https://code.visualstudio.com) và chạy. |
 | **Prisma Studio** | Bắt buộc | Giao diện Web xem dữ liệu trực quan như Excel để quản lý database. | Không cần cài đặt phần mềm ngoài.<br>Chạy lệnh ở Terminal:<br>`npx prisma studio` | Không cần cài đặt phần mềm ngoài.<br>Chạy lệnh ở Terminal/cmd:<br>`npx prisma studio` |
-| **Docker Desktop** | Bắt buộc | Khởi chạy cơ sở dữ liệu PostgreSQL cục bộ cho phát triển và chạy test tự động. | Tải bản Mac (Apple Silicon) từ [docker.com](https://docker.com) và cài đặt. | Tải bản Windows từ [docker.com](https://docker.com) (yêu cầu cấu hình ảo hóa WSL 2). |
+| **PostgreSQL** | Bắt buộc | Hệ quản trị cơ sở dữ liệu lưu trữ để phát triển và chạy test tự động. | Tải ứng dụng **Postgres App** từ [postgresapp.com](https://postgresapp.com) (hoặc chạy: `brew install postgresql`). | Tải trình cài đặt từ trang chủ [postgresql.org](https://www.postgresql.org/download/windows/) (chọn bản EDB PostgreSQL 16) và cài đặt. |
 
 ### Các tiện ích mở rộng (Extensions) khuyên dùng trong VS Code:
 Để học sinh viết code dễ dàng và hạn chế tối đa lỗi cú pháp, hãy cài thêm các tiện ích mở rộng sau trực tiếp trong VS Code (mục Extensions):
@@ -181,7 +181,10 @@ afterAll(async () => {
 ### 6.1. Môi trường cục bộ (Local Environment)
 *   **Mục đích:** Dành cho học sinh lập trình thiết kế tính năng mới, AI tự động kiểm thử và sửa lỗi.
 *   **Database:** **PostgreSQL cục bộ (Local PostgreSQL)**.
-    *   *Mô tả:* Chạy một container PostgreSQL chuẩn (phiên bản 15 hoặc 16) thông qua Docker Compose hoặc cài đặt trực tiếp bằng phần mềm Postgres App (trên Mac) hoặc PostgreSQL Installer (trên Windows).
+    *   *Mô tả:* Được cài đặt trực tiếp thông qua trình cài đặt **PostgreSQL Installer** chính thức của EDB (trên Windows) hoặc ứng dụng **Postgres App** (trên Mac).
+    *   *Yêu cầu:* Sau khi cài đặt cơ sở dữ liệu thành công, sử dụng công cụ quản lý đi kèm (như pgAdmin) hoặc chạy các câu lệnh SQL để tạo thủ công hai database độc lập:
+        1.  `wildlife_dev` (Cơ sở dữ liệu dành cho lập trình phát triển local).
+        2.  `wildlife_test` (Cơ sở dữ liệu dành cho kiểm thử tự động).
     *   *Tại sao bắt buộc?* Giúp đồng bộ 100% các tính năng đặc thù (như trigger DB giới hạn 3 SĐT, các hàm thời gian) và đặc biệt là tối ưu hóa tốc độ chạy của **Automation Test** (kiểm thử tự động chạy local siêu nhanh, không phụ thuộc vào kết nối mạng internet).
 *   **Cấu hình biến môi trường:** Lưu tại tệp `.env.local` ở thư mục gốc:
     ```env
