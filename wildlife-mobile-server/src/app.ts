@@ -13,7 +13,7 @@ import { uploadSnapshot } from './controllers/snapshotController';
 import multer from 'multer';
 
 const app = express();
-const upload = multer({ dest: 'tmp/' });
+const upload = multer({ dest: '/tmp' });
 
 app.use(cors());
 app.use(express.json());
