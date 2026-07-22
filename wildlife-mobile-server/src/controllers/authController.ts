@@ -82,9 +82,9 @@ export async function register(req: Request, res: Response) {
       role: newUser.role,
       createdAt: newUser.createdAt.toISOString()
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi đăng ký tài khoản:', error);
-    return res.status(500).json({ error: 'server_error', message: `Lỗi máy chủ nội bộ trong quá trình đăng ký: ${error?.message || String(error)}` });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình đăng ký.' });
   }
 }
 
