@@ -84,7 +84,7 @@ export async function register(req: Request, res: Response) {
     });
   } catch (error) {
     console.error('Lỗi khi đăng ký tài khoản:', error);
-    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ trong quá trình đăng ký.' });
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình đăng ký.' });
   }
 }
 
