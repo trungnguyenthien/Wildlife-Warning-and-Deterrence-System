@@ -3,6 +3,7 @@ package com.wildlife.deterrence.data
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
+import com.google.gson.Gson
 
 open class TokenManager(context: Context?) {
   private val sharedPreferences = context?.let {
@@ -17,6 +18,7 @@ open class TokenManager(context: Context?) {
   }
 
   private var testToken: String? = null
+  private var testProfile: UserProfileResponse? = null
 
   open fun saveToken(token: String) {
     if (sharedPreferences != null) {
@@ -36,9 +38,40 @@ open class TokenManager(context: Context?) {
 
   open fun deleteToken() {
     if (sharedPreferences != null) {
-      sharedPreferences.edit().remove("jwt_token").apply()
+      sharedPreferences.edit().remove("jwt_token").remove("cached_profile").apply()
     } else {
       testToken = null
+      testProfile = null
+    }
+  }
+
+  open fun saveUserProfile(profile: UserProfileResponse) {
+    if (sharedPreferences != null) {
+      val json = Gson().toJson(profile)
+      sharedPreferences.edit().putString("cached_profile", json).apply()
+    } else {
+      testProfile = profile
+    }
+  }
+
+  open fun getUserProfile(): UserProfileResponse? {
+    return if (sharedPreferences != null) {
+      val json = sharedPreferences.getString("cached_profile", null) ?: return null
+      try {
+        Gson().fromJson(json, UserProfileResponse::class.java)
+      } catch (e: Exception) {
+        null
+      }
+    } else {
+      testProfile
+    }
+  }
+
+  open fun deleteUserProfile() {
+    if (sharedPreferences != null) {
+      sharedPreferences.edit().remove("cached_profile").apply()
+    } else {
+      testProfile = null
     }
   }
 }

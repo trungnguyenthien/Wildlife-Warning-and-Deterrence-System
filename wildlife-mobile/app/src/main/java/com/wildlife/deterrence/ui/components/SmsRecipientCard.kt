@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,16 +43,18 @@ fun SmsRecipientCard(
         else -> relation
     }
 
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
     val relationBgColor = when (relation.lowercase()) {
-        "family", "gia đình" -> Color(0xFFE3F2FD) // Blue
-        "ranger", "kiểm lâm" -> Color(0xFFE8F5E9) // Green
-        else -> Color(0xFFFFF3E0) // Orange
+        "family", "gia đình" -> if (isDark) Color(0xFF0D47A1).copy(alpha = 0.3f) else Color(0xFFE3F2FD) // Blue
+        "ranger", "kiểm lâm" -> if (isDark) Color(0xFF3E350E).copy(alpha = 0.5f) else Color(0xFFE8F5E9) // Vàng trong dark mode
+        else -> if (isDark) Color(0xFFE65100).copy(alpha = 0.3f) else Color(0xFFFFF3E0) // Orange
     }
 
     val relationTextColor = when (relation.lowercase()) {
-        "family", "gia đình" -> Color(0xFF1565C0)
-        "ranger", "kiểm lâm" -> Color(0xFF2E7D32)
-        else -> Color(0xFFE65100)
+        "family", "gia đình" -> if (isDark) Color(0xFF90CAF9) else Color(0xFF1565C0)
+        "ranger", "kiểm lâm" -> if (isDark) Color(0xFFD4AC0D) else Color(0xFF2E7D32) // Vàng trong dark mode
+        else -> if (isDark) Color(0xFFFFCC80) else Color(0xFFE65100)
     }
 
     Card(

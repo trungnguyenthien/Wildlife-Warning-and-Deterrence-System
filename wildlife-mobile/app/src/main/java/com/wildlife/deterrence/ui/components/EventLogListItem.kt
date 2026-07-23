@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,21 +38,23 @@ fun EventLogListItem(
     timestamp: String,
     modifier: Modifier = Modifier
 ) {
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
     // Determine resolved danger level color based on species name
     val speciesUpper = speciesName.uppercase()
     val isDangerous = speciesUpper in listOf("VOI", "HỔ", "BÁO", "TÊ GIÁC", "RẮN", "CÁ SẤU", "STRANGER", "NGƯỜI LẠ")
     val isMedium = speciesUpper in listOf("NAI", "NAI LỚN", "KHỈ", "KHỈ ĐÀN", "HEO RỪNG", "HEO")
     
     val badgeBgColor = when {
-        isDangerous -> Color(0xFFFFEBEE)
-        isMedium -> Color(0xFFFFF3E0)
-        else -> Color(0xFFE8F5E9)
+        isDangerous -> if (isDark) Color(0xFFC62828).copy(alpha = 0.2f) else Color(0xFFFFEBEE)
+        isMedium -> if (isDark) Color(0xFFEF6C00).copy(alpha = 0.2f) else Color(0xFFFFF3E0)
+        else -> if (isDark) Color(0xFF3E350E).copy(alpha = 0.5f) else Color(0xFFE8F5E9)
     }
     
     val badgeTextColor = when {
-        isDangerous -> Color(0xFFC62828)
-        isMedium -> Color(0xFFEF6C00)
-        else -> Color(0xFF2E7D32)
+        isDangerous -> if (isDark) Color(0xFFEF9A9A) else Color(0xFFC62828)
+        isMedium -> if (isDark) Color(0xFFFFCC80) else Color(0xFFEF6C00)
+        else -> if (isDark) Color(0xFFD4AC0D) else Color(0xFF2E7D32)
     }
 
     val confidencePercentage = (confidence * 100).toInt()

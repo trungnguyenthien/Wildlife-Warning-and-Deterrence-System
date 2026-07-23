@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +37,8 @@ fun AppButton(
         AppButtonShape.Rounded -> RoundedCornerShape(12.dp)
     }
 
-    val primaryGreen = Color(0xFF006400) // Project Dark Green
+    val isDark = androidx.compose.material3.MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val primaryGreen = if (isDark) Color(0xFFD4AC0D) else Color(0xFF006400) // Adaptive brand color
 
     val content: @Composable RowScope.() -> Unit = {
         if (icon != null) {

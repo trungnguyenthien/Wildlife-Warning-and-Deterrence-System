@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,9 +27,25 @@ fun CameraStatusBadge(
     offlineDurationSeconds: Long,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor = if (isOnline) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
-    val indicatorColor = if (isOnline) Color(0xFF4CAF50) else Color(0xFFF44336)
-    val textColor = if (isOnline) Color(0xFF2E7D32) else Color(0xFFC62828)
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+    val backgroundColor = if (isOnline) {
+        if (isDark) Color(0xFF1B5E20).copy(alpha = 0.2f) else Color(0xFFE8F5E9)
+    } else {
+        if (isDark) Color(0xFFB71C1C).copy(alpha = 0.2f) else Color(0xFFFFEBEE)
+    }
+
+    val indicatorColor = if (isOnline) {
+        if (isDark) Color(0xFF81C784) else Color(0xFF4CAF50)
+    } else {
+        if (isDark) Color(0xFFE57373) else Color(0xFFF44336)
+    }
+
+    val textColor = if (isOnline) {
+        if (isDark) Color(0xFF81C784) else Color(0xFF2E7D32)
+    } else {
+        if (isDark) Color(0xFFE57373) else Color(0xFFC62828)
+    }
 
     val labelText = if (isOnline) {
         "Online"

@@ -32,6 +32,13 @@ class MainViewModel(
     private val _profileError = MutableStateFlow<String?>(null)
     val profileError: StateFlow<String?> = _profileError.asStateFlow()
 
+    init {
+        val cached = tokenManager.getUserProfile()
+        if (cached != null) {
+            _userProfile.value = cached
+        }
+    }
+
     fun selectTab(index: Int) {
         _selectedTab.value = index
     }
@@ -76,15 +83,27 @@ class MainViewModel(
         }
 
         val authHeader = "Bearer $token"
-        _isLoadingProfile.value = true
         _profileError.value = null
+
+        // Load cached profile first if in-memory is null
+        val cached = tokenManager.getUserProfile()
+        if (cached != null && _userProfile.value == null) {
+            _userProfile.value = cached
+        }
+
+        // Show spinner only when there is no data at all (neither cache nor in-memory)
+        if (_userProfile.value == null) {
+            _isLoadingProfile.value = true
+        }
 
         viewModelScope.launch {
             try {
                 val response = authApi.getUserProfile(authHeader)
                 _isLoadingProfile.value = false
                 if (response.isSuccessful && response.body() != null) {
-                    _userProfile.value = response.body()
+                    val profile = response.body()!!
+                    _userProfile.value = profile
+                    tokenManager.saveUserProfile(profile) // Save to local cache
                 } else {
                     _profileError.value = "Failed to load profile: ${response.code()}"
                 }

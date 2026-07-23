@@ -134,6 +134,35 @@ class MainViewModelTest {
         assertEquals("Failed to load profile: 401", viewModel.profileError.value)
         assertEquals(false, viewModel.isLoadingProfile.value)
     }
+
+    @Test
+    fun testFetchUserProfileLoadsFromCacheImmediately() = runTest {
+        val cachedProfile = UserProfileResponse(
+            id = "cached-id",
+            username = "cached_user",
+            fullName = "Cached User Name",
+            phoneNumber = "0901234567",
+            role = "CITIZEN",
+            email = "cached@example.com"
+        )
+        tokenManager.saveToken("valid-session-token")
+        tokenManager.saveUserProfile(cachedProfile)
+
+        val fakeAuthApi = FakeMainAuthApi().apply {
+            shouldSucceed = true
+        }
+
+        // When VM initializes, it should load from cache instantly
+        val viewModel = MainViewModel(tokenManager, fakeAuthApi)
+        assertEquals("cached-id", viewModel.userProfile.value?.id)
+        assertEquals("cached_user", viewModel.userProfile.value?.username)
+
+        viewModel.fetchUserProfile()
+        
+        // After API response, it should update to API value
+        assertEquals("fake-user-id", viewModel.userProfile.value?.id)
+        assertEquals("fake-user-id", tokenManager.getUserProfile()?.id)
+    }
 }
 
 private class FakeMainAuthApi : AuthApi {

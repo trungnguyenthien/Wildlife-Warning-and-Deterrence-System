@@ -52,22 +52,34 @@ Màn hình sẽ tương tác với API Backend thông qua:
     }
     ```
 
-### Luồng xử lý chính:
+### Luồng xử lý chính (Tích hợp Cache Profile):
 ```mermaid
 sequenceDiagram
   autonumber
   actor User as "Bệ Hạ / Người dùng"
   participant View as "MainScreen (Tab 4)"
   participant VM as "MainViewModel"
-  participant TS as "ThemeSettings"
   participant TM as "TokenManager"
   participant API as "AuthApi"
+  participant TS as "ThemeSettings"
 
-  Note over View: Khi người dùng chuyển sang Tab 4 (Settings)
+  Note over View: Khởi tạo/Mở Tab 4 (Cài đặt)
+  VM->>TM: getUserProfile() (Đọc cache SharedPreferences)
+  TM-->>VM: Trả về Profile cũ (nếu có)
+  VM-->>View: Hiển thị lập tức thông tin cũ lên thẻ cá nhân
+
   View->>VM: fetchUserProfile()
-  VM->>API: GET /users/me
-  API-->>VM: Trả về 200 OK (UserProfileResponse)
-  VM-->>View: Cập nhật UI State (Hiển thị User ID)
+  alt Nếu đã có dữ liệu cache
+      Note over VM: Không hiển thị vòng quay Loading màn hình
+  else Nếu chưa có dữ liệu cache
+      VM-->>View: Hiển thị xoay vòng Loading
+  end
+
+  VM->>API: GET /users/me (Gửi request ngầm dưới nền)
+  API-->>VM: Trả về 200 OK (UserProfileResponse mới)
+  VM->>TM: saveUserProfile(profile) (Lưu đè cache mới)
+  VM-->>View: Cập nhật thông tin profile mới nhất lên UI
+  VM-->>View: Ẩn xoay vòng Loading (nếu đang hiển thị)
 
   Note over View: Khi thay đổi cấu hình giao diện
   User->>View: Chọn Chế độ tối (Dark Mode) trên H1ChoiceButtonGroup
@@ -79,7 +91,7 @@ sequenceDiagram
   User->>View: Nhấn [Đăng xuất] (logout_button)
   View->>User: Hiển thị Dialog xác nhận
   User->>View: Nhấn Đồng ý đăng xuất
-  View->>TM: deleteToken()
+  View->>TM: deleteToken() & Xóa cache profile
   View->>User: Điều hướng quay lại [LOGIN_SCREEN]
 ```
 
@@ -101,6 +113,12 @@ sequenceDiagram
 ## 4. Các Quy tắc Luồng nghiệp vụ (Business Rules)
 
 *   **Tự động tải dữ liệu:** Khi người dùng chuyển sang Tab 4, nếu `userProfile` trong ViewModel đang trống (`null`), hệ thống tự động phát lệnh `fetchUserProfile()`.
+*   **Lưu trữ và Hiển thị Cache Profile:**
+    *   Thông tin profile tải về thành công phải được tuần tự hóa (Serialize) sang định dạng JSON và lưu trữ vào `SharedPreferences` thông qua `TokenManager`.
+    *   Khi ứng dụng mở màn hình cài đặt, `MainViewModel` sẽ tự động khôi phục thông tin từ cache lên màn hình ngay lập tức (nếu có) để người dùng không phải thấy trạng thái trống hoặc màn hình xoay vòng chờ đợi.
+    *   Yêu cầu gọi API `GET /users/me` sẽ chạy ngầm dưới nền. Khi có phản hồi mới nhất từ máy chủ, UI sẽ cập nhật mượt mà và ghi đè cache mới.
+    *   Nếu đã có thông tin cache, màn hình sẽ **không hiển thị** vòng xoay Loading chính giữa để tránh gián đoạn trải nghiệm người dùng. Vòng xoay Loading chỉ hiển thị khi cache hoàn toàn trống (lần đăng nhập đầu tiên).
+*   **Xóa Cache khi Đăng xuất:** Khi người dùng thực hiện Đăng xuất, toàn bộ thông tin cache profile phải được xóa sạch hoàn toàn khỏi `SharedPreferences` cùng với JWT token để đảm bảo an toàn thông tin và không hiển thị nhầm dữ liệu của tài khoản trước đó ở lần đăng nhập sau.
 *   **Lưu trữ Theme bền vững:** Lựa chọn theme của người dùng phải được lưu giữ xuống `SharedPreferences` cục bộ để duy trì trạng thái khi người dùng mở lại app lần sau.
 *   **Ngăn chặn nút Back sau khi Logout:** Khi nhấn Đăng xuất thành công, ứng dụng phải xóa sạch Backstack định tuyến trước khi điều hướng sang màn hình Login, ngăn ngừa việc người dùng nhấn nút Back quay lại màn hình chính khi không còn phiên làm việc.
 
@@ -118,4 +136,7 @@ sequenceDiagram
 1.  Đăng nhập, truy cập màn hình chính, nhấn chuyển sang Tab "Cài đặt".
 2.  Xác nhận hiển thị đúng mã định danh User ID tương ứng với tài khoản đã đăng nhập.
 3.  Thay đổi theme sang "Tối", "Sáng", "Hệ thống" trên `H1ChoiceButtonGroup` để kiểm tra màu sắc giao diện thay đổi tức thì. Khởi động lại ứng dụng để xác thực theme đã chọn được duy trì bền vững.
-4.  Nhấn nút "Đăng xuất", chọn "Hủy" kiểm tra hộp thoại biến mất. Nhấn chọn "Đăng xuất" lần nữa, bấm xác nhận, kiểm định ứng dụng đã chuyển hướng về màn hình Login và không thể nhấn Back để quay lại.
+4.  Thực hiện kiểm thử cache profile:
+    - Khi đang mở Tab Cài đặt, tắt ứng dụng đi và mở lại, chuyển nhanh sang Tab Cài đặt. Xác nhận thông tin Profile hiển thị ngay lập tức (không có độ trễ hay vòng xoay Loading màn hình).
+    - Đăng xuất tài khoản, đăng nhập bằng tài khoản khác. Xác nhận không bị hiển thị nhầm thông tin của tài khoản cũ trước đó (do cache đã được dọn sạch khi đăng xuất).
+5.  Nhấn nút "Đăng xuất", chọn "Hủy" kiểm tra hộp thoại biến mất. Nhấn chọn "Đăng xuất" lần nữa, bấm xác nhận, kiểm định ứng dụng đã chuyển hướng về màn hình Login và không thể nhấn Back để quay lại.
