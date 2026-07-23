@@ -205,7 +205,7 @@ private fun SettingsTabContent(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val titleColor = if (isDark) Color(0xFF81C784) else Color(0xFF2C4C2C)
+        val titleColor = if (isDark) Color(0xFFF4D03F) else Color(0xFF2C4C2C)
         Text(
             text = "Cài đặt",
             fontSize = 24.sp,
@@ -216,8 +216,11 @@ private fun SettingsTabContent(
                 .padding(vertical = 12.dp)
         )
 
-        // Card 1: User Profile Display (Dark green filled card matching mockup)
-        val profileCardBg = Color(0xFF2C4C2C)
+        // Card 1: User Profile Display (Compact horizontal Row layout with adaptive colors)
+        val profileCardBg = if (isDark) Color(0xFF6E5906) else Color(0xFF2C4C2C)
+        val avatarBg = if (isDark) Color(0xFFFEF9E7) else Color(0xFFEFF7EF)
+        val avatarTint = if (isDark) Color(0xFF6E5906) else Color(0xFF2C4C2C)
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -225,70 +228,77 @@ private fun SettingsTabContent(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = profileCardBg)
         ) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 24.dp, horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
+                        .size(64.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFEFF7EF)),
+                        .background(avatarBg),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Avatar",
-                        tint = Color(0xFF2C4C2C),
-                        modifier = Modifier.size(48.dp)
+                        tint = avatarTint,
+                        modifier = Modifier.size(36.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-                if (isLoadingProfile) {
-                    CircularProgressIndicator(color = Color.White)
-                } else if (profileError != null) {
-                    Text(
-                        text = profileError ?: "Lỗi tải thông tin",
-                        color = Color(0xFFFFCDD2),
-                        fontSize = 14.sp
-                    )
-                } else if (userProfile != null) {
-                    Text(
-                        text = "MÃ NGƯỜI DÙNG",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "ID: ${userProfile?.id}",
-                        color = Color.White,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "${userProfile?.fullName} (${userProfile?.username})",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = "Vai trò: ${userProfile?.role}",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 12.sp
-                    )
-                } else {
-                    Text(
-                        text = "Không có dữ liệu profile.",
-                        color = Color.White,
-                        fontSize = 14.sp
-                    )
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    if (isLoadingProfile) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.5.dp
+                        )
+                    } else if (profileError != null) {
+                        Text(
+                            text = profileError ?: "Lỗi tải thông tin",
+                            color = Color(0xFFFFCDD2),
+                            fontSize = 14.sp
+                        )
+                    } else if (userProfile != null) {
+                        Text(
+                            text = userProfile?.fullName ?: "",
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "${userProfile?.username} | Vai trò: ${userProfile?.role}",
+                            color = Color.White.copy(alpha = 0.8f),
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        androidx.compose.material3.Surface(
+                            color = Color.White.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "ID: ${userProfile?.id}",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "Không có dữ liệu profile.",
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }

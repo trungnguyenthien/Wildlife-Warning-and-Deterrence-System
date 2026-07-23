@@ -40,7 +40,7 @@ fun H1ChoiceButtonGroup(
     modifier: Modifier = Modifier
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-    val containerBg = if (isDark) Color(0xFF1E2E1E) else Color(0xFFF0F0F0)
+    val containerBg = if (isDark) Color(0xFF3E350E) else Color(0xFFF0F0F0)
     
     Row(
         modifier = modifier
@@ -54,7 +54,7 @@ fun H1ChoiceButtonGroup(
         options.forEach { option ->
             val isSelected = option == selectedOption
             val itemBg = if (isSelected) {
-                if (isDark) Color(0xFF2C4C2C) else Color.White
+                if (isDark) Color(0xFF6E5906) else Color.White
             } else {
                 Color.Transparent
             }
@@ -92,9 +92,11 @@ fun V1ChoiceButtonGroup(
     modifier: Modifier = Modifier,
     optionRightIcons: Map<String, ImageVector>? = null
 ) {
-    val activeGreen = Color(0xFF2C4C2C)
-    val activeBg = Color(0xFFEFF7EF)
-    val inactiveBorder = Color.LightGray
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val activeGreen = if (isDark) Color(0xFFD4AC0D) else Color(0xFF2C4C2C)
+    val activeBg = if (isDark) Color(0xFF3E350E) else Color(0xFFEFF7EF)
+    val inactiveBorder = if (isDark) MaterialTheme.colorScheme.outline.copy(alpha = 0.5f) else Color.LightGray
+    val defaultCardBg = if (isDark) MaterialTheme.colorScheme.surface else Color.White
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -110,7 +112,7 @@ fun V1ChoiceButtonGroup(
                 BorderStroke(1.dp, inactiveBorder)
             }
 
-            val containerColor = if (isSelected) activeBg else Color.White
+            val containerColor = if (isSelected) activeBg else defaultCardBg
 
             OutlinedCard(
                 shape = RoundedCornerShape(12.dp),

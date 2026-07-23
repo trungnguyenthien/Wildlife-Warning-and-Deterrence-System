@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -43,9 +44,10 @@ fun ValidatedTextField(
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val primaryGreen = Color(0xFF2C4C2C)
-    val defaultBorderColor = Color(0xFF8A9A8A)
-    val iconColor = Color(0xFF2C3E2C)
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val primaryGreen = if (isDark) Color(0xFFD4AC0D) else Color(0xFF2C4C2C)
+    val defaultBorderColor = if (isDark) Color(0xFF8B8A80) else Color(0xFF8A9A8A)
+    val iconColor = if (isDark) Color(0xFFD4AC0D) else Color(0xFF2C3E2C)
 
     Column(modifier = modifier) {
         OutlinedTextField(
