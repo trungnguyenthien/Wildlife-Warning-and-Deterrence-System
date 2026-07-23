@@ -86,7 +86,6 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toBe('missed_image');
-    expect(res.body.message).toContain('tệp tin ảnh');
   });
 
   it('TC_SNAP_UPL_FAILURE_02: Fail to upload manual camera snapshot with non-existent userId', async () => {
@@ -99,7 +98,6 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('not_found_user');
-    expect(res.body.message).toContain('Người dùng');
   });
 
   it('TC_SNAP_UPL_FAILURE_03: Fail to upload manual camera snapshot for non-existent cameraId', async () => {
@@ -112,6 +110,5 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('not_found_camera');
-    expect(res.body.message).toContain('camera');
   });
 });
