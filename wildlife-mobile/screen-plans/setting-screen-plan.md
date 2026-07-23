@@ -14,15 +14,24 @@ Bản kế hoạch này mô tả thiết kế và kiến trúc triển khai cho 
 
 ## 1. Thành phần Giao diện (UI Components)
 
-Màn hình được nhúng vào Tab thứ 4 của `ui/main/MainScreen.kt` dưới dạng Composable `SettingsTabContent` và tái sử dụng triệt để các thành phần dùng chung từ đặc tả [UI_COMPONENTS.md](../UI_COMPONENTS.md):
+Màn hình được nhúng vào Tab thứ 4 của `ui/main/MainScreen.kt` dưới dạng Composable `SettingsTabContent` và cấu trúc giao diện theo các quy tắc sau:
 
-*   **`AppCard` (Tái sử dụng từ [AppCard](../UI_COMPONENTS.md#9-appcard-the-container-chuan)):** Khung chứa chuẩn hóa dùng để bọc nhóm thông tin tài khoản và cấu hình giao diện, tự động hỗ trợ bo tròn `16.dp` hiện đại và viền nhẹ đổ bóng.
-*   **`H1ChoiceButtonGroup` (Tái sử dụng từ [H1ChoiceButtonGroup](../UI_COMPONENTS.md#7-h1choicebuttongroup-hang-nut-chon-mot---ngang-cao-cap)):** Hàng nút chọn capsule ngang cao cấp thay thế cho nhóm RadioButton mặc định để chọn chế độ sáng/tối/hệ thống mượt mà.
-*   **`AppTitleText`, `AppSectionTitleText`, `AppSubTitleText`, `AppBodyText` (Tái sử dụng từ [AppText Components](../UI_COMPONENTS.md#10-apptext-components-cac-composable-view-van-ban-tu-dinh-nghia)):** Các thành phần hiển thị văn bản thống nhất kiểu dáng toàn dự án.
+*   **Bố cục InfoPanel tinh chỉnh gọn gàng:**
+    *   Sử dụng cấu trúc dòng nằm ngang (`Row`) thay vì cột đứng (`Column`) để tiết kiệm diện tích và tăng tính cân đối.
+    *   **Trái:** Ảnh Avatar dạng tròn (`CircleShape`) thu gọn kích thước (`64.dp`).
+    *   **Phải:** Cột thông tin (`Column`) gồm: Họ tên (cỡ chữ lớn, in đậm), Dòng phụ chứa Tên đăng nhập và Vai trò (cỡ chữ nhỏ `12.sp`), Khối hiển thị ID người dùng dạng nhãn nổi bo góc (`Surface`) đè nền mờ (`White.copy(alpha = 0.15f)`) giúp nổi bật ID hex 4 ký tự.
+*   **Chuyển đổi màu sắc đa giao diện (Theme Color Mapping):**
+    *   **Chế độ sáng (Light Mode):** Sử dụng tông xanh lá chủ đạo: Nền thẻ cá nhân xanh lục rừng thẫm (`Color(0xFF2C4C2C)`), Nền Avatar xanh nhạt (`Color(0xFFEFF7EF)`), Tiêu đề màn hình xanh lục (`Color(0xFF2C4C2C)`).
+    *   **Chế độ tối (Dark Mode):** Toàn bộ tông xanh lá chuyển sang sắc vàng/mustard ấm:
+        *   Nền thẻ cá nhân chuyển sang vàng mù tạt đậm (`Color(0xFF6E5906)`) đảm bảo tương phản cao với chữ trắng.
+        *   Nền Avatar chuyển sang vàng nhạt (`Color(0xFFFEF9E7)`), biểu tượng bên trong đổi sang sắc vàng đậm (`Color(0xFF6E5906)`).
+        *   Hộp chọn giao diện `H1ChoiceButtonGroup` chuyển màu nền capsule sang vàng mù tạt đậm (`Color(0xFF6E5906)`) và container mờ (`Color(0xFF3E350E)`).
+        *   Đường viền của các ô nhập liệu `ValidatedTextField` và thẻ chọn `V1ChoiceButtonGroup` tự động chuyển sang sắc vàng mù tạt khi được kích hoạt.
+*   **`AppCard` (Tái sử dụng từ [AppCard](../UI_COMPONENTS.md#9-appcard-the-container-chuan)):** Khung chứa chuẩn hóa dùng để bọc nhóm thông tin tài khoản và cấu hình giao diện.
+*   **`H1ChoiceButtonGroup` (Tái sử dụng từ [H1ChoiceButtonGroup](../UI_COMPONENTS.md#7-h1choicebuttongroup-hang-nut-chon-mot---ngang-cao-cap)):** Hàng nút chọn capsule ngang cao cấp thay thế cho nhóm RadioButton mặc định.
 *   **`logout_button` (FilledButton):** Nút đăng xuất màu đỏ sử dụng tông màu lỗi `MaterialTheme.colorScheme.error`, kèm icon `Icons.Default.ExitToApp`.
-*   **`logout_confirm_dialog` (AlertDialog):** Hộp thoại xác nhận đăng xuất yêu cầu người dùng xác thực trước khi xóa phiên làm việc.
-*   **`sms_config_button` (Tái sử dụng từ [AppButton](../UI_COMPONENTS.md#11-appbutton-nut-bam-da-nang-cua-he-thong)):** Nút bấm mở màn hình quản lý SĐT nhận cảnh báo dạng `Outlined` kèm icon Phone.
-*   **`configure_defense_default_button` (Tái sử dụng từ [AppButton](../UI_COMPONENTS.md#11-appbutton-nut-bam-da-nang-cua-he-thong)):** Nút bấm mở màn hình thiết lập ứng phó mặc định dạng `Outlined` kèm icon Security.
+*   **`logout_confirm_dialog` (AlertDialog):** Hộp thoại xác nhận đăng xuất.
+*   **`sms_config_button` / `configure_defense_default_button` (Tái sử dụng từ [AppButton](../UI_COMPONENTS.md#11-appbutton-nut-bam-da-nang-cua-he-thong)):** Các dòng lệnh điều hướng cài đặt nâng cao.
 
 ---
 
