@@ -3,6 +3,8 @@ package com.wildlife.deterrence.viewmodel
 import com.wildlife.deterrence.data.AuthApi
 import com.wildlife.deterrence.data.LoginRequest
 import com.wildlife.deterrence.data.LoginResponse
+import com.wildlife.deterrence.data.RegisterRequest
+import com.wildlife.deterrence.data.RegisterResponse
 import com.wildlife.deterrence.data.TokenManager
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
@@ -38,7 +40,7 @@ class LoginViewModelTest {
 
     @Test
     fun TC_UI_VAL_USER_01() = runTest {
-        val fakeAuthApi = FakeAuthApi()
+        val fakeAuthApi = FakeLoginAuthApi()
         val viewModel = LoginViewModel(tokenManager, fakeAuthApi)
 
         // Case 1: Empty username
@@ -66,7 +68,7 @@ class LoginViewModelTest {
 
     @Test
     fun TC_UI_VAL_PASS_01() = runTest {
-        val fakeAuthApi = FakeAuthApi()
+        val fakeAuthApi = FakeLoginAuthApi()
         val viewModel = LoginViewModel(tokenManager, fakeAuthApi)
 
         // Case 1: Empty password
@@ -88,7 +90,7 @@ class LoginViewModelTest {
 
     @Test
     fun TC_UI_AUTH_SUCCESS() = runTest {
-        val fakeAuthApi = FakeAuthApi().apply {
+        val fakeAuthApi = FakeLoginAuthApi().apply {
             shouldSucceed = true
             responseToken = "valid-token"
         }
@@ -107,7 +109,7 @@ class LoginViewModelTest {
 
     @Test
     fun TC_UI_AUTH_FAILURE() = runTest {
-        val fakeAuthApi = FakeAuthApi().apply {
+        val fakeAuthApi = FakeLoginAuthApi().apply {
             shouldSucceed = false
             errorCode = 401
         }
@@ -123,7 +125,7 @@ class LoginViewModelTest {
     }
 }
 
-private class FakeAuthApi : AuthApi {
+private class FakeLoginAuthApi : AuthApi {
     var shouldSucceed: Boolean = true
     var responseToken: String = ""
     var errorCode: Int = 400
@@ -134,5 +136,9 @@ private class FakeAuthApi : AuthApi {
         } else {
             Response.error(errorCode, ResponseBody.create(null, ""))
         }
+    }
+
+    override suspend fun register(request: RegisterRequest): Response<RegisterResponse> {
+        return Response.error(400, ResponseBody.create(null, ""))
     }
 }
