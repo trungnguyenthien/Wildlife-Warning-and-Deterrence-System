@@ -28,9 +28,11 @@ Chúng ta sẽ tạo các lớp Kotlin trong gói `com.wildlife.deterrence`:
 *   **`LoginViewModel.kt`**: Quản lý trạng thái nhập liệu (username, password) và logic đăng nhập (hiện tại để trống cấu trúc sơ khai).
 
 ### Tầng View & UI Components (`ui/`)
-*   **`ui/screens/SplashScreen.kt`**: Vẽ logo ứng dụng và tên hệ thống ở giữa màn hình bằng Compose.
-*   **`ui/screens/LoginScreen.kt`**: Màn hình đăng nhập trống (chỉ chứa một text hiển thị placeholder như yêu cầu).
-*   **`ui/components/AppLogo.kt`**: SubView vẽ Logo chung (được dùng ở Splash và có thể cả Login/Register sau này).
+
+Tất cả các thành phần giao diện sẽ tuân thủ nghiêm ngặt và tái sử dụng đặc tả trong tài liệu chung [UI_COMPONENTS.md](../UI_COMPONENTS.md):
+*   **`ui/screens/SplashScreen.kt`**: Sử dụng `AppLogo` bọc căn giữa và hiển thị tên hệ thống.
+*   **`ui/screens/LoginScreen.kt`**: Màn hình đăng nhập lắp ghép từ các component dùng chung (`AppLogo`, `AppTitleText`, `ValidatedTextField`, `AppButton`).
+*   **`ui/components/AppLogo.kt`**: SubView vẽ Logo cảnh báo động vật (Tái sử dụng từ đặc tả [UI_COMPONENTS.md: AppLogo](../UI_COMPONENTS.md#1-applogo-logo-he-thong)).
 
 ---
 

@@ -12,15 +12,15 @@ Bản kế hoạch này mô tả thiết kế và kiến trúc triển khai cho 
 
 ## 1. Thành phần Giao diện (UI Components)
 
-Màn hình được đặt tại `ui/screens/LoginScreen.kt` và chia nhỏ các SubViews như sau:
+Màn hình được đặt tại `ui/screens/LoginScreen.kt` và tái sử dụng các thành phần dùng chung từ đặc tả [UI_COMPONENTS.md](../UI_COMPONENTS.md):
 
-*   **`AppLogo` (Tái sử dụng từ `ui/components/AppLogo.kt`):** Hiển thị logo cảnh báo và tên dự án ở vị trí trên cùng.
-*   **`login_title_text` (Text):** Hiển thị nhãn `Đăng nhập` với kiểu chữ H4 Bold.
-*   **`username_input` (TextField):** Ô nhập tên đăng nhập với nhãn `Username`. Có nút xóa nhanh dữ liệu, hỗ trợ validate khi thay đổi tiêu điểm (focus).
-*   **`password_input` (TextField - Password):** Ô nhập mật khẩu với nhãn `Mật khẩu`. Hỗ trợ ẩn/hiện mật khẩu bằng biểu tượng mắt (mặc định ẩn).
-*   **`login_button` (Button):** Nút đăng nhập chính. Chỉ kích hoạt (enable) khi cả hai trường nhập liệu không trống.
-*   **`register_linkbutton` (TextButton):** Nút liên kết `Đăng ký tài khoản` đưa người dùng sang màn hình đăng ký `[REGISTER_SCREEN]`.
-*   **`login_error_snackbar` (Snackbar):** Hiển thị thông báo lỗi xác thực từ máy chủ hoặc lỗi mạng.
+*   **`AppLogo` (Tái sử dụng từ [AppLogo](../UI_COMPONENTS.md#1-applogo-logo-he-thong)):** Khối hiển thị logo cảnh báo và tên dự án ở trên cùng.
+*   **`login_title_text` (Tái sử dụng [AppTitleText](../UI_COMPONENTS.md#10-apptext-components-cac-composable-view-van-ban-tu-dinh-nghia)):** Hiển thị nhãn `Đăng nhập` sử dụng font chữ tiêu đề lớn đậm màu theo theme.
+*   **`username_input` (Tái sử dụng [ValidatedTextField](../UI_COMPONENTS.md#3-validatedtextfield-truong-nhap-lieu-kem-xac-thuc---cao-cap)):** Trường nhập tài khoản bo góc `12.dp` kèm icon `Icons.Default.Person` ở bên trái, tự động hiển thị nhãn báo lỗi khi kiểm tra biểu mẫu.
+*   **`password_input` (Tái sử dụng [ValidatedTextField](../UI_COMPONENTS.md#3-validatedtextfield-truong-nhap-lieu-kem-xac-thuc---cao-cap)):** Trường nhập mật khẩu bo góc `12.dp` kèm icon `Icons.Default.Lock` ở bên trái, cấu hình `isPassword = true` để hiển thị icon con mắt ẩn/hiện mật khẩu thô ở góc phải.
+*   **`login_button` (Tái sử dụng [AppButton](../UI_COMPONENTS.md#11-appbutton-nut-bam-da-nang-cua-he-thong)):** Nút đăng nhập dạng `Filled` bo góc chữ nhật `Rounded` (`12.dp`), tự động đổi trạng thái vô hiệu hóa (disabled) khi các trường để trống.
+*   **`register_linkbutton` (TextButton):** Nút liên kết dạng chữ màu để chuyển sang màn hình đăng ký `[REGISTER_SCREEN]`.
+*   **`login_error_snackbar` (Snackbar):** Hiển thị thông báo lỗi xác thực từ máy chủ hoặc lỗi mạng ở cuối màn hình.
 
 ---
 
