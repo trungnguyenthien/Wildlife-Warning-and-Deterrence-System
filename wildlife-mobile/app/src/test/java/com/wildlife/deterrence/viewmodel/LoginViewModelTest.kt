@@ -125,6 +125,21 @@ class LoginViewModelTest {
         assertFalse(viewModel.uiState.value.loginSuccess)
         assertEquals("Sai tên đăng nhập hoặc mật khẩu", viewModel.uiState.value.loginError)
     }
+
+    @Test
+    fun testResetState() = runTest {
+        val fakeAuthApi = FakeLoginAuthApi()
+        val viewModel = LoginViewModel(tokenManager, fakeAuthApi)
+
+        viewModel.onUsernameChanged("username_test")
+        viewModel.onPasswordChanged("password_test")
+
+        viewModel.resetState()
+
+        assertEquals("", viewModel.uiState.value.usernameText)
+        assertEquals("", viewModel.uiState.value.passwordText)
+        assertFalse(viewModel.uiState.value.loginSuccess)
+    }
 }
 
 private class FakeLoginAuthApi : AuthApi {

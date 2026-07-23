@@ -115,4 +115,8 @@ class LoginViewModel(
     fun clearErrors() {
         _uiState.value = _uiState.value.copy(loginError = null)
     }
+
+    fun resetState() {
+        _uiState.value = LoginUiState()
+    }
 }
