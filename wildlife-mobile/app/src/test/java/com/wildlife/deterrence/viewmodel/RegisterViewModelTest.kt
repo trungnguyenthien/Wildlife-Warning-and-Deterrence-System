@@ -6,6 +6,7 @@ import com.wildlife.deterrence.data.LoginResponse
 import com.wildlife.deterrence.data.PushTokenRequest
 import com.wildlife.deterrence.data.RegisterRequest
 import com.wildlife.deterrence.data.RegisterResponse
+import com.wildlife.deterrence.data.UserProfileResponse
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -192,5 +193,9 @@ private class FakeRegisterAuthApi : AuthApi {
 
     override suspend fun deletePushToken(authHeader: String, fcmToken: String?): Response<Unit> {
         return Response.success(Unit)
+    }
+
+    override suspend fun getUserProfile(authHeader: String): Response<UserProfileResponse> {
+        return Response.error(400, ResponseBody.create(null, ""))
     }
 }

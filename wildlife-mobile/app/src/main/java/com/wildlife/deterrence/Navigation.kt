@@ -99,6 +99,11 @@ fun MainNavigation() {
           }
           MainScreen(
             viewModel = mainViewModel,
+            onLogout = {
+              tokenManager.deleteToken()
+              backStack.clear()
+              backStack.add(Login)
+            },
             modifier = Modifier.safeDrawingPadding()
           )
         }

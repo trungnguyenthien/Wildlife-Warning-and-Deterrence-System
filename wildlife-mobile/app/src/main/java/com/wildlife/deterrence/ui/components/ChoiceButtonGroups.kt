@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,23 +39,36 @@ fun H1ChoiceButtonGroup(
     onOptionSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
+    val containerBg = if (isDark) Color(0xFF1E2E1E) else Color(0xFFF0F0F0)
+    
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFF0F0F0))
+            .background(containerBg)
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         options.forEach { option ->
             val isSelected = option == selectedOption
+            val itemBg = if (isSelected) {
+                if (isDark) Color(0xFF2C4C2C) else Color.White
+            } else {
+                Color.Transparent
+            }
+            val textColor = if (isSelected) {
+                if (isDark) Color.White else Color(0xFF2C3E2C)
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
             
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(if (isSelected) Color.White else Color.Transparent)
+                    .background(itemBg)
                     .clickable { onOptionSelected(option) }
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.Center
@@ -63,7 +77,7 @@ fun H1ChoiceButtonGroup(
                     text = option,
                     fontSize = 14.sp,
                     fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                    color = if (isSelected) Color(0xFF2C3E2C) else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = textColor
                 )
             }
         }

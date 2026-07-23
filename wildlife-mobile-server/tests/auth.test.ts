@@ -39,6 +39,7 @@ describe('AUTH_REGISTER - Đăng ký tài khoản', () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('id');
+    expect(res.body.id).toMatch(/^[0-9a-f]{4}$/);
     expect(res.body.username).toBe(validUser.username);
     expect(res.body.fullName).toBe(validUser.fullName);
     expect(res.body.phoneNumber).toBe(validUser.phoneNumber);

@@ -6,6 +6,7 @@ import com.wildlife.deterrence.data.AuthApi
 import com.wildlife.deterrence.data.NetworkClient
 import com.wildlife.deterrence.data.PushTokenRequest
 import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.data.UserProfileResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,15 @@ class MainViewModel(
 
     private val _registerStatus = MutableStateFlow<String?>(null)
     val registerStatus: StateFlow<String?> = _registerStatus.asStateFlow()
+
+    private val _userProfile = MutableStateFlow<UserProfileResponse?>(null)
+    val userProfile: StateFlow<UserProfileResponse?> = _userProfile.asStateFlow()
+
+    private val _isLoadingProfile = MutableStateFlow(false)
+    val isLoadingProfile: StateFlow<Boolean> = _isLoadingProfile.asStateFlow()
+
+    private val _profileError = MutableStateFlow<String?>(null)
+    val profileError: StateFlow<String?> = _profileError.asStateFlow()
 
     fun selectTab(index: Int) {
         _selectedTab.value = index
@@ -54,6 +64,33 @@ class MainViewModel(
                 }
             } catch (e: Exception) {
                 _registerStatus.value = "Error: ${e.message}"
+            }
+        }
+    }
+
+    fun fetchUserProfile() {
+        val token = tokenManager.getToken()
+        if (token == null) {
+            _profileError.value = "Error: Session token is null"
+            return
+        }
+
+        val authHeader = "Bearer $token"
+        _isLoadingProfile.value = true
+        _profileError.value = null
+
+        viewModelScope.launch {
+            try {
+                val response = authApi.getUserProfile(authHeader)
+                _isLoadingProfile.value = false
+                if (response.isSuccessful && response.body() != null) {
+                    _userProfile.value = response.body()
+                } else {
+                    _profileError.value = "Failed to load profile: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _isLoadingProfile.value = false
+                _profileError.value = "Error: ${e.message}"
             }
         }
     }

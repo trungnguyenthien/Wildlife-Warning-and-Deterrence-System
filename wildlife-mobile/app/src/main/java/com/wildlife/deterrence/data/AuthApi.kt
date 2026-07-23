@@ -3,6 +3,7 @@ package com.wildlife.deterrence.data
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.DELETE
 import retrofit2.http.Query
@@ -42,6 +43,15 @@ data class PushTokenRequest(
     val osVersion: String
 )
 
+data class UserProfileResponse(
+    val id: String,
+    val username: String,
+    val fullName: String,
+    val phoneNumber: String,
+    val role: String,
+    val email: String? = null
+)
+
 interface AuthApi {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
@@ -60,4 +70,9 @@ interface AuthApi {
         @Header("Authorization") authHeader: String,
         @Query("fcmToken") fcmToken: String? = null
     ): Response<Unit>
+
+    @GET("users/me")
+    suspend fun getUserProfile(
+        @Header("Authorization") authHeader: String
+    ): Response<UserProfileResponse>
 }

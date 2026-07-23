@@ -63,9 +63,26 @@ export async function register(req: Request, res: Response) {
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
+    // Sinh mã hex 4 ký tự duy nhất cho User ID (Ví dụ: 9f3a)
+    let id: string = '';
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 100) {
+      id = crypto.randomBytes(2).toString('hex');
+      const existing = await prisma.user.findUnique({ where: { id } });
+      if (!existing) {
+        isUnique = true;
+      }
+      attempts++;
+    }
+    if (!isUnique) {
+      id = crypto.randomUUID(); // Fallback
+    }
+
     // Lưu User vào Database
     const newUser = await prisma.user.create({
       data: {
+        id,
         username,
         passwordHash,
         fullName,

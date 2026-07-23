@@ -7,6 +7,7 @@ import com.wildlife.deterrence.data.PushTokenRequest
 import com.wildlife.deterrence.data.RegisterRequest
 import com.wildlife.deterrence.data.RegisterResponse
 import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.data.UserProfileResponse
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.Dispatchers
@@ -87,6 +88,52 @@ class MainViewModelTest {
 
         assertEquals("Registration failed: 500", viewModel.registerStatus.value)
     }
+
+    @Test
+    fun testFetchUserProfileSuccess() = runTest {
+        tokenManager.saveToken("valid-session-token")
+        val fakeAuthApi = FakeMainAuthApi().apply {
+            shouldSucceed = true
+        }
+        val viewModel = MainViewModel(tokenManager, fakeAuthApi)
+
+        viewModel.fetchUserProfile()
+
+        assertEquals("fake-user-id", viewModel.userProfile.value?.id)
+        assertEquals("fake_user", viewModel.userProfile.value?.username)
+        assertNull(viewModel.profileError.value)
+        assertEquals(false, viewModel.isLoadingProfile.value)
+        assertEquals("Bearer valid-session-token", fakeAuthApi.lastAuthHeader)
+    }
+
+    @Test
+    fun testFetchUserProfileMissingSession() = runTest {
+        tokenManager.deleteToken()
+        val fakeAuthApi = FakeMainAuthApi()
+        val viewModel = MainViewModel(tokenManager, fakeAuthApi)
+
+        viewModel.fetchUserProfile()
+
+        assertNull(viewModel.userProfile.value)
+        assertEquals("Error: Session token is null", viewModel.profileError.value)
+        assertEquals(false, viewModel.isLoadingProfile.value)
+    }
+
+    @Test
+    fun testFetchUserProfileFailure() = runTest {
+        tokenManager.saveToken("valid-session-token")
+        val fakeAuthApi = FakeMainAuthApi().apply {
+            shouldSucceed = false
+            errorCode = 401
+        }
+        val viewModel = MainViewModel(tokenManager, fakeAuthApi)
+
+        viewModel.fetchUserProfile()
+
+        assertNull(viewModel.userProfile.value)
+        assertEquals("Failed to load profile: 401", viewModel.profileError.value)
+        assertEquals(false, viewModel.isLoadingProfile.value)
+    }
 }
 
 private class FakeMainAuthApi : AuthApi {
@@ -118,5 +165,23 @@ private class FakeMainAuthApi : AuthApi {
 
     override suspend fun deletePushToken(authHeader: String, fcmToken: String?): Response<Unit> {
         return Response.success(Unit)
+    }
+
+    override suspend fun getUserProfile(authHeader: String): Response<UserProfileResponse> {
+        lastAuthHeader = authHeader
+        return if (shouldSucceed) {
+            Response.success(
+                UserProfileResponse(
+                    id = "fake-user-id",
+                    username = "fake_user",
+                    fullName = "Fake User Name",
+                    phoneNumber = "0901234567",
+                    role = "CITIZEN",
+                    email = "fake@example.com"
+                )
+            )
+        } else {
+            Response.error(errorCode, ResponseBody.create(null, ""))
+        }
     }
 }
