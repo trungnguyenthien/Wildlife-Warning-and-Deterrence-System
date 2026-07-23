@@ -21,6 +21,7 @@ import com.wildlife.deterrence.ui.screens.LoginScreen
 import com.wildlife.deterrence.ui.screens.RegisterScreen
 import com.wildlife.deterrence.ui.screens.SplashScreen
 import com.wildlife.deterrence.viewmodel.LoginViewModel
+import com.wildlife.deterrence.viewmodel.MainViewModel
 import com.wildlife.deterrence.viewmodel.RegisterViewModel
 import com.wildlife.deterrence.viewmodel.SplashViewModel
 
@@ -93,9 +94,12 @@ fun MainNavigation() {
         }
 
         entry<Main> {
+          val mainViewModel: MainViewModel = viewModel {
+            MainViewModel(tokenManager)
+          }
           MainScreen(
-            onItemClick = { navKey -> backStack.add(navKey) },
-            modifier = Modifier.safeDrawingPadding().padding(16.dp)
+            viewModel = mainViewModel,
+            modifier = Modifier.safeDrawingPadding()
           )
         }
       },

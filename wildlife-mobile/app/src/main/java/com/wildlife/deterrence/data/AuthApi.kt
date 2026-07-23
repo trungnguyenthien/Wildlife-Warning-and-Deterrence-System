@@ -3,6 +3,9 @@ package com.wildlife.deterrence.data
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Header
+import retrofit2.http.DELETE
+import retrofit2.http.Query
 
 data class LoginRequest(
     val username: String,
@@ -33,10 +36,28 @@ data class RegisterResponse(
     val createdAt: String
 )
 
+data class PushTokenRequest(
+    val fcmToken: String,
+    val deviceModel: String,
+    val osVersion: String
+)
+
 interface AuthApi {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
+
+    @POST("devices/push-token")
+    suspend fun registerPushToken(
+        @Header("Authorization") authHeader: String,
+        @Body request: PushTokenRequest
+    ): Response<Unit>
+
+    @DELETE("devices/push-token")
+    suspend fun deletePushToken(
+        @Header("Authorization") authHeader: String,
+        @Query("fcmToken") fcmToken: String? = null
+    ): Response<Unit>
 }

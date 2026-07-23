@@ -3,6 +3,7 @@ package com.wildlife.deterrence.viewmodel
 import com.wildlife.deterrence.data.AuthApi
 import com.wildlife.deterrence.data.LoginRequest
 import com.wildlife.deterrence.data.LoginResponse
+import com.wildlife.deterrence.data.PushTokenRequest
 import com.wildlife.deterrence.data.RegisterRequest
 import com.wildlife.deterrence.data.RegisterResponse
 import junit.framework.TestCase.assertEquals
@@ -180,5 +181,16 @@ private class FakeRegisterAuthApi : AuthApi {
         } else {
             Response.error(errorCode, ResponseBody.create(null, ""))
         }
+    }
+
+    override suspend fun registerPushToken(
+        authHeader: String,
+        request: PushTokenRequest
+    ): Response<Unit> {
+        return Response.success(Unit)
+    }
+
+    override suspend fun deletePushToken(authHeader: String, fcmToken: String?): Response<Unit> {
+        return Response.success(Unit)
     }
 }

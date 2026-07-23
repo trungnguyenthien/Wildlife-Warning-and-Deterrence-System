@@ -10,6 +10,7 @@ import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './contro
 import { listEvents, listAlertFeed, readAlert, processDetection } from './controllers/eventController';
 import { getSummary } from './controllers/statsController';
 import { uploadSnapshot } from './controllers/snapshotController';
+import { registerPushToken, deletePushToken } from './controllers/deviceController';
 import multer from 'multer';
 
 const app = express();
@@ -66,6 +67,12 @@ app.get('/audio-samples', authenticateToken, listAudioSamples);
 app.get('/users/me/sms-recipients', authenticateToken, listSmsRecipients);
 app.post('/users/me/sms-recipients', authenticateToken, addSmsRecipient);
 app.delete('/users/me/sms-recipients/:recipientId', authenticateToken, deleteSmsRecipient);
+
+// ==========================================
+// 6.1. ENDPOINTS DỰ PHÒNG FCM PUSH TOKEN
+// ==========================================
+app.post('/devices/push-token', authenticateToken, registerPushToken);
+app.delete('/devices/push-token', authenticateToken, deletePushToken);
 
 // ==========================================
 // 7. ENDPOINTS NHẬT KÝ SỰ KIỆN & CẢNH BÁO

@@ -53,6 +53,7 @@ dependencies {
   implementation(libs.retrofit.converter.gson)
   implementation(libs.okhttp.core)
   implementation(libs.okhttp.logging)
+  implementation(libs.firebase.messaging)
 
   // Core Android dependencies
   implementation(libs.androidx.core.ktx)
