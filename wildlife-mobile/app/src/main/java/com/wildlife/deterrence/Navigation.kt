@@ -48,9 +48,18 @@ fun MainNavigation() {
         }
 
         entry<Login> {
-          val loginViewModel: LoginViewModel = viewModel()
+          val loginViewModel: LoginViewModel = viewModel {
+            LoginViewModel(tokenManager)
+          }
           LoginScreen(
             viewModel = loginViewModel,
+            onNavigateToMain = {
+              backStack.removeLastOrNull()
+              backStack.add(Main)
+            },
+            onNavigateToRegister = {
+              backStack.add(Register)
+            },
             modifier = Modifier.safeDrawingPadding().padding(16.dp)
           )
         }

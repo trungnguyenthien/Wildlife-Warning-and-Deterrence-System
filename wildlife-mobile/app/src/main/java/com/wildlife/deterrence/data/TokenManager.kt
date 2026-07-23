@@ -4,26 +4,41 @@ import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 
-class TokenManager(context: Context) {
-  private val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-
-  private val sharedPreferences = EncryptedSharedPreferences.create(
-    "secure_prefs",
-    masterKeyAlias,
-    context,
-    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-  )
-
-  fun saveToken(token: String) {
-    sharedPreferences.edit().putString("jwt_token", token).apply()
+open class TokenManager(context: Context?) {
+  private val sharedPreferences = context?.let {
+    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    EncryptedSharedPreferences.create(
+      "secure_prefs",
+      masterKeyAlias,
+      it,
+      EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+      EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
   }
 
-  fun getToken(): String? {
-    return sharedPreferences.getString("jwt_token", null)
+  private var testToken: String? = null
+
+  open fun saveToken(token: String) {
+    if (sharedPreferences != null) {
+      sharedPreferences.edit().putString("jwt_token", token).apply()
+    } else {
+      testToken = token
+    }
   }
 
-  fun deleteToken() {
-    sharedPreferences.edit().remove("jwt_token").apply()
+  open fun getToken(): String? {
+    return if (sharedPreferences != null) {
+      sharedPreferences.getString("jwt_token", null)
+    } else {
+      testToken
+    }
+  }
+
+  open fun deleteToken() {
+    if (sharedPreferences != null) {
+      sharedPreferences.edit().remove("jwt_token").apply()
+    } else {
+      testToken = null
+    }
   }
 }

@@ -48,6 +48,12 @@ dependencies {
   implementation(composeBom)
   androidTestImplementation(composeBom)
 
+  // Network (Retrofit & OkHttp)
+  implementation(libs.retrofit.core)
+  implementation(libs.retrofit.converter.gson)
+  implementation(libs.okhttp.core)
+  implementation(libs.okhttp.logging)
+
   // Core Android dependencies
   implementation(libs.androidx.core.ktx)
   implementation(libs.androidx.lifecycle.runtime.ktx)
