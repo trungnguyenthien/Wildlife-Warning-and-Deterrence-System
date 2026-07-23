@@ -1,0 +1,66 @@
+package com.wildlife.deterrence
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
+import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.ui.main.MainScreen
+import com.wildlife.deterrence.ui.screens.LoginScreen
+import com.wildlife.deterrence.ui.screens.SplashScreen
+import com.wildlife.deterrence.viewmodel.LoginViewModel
+import com.wildlife.deterrence.viewmodel.SplashViewModel
+
+@Composable
+fun MainNavigation() {
+  val context = LocalContext.current
+  val tokenManager = remember { TokenManager(context) }
+  val backStack = rememberNavBackStack(Splash)
+
+  NavDisplay(
+    backStack = backStack,
+    onBack = { backStack.removeLastOrNull() },
+    entryProvider =
+      entryProvider {
+        entry<Splash> {
+          val splashViewModel: SplashViewModel = viewModel {
+            SplashViewModel(tokenManager)
+          }
+          SplashScreen(
+            viewModel = splashViewModel,
+            onNavigateToLogin = {
+              backStack.removeLastOrNull()
+              backStack.add(Login)
+            },
+            onNavigateToMain = {
+              backStack.removeLastOrNull()
+              backStack.add(Main)
+            },
+            modifier = Modifier.safeDrawingPadding()
+          )
+        }
+
+        entry<Login> {
+          val loginViewModel: LoginViewModel = viewModel()
+          LoginScreen(
+            viewModel = loginViewModel,
+            modifier = Modifier.safeDrawingPadding().padding(16.dp)
+          )
+        }
+
+        entry<Main> {
+          MainScreen(
+            onItemClick = { navKey -> backStack.add(navKey) },
+            modifier = Modifier.safeDrawingPadding().padding(16.dp)
+          )
+        }
+      },
+  )
+}
