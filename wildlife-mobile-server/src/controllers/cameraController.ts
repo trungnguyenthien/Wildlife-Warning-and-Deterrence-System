@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { sendDeviceCommand } from '../websocket';
 
 const prisma = new PrismaClient();
 
@@ -260,12 +261,49 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
       }
     });
 
-    // Trả về commandId (sử dụng ID của bản ghi device log làm commandId)
-    return res.status(200).json({
-      commandId: deviceLog.id,
-      status: 'SENT',
-      message: `Đã đẩy lệnh test thiết bị ${deviceKey} xuống camera thành công.`
-    });
+    // Gửi lệnh điều khiển qua WebSocket và chờ phản hồi COMMAND_ACK từ AI Server
+    const user = req.user!;
+    try {
+      await sendDeviceCommand(
+        user.id,
+        deviceLog.id,
+        cameraId,
+        deviceKey,
+        'TEST',
+        { durationSeconds, intensity }
+      );
+      
+      return res.status(200).json({
+        commandId: deviceLog.id,
+        status: 'SUCCESS',
+        message: `Đã đẩy lệnh test thiết bị ${deviceKey} xuống camera thành công.`
+      });
+    } catch (error: unknown) {
+      const wsError = error as Error;
+      console.error('[WS] Lỗi gửi lệnh test:', wsError.message);
+      
+      const isOffline = wsError.message?.includes('ngoại tuyến') || wsError.message?.includes('Offline');
+      const isTimeout = wsError.message?.includes('Quá thời gian') || wsError.message?.includes('Timeout');
+      
+      if (isOffline) {
+        return res.status(400).json({
+          error: 'camera_offline',
+          message: wsError.message
+        });
+      }
+      
+      if (isTimeout) {
+        return res.status(504).json({
+          error: 'gateway_timeout',
+          message: wsError.message
+        });
+      }
+      
+      return res.status(400).json({
+        error: 'command_failed',
+        message: wsError.message
+      });
+    }
   } catch (error) {
     console.error('Lỗi khi gửi lệnh test thiết bị:', error);
     return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });

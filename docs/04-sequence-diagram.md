@@ -541,17 +541,17 @@ sequenceDiagram
     participant Camera as Camera
     participant Database as Database
 
-    Note over AI_Server, Mobile_Server: Kết nối WS /ws/cameras đã được AI_Server thiết lập và duy trì
+    Note over AI_Server, Mobile_Server: Kết nối WS /ws?userId={userId} đã được AI_Server thiết lập và duy trì
     Note over Mobile, Camera: Người dùng bấm nút "Nghe thử" tại app
     Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (sampleId, durationSeconds)
     activate Mobile_Server
-    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, deviceKey, action: "TEST", params)
+    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, cameraId, deviceKey, action: "TEST", params)
     activate AI_Server
     AI_Server->>Camera: Ra lệnh cho Loa phát thanh phát file âm thanh mẫu
     activate Camera
     Camera-->>AI_Server: Phản hồi xác nhận loa đã phát xong
     deactivate Camera
-    AI_Server-->>Mobile_Server: WebSocket: Phản hồi COMMAND_ACK (commandId, status: "SUCCESS")
+    AI_Server-->>Mobile_Server: WebSocket: Phản hồi COMMAND_ACK (commandId, cameraId, status: "SUCCESS")
     deactivate AI_Server
     Mobile_Server->>Database: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vật lý (device_logs)
     Database-->>Mobile_Server: Lưu thành công

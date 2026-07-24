@@ -3,6 +3,10 @@ import app from '../src/app';
 import { PrismaClient } from '@prisma/client';
 import { clearDatabase, disconnectPrisma } from './helper';
 
+jest.mock('../src/websocket', () => ({
+  sendDeviceCommand: jest.fn().mockResolvedValue({ status: 'SUCCESS' }),
+}));
+
 const prisma = new PrismaClient();
 
 describe('CAMERA TESTING SUITE', () => {
@@ -234,7 +238,7 @@ describe('CAMERA TESTING SUITE', () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('commandId');
-    expect(res.body.status).toBe('SENT');
+    expect(res.body.status).toBe('SUCCESS');
   });
 
   it('TC_DEV_TST_FAILURE_01: Device test missing durationSeconds', async () => {

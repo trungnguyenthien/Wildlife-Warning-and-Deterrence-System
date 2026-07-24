@@ -36,6 +36,8 @@ Hệ thống tài liệu thiết kế được chia làm 6 tệp cốt lõi đư
     - _Chức năng:_ Thiết kế cấu trúc cơ sở dữ liệu chi tiết (các bảng, các cột, kiểu dữ liệu, mối quan hệ khóa ngoại và quy trình CRUD tương ứng).
 6.  **[06-test-mobile-api.md](./06-test-mobile-api.md):**
     - _Chức năng:_ Kịch bản kiểm thử tích hợp API (REST API Test Cases) định nghĩa rõ mã testcase, request body gửi đi và response mong đợi của từng trường hợp thành công/thất bại.
+7.  **[ai_server_plan.md](./ai_server_plan.md):**
+    - _Chức năng:_ Kế hoạch tích hợp phân hệ AI Server (đã có sẵn) với Mobile Server, tóm gọn các hành động và API cần tích hợp.
 
 ---
 
@@ -51,6 +53,8 @@ graph TD
     03 --> 06[06-Kịch bản Kiểm thử API]
     03 --> 05[05-Thiết kế Database]
     04 --> 05
+    03 --> AIPlan[ai_server_plan.md]
+    04 --> AIPlan
 ```
 
 - **Tài liệu [01]** là gốc của mọi nghiệp vụ.
@@ -59,6 +63,7 @@ graph TD
 - **Tài liệu [03]** (API) định nghĩa chi tiết cấu trúc truyền nhận dữ liệu (Request/Response) để đáp ứng các bước vận hành đã định hình trong luồng hệ thống [04].
 - **Tài liệu [05]** (DB) được sinh ra từ đặc tả API ([03]) và luồng xử lý toàn hệ thống ([04]) để lưu trữ thông tin bền vững.
 - **Tài liệu [06]** (Test Spec) phụ thuộc trực tiếp vào đặc tả API ([03]) để kiểm tra tính đúng đắn của các Endpoint.
+- **Tài liệu [ai_server_plan.md]** phụ thuộc trực tiếp vào đặc tả API ([03]) và luồng xử lý toàn hệ thống ([04]) để xây dựng kế hoạch kết nối thiết bị AI Server sẵn có.
 
 ---
 
