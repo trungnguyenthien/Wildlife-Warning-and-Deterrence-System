@@ -138,7 +138,7 @@ Lưu trữ thông tin tài khoản đăng nhập của người dân, kiểm lâ
 
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 |---|---|---|---|
-| `id` | `VARCHAR(50)` | `PRIMARY KEY` | ID người dùng (mã hex/uuid, vd: `9f3a`) |
+| `id` | `VARCHAR(50)` | `PRIMARY KEY` | ID người dùng (mã hex/uuid sinh tự động bởi Backend, cấm Client truyền lên) |
 | `username` | `VARCHAR(50)` | `NOT NULL, UNIQUE` | Tên đăng nhập |
 | `password_hash` | `VARCHAR(255)` | `NOT NULL` | Mật khẩu băm (bcrypt/argon2) |
 | `full_name` | `VARCHAR(100)` | `NOT NULL` | Họ và tên hiển thị |

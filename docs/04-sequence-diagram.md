@@ -91,9 +91,17 @@ sequenceDiagram
     Note over Mobile, Database: Tiến trình Đăng ký tài khoản mới
     Mobile->>Mobile_Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
     activate Mobile_Server
+    
+    rect rgb(240, 240, 240)
+        Note over Mobile_Server: Kiểm tra dữ liệu đầu vào
+        alt Gửi kèm id hoặc userId từ Client
+            Mobile_Server-->>Mobile: Response 400 Bad Request (id_not_allowed_from_client)
+        end
+    end
+
     Mobile_Server->>Database: Truy vấn tên đăng nhập / số điện thoại trùng lặp
     Database-->>Mobile_Server: Kết quả (Chưa tồn tại)
-    Mobile_Server->>Mobile_Server: Băm mật khẩu (Bcrypt/Argon2)
+    Mobile_Server->>Mobile_Server: Băm mật khẩu (Bcrypt/Argon2) & Sinh mã ID hex 4 ký tự ngẫu nhiên
     Mobile_Server->>Database: Tạo bản ghi người dùng mới (mã hex 4 ký tự)
     Database-->>Mobile_Server: Thành công
     Mobile_Server-->>Mobile: Response 201 Created (Đăng ký thành công)

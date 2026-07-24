@@ -10,6 +10,11 @@ const prisma = new PrismaClient();
 export async function register(req: Request, res: Response) {
   const { username, password, fullName, phoneNumber, role } = req.body;
 
+  // Validation: Nghiêm cấm Client truyền ID
+  if (req.body.id !== undefined || req.body.userId !== undefined) {
+    return res.status(400).json({ error: 'id_not_allowed_from_client', message: 'Không cho phép gửi kèm ID tài khoản từ ứng dụng di động.' });
+  }
+
   // Validation: Thiếu các trường bắt buộc
   if (!username) {
     return res.status(400).json({ error: 'missed_username', message: 'Thiếu thông tin bắt buộc: username.' });

@@ -123,6 +123,15 @@ describe('AUTH_REGISTER - Đăng ký tài khoản', () => {
     expect(res.body.error).toBe('invalid_role');
     expect(res.body.message).toContain('Vai trò không hợp lệ');
   });
+
+  it('TC_AUTH_REG_FAILURE_10: Fail to register due to client sending explicit ID', async () => {
+    const res = await request(app)
+      .post('/auth/register')
+      .send({ ...validUser, username: 'ranger_explicit_id', id: 'custom_id' });
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('id_not_allowed_from_client');
+    expect(res.body.message).toContain('Không cho phép gửi kèm ID tài khoản');
+  });
 });
 
 describe('AUTH_LOGIN - Đăng nhập tài khoản', () => {

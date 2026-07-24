@@ -187,6 +187,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 - `email`: Không bắt buộc. Nếu có nhập, phải đúng định dạng email tiêu chuẩn (`local@domain.tld`).
 - `password`: ≥ 8 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt.
 - `role`: 1 trong 4 enum trên — UI là Dropdown.
+- `id` / `userId`: **Nghiêm cấm Client truyền ID từ phía ứng dụng.** ID người dùng phải được tạo hoàn toàn ở phía Backend. Nếu Request chứa các trường này, hệ thống sẽ trả về lỗi `400 Bad Request` (mã lỗi: `id_not_allowed_from_client`).
 
 **Side effects**
 - Hash mật khẩu (bcrypt/argon2).

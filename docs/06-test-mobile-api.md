@@ -80,6 +80,10 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Mô tả:** Đăng ký thất bại khi truyền vai trò (role) không được hệ thống hỗ trợ.
     *   **Dữ liệu gửi đi (Request Body):** `{ "username": "ranger_tuyen2", "password": "password123", "fullName": "Nguyen Ranger", "phoneNumber": "+84901234567", "role": "SUPER_ADMIN" }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request` (Vai trò phải là RANGER, CITIZEN, BORDER_GUARD hoặc HIGHWAY_ADMIN).
+*   **TC_AUTH_REG_FAILURE_10: Fail to register due to client sending explicit ID**
+    *   **Mô tả:** Đăng ký thất bại khi Client gửi kèm trường `id` hoặc `userId` trong Request Body.
+    *   **Dữ liệu gửi đi (Request Body):** `{ "id": "custom_id", "username": "ranger_tuyen3", "password": "password123", "fullName": "Nguyen Ranger", "phoneNumber": "+84901234567", "role": "RANGER" }`
+    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request` kèm mã lỗi `id_not_allowed_from_client` và thông báo không cho phép gửi kèm ID tài khoản từ ứng dụng di động.
 
 #### 2. `POST /auth/login` (Đăng nhập tài khoản)
 *   **TC_AUTH_LOG_SUCCESS_01: Login successfully with correct credentials**
