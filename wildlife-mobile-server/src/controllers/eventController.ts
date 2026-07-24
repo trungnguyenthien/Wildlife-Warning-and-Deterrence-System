@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient, AlertType, DangerLevel, Role } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { notifySSE } from './cameraController';
+import { sendPushToAllDevices } from '../config/firebase';
 
 const prisma = new PrismaClient();
 
@@ -300,6 +301,15 @@ export async function processDetection(req: Request, res: Response) {
           eventId
         }
       });
+
+      // Bắn Push Notification khi phát hiện thú rừng nguy hiểm (không phải người và nguy cơ từ MEDIUM trở lên)
+      if (!mainSpecies.isHuman && maxDangerLevel !== DangerLevel.LOW) {
+        await sendPushToAllDevices(
+          'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
+          `Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name} (Độ nguy hiểm: ${maxDangerLevel})`,
+          { eventId, cameraId, speciesId: mainSpecies.id }
+        );
+      }
     }
 
     // Tra cứu hành động phòng vệ (Custom Config hoặc Preset mặc định)

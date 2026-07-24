@@ -1,7 +1,24 @@
+const mockSendEachForMulticast = jest.fn().mockResolvedValue({
+  successCount: 1,
+  failureCount: 0
+});
+
+jest.mock('firebase-admin', () => ({
+  initializeApp: jest.fn(),
+  getApps: jest.fn().mockReturnValue([]),
+  cert: jest.fn()
+}));
+
+jest.mock('firebase-admin/messaging', () => ({
+  getMessaging: jest.fn()
+}));
+
 import request from 'supertest';
 import app from '../src/app';
 import { PrismaClient } from '@prisma/client';
 import { clearDatabase, disconnectPrisma } from './helper';
+import { getApps, initializeApp } from 'firebase-admin';
+import { getMessaging } from 'firebase-admin/messaging';
 
 const prisma = new PrismaClient();
 
@@ -11,6 +28,23 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   const camId = 'CAM_EVT_01';
   const speciesId = 'voi_rung';
   const humanId = 'human_border_intruder';
+  let appsList: any[] = [];
+
+  beforeEach(() => {
+    appsList = [];
+    (getApps as jest.Mock).mockImplementation(() => appsList);
+    (initializeApp as jest.Mock).mockImplementation(() => {
+      appsList.push('app');
+      return {};
+    });
+    mockSendEachForMulticast.mockResolvedValue({
+      successCount: 1,
+      failureCount: 0
+    });
+    (getMessaging as jest.Mock).mockReturnValue({
+      sendEachForMulticast: mockSendEachForMulticast
+    });
+  });
 
   beforeAll(async () => {
     try {
@@ -307,5 +341,75 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       .get('/alerts/feed')
       .set('Authorization', `Bearer ${rangerToken}`);
     expect(refetched.body[0].isRead).toBe(true);
+  });
+
+  // 4. Firebase Push Notification Tests
+  it('TC_AI_DET_SUCCESS_04: Push notification sent via Firebase when wild animal detected', async () => {
+    if (!rangerToken) return;
+
+    // Lấy userId thực tế của ranger_evt để vượt qua ràng buộc khóa ngoại
+    const user = await prisma.user.findUnique({ where: { username: 'ranger_evt' } });
+    const rangerUserId = user ? user.id : 'unknown';
+
+    // Thiết lập môi trường key hợp lệ (fake base64 của JSON rỗng `{}`)
+    process.env.PUSH_SERVICE_ACCOUNT_KEY_JSON = Buffer.from('{}').toString('base64');
+    mockSendEachForMulticast.mockClear();
+
+    // Đăng ký một device token để đảm bảo có token gửi đi
+    await prisma.deviceToken.create({
+      data: {
+        userId: rangerUserId,
+        fcmToken: 'fcm-token-test-123',
+        deviceModel: 'Pixel 6',
+        osVersion: 'Android 13'
+      }
+    });
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .send({
+        detections: [{ speciesId: speciesId, confidence: 0.96 }], // voi_rung (danger: CRITICAL, isHuman: false)
+        imageUrl: 'https://cdn.example.com/voi-push.jpg',
+        detectedAt: '2026-07-22T11:00:00Z'
+      });
+
+    expect(res.status).toBe(201);
+    expect(mockSendEachForMulticast).toHaveBeenCalled();
+  });
+
+  it('TC_AI_DET_SUCCESS_05: No push notification sent when detection is non-dangerous or human', async () => {
+    if (!rangerToken) return;
+
+    mockSendEachForMulticast.mockClear();
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .send({
+        detections: [{ speciesId: humanId, confidence: 0.98 }], // human_border_intruder (isHuman: true)
+        imageUrl: 'https://cdn.example.com/human-push.jpg',
+        detectedAt: '2026-07-22T11:15:00Z'
+      });
+
+    expect(res.status).toBe(201);
+    expect(mockSendEachForMulticast).not.toHaveBeenCalled();
+  });
+
+  it('TC_AI_DET_FAILURE_09: Firebase push notification fails gracefully on invalid service account key', async () => {
+    if (!rangerToken) return;
+
+    // Thiết lập biến môi trường key lỗi (không thể decode/parse JSON)
+    process.env.PUSH_SERVICE_ACCOUNT_KEY_JSON = 'invalid-base64-string';
+    mockSendEachForMulticast.mockClear();
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .send({
+        detections: [{ speciesId: speciesId, confidence: 0.99 }],
+        imageUrl: 'https://cdn.example.com/voi-fail.jpg',
+        detectedAt: '2026-07-22T11:30:00Z'
+      });
+
+    // Webhook vẫn phải trả về 201 Created và không bị crash
+    expect(res.status).toBe(201);
   });
 });

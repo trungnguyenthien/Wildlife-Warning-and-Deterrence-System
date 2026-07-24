@@ -491,3 +491,21 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Mô tả:** Định dạng thời điểm phát hiện không đúng chuẩn ISO 8601.
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.95 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "22-07-2026 10:00:00" }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
+*   **TC_AI_DET_SUCCESS_04: Push notification sent via Firebase when wild animal detected**
+    *   **Mô tả:** Khi phát hiện thú hoang dã nguy hiểm, kiểm tra hệ thống giải mã chứng chỉ trực tiếp trong RAM từ biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON` và gửi thông báo qua FCM thành công đến các thiết bị di động đã đăng ký.
+    *   **Điều kiện trước:** Có bản ghi token thiết bị trong bảng `device_tokens`. Loài được nhận diện là loài thú hoang dã nguy hiểm (`isHuman` = false, `dangerLevel` = HIGH/CRITICAL, ví dụ: `elephant`).
+    *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
+    *   **Kết quả mong đợi (Expected Response):** `201 Created` trả về eventId và các hành động phòng vệ.
+    *   **Xác thực Side Effects:** Kiểm tra giả lập gửi tin nhắn FCM được gọi thành công, không tạo ra file tạm nào trên ổ đĩa cứng của server.
+*   **TC_AI_DET_SUCCESS_05: No push notification sent when detection is non-dangerous or human**
+    *   **Mô tả:** Khi phát hiện con người hoặc loài động vật không gây nguy hiểm (DangerLevel LOW), kiểm tra hệ thống không kích hoạt luồng gửi Push Notification để tránh làm phiền thiết bị người dùng.
+    *   **Điều kiện trước:** Có bản ghi token thiết bị trong bảng `device_tokens`. Loài được nhận diện là `human` hoặc loài có DangerLevel `LOW` (ví dụ: `monkey`).
+    *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "monkey", "confidence": 0.95 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
+    *   **Kết quả mong đợi (Expected Response):** `201 Created`.
+    *   **Xác thực Side Effects:** Hệ thống không thực hiện bất kỳ cuộc gọi gửi tin nhắn push nào qua Firebase Cloud Messaging.
+*   **TC_AI_DET_FAILURE_09: Firebase push notification fails gracefully on invalid service account key**
+    *   **Mô tả:** Kiểm tra hệ thống vẫn hoạt động bình thường và ghi nhận sự kiện vào DB khi xảy ra lỗi giải mã/khởi tạo Firebase do biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON` không hợp lệ. Lỗi phải được xử lý mềm để tránh gián đoạn Webhook của AI Server.
+    *   **Điều kiện trước:** Biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON` chứa chuỗi base64 không đúng định dạng của Object JSON chứng chỉ.
+    *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
+    *   **Kết quả mong đợi (Expected Response):** `201 Created` (hoặc `200 OK` tùy trường hợp gom nhóm sự kiện), sự kiện vẫn được lưu trữ vào DB.
+    *   **Xác thực Side Effects:** Server in log lỗi khởi tạo/xác thực Firebase ra console, không crash ứng dụng.
