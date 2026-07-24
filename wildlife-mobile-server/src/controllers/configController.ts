@@ -1,93 +1,9 @@
 import { Response } from 'express';
-import { PrismaClient, DangerLevel } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import { PRESET_SCENARIOS, getRecommendedPresetForSpecies } from '../config/presets';
 
 const prisma = new PrismaClient();
-
-// Danh mục Danger Level Presets mặc định
-const DANGER_PRESETS: Record<DangerLevel, Record<string, unknown>> = {
-  [DangerLevel.LOW]: {
-    ledFlash: false,
-    ledColor: 'WHITE',
-    ledIntensity: 0,
-    speakerWarn: false,
-    audioSampleId: null,
-    audioIntensity: 0,
-    electricFence: false,
-    electricFenceDuration: 0,
-    silentAlert: true
-  },
-  [DangerLevel.MEDIUM]: {
-    ledFlash: true,
-    ledColor: 'YELLOW',
-    ledIntensity: 50,
-    speakerWarn: true,
-    audioSampleId: 'A_dog_bark',
-    audioIntensity: 50,
-    electricFence: false,
-    electricFenceDuration: 0,
-    silentAlert: false
-  },
-  [DangerLevel.HIGH]: {
-    ledFlash: true,
-    ledColor: 'RED',
-    ledIntensity: 80,
-    speakerWarn: true,
-    audioSampleId: 'A_alarm_siren',
-    audioIntensity: 80,
-    electricFence: false,
-    electricFenceDuration: 0,
-    silentAlert: false
-  },
-  [DangerLevel.CRITICAL]: {
-    ledFlash: true,
-    ledColor: 'STROBE',
-    ledIntensity: 100,
-    speakerWarn: true,
-    audioSampleId: 'A_gunshot',
-    audioIntensity: 100,
-    electricFence: true,
-    electricFenceDuration: 15,
-    silentAlert: false
-  }
-};
-
-// Preset kịch bản tùy chọn nâng cao
-const PRESET_SCENARIOS: Record<string, Record<string, unknown>> = {
-  critical_danger: {
-    ledFlash: true,
-    ledColor: 'STROBE',
-    ledIntensity: 100,
-    speakerWarn: true,
-    audioSampleId: 'A_gunshot',
-    audioIntensity: 100,
-    electricFence: true,
-    electricFenceDuration: 15,
-    silentAlert: false
-  },
-  medium_danger: {
-    ledFlash: true,
-    ledColor: 'YELLOW',
-    ledIntensity: 50,
-    speakerWarn: true,
-    audioSampleId: 'A_dog_bark',
-    audioIntensity: 50,
-    electricFence: false,
-    electricFenceDuration: 0,
-    silentAlert: false
-  },
-  intruder: {
-    ledFlash: true,
-    ledColor: 'RED',
-    ledIntensity: 90,
-    speakerWarn: true,
-    audioSampleId: 'A_alarm_siren',
-    audioIntensity: 90,
-    electricFence: false,
-    electricFenceDuration: 0,
-    silentAlert: false
-  }
-};
 
 // 1. GET /species - Danh mục các loài động vật
 export async function listSpecies(_req: AuthenticatedRequest, res: Response) {
@@ -180,7 +96,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
     }
 
     // Nếu không có tùy chọn, lấy cấu hình mặc định (Danger Preset)
-    const fallback = DANGER_PRESETS[species.dangerLevel];
+    const fallback = getRecommendedPresetForSpecies(species.id, species.dangerLevel);
     return res.status(200).json({
       cameraId,
       speciesId,

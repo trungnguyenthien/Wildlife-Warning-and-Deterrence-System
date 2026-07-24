@@ -3,16 +3,9 @@ import { PrismaClient, AlertType, DangerLevel, Role } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { notifySSE } from './cameraController';
 import { sendPushToAllDevices } from '../config/firebase';
+import { getRecommendedPresetForSpecies } from '../config/presets';
 
 const prisma = new PrismaClient();
-
-// Danger Level Presets mặc định để AI Webhook trả về Action ứng phó nhanh
-const DANGER_LEVEL_ACTIONS: Record<DangerLevel, Record<string, unknown>> = {
-  [DangerLevel.LOW]: { ledFlash: false, speakerWarn: false, electricFence: false, silentAlert: true },
-  [DangerLevel.MEDIUM]: { ledFlash: true, speakerWarn: true, electricFence: false, silentAlert: false },
-  [DangerLevel.HIGH]: { ledFlash: true, speakerWarn: true, electricFence: false, silentAlert: false },
-  [DangerLevel.CRITICAL]: { ledFlash: true, speakerWarn: true, electricFence: true, silentAlert: false }
-};
 
 // 1. GET /events - Lấy nhật ký sự kiện lịch sử của camera
 export async function listEvents(req: AuthenticatedRequest, res: Response) {
@@ -322,7 +315,13 @@ export async function processDetection(req: Request, res: Response) {
       }
     });
 
-    let actionResponse = DANGER_LEVEL_ACTIONS[maxDangerLevel];
+    const defaultPreset = getRecommendedPresetForSpecies(mainSpecies.id, maxDangerLevel);
+    let actionResponse = {
+      ledFlash: defaultPreset.ledFlash,
+      speakerWarn: defaultPreset.speakerWarn,
+      electricFence: defaultPreset.electricFence,
+      silentAlert: defaultPreset.silentAlert
+    };
     if (customConfig) {
       actionResponse = {
         ledFlash: customConfig.ledFlashRate ? true : false,

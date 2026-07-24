@@ -1,0 +1,76 @@
+# ==============================================================================
+# TỆP CẤU HÌNH PHÒNG VỆ VÀ KỊCH BẢN MẪU DÀNH CHO HỌC SINH (DANGER PRESETS & SCENARIOS)
+# ==============================================================================
+# Hướng dẫn chi tiết cách cấu hình dành cho học sinh:
+#
+# 1. BẢN ĐỒ ÁNH XẠ MỨC ĐỘ NGUY HIỂM (danger_level_to_preset_map):
+#    - Định nghĩa kịch bản mẫu mặc định sẽ áp dụng cho mỗi mức độ nguy hiểm
+#      (LOW, MEDIUM, HIGH, CRITICAL) của loài động vật khi không tìm thấy cấu hình riêng biệt.
+#
+# 2. KỊCH BẢN PHÒNG VỆ MẪU NHANH (preset_scenarios):
+#    - Các kịch bản có sẵn để kiểm lâm có thể chọn nhanh từ ứng dụng di động:
+#      * intruder: Kịch bản khi phát hiện người lạ xâm nhập trái phép.
+#      * medium_danger: Kịch bản xua đuổi các loài động vật ít nguy hiểm (tầm trung).
+#      * critical_danger: Kịch bản xua đuổi khẩn cấp các loài cực kỳ nguy hiểm (Voi, Hổ).
+#
+# 3. CÁC THAM SỐ CẤU HÌNH CHI TIẾT VÀ QUY ĐỊNH MIỀN GIÁ TRỊ:
+#    - ledFlash: Bật/Tắt chế độ chớp nháy của đèn LED tại trạm camera.
+#      * Kiểu dữ liệu: Boolean (true hoặc false).
+#    - ledColor: Màu sắc hiển thị của đèn LED.
+#      * Kiểu dữ liệu: String.
+#      * Giá trị cho phép: RED (Đỏ), YELLOW (Vàng), WHITE (Trắng), STROBE (Chớp nhấp nháy liên tục), null (Không bật).
+#    - ledIntensity: Cường độ sáng của đèn LED.
+#      * Kiểu dữ liệu: Integer (Số nguyên từ 0 đến 100).
+#      * Chú ý: Trường này map với cột `led_duration_seconds` trong Database để mô phỏng thời lượng sáng của LED.
+#    - speakerWarn: Bật/Tắt loa cảnh báo tại trạm camera.
+#      * Kiểu dữ liệu: Boolean (true hoặc false).
+#    - audioSampleId: Mã định danh âm thanh cảnh báo được lưu trên thiết bị.
+#      * Kiểu dữ liệu: String (hoặc null nếu không dùng).
+#      * Giá trị cho phép: A_gunshot (Tiếng súng nổ), A_dog_bark (Tiếng chó sủa), A_alarm_siren (Tiếng còi hú khẩn cấp).
+#    - audioIntensity: Cường độ âm lượng của loa phát tại chỗ.
+#      * Kiểu dữ liệu: Integer (Số nguyên từ 0 đến 100).
+#    - electricFence: Kích hoạt xung điện của hàng rào bảo vệ.
+#      * Kiểu dữ liệu: Boolean (true hoặc false).
+#    - electricFenceDuration: Thời lượng kích hoạt xung điện của hàng rào (đơn vị giây).
+#      * Kiểu dữ liệu: Integer (Số nguyên lớn hơn hoặc bằng 0).
+#    - silentAlert: Chế độ cảnh báo âm thầm (Không kích hoạt còi/đèn tại trạm camera, chỉ âm thầm gửi Push/SMS).
+#      * Kiểu dữ liệu: Boolean (true hoặc false).
+# ==============================================================================
+
+danger_level_to_preset_map:
+  LOW: "intruder"
+  MEDIUM: "medium_danger"
+  HIGH: "critical_danger"
+  CRITICAL: "critical_danger"
+
+preset_scenarios:
+  critical_danger:
+    ledFlash: true
+    ledColor: "STROBE"
+    ledIntensity: 100
+    speakerWarn: true
+    audioSampleId: "A_gunshot"
+    audioIntensity: 100
+    electricFence: true
+    electricFenceDuration: 15
+    silentAlert: false
+  medium_danger:
+    ledFlash: true
+    ledColor: "YELLOW"
+    ledIntensity: 50
+    speakerWarn: true
+    audioSampleId: "A_dog_bark"
+    audioIntensity: 50
+    electricFence: false
+    electricFenceDuration: 0
+    silentAlert: false
+  intruder:
+    ledFlash: true
+    ledColor: "RED"
+    ledIntensity: 90
+    speakerWarn: true
+    audioSampleId: "A_alarm_siren"
+    audioIntensity: 90
+    electricFence: false
+    electricFenceDuration: 0
+    silentAlert: false

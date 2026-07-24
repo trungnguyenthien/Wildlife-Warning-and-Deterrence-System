@@ -1,0 +1,50 @@
+# ==============================================================================
+# TỆP CẤU HÌNH KHUYẾN NGHỊ PHÒNG VỆ RIÊNG CHO TỪNG LOÀI ĐỘNG VẬT (ANIMAL RECOMMENDED CONFIG)
+# ==============================================================================
+# Hướng dẫn chi tiết cách cấu hình dành cho học sinh:
+#
+# 1. inheritPreset:
+#    - Tên kịch bản mẫu mà loài này muốn kế thừa (Khai báo trong danger-presets.yaml).
+#    - Giá trị hợp lệ: @critical_danger, @medium_danger, @intruder
+#
+# 2. override:
+#    - Khối chứa các giá trị ghi đè thông số phòng vệ của kịch bản đã kế thừa.
+#    - Học sinh có thể ghi đè bất kỳ tham số nào trong các tham số sau:
+#      * ledFlash (Boolean: true/false)
+#      * ledColor (String: RED, YELLOW, WHITE, STROBE, null)
+#      * ledIntensity (Integer: 0-100)
+#      * speakerWarn (Boolean: true/false)
+#      * audioSampleId (String: A_gunshot, A_dog_bark, A_alarm_siren, null)
+#      * audioIntensity (Integer: 0-100)
+#      * electricFence (Boolean: true/false)
+#      * electricFenceDuration (Integer: >= 0)
+#      * silentAlert (Boolean: true/false)
+# ==============================================================================
+
+- speciesId: "voi_rung"
+  inheritPreset: "@critical_danger"
+  override:
+    ledIntensity: 100
+    electricFenceDuration: 15
+    silentAlert: false
+
+- speciesId: "ho_dong_duong"
+  inheritPreset: "@critical_danger"
+  override:
+    ledColor: "RED"
+    audioSampleId: "A_gunshot"
+    electricFence: false
+
+- speciesId: "monkey"
+  inheritPreset: "@medium_danger"
+  override:
+    ledColor: "WHITE"
+    electricFence: false
+    silentAlert: false
+
+- speciesId: "human_border_intruder"
+  inheritPreset: "@intruder"
+  override:
+    ledColor: "RED"
+    audioSampleId: "A_alarm_siren"
+    silentAlert: false
