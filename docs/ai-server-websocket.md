@@ -24,12 +24,11 @@ Camera (RPi)  ── WS ──▶  AI_Server
 ## 2. Kết nối
 
 ```
-ws://<AI_SERVER_HOST>:5000/camera/ws?cameraId={cameraId}&token={apiToken}
+ws://<AI_SERVER_HOST>:5000/camera/ws?userId={userId}
 ```
 
 - **Camera** là bên chủ động mở kết nối WebSocket
-- **cameraId**: định danh trạm (vd: `cam-001`)
-- **token**: API token để xác thực thiết bị
+- **`userId`**: mã hex 4 ký tự của người quản lý trạm (vd: `u_rg`), dùng để xác thực thiết bị. `userId` này đồng thời được AI_Server dùng để giao tiếp với Mobile_Server
 - Auto-reconnect với exponential backoff nếu mất kết nối
 
 ---
@@ -45,6 +44,8 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 }
 ```
 
+> `cameraId` không nằm trong URL kết nối, mà được truyền trong **payload của từng request** để định danh trạm camera cụ thể.
+
 ---
 
 ## 4. Bản tin Uplink (Camera → AI_Server)
@@ -55,6 +56,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 {
   "event": "IMAGE_DATA",
   "payload": {
+    "cameraId": "cam-001",
     "imageBase64": "<base64 của ảnh JPEG>",
     "timestamp": "2026-07-25T14:30:00Z",
     "motionScore": 0.85
@@ -81,6 +83,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 {
   "event": "DEVICE_STATUS",
   "payload": {
+    "cameraId": "cam-001",
     "deviceKey": "speaker",
     "status": "ON",
     "errorMsg": null
@@ -98,6 +101,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 {
   "event": "DEFEND_ACTION",
   "payload": {
+    "cameraId": "cam-001",
     "actionId": "act-123",
     "ledFlash": true,
     "ledColor": "STROBE",
@@ -116,6 +120,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 {
   "event": "DEVICE_COMMAND",
   "payload": {
+    "cameraId": "cam-001",
     "commandId": "cmd-456",
     "deviceKey": "speaker",
     "action": "TEST",
@@ -133,6 +138,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 {
   "event": "CONFIG_UPDATE",
   "payload": {
+    "cameraId": "cam-001",
     "ledColor": "RED",
     "audioSampleId": "A_growl",
     "fenceLevel": "medium"
@@ -146,9 +152,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
 
 ### 6.1. AI_Server (server)
 
-Dùng `asyncio` + `websockets` (≥ 13.0):
-
-```python
+```py
 import asyncio
 import base64
 import json
@@ -156,49 +160,54 @@ from urllib.parse import urlsplit, parse_qs
 
 from websockets.asyncio.server import serve
 
-CAMERA_TOKENS = {"cam-001": "token-abc-123"}
+
+# Danh sách userId hợp lệ. Trong thực tế, nên lấy từ cấu hình hoặc DB.
+VALID_USER_IDS = {"u_rg", "u_abc", "u_xyz"}
 
 
 async def handle_camera(websocket):
-    # websocket.request.path chứa cả path + query string, vd:
-    # "/camera/ws?cameraId=cam-001&token=token-abc-123"
+    # Lấy userId từ query string
     query = urlsplit(websocket.request.path).query
     params = parse_qs(query)
-    camera_id = params.get("cameraId", [None])[0]
-    token = params.get("token", [None])[0]
+    user_id = params.get("userId", [None])[0]
 
-    if not camera_id or CAMERA_TOKENS.get(camera_id) != token:
+    if not user_id or user_id not in VALID_USER_IDS:
         await websocket.close(code=4001, reason="Unauthorized")
         return
 
-    print(f"[AI_Server] Camera {camera_id} đã kết nối")
+    print(f"[AI_Server] Camera của user {user_id} đã kết nối")
 
     async for message in websocket:
         try:
             data = json.loads(message)
         except json.JSONDecodeError:
-            print(f"[AI_Server] Message không phải JSON hợp lệ từ {camera_id}, bỏ qua")
+            print("[AI_Server] Message không phải JSON hợp lệ, bỏ qua")
             continue
 
         event = data.get("event")
+        payload = data.get("payload", {})
+        camera_id = payload.get("cameraId")  # cameraId lấy từ payload
 
         if event == "IMAGE_DATA":
-            # Giải mã base64 -> bytes ảnh JPEG thật
-            img_bytes = base64.b64decode(data["payload"]["imageBase64"])
+            img_bytes = base64.b64decode(payload["imageBase64"])
             print(
-                f"[AI_Server] Nhận ảnh từ {camera_id} "
-                f"({len(img_bytes)} bytes), timestamp={data['payload']['timestamp']}"
+                f"[AI_Server] Nhận ảnh từ camera {camera_id} (user {user_id}), "
+                f"{len(img_bytes)} bytes, timestamp={payload['timestamp']}"
             )
 
             # TODO: Chạy YOLOv8 inference ở đây
             # result = run_yolo_inference(img_bytes)
-            # Gửi kết quả phân tích lên Mobile_Server qua HTTP POST
-            # Nhận @DefendAction từ Mobile_Server
+            #
+            # Gửi kết quả lên Mobile_Server bằng HTTP POST (dùng userId để xác thực):
+            #   POST https://mobile-server.com/api/v1/cameras/{camera_id}/detections
+            #   Body: {"detections": [...], "imageUrl": "...", "detectedAt": "..."}
+            #
+            # Nhận @DefendAction từ Mobile_Server, rồi gửi xuống Camera:
 
-            # Gửi lệnh phòng vệ xuống Camera
             await websocket.send(json.dumps({
                 "event": "DEFEND_ACTION",
                 "payload": {
+                    "cameraId": camera_id,
                     "actionId": "act-123",
                     "ledFlash": True,
                     "speakerWarn": True,
@@ -207,10 +216,10 @@ async def handle_camera(websocket):
             }))
 
         elif event == "DEVICE_HEARTBEAT":
-            print(f"[AI_Server] Heartbeat từ {camera_id}: CPU {data['payload']['cpuTemp']}°C")
+            print(f"[AI_Server] Heartbeat từ camera {camera_id}: CPU {payload['cpuTemp']}°C")
 
         elif event == "DEVICE_STATUS":
-            print(f"[AI_Server] Trạng thái {data['payload']['deviceKey']} = {data['payload']['status']}")
+            print(f"[AI_Server] Trạng thái {payload['deviceKey']} = {payload['status']} (camera {camera_id})")
 
 
 async def main():
@@ -225,9 +234,7 @@ if __name__ == "__main__":
 
 ### 6.2. Camera (Raspberry Pi - client)
 
-Dùng `asyncio` + `websockets` (≥ 13.0) + tự động reconnect:
-
-```python
+```py
 import asyncio
 import base64
 import json
@@ -237,14 +244,14 @@ from urllib.parse import urlencode
 from websockets.asyncio.client import connect
 from websockets.exceptions import ConnectionClosed
 
-CAMERA_ID = "cam-001"
-TOKEN = "token-abc-123"
+USER_ID = "u_rg"               # mã hex 4 ký tự của người quản lý
+CAMERA_ID = "cam-001"          # định danh trạm camera
 AI_SERVER_HOST = "192.168.1.100"
 
-CAPTURE_INTERVAL_SEC = 2      # chụp ảnh khi có chuyển động, tối đa mỗi 2s/lần
-HEARTBEAT_INTERVAL_SEC = 30   # heartbeat mỗi 30s
+CAPTURE_INTERVAL_SEC = 2        # chụp ảnh khi có chuyển động, tối đa mỗi 2s/lần
+HEARTBEAT_INTERVAL_SEC = 30     # heartbeat mỗi 30s
 
-_query = urlencode({"cameraId": CAMERA_ID, "token": TOKEN})
+_query = urlencode({"userId": USER_ID})
 WS_URL = f"ws://{AI_SERVER_HOST}:5000/camera/ws?{_query}"
 
 
@@ -273,7 +280,7 @@ def now_iso() -> str:
 
 async def uplink_loop(ws):
     """Vòng lặp chụp ảnh (throttle theo CAPTURE_INTERVAL_SEC) + heartbeat."""
-    elapsed_since_capture = CAPTURE_INTERVAL_SEC  # cho phép chụp ngay lần đầu
+    elapsed_since_capture = CAPTURE_INTERVAL_SEC   # cho phép chụp ngay lần đầu
     elapsed_since_heartbeat = 0
 
     while True:
@@ -282,6 +289,7 @@ async def uplink_loop(ws):
             await ws.send(json.dumps({
                 "event": "IMAGE_DATA",
                 "payload": {
+                    "cameraId": CAMERA_ID,
                     "imageBase64": image_b64,
                     "timestamp": now_iso(),
                     "motionScore": 0.85
@@ -330,18 +338,17 @@ async def connect_and_serve():
     while True:
         try:
             async with connect(WS_URL) as ws:
-                print(f"[Camera] Đã kết nối AI_Server tại {WS_URL}")
-                backoff = 3  # reset backoff sau khi kết nối thành công
+                print(f"[Camera] Đã kết nối AI_Server (user={USER_ID})")
+                backoff = 3   # reset backoff sau khi kết nối thành công
 
                 async with asyncio.TaskGroup() as tg:
                     tg.create_task(uplink_loop(ws))
                     tg.create_task(downlink_loop(ws))
-                    # Nếu 1 trong 2 task lỗi, TaskGroup tự hủy task còn lại
 
         except* (ConnectionClosed, OSError) as eg:
             print(f"[Camera] Mất kết nối: {eg.exceptions}. Reconnect sau {backoff} giây...")
             await asyncio.sleep(backoff)
-            backoff = min(backoff * 2, 60)  # exponential backoff, tối đa 60s
+            backoff = min(backoff * 2, 60)   # exponential backoff, tối đa 60s
 
 
 if __name__ == "__main__":
@@ -352,7 +359,45 @@ if __name__ == "__main__":
 
 ---
 
-## 7. Flow tổng thể (Camera → AI_Server → Mobile_Server)
+## 7. Giao tiếp AI_Server ↔ Mobile_Server
+
+AI_Server dùng **`userId`** (nhận từ query string kết nối của Camera) để giao tiếp với Mobile_Server qua 2 kênh:
+
+### 7.1. Webhook HTTP (gửi kết quả nhận diện)
+
+```
+POST https://wildlife-warning-and-deterrence-sys.vercel.app/api/v1/cameras/{cameraId}/detections
+```
+
+```json
+{
+  "detections": [
+    { "speciesId": "elephant", "confidence": 0.92 }
+  ],
+  "imageUrl": "https://cdn.example.com/snapshots/cam-001_20260725_143000.jpg",
+  "detectedAt": "2026-07-25T14:30:00Z"
+}
+```
+
+- Endpoint này **không cần JWT**, là webhook mở dành riêng cho AI_Server
+- Phản hồi chứa `eventId` và `responseAction` (`@DefendAction`) để gửi xuống Camera
+
+### 7.2. WebSocket song công (nhận lệnh điều khiển)
+
+```
+wss://wildlife-warning-and-deterrence-sys.vercel.app/ws?userId={userId}
+```
+
+- AI_Server chủ động kết nối và duy trì WebSocket đến Mobile_Server, dùng `userId` để định danh
+- Khi Mobile App gửi lệnh test thiết bị, Mobile_Server đẩy xuống AI_Server qua WS này dưới dạng `DEVICE_COMMAND`
+- AI_Server nhận được, chuyển tiếp xuống Camera qua WS `DEVICE_COMMAND` (mục 5.2)
+- Sau khi Camera thực thi xong, AI_Server gửi `COMMAND_ACK` qua WS lên Mobile_Server
+
+> **Chi tiết:** Xem [03-mobile_api.md](./03-mobile_api.md#13a2-ws-ws) và [04-sequence-diagram.md](./04-sequence-diagram.md#ii-thiết-b-camera--ai-server).
+
+---
+
+## 8. Flow tổng thể
 
 ```mermaid
 sequenceDiagram
@@ -360,27 +405,28 @@ sequenceDiagram
     participant AI_Server as AI_Server
     participant Mobile_Server as Mobile_Server
 
-    Note over Camera, AI_Server: WebSocket luôn duy trì
-    Camera->>AI_Server: WS: IMAGE_DATA {image, timestamp}
+    Note over Camera, AI_Server: WS luôn duy trì (userId xác thực)
+    Camera->>AI_Server: WS: IMAGE_DATA {cameraId, image, timestamp}
     activate AI_Server
     AI_Server->>AI_Server: YOLOv8 inference
     AI_Server->>Mobile_Server: POST /cameras/{id}/detections
     activate Mobile_Server
     Mobile_Server-->>AI_Server: 201 {eventId, @DefendAction}
     deactivate Mobile_Server
-    AI_Server-->>Camera: WS: DEFEND_ACTION {@DefendAction}
+    AI_Server-->>Camera: WS: DEFEND_ACTION {cameraId, @DefendAction}
     deactivate AI_Server
     Camera->>Camera: GPIO: bật LED, loa, hàng rào
 ```
 
 ---
 
-## 8. Ghi chú
+## 9. Ghi chú
 
 - Port mặc định: **5000** (có thể cấu hình qua biến môi trường `WS_PORT`)
 - Camera chụp ảnh tần suất **2 giây/lần** (khi có chuyển động) — được throttle đúng trong `uplink_loop`
 - Heartbeat gửi mỗi **30 giây**
 - Timeout chờ response: **5 giây**
 - Auto-reconnect: **3 giây** (tăng dần theo exponential backoff: 3s → 6s → 12s → max 60s)
-- Yêu cầu `websockets >= 13.0` (do dùng `websocket.request.path` và module `websockets.asyncio.server` / `websockets.asyncio.client`); nếu dùng bản cũ hơn cần thay bằng `websocket.path`
+- `cameraId` được truyền trong payload của từng bản tin, **không nằm trong URL kết nối**
+- Yêu cầu `websockets >= 13.0`; nếu dùng bản cũ hơn cần thay `websocket.request.path` bằng `websocket.path`
 - Tham khảo thêm: [ai_server_plan.md](./ai_server_plan.md), [04-sequence-diagram.md](./04-sequence-diagram.md)
