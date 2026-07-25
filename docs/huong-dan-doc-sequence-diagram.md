@@ -22,6 +22,21 @@ Nó trả lời cho các câu hỏi:
 
 Ở đỉnh sơ đồ, bạn sẽ thấy các ô hình chữ nhật đại diện cho các thành phần trong hệ thống. Mỗi thành phần có một **đường đời (Lifeline)** là đường nét đứt chạy thẳng xuống dưới, thể hiện sự tồn tại của nó theo thời gian.
 
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+    participant AI_Server
+    participant Camera
+
+    Note over Mobile: Ứng dụng Android trên điện thoại
+    Note over Mobile_Server: Máy chủ trung tâm (Backend)
+    Note over Database: Cơ sở dữ liệu lưu trữ
+    Note over AI_Server: Máy chủ AI chạy YOLOv8
+    Note over Camera: Camera + thiết bị ngoại vi vật lý
+```
+
 ```mermaid
 sequenceDiagram
     participant Mobile
@@ -51,6 +66,14 @@ sequenceDiagram
 
 Mũi tên **nét liền, đầu nhọn đặc**: đối tượng A chủ động gửi một yêu cầu (HTTP Request) đến đối tượng B.
 
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: POST /auth/login (username, password)
+```
+
 ```mermaid
 sequenceDiagram
     participant Mobile
@@ -62,6 +85,15 @@ sequenceDiagram
 ### b) Phản hồi kết quả — Response (`-->>`)
 
 Mũi tên **nét đứt, đầu nhọn hở**: đối tượng B đã xử lý xong và gửi trả kết quả về cho A.
+
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: POST /auth/login (username, password)
+    Mobile_Server-->>Mobile: Response 200 OK (accessToken, user)
+```
 
 ```mermaid
 sequenceDiagram
@@ -75,6 +107,22 @@ sequenceDiagram
 ### c) Hộp kích hoạt — Activation Bar (`activate` / `deactivate`)
 
 Một dải hình chữ nhật đứng màu xám đè lên đường lifeline, thể hiện khoảng thời gian đối tượng đang **bận xử lý** (ví dụ: truy vấn DB, tính toán AI) trước khi trả kết quả.
+
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    Mobile->>Mobile_Server: GET /cameras
+    activate Mobile_Server
+    Mobile_Server->>Database: SELECT * FROM cameras
+    activate Database
+    Database-->>Mobile_Server: Danh sách camera
+    deactivate Database
+    Mobile_Server-->>Mobile: Response 200 OK (cameras[])
+    deactivate Mobile_Server
+```
 
 ```mermaid
 sequenceDiagram
@@ -96,6 +144,13 @@ sequenceDiagram
 
 Khi một đối tượng tự thực hiện một hành động nội bộ (không cần gửi đến ai khác), mũi tên sẽ quay ngược lại chính nó.
 
+```yaml
+sequenceDiagram
+    participant AI_Server
+
+    AI_Server->>AI_Server: Phân tích ảnh bằng mô hình YOLOv8
+```
+
 ```mermaid
 sequenceDiagram
     participant AI_Server
@@ -106,6 +161,16 @@ sequenceDiagram
 ### e) Ghi chú — Note (`Note over` / `Note right of`)
 
 Dùng để ghi chú giải thích ngữ cảnh, trạng thái hệ thống, hoặc một hành động vật lý ngoài đời thực.
+
+```yaml
+sequenceDiagram
+    participant Camera
+    participant AI_Server
+
+    Note over Camera: Cảm biến hồng ngoại phát hiện chuyển động
+    Camera->>AI_Server: Gửi ảnh chụp được (Binary)
+    Note right of AI_Server: AI đang xử lý, có thể mất 1-2 giây
+```
 
 ```mermaid
 sequenceDiagram
@@ -122,6 +187,23 @@ sequenceDiagram
 ### a) Khối chạy song song — `par ... and ... end`
 
 Thể hiện việc hệ thống thực hiện nhiều hành động **cùng một lúc** (song song), thay vì tuần tự từng bước một.
+
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+
+    Mobile->>Mobile_Server: Vào tab Thống kê
+    activate Mobile_Server
+    par Tải dữ liệu song song
+        Mobile_Server-->>Mobile: GET /stats/summary → Biểu đồ sự kiện
+    and
+        Mobile_Server-->>Mobile: GET /alerts/feed → Tin tức mới
+    and
+        Mobile_Server-->>Mobile: GET /reference-data/danger-levels → Cấp độ nguy hiểm
+    end
+    deactivate Mobile_Server
+```
 
 ```mermaid
 sequenceDiagram
@@ -146,6 +228,21 @@ sequenceDiagram
 
 Dùng để nhóm các hành động có liên quan mật thiết lại với nhau, giúp người đọc dễ nhận biết các luồng xử lý riêng biệt.
 
+```yaml
+sequenceDiagram
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    rect rgb(200, 240, 200)
+        Note over Mobile,Database: Luồng: Thêm số điện thoại nhận SMS
+        Mobile->>Mobile_Server: POST /sms-recipients (phone)
+        Mobile_Server->>Database: INSERT sms_recipients
+        Database-->>Mobile_Server: OK
+        Mobile_Server-->>Mobile: Response 201 Created
+    end
+```
+
 ```mermaid
 sequenceDiagram
     participant Mobile
@@ -165,6 +262,19 @@ sequenceDiagram
 
 Hệ thống tự đánh số thứ tự `1, 2, 3...` cho từng bước, giúp các bạn dễ gọi tên bước khi thuyết trình.
 
+```yaml
+sequenceDiagram
+    autonumber
+    participant Mobile
+    participant Mobile_Server
+    participant Database
+
+    Mobile->>Mobile_Server: POST /auth/login
+    Mobile_Server->>Database: Kiểm tra tài khoản
+    Database-->>Mobile_Server: Trả về thông tin user
+    Mobile_Server-->>Mobile: Response 200 OK (accessToken)
+```
+
 ```mermaid
 sequenceDiagram
     autonumber
@@ -183,6 +293,33 @@ sequenceDiagram
 ## 5. Ví dụ tổng hợp: Luồng nhận diện động vật (Action 1.1)
 
 Đây là đoạn sơ đồ quan trọng nhất trong đề tài — mô tả toàn bộ quá trình từ khi Camera phát hiện thú rừng đến khi kích hoạt thiết bị xua đuổi:
+
+```yaml
+sequenceDiagram
+    autonumber
+    participant Camera
+    participant AI_Server
+    participant Mobile_Server
+    participant Database
+
+    Note over Camera: Cảm biến phát hiện chuyển động tại thực địa
+    Camera->>AI_Server: Gửi ảnh chụp được (Binary)
+
+    activate AI_Server
+    AI_Server->>AI_Server: Phân tích bằng YOLOv8
+    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections
+    activate Mobile_Server
+    Mobile_Server->>Database: Lưu sự kiện, tính resolvedDangerLevel
+    Database-->>Mobile_Server: eventId
+    Mobile_Server-->>AI_Server: Response 201 Created (DefendAction)
+    deactivate Mobile_Server
+    deactivate AI_Server
+
+    rect rgb(255, 220, 200)
+        Note over AI_Server,Camera: Kích hoạt thiết bị xua đuổi
+        AI_Server->>Camera: Truyền lệnh điều khiển (DefendAction)
+    end
+```
 
 ```mermaid
 sequenceDiagram
