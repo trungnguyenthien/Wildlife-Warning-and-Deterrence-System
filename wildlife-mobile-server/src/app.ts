@@ -84,11 +84,17 @@ app.post('/alerts/feed/:alertId/read', authenticateToken, readAlert);
 // ==========================================
 // 8. API TÍCH HỢP THIẾT BỊ / AI SERVER
 // ==========================================
-app.post('/cameras/:cameraId/detections', processDetection); // Webhook không cần JWT Token
+app.post('/cameras/:cameraId/detections', upload.single('image'), processDetection); // Webhook không cần JWT Token
 
 // ==========================================
 // 9. ENDPOINTS THỐNG KÊ
 // ==========================================
 app.get('/stats/summary', authenticateToken, getSummary);
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 export default app;

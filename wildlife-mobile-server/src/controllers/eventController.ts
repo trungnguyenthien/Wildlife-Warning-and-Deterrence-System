@@ -4,6 +4,8 @@ import { AuthenticatedRequest } from '../middlewares/auth';
 import { notifySSE } from './cameraController';
 import { sendPushToAllDevices } from '../config/firebase';
 import { getRecommendedPresetForSpecies } from '../config/presets';
+import fs from 'fs';
+import { uploadImage } from '../config/cloudinary';
 
 const prisma = new PrismaClient();
 
@@ -156,7 +158,83 @@ export async function readAlert(req: AuthenticatedRequest, res: Response) {
 // 4. POST /cameras/{cameraId}/detections - Webhook AI Server nhận dạng hiện trường
 export async function processDetection(req: Request, res: Response) {
   const { cameraId } = req.params;
-  const { detections, imageUrl, detectedAt } = req.body;
+
+  // 1. Parse fields (handles JSON or Multipart Form Data)
+  let rawDetections = req.body.detections;
+  let detections: any[] = [];
+  let imageUrl = req.body.imageUrl;
+  let detectedAt = req.body.detectedAt;
+  const userId = req.body.userId;
+
+  // Handle file validation and upload if file exists
+  if (req.file) {
+    const file = req.file;
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedMimeTypes.includes(file.mimetype)) {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      return res.status(400).json({
+        error: 'invalid_image_format',
+        message: 'Định dạng hình ảnh không hợp lệ. Chỉ chấp nhận JPG, JPEG hoặc PNG.'
+      });
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      return res.status(400).json({
+        error: 'image_too_large',
+        message: 'Dung lượng hình ảnh quá lớn. Giới hạn tối đa là 5MB.'
+      });
+    }
+
+    // Spec: userId is mandatory for multipart
+    if (!userId) {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      return res.status(400).json({
+        error: 'missed_user_id',
+        message: 'Thiếu thông tin bắt buộc: userId.'
+      });
+    }
+
+    // Spec: Validate user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    if (!user) {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      return res.status(404).json({
+        error: 'not_found_user',
+        message: 'Người dùng sở hữu trạm camera không tồn tại.'
+      });
+    }
+
+    // Upload to Cloudinary
+    try {
+      imageUrl = await uploadImage(file.path, 'detections');
+    } catch (err) {
+      console.error('Lỗi tải ảnh lên Cloudinary:', err);
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      return res.status(500).json({
+        error: 'upload_failed',
+        message: 'Không thể tải ảnh snapshot lên Cloudinary.'
+      });
+    } finally {
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    }
+  }
+
+  // Parse detections if it is a JSON string (Multipart mode)
+  if (typeof rawDetections === 'string') {
+    try {
+      detections = JSON.parse(rawDetections);
+    } catch (e) {
+      return res.status(400).json({
+        error: 'invalid_detections_json',
+        message: 'Trường detections không đúng định dạng JSON.'
+      });
+    }
+  } else {
+    detections = rawDetections;
+  }
 
   // Validation: Thiếu trường bắt buộc
   if (!detections) {

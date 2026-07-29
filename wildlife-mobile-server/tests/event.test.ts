@@ -19,6 +19,7 @@ import { PrismaClient } from '@prisma/client';
 import { clearDatabase, disconnectPrisma } from './helper';
 import { getApps, initializeApp } from 'firebase-admin';
 import { getMessaging } from 'firebase-admin/messaging';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
@@ -411,5 +412,51 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
 
     // Webhook vẫn phải trả về 201 Created và không bị crash
     expect(res.status).toBe(201);
+  });
+
+  it('TC_AI_DET_SUCCESS_MULTIPART: AI Webhook with valid multipart form data', async () => {
+    // Lấy userId thực tế của ranger_evt để vượt qua ràng buộc khóa ngoại
+    const user = await prisma.user.findUnique({ where: { username: 'ranger_evt' } });
+    const rangerUserId = user ? user.id : 'unknown';
+
+    const sampleImagePath = path.join(__dirname, '../f4.png');
+    const detectionsStr = JSON.stringify([{ speciesId: speciesId, confidence: 0.88 }]);
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .attach('image', sampleImagePath)
+      .field('userId', rangerUserId)
+      .field('detections', detectionsStr)
+      .field('detectedAt', '2026-07-22T12:00:00Z');
+
+    expect(res.status).toBe(201);
+    expect(res.body).toHaveProperty('eventId');
+  });
+
+  it('TC_AI_DET_FAILURE_MULTIPART_MISSING_USER: Fail AI Webhook multipart missing userId', async () => {
+    const sampleImagePath = path.join(__dirname, '../f4.png');
+    const detectionsStr = JSON.stringify([{ speciesId: speciesId, confidence: 0.88 }]);
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .attach('image', sampleImagePath)
+      .field('detections', detectionsStr);
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('missed_user_id');
+  });
+
+  it('TC_AI_DET_FAILURE_MULTIPART_INVALID_USER: Fail AI Webhook multipart with non-existent userId', async () => {
+    const sampleImagePath = path.join(__dirname, '../f4.png');
+    const detectionsStr = JSON.stringify([{ speciesId: speciesId, confidence: 0.88 }]);
+
+    const res = await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .attach('image', sampleImagePath)
+      .field('userId', 'non-existent-user-uuid')
+      .field('detections', detectionsStr);
+
+    expect(res.status).toBe(404);
+    expect(res.body.error).toBe('not_found_user');
   });
 });
