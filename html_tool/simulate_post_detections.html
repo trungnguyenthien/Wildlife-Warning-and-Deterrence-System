@@ -795,7 +795,8 @@
                 confidence: d.confidence
             })));
 
-            const cmd = `curl -X POST "${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections" \\\n  -F "userId=${userId}" \\\n  -F "detections=${detectionsStr.replace(/"/g, '\\"')}" \\\n  -F "image=@${fileRef}"`;
+            const currentIsoDate = new Date().toISOString();
+            const cmd = `curl -X POST "${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections" \\\n  -F "userId=${userId}" \\\n  -F "detections=${detectionsStr.replace(/"/g, '\\"')}" \\\n  -F "detectedAt=${currentIsoDate}" \\\n  -F "image=@${fileRef}"`;
             curlPreview.textContent = cmd;
         }
 
@@ -911,6 +912,7 @@
                     speciesId: d.speciesId,
                     confidence: d.confidence
                 }))));
+                formData.append('detectedAt', new Date().toISOString());
                 formData.append('image', firstDetWithFile.imageFile);
 
                 const options = {
