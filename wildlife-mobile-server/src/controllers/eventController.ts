@@ -220,6 +220,11 @@ export async function processDetection(req: Request, res: Response) {
     } finally {
       if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
     }
+
+    // Default detectedAt if not provided in multipart mode
+    if (!detectedAt) {
+      detectedAt = new Date().toISOString();
+    }
   }
 
   // Parse detections if it is a JSON string (Multipart mode)
