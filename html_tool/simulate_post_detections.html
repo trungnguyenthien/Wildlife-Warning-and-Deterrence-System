@@ -1,758 +1,884 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wildlife Warning &amp; Deterrence - AI Webhook Simulator</title>
-    <meta name="description" content="Simulate AI detection snapshots and metadata payloads to the Wildlife Warning and Deterrence System backend. Supports client-side snapshot upload and customizable species detection.">
+    <meta
+      name="description"
+      content="Simulate AI detection snapshots and metadata payloads to the Wildlife Warning and Deterrence System backend. Supports client-side snapshot upload and customizable species detection."
+    />
     <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #09150d 0%, #112516 100%);
-            --panel-bg: rgba(28, 53, 35, 0.7);
-            --panel-border: rgba(44, 76, 50, 0.5);
-            --input-bg: #0c1a10;
-            --input-border: #233d28;
-            --text-primary: #ffffff;
-            --text-secondary: #a3b8a8;
-            --primary-accent: #d4ac0d; /* Gold */
-            --primary-hover: #f4d03f; /* Bright Yellow */
-            --danger-accent: #c62828;
-            --success-accent: #2e7d32;
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            --transition-speed: 0.2s;
-        }
+      :root {
+        --bg-gradient: linear-gradient(135deg, #09150d 0%, #112516 100%);
+        --panel-bg: rgba(28, 53, 35, 0.7);
+        --panel-border: rgba(44, 76, 50, 0.5);
+        --input-bg: #0c1a10;
+        --input-border: #233d28;
+        --text-primary: #ffffff;
+        --text-secondary: #a3b8a8;
+        --primary-accent: #d4ac0d; /* Gold */
+        --primary-hover: #f4d03f; /* Bright Yellow */
+        --danger-accent: #c62828;
+        --success-accent: #2e7d32;
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        --transition-speed: 0.2s;
+      }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 2rem;
-        }
+      body {
+        background: var(--bg-gradient);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem;
+      }
 
-        header {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto 1.5rem auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
+      header {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto 1.5rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
 
-        .header-logo-section {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+      .header-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
 
-        .header-logo-box {
-            background: rgba(212, 172, 13, 0.15);
-            border: 1.5px solid var(--primary-accent);
-            border-radius: 8px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            color: var(--primary-accent);
-        }
+      .header-logo-box {
+        background: rgba(212, 172, 13, 0.15);
+        border: 1.5px solid var(--primary-accent);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--primary-accent);
+      }
 
-        h1 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--text-primary) 0%, var(--primary-hover) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+      h1 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        background: linear-gradient(
+          90deg,
+          var(--text-primary) 0%,
+          var(--primary-hover) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
 
-        .header-subtitle {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
+      .header-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
 
-        .badge {
-            background: rgba(212, 172, 13, 0.1);
-            border: 1px solid rgba(212, 172, 13, 0.3);
-            color: var(--primary-accent);
-            padding: 0.2rem 0.6rem;
-            border-radius: 99px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
+      .badge {
+        background: rgba(212, 172, 13, 0.1);
+        border: 1px solid rgba(212, 172, 13, 0.3);
+        color: var(--primary-accent);
+        padding: 0.2rem 0.6rem;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
 
+      main {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        flex-grow: 1;
+      }
+
+      @media (max-width: 850px) {
         main {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            flex-grow: 1;
+          grid-template-columns: 1fr;
         }
+      }
 
-        @media (max-width: 850px) {
-            main {
-                grid-template-columns: 1fr;
-            }
+      .card {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      input[type="text"] {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-primary);
+        padding: 0.65rem 0.85rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        transition: all var(--transition-speed);
+        width: 100%;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 2px rgba(212, 172, 13, 0.15);
+      }
+
+      /* Select Image Area Styling */
+      .select-image-area {
+        border: 1.5px dashed var(--panel-border);
+        background: var(--input-bg);
+        border-radius: 8px;
+        padding: 0.75rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 50px;
+      }
+
+      .select-image-area:hover {
+        border-color: var(--primary-accent);
+        background: rgba(212, 172, 13, 0.02);
+      }
+
+      .select-image-text {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      .select-image-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        width: 100%;
+        padding: 0.25rem 0;
+      }
+
+      .select-image-thumb {
+        width: 100px;
+        height: 67px;
+        border-radius: 6px;
+        background-size: cover;
+        background-position: center;
+        border: 1.5px solid var(--panel-border);
+        flex-shrink: 0;
+      }
+
+      .select-image-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0.25rem;
+        min-width: 0;
+      }
+
+      .select-image-remove {
+        color: #ef9a9a;
+        font-size: 1rem;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.2rem;
+      }
+
+      /* Thêm nhận diện mới section */
+      .section-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary-accent);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-top: 0.25rem;
+        border-bottom: 1px solid rgba(212, 172, 13, 0.2);
+        padding-bottom: 0.25rem;
+      }
+
+      /* Slider styling */
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .confidence-slider {
+        flex-grow: 1;
+        -webkit-appearance: none;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--input-border);
+        outline: none;
+        accent-color: var(--primary-accent);
+      }
+
+      .confidence-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--primary-accent);
+        cursor: pointer;
+      }
+
+      .confidence-value {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--primary-hover);
+        min-width: 32px;
+        text-align: right;
+      }
+
+      /* Buttons (Rounded) */
+      .btn-rounded {
+        border: 1.5px solid var(--primary-accent);
+        background: rgba(212, 172, 13, 0.1);
+        color: var(--primary-hover);
+        padding: 0.7rem 1.5rem;
+        border-radius: 24px; /* Rounded pill shape as shown in drawing */
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        text-align: center;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-rounded:hover {
+        background: var(--primary-accent);
+        color: #050d06;
+        box-shadow: 0 4px 12px rgba(212, 172, 13, 0.3);
+      }
+
+      .btn-rounded:active {
+        transform: translateY(1px);
+      }
+
+      .btn-post {
+        background: var(--primary-accent);
+        color: #050d06;
+        border: none;
+        padding: 0.85rem 2rem;
+        font-size: 0.95rem;
+        letter-spacing: 0.05em;
+        box-shadow: 0 4px 16px rgba(212, 172, 13, 0.35);
+      }
+
+      .btn-post:hover {
+        background: var(--primary-hover);
+        color: #050d06;
+        box-shadow: 0 6px 20px rgba(212, 172, 13, 0.55);
+      }
+
+      /* List container: Danh sách nhận diện */
+      .list-box-container {
+        border: 1px solid var(--panel-border);
+        background: rgba(12, 26, 16, 0.6);
+        border-radius: 10px;
+        padding: 0.75rem;
+        min-height: 180px;
+        max-height: 250px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .list-box-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 160px;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        text-align: center;
+      }
+
+      .det-item-row {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 6px;
+        padding: 0.5rem 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        justify-content: space-between;
+        animation: fadeIn 0.25s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
         }
-
-        .card {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            border-radius: 14px;
-            padding: 1.5rem;
-            box-shadow: var(--glass-shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
+      .det-item-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        overflow: hidden;
+        flex-grow: 1;
+      }
+
+      .det-item-thumb {
+        width: 40px;
+        height: 28px;
+        border-radius: 4px;
+        background-size: cover;
+        background-position: center;
+        border: 1px solid var(--input-border);
+        flex-shrink: 0;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      .det-item-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .det-item-name {
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .det-item-conf {
+        font-size: 0.7rem;
+        color: var(--primary-accent);
+        font-weight: 600;
+      }
+
+      .det-item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .det-item-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-secondary);
+      }
+
+      .det-item-status-dot.sending {
+        background: var(--primary-accent);
+        animation: pulse 1s infinite alternate;
+      }
+      .det-item-status-dot.success {
+        background: #81c784;
+      }
+      .det-item-status-dot.error {
+        background: #e57373;
+      }
+
+      @keyframes pulse {
+        from {
+          opacity: 0.4;
         }
-
-        label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+        to {
+          opacity: 1;
         }
+      }
 
-        input[type="text"] {
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: var(--text-primary);
-            padding: 0.65rem 0.85rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            transition: all var(--transition-speed);
-            width: 100%;
-        }
+      /* Box: cURL trước khi gửi & Response */
+      .code-box-wrapper {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 180px;
+        position: relative;
+      }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-accent);
-            box-shadow: 0 0 0 2px rgba(212, 172, 13, 0.15);
-        }
+      .code-box-pane {
+        flex-grow: 1;
+        background: #050b06;
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-y: auto;
+        max-height: 250px;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
+          monospace;
+        font-size: 0.75rem;
+        color: #a3b8a8;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        position: relative;
+      }
 
-        /* Select Image Area Styling */
-        .select-image-area {
-            border: 1.5px dashed var(--panel-border);
-            background: var(--input-bg);
-            border-radius: 8px;
-            padding: 0.75rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            min-height: 50px;
-        }
+      .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(28, 53, 35, 0.8);
+        border: 1px solid var(--panel-border);
+        color: var(--text-secondary);
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+      }
 
-        .select-image-area:hover {
-            border-color: var(--primary-accent);
-            background: rgba(212, 172, 13, 0.02);
-        }
+      .copy-btn:hover {
+        border-color: var(--primary-accent);
+        color: var(--primary-hover);
+      }
 
-        .select-image-text {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
+      .status-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+      }
 
-        .select-image-preview {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            width: 100%;
-            padding: 0.25rem 0;
-        }
+      .status-pill {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+      }
 
-        .select-image-thumb {
-            width: 100px;
-            height: 67px;
-            border-radius: 6px;
-            background-size: cover;
-            background-position: center;
-            border: 1.5px solid var(--panel-border);
-            flex-shrink: 0;
-        }
+      .status-pill.success {
+        background: rgba(46, 125, 50, 0.2);
+        color: #81c784;
+        border: 1px solid rgba(46, 125, 50, 0.4);
+      }
+      .status-pill.error {
+        background: rgba(198, 40, 40, 0.2);
+        color: #e57373;
+        border: 1px solid rgba(198, 40, 40, 0.4);
+      }
+      .status-pill.pending {
+        background: rgba(212, 172, 13, 0.15);
+        color: var(--primary-hover);
+        border: 1px solid rgba(212, 172, 13, 0.4);
+      }
 
-        .select-image-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 0.25rem;
-            min-width: 0;
-        }
+      .hidden {
+        display: none !important;
+      }
 
-        .select-image-remove {
-            color: #ef9a9a;
-            font-size: 1rem;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0.2rem;
-        }
+      footer {
+        max-width: 1200px;
+        width: 100%;
+        margin: 2rem auto 0 auto;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        opacity: 0.8;
+        line-height: 1.5;
+      }
 
-        /* Thêm nhận diện mới section */
-        .section-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--primary-accent);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 0.25rem;
-            border-bottom: 1px solid rgba(212, 172, 13, 0.2);
-            padding-bottom: 0.25rem;
-        }
+      footer a {
+        color: var(--primary-accent);
+        text-decoration: none;
+      }
 
-        /* Slider styling */
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .confidence-slider {
-            flex-grow: 1;
-            -webkit-appearance: none;
-            height: 4px;
-            border-radius: 2px;
-            background: var(--input-border);
-            outline: none;
-            accent-color: var(--primary-accent);
-        }
-
-        .confidence-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--primary-accent);
-            cursor: pointer;
-        }
-
-        .confidence-value {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--primary-hover);
-            min-width: 32px;
-            text-align: right;
-        }
-
-        /* Buttons (Rounded) */
-        .btn-rounded {
-            border: 1.5px solid var(--primary-accent);
-            background: rgba(212, 172, 13, 0.1);
-            color: var(--primary-hover);
-            padding: 0.7rem 1.5rem;
-            border-radius: 24px; /* Rounded pill shape as shown in drawing */
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            text-align: center;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-rounded:hover {
-            background: var(--primary-accent);
-            color: #050d06;
-            box-shadow: 0 4px 12px rgba(212, 172, 13, 0.3);
-        }
-
-        .btn-rounded:active {
-            transform: translateY(1px);
-        }
-
-        .btn-post {
-            background: var(--primary-accent);
-            color: #050d06;
-            border: none;
-            padding: 0.85rem 2rem;
-            font-size: 0.95rem;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 16px rgba(212, 172, 13, 0.35);
-        }
-
-        .btn-post:hover {
-            background: var(--primary-hover);
-            color: #050d06;
-            box-shadow: 0 6px 20px rgba(212, 172, 13, 0.55);
-        }
-
-        /* List container: Danh sách nhận diện */
-        .list-box-container {
-            border: 1px solid var(--panel-border);
-            background: rgba(12, 26, 16, 0.6);
-            border-radius: 10px;
-            padding: 0.75rem;
-            min-height: 180px;
-            max-height: 250px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .list-box-placeholder {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 160px;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            text-align: center;
-        }
-
-        .det-item-row {
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 6px;
-            padding: 0.5rem 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            justify-content: space-between;
-            animation: fadeIn 0.25s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .det-item-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            overflow: hidden;
-            flex-grow: 1;
-        }
-
-        .det-item-thumb {
-            width: 40px;
-            height: 28px;
-            border-radius: 4px;
-            background-size: cover;
-            background-position: center;
-            border: 1px solid var(--input-border);
-            flex-shrink: 0;
-            background-color: rgba(255,255,255,0.05);
-        }
-
-        .det-item-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 0;
-        }
-
-        .det-item-name {
-            font-size: 0.8rem;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .det-item-conf {
-            font-size: 0.7rem;
-            color: var(--primary-accent);
-            font-weight: 600;
-        }
-
-        .det-item-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .det-item-status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-secondary);
-        }
-
-        .det-item-status-dot.sending { background: var(--primary-accent); animation: pulse 1s infinite alternate; }
-        .det-item-status-dot.success { background: #81c784; }
-        .det-item-status-dot.error { background: #e57373; }
-
-        @keyframes pulse {
-            from { opacity: 0.4; }
-            to { opacity: 1; }
-        }
-
-        /* Box: cURL trước khi gửi & Response */
-        .code-box-wrapper {
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            min-height: 180px;
-            position: relative;
-        }
-
-        .code-box-pane {
-            flex-grow: 1;
-            background: #050b06;
-            border: 1px solid var(--input-border);
-            border-radius: 8px;
-            padding: 1rem;
-            overflow-y: auto;
-            max-height: 250px;
-            font-family: 'SFMono-Regular', Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            font-size: 0.75rem;
-            color: #a3b8a8;
-            line-height: 1.4;
-            white-space: pre-wrap;
-            position: relative;
-        }
-
-        .copy-btn {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: rgba(28, 53, 35, 0.8);
-            border: 1px solid var(--panel-border);
-            color: var(--text-secondary);
-            font-size: 0.65rem;
-            font-weight: 600;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-        }
-
-        .copy-btn:hover {
-            border-color: var(--primary-accent);
-            color: var(--primary-hover);
-        }
-
-        .status-header-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.25rem;
-        }
-
-        .status-pill {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-        }
-
-        .status-pill.success { background: rgba(46,125,50,0.2); color: #81c784; border: 1px solid rgba(46,125,50,0.4); }
-        .status-pill.error { background: rgba(198,40,40,0.2); color: #e57373; border: 1px solid rgba(198,40,40,0.4); }
-        .status-pill.pending { background: rgba(212,172,13,0.15); color: var(--primary-hover); border: 1px solid rgba(212,172,13,0.4); }
-
-        .hidden {
-            display: none !important;
-        }
-
-        footer {
-            max-width: 1200px;
-            width: 100%;
-            margin: 2rem auto 0 auto;
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            opacity: 0.8;
-            line-height: 1.5;
-        }
-
-        footer a {
-            color: var(--primary-accent);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
+      footer a:hover {
+        text-decoration: underline;
+      }
     </style>
-</head>
-<body>
-    
+  </head>
+  <body>
     <header>
-        <div class="header-logo-section">
-            <div class="header-logo-box" aria-hidden="true">🐘</div>
-            <div>
-                <h1>Wildlife Warning &amp; Deterrence</h1>
-                <div class="header-subtitle">AI Webhook Simulator</div>
-            </div>
-        </div>
+      <div class="header-logo-section">
+        <div class="header-logo-box" aria-hidden="true">🐘</div>
         <div>
-            <span class="badge" id="env-badge">Production Server</span>
+          <h1>Wildlife Warning &amp; Deterrence</h1>
+          <div class="header-subtitle">AI Webhook Simulator</div>
         </div>
+      </div>
+      <div>
+        <span class="badge" id="env-badge">Production Server</span>
+      </div>
     </header>
 
     <main>
-        <!-- LEFT COLUMN (Cột trái): Inputs, Add Form, Detections List -->
-        <section class="card" aria-label="Cấu hình nhận diện">
-            <!-- Row 1: userID & cameraID side-by-side -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label for="user-id">userID</label>
-                    <input type="text" id="user-id" placeholder="Nhập userID..." required>
-                </div>
-                <div class="form-group">
-                    <label for="camera-id">cameraID</label>
-                    <input type="text" id="camera-id" placeholder="Nhập cameraID..." required>
-                </div>
+      <!-- LEFT COLUMN (Cột trái): Inputs, Add Form, Detections List -->
+      <section class="card" aria-label="Cấu hình nhận diện">
+        <!-- Row 1: userID & cameraID side-by-side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem">
+          <div class="form-group">
+            <label for="user-id">userID</label>
+            <input
+              type="text"
+              id="user-id"
+              placeholder="Nhập userID..."
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="camera-id">cameraID</label>
+            <input
+              type="text"
+              id="camera-id"
+              placeholder="Nhập cameraID..."
+              required
+            />
+          </div>
+        </div>
+
+        <!-- Row 2: Select Image ... Area -->
+        <div class="form-group">
+          <label>Hình ảnh snapshot (Select Image)</label>
+          <div class="select-image-area" id="image-dropzone">
+            <div class="select-image-text" id="image-placeholder-text">
+              <span>📸</span> Select Image ...
             </div>
-
-            <!-- Row 2: Select Image ... Area -->
-            <div class="form-group">
-                <label>Hình ảnh snapshot (Select Image)</label>
-                <div class="select-image-area" id="image-dropzone">
-                    <div class="select-image-text" id="image-placeholder-text">
-                        <span>📸</span> Select Image ...
-                    </div>
-                    <div class="select-image-preview hidden" id="image-preview-container">
-                        <div class="select-image-thumb" id="image-preview-thumb"></div>
-                        <div class="select-image-info">
-                            <span style="opacity: 0.85; font-size: 0.75rem; font-weight: 600;" id="image-file-size">(600x400)</span>
-                        </div>
-                        <button type="button" class="select-image-remove" id="btn-remove-image">✕</button>
-                    </div>
-                    <input type="file" id="file-input" accept="image/jpeg,image/png,image/jpg" style="display: none;">
-                </div>
+            <div
+              class="select-image-preview hidden"
+              id="image-preview-container"
+            >
+              <div class="select-image-thumb" id="image-preview-thumb"></div>
+              <div class="select-image-info">
+                <span
+                  style="opacity: 0.85; font-size: 0.75rem; font-weight: 600"
+                  id="image-file-size"
+                  >(600x400)</span
+                >
+              </div>
+              <button
+                type="button"
+                class="select-image-remove"
+                id="btn-remove-image"
+              >
+                ✕
+              </button>
             </div>
+            <input
+              type="file"
+              id="file-input"
+              accept="image/jpeg,image/png,image/jpg"
+              style="display: none"
+            />
+          </div>
+        </div>
 
-            <!-- Section: Thêm nhận diện mới -->
-            <div class="section-title">Thêm nhận diện mới</div>
-            
-            <div class="form-group">
-                <label for="species-id-input">input speciesId</label>
-                <input type="text" id="species-id-input" list="species-presets" placeholder="Nhập mã loài vật (e.g. voi_rung, ho_dong_duong)..." value="voi_rung">
-                <datalist id="species-presets">
-                    <option value="voi_rung">Voi Rừng Tây Nguyên (voi_rung)</option>
-                    <option value="ho_dong_duong">Hổ Đông Dương (ho_dong_duong)</option>
-                    <option value="monkey">Khỉ Vàng (monkey)</option>
-                    <option value="nai_vang">Nai Vàng Nam Bộ (nai_vang)</option>
-                    <option value="human_border_intruder">Người lạ xâm nhập (human_border_intruder)</option>
-                </datalist>
-            </div>
+        <!-- Section: Thêm nhận diện mới -->
+        <div class="section-title">Thêm nhận diện mới</div>
 
-            <div class="form-group">
-                <label for="confidence-slider">
-                    <span>Thanh kéo confidence</span>
-                    <span id="confidence-val" style="color: var(--primary-hover); font-weight: bold;">0.75</span>
-                </label>
-                <div class="slider-container">
-                    <input type="range" id="confidence-slider" class="confidence-slider" min="0.5" max="1.0" step="0.01" value="0.75">
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="species-id-input">input speciesId</label>
+          <input
+            type="text"
+            id="species-id-input"
+            list="species-presets"
+            placeholder="Nhập mã loài vật (e.g. voi_rung, ho_dong_duong)..."
+            value="voi_rung"
+          />
+          <datalist id="species-presets">
+            <option value="voi_rung">Voi Rừng Tây Nguyên (voi_rung)</option>
+            <option value="ho_dong_duong">Hổ Đông Dương (ho_dong_duong)</option>
+            <option value="monkey">Khỉ Vàng (monkey)</option>
+            <option value="nai_vang">Nai Vàng Nam Bộ (nai_vang)</option>
+            <option value="human_border_intruder">
+              Người lạ xâm nhập (human_border_intruder)
+            </option>
+          </datalist>
+        </div>
 
-            <button type="button" class="btn-rounded" id="btn-add">Thêm mới</button>
+        <div class="form-group">
+          <label for="confidence-slider">
+            <span>Thanh kéo confidence</span>
+            <span
+              id="confidence-val"
+              style="color: var(--primary-hover); font-weight: bold"
+              >0.75</span
+            >
+          </label>
+          <div class="slider-container">
+            <input
+              type="range"
+              id="confidence-slider"
+              class="confidence-slider"
+              min="0.5"
+              max="1.0"
+              step="0.01"
+              value="0.75"
+            />
+          </div>
+        </div>
 
-            <!-- Section: Danh sách nhận diện trước khi gửi, có thể xoá bớt nhận diện -->
-            <div class="form-group">
-                <label>Danh sách nhận diện trước khi gửi <span class="label-desc">(Có thể xóa bớt)</span></label>
-                <div class="list-box-container" id="detections-list">
-                    <!-- Added rows go here -->
-                </div>
-            </div>
-        </section>
+        <button type="button" class="btn-rounded" id="btn-add">Thêm mới</button>
 
-        <!-- RIGHT COLUMN (Cột phải): cURL preview, Post, Response -->
-        <section class="card" aria-label="Thao tác &amp; Kết quả">
-            <!-- Box: cURL trước khi gửi -->
-            <div class="form-group code-box-wrapper">
-                <label>cURL trước khi gửi</label>
-                <div class="code-box-pane">
-                    <button type="button" class="copy-btn" id="btn-copy-curl">Copy</button>
-                    <pre><code id="curl-preview">curl -X POST ...</code></pre>
-                </div>
-            </div>
+        <!-- Section: Danh sách nhận diện trước khi gửi, có thể xoá bớt nhận diện -->
+        <div class="form-group">
+          <label
+            >Danh sách nhận diện trước khi gửi
+            <span class="label-desc">(Có thể xóa bớt)</span></label
+          >
+          <div class="list-box-container" id="detections-list">
+            <!-- Added rows go here -->
+          </div>
+        </div>
+      </section>
 
-            <!-- Button: Post (Rounded) -->
-            <button type="button" class="btn-rounded btn-post" id="btn-post">Post</button>
+      <!-- RIGHT COLUMN (Cột phải): cURL preview, Post, Response -->
+      <section class="card" aria-label="Thao tác &amp; Kết quả">
+        <!-- Box: cURL trước khi gửi -->
+        <div class="form-group code-box-wrapper">
+          <label>cURL trước khi gửi</label>
+          <div class="code-box-pane">
+            <button type="button" class="copy-btn" id="btn-copy-curl">
+              Copy
+            </button>
+            <pre><code id="curl-preview">curl -X POST ...</code></pre>
+          </div>
+        </div>
 
-            <!-- Box: Response -->
-            <div class="form-group code-box-wrapper">
-                <div class="status-header-row">
-                    <label>Response</label>
-                    <span class="status-pill hidden" id="status-badge">PENDING</span>
-                </div>
-                <div class="code-box-pane">
-                    <button type="button" class="copy-btn" id="btn-copy-response">Copy</button>
-                    <pre><code id="response-preview">// Kết quả phản hồi sẽ hiển thị ở đây...</code></pre>
-                </div>
-            </div>
-        </section>
+        <!-- Button: Post (Rounded) -->
+        <button type="button" class="btn-rounded btn-post" id="btn-post">
+          Post
+        </button>
+
+        <!-- Box: Response -->
+        <div class="form-group code-box-wrapper">
+          <div class="status-header-row">
+            <label>Response</label>
+            <span class="status-pill hidden" id="status-badge">PENDING</span>
+          </div>
+          <div class="code-box-pane">
+            <button type="button" class="copy-btn" id="btn-copy-response">
+              Copy
+            </button>
+            <pre><code id="response-preview">// Kết quả phản hồi sẽ hiển thị ở đây...</code></pre>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-        <p>Báo cáo thiết kế &amp; Đồng bộ tài liệu dựa trên: <a href="../docs/03-mobile_api.md" target="_blank">03-mobile_api.md</a></p>
-        <p>Hệ thống Cảnh báo &amp; Xua đuổi Động vật hoang dã KHKT &copy; 2026. Phát triển bởi Antigravity Agent phục vụ Bệ Hạ.</p>
+      <p>
+        Báo cáo thiết kế &amp; Đồng bộ tài liệu dựa trên:
+        <a href="../docs/03-mobile_api.md" target="_blank">03-mobile_api.md</a>
+      </p>
+      <p>
+        Hệ thống Cảnh báo &amp; Xua đuổi Động vật hoang dã KHKT &copy; 2026.
+        Phát triển bởi Antigravity Agent phục vụ Bệ Hạ.
+      </p>
     </footer>
 
     <!-- Script Logic -->
     <script>
-        // Cookies management helpers
-        function setCookie(name, value, days = 30) {
-            const expires = new Date(Date.now() + days * 864e5).toUTCString();
-            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/; SameSite=Lax';
-        }
+      // Cookies management helpers
+      function setCookie(name, value, days = 30) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie =
+          name +
+          "=" +
+          encodeURIComponent(value) +
+          "; expires=" +
+          expires +
+          "; path=/; SameSite=Lax";
+      }
 
-        function getCookie(name) {
-            return document.cookie.split('; ').reduce((r, v) => {
-                const parts = v.split('=');
-                return parts[0] === name ? decodeURIComponent(parts[1]) : r;
-            }, '');
-        }
+      function getCookie(name) {
+        return document.cookie.split("; ").reduce((r, v) => {
+          const parts = v.split("=");
+          return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+        }, "");
+      }
 
-        // Active State
-        let activeDetections = [];
+      // Active State
+      let activeDetections = [];
 
-        // Currently selected file state in "Select Image..."
-        let currentSelectedFile = null;
+      // Currently selected file state in "Select Image..."
+      let currentSelectedFile = null;
 
-        // DOM elements
-        const userIdInput = document.getElementById('user-id');
-        const cameraIdInput = document.getElementById('camera-id');
-        const fileInput = document.getElementById('file-input');
-        const imageDropzone = document.getElementById('image-dropzone');
-        const imagePlaceholderText = document.getElementById('image-placeholder-text');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreviewThumb = document.getElementById('image-preview-thumb');
-        const imageFileSize = document.getElementById('image-file-size');
-        const btnRemoveImage = document.getElementById('btn-remove-image');
+      // DOM elements
+      const userIdInput = document.getElementById("user-id");
+      const cameraIdInput = document.getElementById("camera-id");
+      const fileInput = document.getElementById("file-input");
+      const imageDropzone = document.getElementById("image-dropzone");
+      const imagePlaceholderText = document.getElementById(
+        "image-placeholder-text",
+      );
+      const imagePreviewContainer = document.getElementById(
+        "image-preview-container",
+      );
+      const imagePreviewThumb = document.getElementById("image-preview-thumb");
+      const imageFileSize = document.getElementById("image-file-size");
+      const btnRemoveImage = document.getElementById("btn-remove-image");
 
-        const speciesIdInput = document.getElementById('species-id-input');
-        const confidenceSlider = document.getElementById('confidence-slider');
-        const confidenceVal = document.getElementById('confidence-val');
-        const btnAdd = document.getElementById('btn-add');
-        const detectionsList = document.getElementById('detections-list');
+      const speciesIdInput = document.getElementById("species-id-input");
+      const confidenceSlider = document.getElementById("confidence-slider");
+      const confidenceVal = document.getElementById("confidence-val");
+      const btnAdd = document.getElementById("btn-add");
+      const detectionsList = document.getElementById("detections-list");
 
-        const curlPreview = document.getElementById('curl-preview');
-        const btnCopyCurl = document.getElementById('btn-copy-curl');
-        const btnPost = document.getElementById('btn-post');
+      const curlPreview = document.getElementById("curl-preview");
+      const btnCopyCurl = document.getElementById("btn-copy-curl");
+      const btnPost = document.getElementById("btn-post");
 
-        const statusBadge = document.getElementById('status-badge');
-        const responsePreview = document.getElementById('response-preview');
-        const btnCopyResponse = document.getElementById('btn-copy-response');
+      const statusBadge = document.getElementById("status-badge");
+      const responsePreview = document.getElementById("response-preview");
+      const btnCopyResponse = document.getElementById("btn-copy-response");
 
-        // Target Production URL
-        const PRODUCTION_BASE_URL = 'https://wildlife-warning-and-deterrence-sys.vercel.app';
+      // Target Production URL
+      const PRODUCTION_BASE_URL =
+        "https://wildlife-warning-and-deterrence-sys.vercel.app";
 
-        // Load cookie values
-        userIdInput.value = getCookie('userId') || 'u_rg';
-        cameraIdInput.value = getCookie('cameraId') || 'CAM_PROD_TEST';
+      // Load cookie values
+      userIdInput.value = getCookie("userId") || "u_rg";
+      cameraIdInput.value = getCookie("cameraId") || "CAM_PROD_TEST";
 
-        // Update cookie on input changes
-        userIdInput.addEventListener('input', () => {
-            setCookie('userId', userIdInput.value.trim());
-            updateCurlPreview();
+      // Update cookie on input changes
+      userIdInput.addEventListener("input", () => {
+        setCookie("userId", userIdInput.value.trim());
+        updateCurlPreview();
+      });
+
+      cameraIdInput.addEventListener("input", () => {
+        setCookie("cameraId", cameraIdInput.value.trim());
+        updateCurlPreview();
+      });
+
+      // Helper to format file sizes
+      function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ["Bytes", "KB", "MB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (
+          parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i]
+        );
+      }
+
+      // Image resizing helper (Resizes client-side file to exactly 600x400)
+      function resizeImage(file, width = 600, height = 400) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const img = new Image();
+            img.onload = function () {
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+
+              // Scale draw image to 600x400
+              ctx.drawImage(img, 0, 0, width, height);
+
+              canvas.toBlob(
+                (blob) => {
+                  if (blob) {
+                    const resizedFile = new File([blob], file.name, {
+                      type: "image/jpeg",
+                      lastModified: Date.now(),
+                    });
+                    resolve({
+                      file: resizedFile,
+                      previewUrl: canvas.toDataURL("image/jpeg"),
+                    });
+                  } else {
+                    reject(new Error("Canvas conversion to blob failed"));
+                  }
+                },
+                "image/jpeg",
+                0.85,
+              ); // 85% JPEG quality
+            };
+            img.onerror = (err) => reject(err);
+            img.src = event.target.result;
+          };
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
         });
+      }
 
-        cameraIdInput.addEventListener('input', () => {
-            setCookie('cameraId', cameraIdInput.value.trim());
-            updateCurlPreview();
-        });
+      // Render Detections List
+      function renderDetections() {
+        detectionsList.innerHTML = "";
 
-        // Helper to format file sizes
-        function formatBytes(bytes, decimals = 2) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-        }
-
-        // Image resizing helper (Resizes client-side file to exactly 600x400)
-        function resizeImage(file, width = 600, height = 400) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Scale draw image to 600x400
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        canvas.toBlob((blob) => {
-                            if (blob) {
-                                const resizedFile = new File([blob], file.name, {
-                                    type: 'image/jpeg',
-                                    lastModified: Date.now()
-                                });
-                                resolve({
-                                    file: resizedFile,
-                                    previewUrl: canvas.toDataURL('image/jpeg')
-                                });
-                            } else {
-                                reject(new Error("Canvas conversion to blob failed"));
-                            }
-                        }, 'image/jpeg', 0.85); // 85% JPEG quality
-                    };
-                    img.onerror = (err) => reject(err);
-                    img.src = event.target.result;
-                };
-                reader.onerror = (err) => reject(err);
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Render Detections List
-        function renderDetections() {
-            detectionsList.innerHTML = '';
-            
-            if (activeDetections.length === 0) {
-                detectionsList.innerHTML = `
+        if (activeDetections.length === 0) {
+          detectionsList.innerHTML = `
                     <div class="list-box-placeholder">
                         Chưa có nhận diện nào.<br>Cấu hình trường bên trên và nhấn "Thêm mới" để tạo danh sách.
                     </div>`;
-                return;
-            }
+          return;
+        }
 
-            activeDetections.forEach((det, index) => {
-                const row = document.createElement('div');
-                row.className = 'det-item-row';
+        activeDetections.forEach((det, index) => {
+          const row = document.createElement("div");
+          row.className = "det-item-row";
 
-                row.innerHTML = `
+          row.innerHTML = `
                     <div class="det-item-left">
                         <div class="det-item-thumb" style="background-image: url('${det.imagePreviewUrl}');"></div>
                         <div class="det-item-info">
@@ -766,219 +892,230 @@
                     </div>
                 `;
 
-                // Remove item handler
-                const removeBtn = row.querySelector('.remove-btn');
-                removeBtn.addEventListener('click', () => {
-                    activeDetections.splice(index, 1);
-                    renderDetections();
-                    updateCurlPreview();
-                });
-
-                detectionsList.appendChild(row);
-            });
-        }
-
-        // Live cURL preview update
-        function updateCurlPreview() {
-            if (activeDetections.length === 0) {
-                curlPreview.textContent = 'Chưa có nhận diện nào để hiển thị cURL.';
-                return;
-            }
-
-            const cameraId = cameraIdInput.value.trim() || 'CAM_PROD_TEST';
-            const userId = userIdInput.value.trim() || 'u_rg';
-            
-            const firstDet = activeDetections[0];
-            const fileRef = firstDet.imageFile ? firstDet.imageFile.name : 'image.jpg';
-            const detectionsStr = JSON.stringify(activeDetections.map(d => ({
-                speciesId: d.speciesId,
-                confidence: d.confidence
-            })));
-
-            const currentIsoDate = new Date().toISOString();
-            const cmd = `curl -X POST "${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections" \\\n  -F "userId=${userId}" \\\n  -F "detections=${detectionsStr.replace(/"/g, '\\"')}" \\\n  -F "detectedAt=${currentIsoDate}" \\\n  -F "image=@${fileRef}"`;
-            curlPreview.textContent = cmd;
-        }
-
-        // Confidence slider change handler
-        confidenceSlider.addEventListener('input', (e) => {
-            confidenceVal.textContent = parseFloat(e.target.value).toFixed(2);
-        });
-
-        // Trigger file input click
-        imageDropzone.addEventListener('click', (e) => {
-            if (e.target !== btnRemoveImage && !btnRemoveImage.contains(e.target)) {
-                fileInput.click();
-            }
-        });
-
-        fileInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                await handleFileSelection(e.target.files[0]);
-            }
-        });
-
-        async function handleFileSelection(file) {
-            try {
-                // Automatically resize client image to exactly 600x400
-                const resized = await resizeImage(file, 600, 400);
-                currentSelectedFile = {
-                    file: resized.file,
-                    previewUrl: resized.previewUrl
-                };
-
-                imageFileSize.textContent = `(Resized: ${formatBytes(resized.file.size)})`;
-                imagePreviewThumb.style.backgroundImage = `url('${resized.previewUrl}')`;
-                
-                imagePlaceholderText.classList.add('hidden');
-                imagePreviewContainer.classList.remove('hidden');
-            } catch (err) {
-                alert("Không thể đọc và resize tệp ảnh: " + err.message);
-            }
-        }
-
-        btnRemoveImage.addEventListener('click', (e) => {
-            e.stopPropagation();
-            currentSelectedFile = null;
-            fileInput.value = '';
-            imagePlaceholderText.classList.remove('hidden');
-            imagePreviewContainer.classList.add('hidden');
-        });
-
-        // Add Detections handler
-        btnAdd.addEventListener('click', () => {
-            const speciesId = speciesIdInput.value.trim();
-            if (!speciesId) {
-                alert("Vui lòng điền Species ID.");
-                return;
-            }
-            if (!currentSelectedFile) {
-                alert("Vui lòng chọn hình ảnh snapshot trước khi Thêm mới.");
-                return;
-            }
-            const confidence = parseFloat(confidenceSlider.value);
-
-            activeDetections.push({
-                id: 'det-' + Math.random().toString(36).substring(7),
-                speciesId: speciesId,
-                confidence: confidence,
-                imageFile: currentSelectedFile.file,
-                imagePreviewUrl: currentSelectedFile.previewUrl,
-                status: 'idle'
-            });
-
+          // Remove item handler
+          const removeBtn = row.querySelector(".remove-btn");
+          removeBtn.addEventListener("click", () => {
+            activeDetections.splice(index, 1);
             renderDetections();
             updateCurlPreview();
+          });
 
-            // Clear inputs for next detection, keep the selected image
-            speciesIdInput.value = '';
-            confidenceSlider.value = '0.75';
-            confidenceVal.textContent = '0.75';
+          detectionsList.appendChild(row);
+        });
+      }
+
+      // Live cURL preview update
+      function updateCurlPreview() {
+        if (activeDetections.length === 0) {
+          curlPreview.textContent = "Chưa có nhận diện nào để hiển thị cURL.";
+          return;
+        }
+
+        const cameraId = cameraIdInput.value.trim() || "CAM_PROD_TEST";
+        const userId = userIdInput.value.trim() || "u_rg";
+
+        const firstDet = activeDetections[0];
+        const fileRef = firstDet.imageFile
+          ? firstDet.imageFile.name
+          : "image.jpg";
+        const detectionsStr = JSON.stringify(
+          activeDetections.map((d) => ({
+            speciesId: d.speciesId,
+            confidence: d.confidence,
+          })),
+        );
+
+        const currentIsoDate = new Date().toISOString();
+        const cmd = `curl -X POST "${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections" \\\n  -F "userId=${userId}" \\\n  -F "detections=${detectionsStr.replace(/"/g, '\\"')}" \\\n  -F "detectedAt=${currentIsoDate}" \\\n  -F "image=@${fileRef}"`;
+        curlPreview.textContent = cmd;
+      }
+
+      // Confidence slider change handler
+      confidenceSlider.addEventListener("input", (e) => {
+        confidenceVal.textContent = parseFloat(e.target.value).toFixed(2);
+      });
+
+      // Trigger file input click
+      imageDropzone.addEventListener("click", (e) => {
+        if (e.target !== btnRemoveImage && !btnRemoveImage.contains(e.target)) {
+          fileInput.click();
+        }
+      });
+
+      fileInput.addEventListener("change", async (e) => {
+        if (e.target.files.length > 0) {
+          await handleFileSelection(e.target.files[0]);
+        }
+      });
+
+      async function handleFileSelection(file) {
+        try {
+          // Automatically resize client image to exactly 600x400
+          const resized = await resizeImage(file, 600, 400);
+          currentSelectedFile = {
+            file: resized.file,
+            previewUrl: resized.previewUrl,
+          };
+
+          imageFileSize.textContent = `(Resized: ${formatBytes(resized.file.size)})`;
+          imagePreviewThumb.style.backgroundImage = `url('${resized.previewUrl}')`;
+
+          imagePlaceholderText.classList.add("hidden");
+          imagePreviewContainer.classList.remove("hidden");
+        } catch (err) {
+          alert("Không thể đọc và resize tệp ảnh: " + err.message);
+        }
+      }
+
+      btnRemoveImage.addEventListener("click", (e) => {
+        e.stopPropagation();
+        currentSelectedFile = null;
+        fileInput.value = "";
+        imagePlaceholderText.classList.remove("hidden");
+        imagePreviewContainer.classList.add("hidden");
+      });
+
+      // Add Detections handler
+      btnAdd.addEventListener("click", () => {
+        const speciesId = speciesIdInput.value.trim();
+        if (!speciesId) {
+          alert("Vui lòng điền Species ID.");
+          return;
+        }
+        if (!currentSelectedFile) {
+          alert("Vui lòng chọn hình ảnh snapshot trước khi Thêm mới.");
+          return;
+        }
+        const confidence = parseFloat(confidenceSlider.value);
+
+        activeDetections.push({
+          id: "det-" + Math.random().toString(36).substring(7),
+          speciesId: speciesId,
+          confidence: confidence,
+          imageFile: currentSelectedFile.file,
+          imagePreviewUrl: currentSelectedFile.previewUrl,
+          status: "idle",
         });
 
-        // POST Request simulate execution
-        btnPost.addEventListener('click', async () => {
-            if (activeDetections.length === 0) {
-                alert("Không có nhận diện nào để gửi. Vui lòng thêm nhận diện vào danh sách.");
-                return;
-            }
-
-            btnPost.disabled = true;
-            statusBadge.classList.remove('hidden');
-            statusBadge.className = 'status-pill pending';
-            statusBadge.textContent = 'PENDING';
-            responsePreview.textContent = '// Đang gửi yêu cầu...';
-
-            const cameraId = cameraIdInput.value.trim() || 'CAM_PROD_TEST';
-            const userId = userIdInput.value.trim() || 'u_rg';
-            const url = `${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections`;
-
-            // Mark all active detections as sending
-            activeDetections.forEach(d => d.status = 'sending');
-            renderDetections();
-
-            try {
-                // Send Multipart/Form-data
-                const formData = new FormData();
-
-                // Find first item with imageFile
-                const firstDetWithFile = activeDetections.find(d => d.imageFile);
-                if (!firstDetWithFile) {
-                    throw new Error("Không tìm thấy tệp ảnh cho nhận diện.");
-                }
-
-                formData.append('userId', userId);
-                formData.append('detections', JSON.stringify(activeDetections.map(d => ({
-                    speciesId: d.speciesId,
-                    confidence: d.confidence
-                }))));
-                formData.append('detectedAt', new Date().toISOString());
-                formData.append('image', firstDetWithFile.imageFile);
-
-                const options = {
-                    method: 'POST',
-                    body: formData
-                };
-
-                const startTime = performance.now();
-                const response = await fetch(url, options);
-                const duration = Math.round(performance.now() - startTime);
-
-                const status = response.status;
-                const statusText = response.statusText;
-
-                let responseData;
-                try {
-                    responseData = await response.json();
-                } catch (e) {
-                    responseData = await response.text();
-                }
-
-                if (response.ok) {
-                    statusBadge.className = 'status-pill success';
-                    statusBadge.textContent = `${status} ${statusText} (${duration}ms)`;
-                    activeDetections.forEach(d => d.status = 'success');
-                } else {
-                    statusBadge.className = 'status-pill error';
-                    statusBadge.textContent = `${status} ${statusText} (${duration}ms)`;
-                    activeDetections.forEach(d => d.status = 'error');
-                }
-
-                responsePreview.textContent = typeof responseData === 'object'
-                    ? JSON.stringify(responseData, null, 2)
-                    : responseData;
-
-            } catch (err) {
-                statusBadge.className = 'status-pill error';
-                statusBadge.textContent = 'CONNECTION FAILED';
-                responsePreview.textContent = `Error: ${err.message}`;
-                activeDetections.forEach(d => d.status = 'error');
-            } finally {
-                btnPost.disabled = false;
-                renderDetections();
-            }
-        });
-
-        // Clipboard copying handlers
-        btnCopyCurl.addEventListener('click', () => {
-            navigator.clipboard.writeText(curlPreview.textContent).then(() => {
-                const prev = btnCopyCurl.textContent;
-                btnCopyCurl.textContent = 'Copied!';
-                setTimeout(() => btnCopyCurl.textContent = prev, 1500);
-            });
-        });
-
-        btnCopyResponse.addEventListener('click', () => {
-            navigator.clipboard.writeText(responsePreview.textContent).then(() => {
-                const prev = btnCopyResponse.textContent;
-                btnCopyResponse.textContent = 'Copied!';
-                setTimeout(() => btnCopyResponse.textContent = prev, 1500);
-            });
-        });
-
-        // Initial setup
         renderDetections();
         updateCurlPreview();
+
+        // Clear inputs for next detection, keep the selected image
+        speciesIdInput.value = "";
+        confidenceSlider.value = "0.75";
+        confidenceVal.textContent = "0.75";
+      });
+
+      // POST Request simulate execution
+      btnPost.addEventListener("click", async () => {
+        if (activeDetections.length === 0) {
+          alert(
+            "Không có nhận diện nào để gửi. Vui lòng thêm nhận diện vào danh sách.",
+          );
+          return;
+        }
+
+        btnPost.disabled = true;
+        statusBadge.classList.remove("hidden");
+        statusBadge.className = "status-pill pending";
+        statusBadge.textContent = "PENDING";
+        responsePreview.textContent = "// Đang gửi yêu cầu...";
+
+        const cameraId = cameraIdInput.value.trim() || "CAM_PROD_TEST";
+        const userId = userIdInput.value.trim() || "u_rg";
+        const url = `${PRODUCTION_BASE_URL}/cameras/${cameraId}/detections`;
+
+        // Mark all active detections as sending
+        activeDetections.forEach((d) => (d.status = "sending"));
+        renderDetections();
+
+        try {
+          // Send Multipart/Form-data
+          const formData = new FormData();
+
+          // Find first item with imageFile
+          const firstDetWithFile = activeDetections.find((d) => d.imageFile);
+          if (!firstDetWithFile) {
+            throw new Error("Không tìm thấy tệp ảnh cho nhận diện.");
+          }
+
+          formData.append("userId", userId);
+          formData.append(
+            "detections",
+            JSON.stringify(
+              activeDetections.map((d) => ({
+                speciesId: d.speciesId,
+                confidence: d.confidence,
+              })),
+            ),
+          );
+          formData.append("detectedAt", new Date().toISOString());
+          formData.append("image", firstDetWithFile.imageFile);
+
+          const options = {
+            method: "POST",
+            body: formData,
+          };
+
+          const startTime = performance.now();
+          const response = await fetch(url, options);
+          const duration = Math.round(performance.now() - startTime);
+
+          const status = response.status;
+          const statusText = response.statusText;
+
+          let responseData;
+          try {
+            responseData = await response.json();
+          } catch (e) {
+            responseData = await response.text();
+          }
+
+          if (response.ok) {
+            statusBadge.className = "status-pill success";
+            statusBadge.textContent = `${status} ${statusText} (${duration}ms)`;
+            activeDetections.forEach((d) => (d.status = "success"));
+          } else {
+            statusBadge.className = "status-pill error";
+            statusBadge.textContent = `${status} ${statusText} (${duration}ms)`;
+            activeDetections.forEach((d) => (d.status = "error"));
+          }
+
+          responsePreview.textContent =
+            typeof responseData === "object"
+              ? JSON.stringify(responseData, null, 2)
+              : responseData;
+        } catch (err) {
+          statusBadge.className = "status-pill error";
+          statusBadge.textContent = "CONNECTION FAILED";
+          responsePreview.textContent = `Error: ${err.message}`;
+          activeDetections.forEach((d) => (d.status = "error"));
+        } finally {
+          btnPost.disabled = false;
+          renderDetections();
+        }
+      });
+
+      // Clipboard copying handlers
+      btnCopyCurl.addEventListener("click", () => {
+        navigator.clipboard.writeText(curlPreview.textContent).then(() => {
+          const prev = btnCopyCurl.textContent;
+          btnCopyCurl.textContent = "Copied!";
+          setTimeout(() => (btnCopyCurl.textContent = prev), 1500);
+        });
+      });
+
+      btnCopyResponse.addEventListener("click", () => {
+        navigator.clipboard.writeText(responsePreview.textContent).then(() => {
+          const prev = btnCopyResponse.textContent;
+          btnCopyResponse.textContent = "Copied!";
+          setTimeout(() => (btnCopyResponse.textContent = prev), 1500);
+        });
+      });
+
+      // Initial setup
+      renderDetections();
+      updateCurlPreview();
     </script>
-</body>
+  </body>
 </html>
