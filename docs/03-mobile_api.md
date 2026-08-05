@@ -666,12 +666,11 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
 
 ---
 
-### 8.2. `PUT /response-configs/{cameraId}/{speciesId}`
+### 8.2. `PUT /response-configs/{speciesId}`
 
-Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (bấm nút Lưu `save_config_button`).
+Tạo / cập nhật cấu hình ứng phó cho cặp **(người dùng × loài)**. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (bấm nút Lưu `save_config_button`).
 
 **URL params**
-- `cameraId`: `cam-...` hoặc `ALL` (áp dụng cho tất cả).
 - `speciesId`: id từ API 8.1.
 
 **Request body** (full schema)
@@ -682,11 +681,11 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
 **Response 200**
 ```json
 {
-  "cameraId": "cam-001",
+  "userId": "u_rg",
   "speciesId": "elephant",
   "config": "@DefendAction",
   "updatedAt": "2026-07-16T09:30:00+07:00",
-  "updatedBy": "9f3a"
+  "updatedBy": "u_rg"
 }
 ```
 
@@ -696,8 +695,8 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
 - Nếu `silentAlert = true` thì `led`,`speaker` có thể null.
 
 **Side effects**
-- Lưu DB, set làm default cho cặp (camera, loài).
-- Push `RESPONSE_CONFIG_UPDATED` cho các thiết bị đang online của user (nếu user đang mở app trên thiết bị khác).
+- Lưu DB, set làm mặc định cho cặp (người dùng, loài).
+- Push `RESPONSE_CONFIG_UPDATED` cho các thiết bị đang online của user.
 
 **Lỗi hay gặp**
 - `409 ERR_CONCURRENT_CONFIG_CHANGE` → UI hiện dialog "Cấu hình đã thay đổi, tải lại?" + button Refresh.
@@ -705,14 +704,14 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(camera × loài)**. Map
 
 ---
 
-### 8.3. `GET /response-configs?cameraId=&speciesId=`
+### 8.3. `GET /response-configs?speciesId=`
 
-Lấy config của 1 cặp. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (khi load cấu hình hiện tại của loài).
+Lấy config của 1 loài động vật. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (khi load cấu hình hiện tại của loài).
 
 **Response 200** (hoặc 404 nếu chưa config)
 ```json
 {
-  "cameraId": "cam-001",
+  "userId": "u_rg",
   "speciesId": "elephant",
   "config": { /* ResponseConfigSchema */ },
   "fallbackPresetId": "critical_danger",    // server dùng preset này nếu user xoá config
@@ -727,7 +726,7 @@ Lấy config của 1 cặp. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]`
 
 ---
 
-### 8.4. `DELETE /response-configs/{cameraId}/{speciesId}`
+### 8.4. `DELETE /response-configs/{speciesId}`
 
 Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerLevel`).
 
@@ -735,9 +734,9 @@ Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerL
 
 ---
 
-### 8.5. `POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}`
+### 8.5. `POST /response-configs/{speciesId}/apply-preset/{presetId}`
 
-Áp dụng preset vào 1 cặp — UI có nút Preset gần chip loài (mục 7.4.7).
+Áp dụng preset vào loài — UI có nút Preset gần chip loài.
 
 **Request body** (optional override)
 ```json
@@ -755,14 +754,14 @@ Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerL
 
 ---
 
-### 8.6. `GET /response-configs/{cameraId}` *(helper)*
+### 8.6. `GET /response-configs` *(helper)*
 
-Lấy tất cả cấu hình của 1 camera (cho các loài). Mapping: màn hình `[SPECIES_CONFIG_LIST_SCREEN]` (hiển thị danh sách các cấu hình của từng loài).
+Lấy tất cả cấu hình của người dùng hiện tại (cho các loài). Mapping: màn hình `[SPECIES_CONFIG_LIST_SCREEN]` (hiển thị danh sách các cấu hình của từng loài).
 
 **Response 200**
 ```json
 {
-  "cameraId": "cam-001",
+  "userId": "u_rg",
   "configs": [
     { "speciesId": "elephant", "config": "@DefendAction", "updatedAt":"..." },
     { "speciesId": "tiger",    "config": "@DefendAction", "updatedAt":"..." }
@@ -1142,7 +1141,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 | # | Method | Endpoint | Mô tả chức năng |
 |---|---|---|---|
 | 8.1 | GET | `/species` | Tải danh sách loài kèm chỉ số hung dữ và đặc tính loài |
-| 8.6 | GET | `/response-configs/{cam}` | Tải toàn bộ danh sách cấu hình đang áp dụng trên camera |
+| 8.6 | GET | `/response-configs` | Tải toàn bộ danh sách cấu hình đang áp dụng của Ranger |
 
 ### 14.8. Màn hình thiết lập phòng vệ theo loài (`[SPECIES_CONFIG_DETAIL_SCREEN]`)
 
@@ -1152,10 +1151,10 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 | 7.1 | GET | `/control/presets` | Lấy danh sách 3 kịch bản phòng vệ mẫu mặc định |
 | 7.2 | GET | `/audio-samples` | Tải danh sách file âm thanh xua đuổi & mẫu phát loa (dropdowns) |
 | 8.1 | GET | `/species` | Hiển thị thông tin tên loài và đặc tính đang cấu hình |
-| 8.2 | PUT | `/response-configs/{cam}/{species}` | Lưu cấu hình ứng phó tự chọn (`save_config_button`) |
-| 8.3 | GET | `/response-configs?cameraId=&speciesId=` | Tải cấu hình hiện có của loài để đổ lên form |
-| 8.4 | DELETE | `/response-configs/{cam}/{species}` | Xóa cấu hình tự chọn của loài để quay về mặc định (`reset_config_button`) |
-| 8.5 | POST | `/response-configs/{cam}/{species}/apply-preset/{id}` | Áp nhanh preset mẫu vào cấu hình loài |
+| 8.2 | PUT | `/response-configs/{species}` | Lưu cấu hình ứng phó tự chọn (`save_config_button`) |
+| 8.3 | GET | `/response-configs?speciesId=` | Tải cấu hình hiện có của loài để đổ lên form |
+| 8.4 | DELETE | `/response-configs/{species}` | Xóa cấu hình tự chọn của loài để quay về mặc định (`reset_config_button`) |
+| 8.5 | POST | `/response-configs/{species}/apply-preset/{id}` | Áp nhanh preset mẫu vào cấu hình loài |
 
 ### 14.9. Màn hình quản lý SĐT nhận cảnh báo (`[SMS_CONFIG_SCREEN]`)
 

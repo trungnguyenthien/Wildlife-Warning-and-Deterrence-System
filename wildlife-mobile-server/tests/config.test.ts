@@ -75,33 +75,23 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body[0].id).toBe(speciesId);
   });
 
-  // 2. GET /response-configs/{cameraId}
-  it('TC_CFG_LIST_SUCCESS_01: Retrieve configs applied at camera successfully', async () => {
+  // 2. GET /response-configs
+  it('TC_CFG_LIST_SUCCESS_01: Retrieve configs applied for current user successfully', async () => {
     if (!token) return;
     const res = await request(app)
-      .get(`/response-configs/${camId}`)
+      .get(`/response-configs`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 
-  it('TC_CFG_LIST_FAILURE_01: Fail to retrieve config list for non-existent camera', async () => {
-    if (!token) return;
-    const res = await request(app)
-      .get('/response-configs/CAM_NON_EXIST_9999')
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.status).toBe(404);
-    expect(res.body.error).toBe('not_found_camera');
-  });
-
-  // 3. GET /response-configs
+  // 3. GET /response-configs?speciesId=
   it('TC_CFG_DET_SUCCESS_01: Retrieve custom configuration successfully when custom record exists', async () => {
     if (!token) return;
     // Trước tiên, lưu cấu hình tùy chỉnh vào DB
     await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         ledFlash: true,
@@ -114,13 +104,13 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       });
 
     const res = await request(app)
-      .get(`/response-configs?cameraId=${camId}&speciesId=${speciesId}`)
+      .get(`/response-configs?speciesId=${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
     // Kiểm tra trường `id` của cấu hình tùy chỉnh (khác với fallback preset)
     expect(res.body).toHaveProperty('id');
-    expect(res.body).toHaveProperty('cameraId');
+    expect(res.body).toHaveProperty('userId');
     expect(res.body).toHaveProperty('speciesId');
   });
 
@@ -128,11 +118,11 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     if (!token) return;
     // Xóa cấu hình tùy chỉnh để test fallback
     await request(app)
-      .delete(`/response-configs/${camId}/${speciesId}`)
+      .delete(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     const res = await request(app)
-      .get(`/response-configs?cameraId=${camId}&speciesId=${speciesId}`)
+      .get(`/response-configs?speciesId=${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
@@ -140,20 +130,10 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.ledColor).toBe('STROBE');
   });
 
-  it('TC_CFG_DET_FAILURE_01: Fail to retrieve config when cameraId query parameter is missing', async () => {
-    if (!token) return;
-    const res = await request(app)
-      .get(`/response-configs?speciesId=${speciesId}`)
-      .set('Authorization', `Bearer ${token}`);
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('missed_camera_id');
-  });
-
   it('TC_CFG_DET_FAILURE_02: Fail to retrieve config when speciesId query parameter is missing', async () => {
     if (!token) return;
     const res = await request(app)
-      .get(`/response-configs?cameraId=${camId}`)
+      .get(`/response-configs?speciesId=`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(400);
@@ -163,14 +143,14 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_DET_FAILURE_03: Fail to retrieve config when speciesId is invalid', async () => {
     if (!token) return;
     const res = await request(app)
-      .get(`/response-configs?cameraId=${camId}&speciesId=non_existent_species`)
+      .get(`/response-configs?speciesId=non_existent_species`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('not_found_species');
   });
 
-  // 4. PUT /response-configs/{cameraId}/{speciesId}
+  // 4. PUT /response-configs/{speciesId}
   const validConfigPayload = {
     ledFlash: true,
     ledColor: 'RED',
@@ -184,7 +164,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_SUCCESS_01: Save custom defense configuration successfully', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send(validConfigPayload);
 
@@ -197,7 +177,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     if (!token) return;
     const { ledFlash: _, ...payload } = validConfigPayload;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send(payload);
 
@@ -209,7 +189,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     if (!token) return;
     const { speakerWarn: _, ...payload } = validConfigPayload;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send(payload);
 
@@ -217,12 +197,11 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_speaker_warn');
   });
 
-
   it('TC_CFG_SAVE_FAILURE_04: Save config missing silentAlert', async () => {
     if (!token) return;
     const { silentAlert: _, ...payload } = validConfigPayload;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send(payload);
 
@@ -233,7 +212,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_FAILURE_05: Save config with invalid LED color', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validConfigPayload, ledColor: 'BLUE' }); // BLUE không có trong enum
 
@@ -244,7 +223,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_FAILURE_07: Save config with negative LED intensity', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validConfigPayload, ledIntensity: -1 });
 
@@ -255,7 +234,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_FAILURE_06: Save config with LED intensity exceeds 100', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validConfigPayload, ledIntensity: 120 });
 
@@ -266,7 +245,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_FAILURE_09: Save config with negative audio intensity', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validConfigPayload, audioIntensity: -5 });
 
@@ -277,7 +256,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_SAVE_FAILURE_08: Save config with audio intensity exceeds 100', async () => {
     if (!token) return;
     const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({ ...validConfigPayload, audioIntensity: 110 });
 
@@ -285,12 +264,11 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_audio_intensity');
   });
 
-
-  // 5. POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}
+  // 5. POST /response-configs/{speciesId}/apply-preset/{presetId}
   it('TC_CFG_PRE_SUCCESS_01: Apply danger level preset successfully', async () => {
     if (!token) return;
     const res = await request(app)
-      .post(`/response-configs/${camId}/${speciesId}/apply-preset/critical_danger`)
+      .post(`/response-configs/${speciesId}/apply-preset/critical_danger`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
@@ -300,19 +278,19 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
   it('TC_CFG_PRE_FAILURE_01: Fail to apply preset with invalid presetId', async () => {
     if (!token) return;
     const res = await request(app)
-      .post(`/response-configs/${camId}/${speciesId}/apply-preset/non_existent_preset`)
+      .post(`/response-configs/${speciesId}/apply-preset/non_existent_preset`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe('not_found_preset');
   });
 
-  // 6. DELETE /response-configs/{cameraId}/{speciesId}
+  // 6. DELETE /response-configs/{speciesId}
   it('TC_CFG_DEL_SUCCESS_01: Reset custom config to fallback presets successfully', async () => {
     if (!token) return;
     // Đảm bảo có cấu hình tùy chỉnh trước khi xóa
     await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
+      .put(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`)
       .send({
         ledFlash: true,
@@ -324,7 +302,7 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
       });
 
     const res = await request(app)
-      .delete(`/response-configs/${camId}/${speciesId}`)
+      .delete(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(204);
@@ -332,9 +310,9 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
 
   it('TC_CFG_DEL_FAILURE_01: Fail to delete non-existent custom configuration', async () => {
     if (!token) return;
-    // Lún này đã xóa ở test trước, nên xóa lần nữa phải trả về 404
+    // Lúc này đã xóa ở test trước, nên xóa lần nữa phải trả về 404
     const res = await request(app)
-      .delete(`/response-configs/${camId}/${speciesId}`)
+      .delete(`/response-configs/${speciesId}`)
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(404);

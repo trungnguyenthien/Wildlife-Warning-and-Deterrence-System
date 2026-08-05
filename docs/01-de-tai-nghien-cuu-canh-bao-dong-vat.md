@@ -242,7 +242,7 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
     - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.�n phòng vệ mẫu cho toàn hệ thống từ xa.
   - **Nội dung:**
     - Các nút **Tự set hành vi nhanh (Presets)**: _Người lạ đột nhập, Thú vừa, Thú cực kỳ nguy hiểm_.
-    - Lối vào màn hình **Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI]** để tinh chỉnh chi tiết theo trạm camera + loài động vật.
+    - Lối vào màn hình **Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI]** để tinh chỉnh chi tiết theo tài khoản kiểm lâm + loài động vật.
 
 #### 7.4.5. Màn hình chi tiết camera [CAMERA_VIEW]
 
@@ -262,11 +262,10 @@ Cho phép người dùng thực hiện các tùy chỉnh cá nhân:
 
 #### 7.4.7. Màn hình Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI]
 
-Màn hình này cho phép người dùng tùy biến và thiết lập trước kịch bản phòng vệ tự động theo sự kết hợp của từng trạm camera cụ thể và từng loài động vật. Khi mô hình AI phát hiện loài tương ứng tại camera được chọn, hệ thống sẽ kích hoạt các thiết lập phòng vệ đã được cấu hình riêng cho camera đó.
+Màn hình này cho phép người dùng tùy biến và thiết lập trước kịch bản phòng vệ tự động theo sự kết hợp của tài khoản kiểm lâm và từng loài động vật. Khi mô hình AI phát hiện loài tương ứng tại bất kỳ camera nào do kiểm lâm đó quản lý, hệ thống sẽ kích hoạt các thiết lập phòng vệ đã được cấu hình cho loài đó.
 
-- **Bộ chọn Camera (Camera Selector):** Hiển thị dưới dạng danh sách thả xuống hoặc các nút tùy chọn nhanh (Dropdown/Chips), cho phép chọn trạm camera cụ thể (ví dụ: Camera 1, Camera 2, hoặc tùy chọn "Áp dụng cho tất cả").
 - **Danh sách chọn loài động vật (Animal Selector Chips):** Hiển thị danh sách các loài có sẵn trong hệ thống: _Cá sấu, Nai, Voi, Hươu cao cổ, Báo, Khỉ, Tê giác, Rắn, Hổ_. Người dùng nhấp chọn vào một loài để cấu hình. Loài được chọn sẽ được làm nổi bật (Highlight).
-- **Luồng thiết lập:** Người dùng chọn Camera -> Chọn loài động vật -> Cấu hình các nhóm cài đặt chi tiết bên dưới.
+- **Luồng thiết lập:** Người dùng chọn loài động vật -> Cấu hình các nhóm cài đặt chi tiết bên dưới.
 - **Các nhóm cài đặt chi tiết (Defense Parameter Configurations):**
   - **Âm thanh xua đuổi:**
     - Lựa chọn loại âm thanh: _Tiếng súng, Tiếng gầm, Tiếng chó sủa lớn, Tiếng nổ giả lập, Tần số siêu âm_.

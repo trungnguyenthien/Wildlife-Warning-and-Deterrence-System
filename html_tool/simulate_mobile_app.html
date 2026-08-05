@@ -784,7 +784,7 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="config-camera-id">Camera áp dụng</label>
+            <label for="config-camera-id">Camera nghe thử</label>
             <select id="config-camera-id">
               <option value="">-- Chọn Camera --</option>
             </select>
@@ -1634,15 +1634,14 @@
       }
 
       async function loadResponseConfig() {
-        const cameraId = configCameraId.value;
         const speciesId = configSpeciesId.value;
-        if (!cameraId || !speciesId) return;
+        if (!speciesId) return;
 
         btnLoadConfig.disabled = true;
         const baseUrl = serverUrlInput.value.trim();
 
         try {
-          const res = await fetch(`${baseUrl}/response-configs?cameraId=${cameraId}&speciesId=${speciesId}`, {
+          const res = await fetch(`${baseUrl}/response-configs?speciesId=${speciesId}`, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
           });
           if (res.ok) {
@@ -1690,17 +1689,15 @@
       }
 
       // Đăng ký bộ lắng nghe sự kiện
-      configCameraId.addEventListener('change', loadResponseConfig);
       configSpeciesId.addEventListener('change', loadResponseConfig);
       btnLoadConfig.addEventListener('click', loadResponseConfig);
 
       btnSaveConfig.addEventListener('click', async () => {
-        const cameraId = configCameraId.value;
         const speciesId = configSpeciesId.value;
         const baseUrl = serverUrlInput.value.trim();
 
-        if (!cameraId || !speciesId) {
-          alert("Vui lòng chọn đầy đủ Camera và Loài động vật.");
+        if (!speciesId) {
+          alert("Vui lòng chọn Loài động vật.");
           return;
         }
 
@@ -1715,7 +1712,7 @@
         const silentAlert = configSilentAlert.checked;
 
         try {
-          const res = await fetch(`${baseUrl}/response-configs/${cameraId}/${speciesId}`, {
+          const res = await fetch(`${baseUrl}/response-configs/${speciesId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -1751,12 +1748,11 @@
       });
 
       btnResetConfig.addEventListener('click', async () => {
-        const cameraId = configCameraId.value;
         const speciesId = configSpeciesId.value;
         const baseUrl = serverUrlInput.value.trim();
 
-        if (!cameraId || !speciesId) {
-          alert("Vui lòng chọn đầy đủ Camera và Loài động vật.");
+        if (!speciesId) {
+          alert("Vui lòng chọn Loài động vật.");
           return;
         }
 
@@ -1767,7 +1763,7 @@
         btnResetConfig.disabled = true;
 
         try {
-          const res = await fetch(`${baseUrl}/response-configs/${cameraId}/${speciesId}`, {
+          const res = await fetch(`${baseUrl}/response-configs/${speciesId}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${accessToken}`

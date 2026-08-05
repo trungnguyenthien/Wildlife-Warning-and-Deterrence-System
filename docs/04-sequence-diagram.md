@@ -449,8 +449,8 @@ sequenceDiagram
         Database-->>Mobile_Server: Danh sách loài
         Mobile_Server-->>Mobile: Response 200 OK (items)
         deactivate Mobile_Server
-    and Tải các cấu hình đang hoạt động tại trạm camera này
-        Mobile->>Mobile_Server: GET /response-configs/{cam}
+    and Tải các cấu hình đang hoạt động của Ranger
+        Mobile->>Mobile_Server: GET /response-configs
         activate Mobile_Server
         Mobile_Server->>Database: Lấy các cấu hình phòng vệ hiện tại
         Database-->>Mobile_Server: Danh sách cấu hình phòng vệ
@@ -461,7 +461,7 @@ sequenceDiagram
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /species](./03-mobile_api.md#81-get-species)
-    *   [GET /response-configs/{cameraId}](./03-mobile_api.md#86-get-response-configscameraid-helper)
+    *   [GET /response-configs](./03-mobile_api.md#86-get-response-configs-helper)
 
 ---
 
@@ -481,7 +481,7 @@ sequenceDiagram
     Note over Mobile, Database: Người dùng mở màn hình Thiết lập phòng vệ theo loài
     Note over Mobile, Mobile_Server: Gửi các yêu cầu tải cấu hình & danh mục mẫu
     par Tải cấu hình phòng vệ hiện tại
-        Mobile->>Mobile_Server: GET /response-configs?cameraId={cam}&speciesId={species}
+        Mobile->>Mobile_Server: GET /response-configs?speciesId={species}
         activate Mobile_Server
         Mobile_Server->>Database: Lấy cấu hình ứng phó
         Database-->>Mobile_Server: Cấu hình phòng vệ ("@DefendAction")
@@ -505,7 +505,7 @@ sequenceDiagram
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /response-configs?cameraId=&speciesId=](./03-mobile_api.md#83-get-response-configscameraidspeciesid)
+    *   [GET /response-configs?speciesId=](./03-mobile_api.md#83-get-response-configsspeciesid)
     *   [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
     *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
 
@@ -521,17 +521,17 @@ sequenceDiagram
     participant Database as Database
 
     Note over Mobile, Database: Người dùng thay đổi thông số cấu hình và nhấn nút Lưu
-    Mobile->>Mobile_Server: PUT /response-configs/{cam}/{species} (cấu hình "@DefendAction")
+    Mobile->>Mobile_Server: PUT /response-configs/{species} (cấu hình "@DefendAction")
     activate Mobile_Server
-    Mobile_Server->>Database: Lưu/Cập nhật cấu hình phòng vệ cho loài của trạm
+    Mobile_Server->>Database: Lưu/Cập nhật cấu hình phòng vệ cho loài của người dùng
     Database-->>Mobile_Server: Lưu thành công
     Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
     deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị thông báo lưu thành công & quay về màn hình trước
 ```
 *   **Chi tiết đặc tả API:**
-    *   [PUT /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#82-put-response-configscameraidspeciesid)
-    *   [DELETE /response-configs/{cameraId}/{speciesId}](./03-mobile_api.md#84-delete-response-configscameraidspeciesid)
+    *   [PUT /response-configs/{speciesId}](./03-mobile_api.md#82-put-response-configsspeciesid)
+    *   [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
 
 ### 6.3. Action: Test speaker sound at camera station (AI_SERVER)
 

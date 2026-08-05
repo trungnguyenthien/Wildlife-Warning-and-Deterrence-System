@@ -415,11 +415,18 @@ export async function processDetection(req: Request, res: Response) {
       console.log(`[Detection-Workflow] Nhận diện được gộp nhóm vào Event cũ ${eventId}. Không tạo Alert mới hay gửi Push.`);
     }
 
+    // Tra cứu userId sở hữu camera từ Snapshot gần nhất để định dạng cấu hình phòng vệ theo chủ sở hữu
+    const latestSnapshot = await prisma.snapshot.findFirst({
+      where: { cameraId },
+      orderBy: { uploadedAt: 'desc' }
+    });
+    const ownerId = latestSnapshot?.userId || 'u_rg';
+
     // Tra cứu hành động phòng vệ (Custom Config hoặc Preset mặc định)
     const customConfig = await prisma.responseConfig.findUnique({
       where: {
-        cameraId_speciesId: {
-          cameraId,
+        userId_speciesId: {
+          userId: ownerId,
           speciesId: mainSpecies.id
         }
       }

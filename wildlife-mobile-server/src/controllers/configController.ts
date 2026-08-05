@@ -18,49 +18,32 @@ export async function listSpecies(_req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// 2. GET /response-configs/{cameraId} - Danh sách cấu hình tại camera
+// 2. GET /response-configs - Danh sách cấu hình của người dùng hiện tại
 export async function listConfigs(req: AuthenticatedRequest, res: Response) {
-  const { cameraId } = req.params;
+  const userId = req.user!.id;
 
   try {
-    const camera = await prisma.camera.findUnique({
-      where: { id: cameraId }
-    });
-
-    if (!camera) {
-      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
-    }
-
     const configs = await prisma.responseConfig.findMany({
-      where: { cameraId }
+      where: { userId }
     });
 
     return res.status(200).json(configs);
   } catch (error) {
-    console.error('Lỗi khi tải cấu hình camera:', error);
+    console.error('Lỗi khi tải cấu hình người dùng:', error);
     return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }
 
 // 3. GET /response-configs - Lấy cấu hình chi tiết (Cấu hình tùy chỉnh hoặc Cấu hình mặc định Preset)
 export async function getConfigDetail(req: AuthenticatedRequest, res: Response) {
-  const { cameraId, speciesId } = req.query;
+  const userId = req.user!.id;
+  const { speciesId } = req.query;
 
-  if (!cameraId) {
-    return res.status(400).json({ error: 'missed_camera_id', message: 'Thiếu tham số bắt buộc: cameraId.' });
-  }
   if (!speciesId) {
     return res.status(400).json({ error: 'missed_species_id', message: 'Thiếu tham số bắt buộc: speciesId.' });
   }
 
   try {
-    const camera = await prisma.camera.findUnique({
-      where: { id: cameraId as string }
-    });
-    if (!camera) {
-      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
-    }
-
     const species = await prisma.species.findUnique({
       where: { id: speciesId as string }
     });
@@ -71,8 +54,8 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
     // Tìm cấu hình tùy chọn
     const customConfig = await prisma.responseConfig.findUnique({
       where: {
-        cameraId_speciesId: {
-          cameraId: cameraId as string,
+        userId_speciesId: {
+          userId,
           speciesId: speciesId as string
         }
       }
@@ -81,7 +64,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
     if (customConfig) {
       return res.status(200).json({
         id: customConfig.id,
-        cameraId: customConfig.cameraId,
+        userId: customConfig.userId,
         speciesId: customConfig.speciesId,
         ledFlash: customConfig.ledFlashRate ? true : false,
         ledColor: customConfig.ledColor,
@@ -96,7 +79,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
     // Nếu không có tùy chọn, lấy cấu hình mặc định (Danger Preset)
     const fallback = getRecommendedPresetForSpecies(species.id, species.dangerLevel);
     return res.status(200).json({
-      cameraId,
+      userId,
       speciesId,
       ...fallback
     });
@@ -107,8 +90,10 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
 }
 
 // 4. PUT /response-configs/{cameraId}/{speciesId} - Lưu cấu hình phòng vệ tùy chọn
+// 4. PUT /response-configs/{speciesId} - Lưu cấu hình phòng vệ tùy chọn
 export async function saveConfig(req: AuthenticatedRequest, res: Response) {
-  const { cameraId, speciesId } = req.params;
+  const userId = req.user!.id;
+  const { speciesId } = req.params;
   const {
     ledFlash,
     ledColor,
@@ -145,11 +130,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
   }
 
   try {
-    const camera = await prisma.camera.findUnique({ where: { id: cameraId } });
-    if (!camera) {
-      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera.' });
-    }
-
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
       return res.status(404).json({ error: 'not_found_species', message: 'Không tìm thấy loài động vật.' });
@@ -163,15 +143,15 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       ledColor: ledColor || null,
       ledDurationSeconds: ledIntensity || 0, // Ánh xạ trường
       silentAlert,
-      lastModifiedBy: req.user!.id
+      lastModifiedBy: userId
     };
 
     const savedConfig = await prisma.responseConfig.upsert({
       where: {
-        cameraId_speciesId: { cameraId, speciesId }
+        userId_speciesId: { userId, speciesId }
       },
       create: {
-        cameraId,
+        userId,
         speciesId,
         ...configData
       },
@@ -179,7 +159,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     });
 
     return res.status(200).json({
-      cameraId: savedConfig.cameraId,
+      userId: savedConfig.userId,
       speciesId: savedConfig.speciesId,
       ledFlash,
       ledColor: savedConfig.ledColor,
@@ -195,14 +175,15 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// 5. DELETE /response-configs/{cameraId}/{speciesId} - Xóa cấu hình tùy chỉnh để quay về mặc định
+// 5. DELETE /response-configs/{speciesId} - Xóa cấu hình tùy chỉnh để quay về mặc định
 export async function resetConfig(req: AuthenticatedRequest, res: Response) {
-  const { cameraId, speciesId } = req.params;
+  const userId = req.user!.id;
+  const { speciesId } = req.params;
 
   try {
     const existingConfig = await prisma.responseConfig.findUnique({
       where: {
-        cameraId_speciesId: { cameraId, speciesId }
+        userId_speciesId: { userId, speciesId }
       }
     });
 
@@ -212,7 +193,7 @@ export async function resetConfig(req: AuthenticatedRequest, res: Response) {
 
     await prisma.responseConfig.delete({
       where: {
-        cameraId_speciesId: { cameraId, speciesId }
+        userId_speciesId: { userId, speciesId }
       }
     });
 
@@ -223,9 +204,10 @@ export async function resetConfig(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-// 6. POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId} - Áp nhanh preset
+// 6. POST /response-configs/{speciesId}/apply-preset/{presetId} - Áp nhanh preset
 export async function applyPreset(req: AuthenticatedRequest, res: Response) {
-  const { cameraId, speciesId, presetId } = req.params;
+  const userId = req.user!.id;
+  const { speciesId, presetId } = req.params;
 
   const preset = PRESET_SCENARIOS[presetId];
   if (!preset) {
@@ -233,11 +215,6 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
   }
 
   try {
-    const camera = await prisma.camera.findUnique({ where: { id: cameraId } });
-    if (!camera) {
-      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera.' });
-    }
-
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
       return res.status(404).json({ error: 'not_found_species', message: 'Không tìm thấy loài động vật.' });
@@ -251,15 +228,15 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
       ledColor: (preset.ledColor as string | null) || null,
       ledDurationSeconds: typeof preset.ledIntensity === 'number' ? preset.ledIntensity : null,
       silentAlert: typeof preset.silentAlert === 'boolean' ? preset.silentAlert : false,
-      lastModifiedBy: req.user!.id
+      lastModifiedBy: userId
     };
 
     const updatedConfig = await prisma.responseConfig.upsert({
       where: {
-        cameraId_speciesId: { cameraId, speciesId }
+        userId_speciesId: { userId, speciesId }
       },
       create: {
-        cameraId,
+        userId,
         speciesId,
         ...configData
       },
@@ -267,7 +244,7 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
     });
 
     return res.status(200).json({
-      cameraId: updatedConfig.cameraId,
+      userId: updatedConfig.userId,
       speciesId: updatedConfig.speciesId,
       ...preset
     });

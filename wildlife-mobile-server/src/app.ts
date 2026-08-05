@@ -70,11 +70,15 @@ app.post('/cameras/:cameraId/snapshots', authenticateToken, upload.single('image
 // 5. ENDPOINTS CẤU HÌNH PHÒNG VỆ & LOÀI
 // ==========================================
 app.get('/species', authenticateToken, listSpecies);
-app.get('/response-configs', authenticateToken, getConfigDetail);
-app.get('/response-configs/:cameraId', authenticateToken, listConfigs);
-app.put('/response-configs/:cameraId/:speciesId', authenticateToken, saveConfig);
-app.delete('/response-configs/:cameraId/:speciesId', authenticateToken, resetConfig);
-app.post('/response-configs/:cameraId/:speciesId/apply-preset/:presetId', authenticateToken, applyPreset);
+app.get('/response-configs', authenticateToken, (req, res) => {
+  if (Object.prototype.hasOwnProperty.call(req.query, 'speciesId')) {
+    return getConfigDetail(req, res);
+  }
+  return listConfigs(req, res);
+});
+app.put('/response-configs/:speciesId', authenticateToken, saveConfig);
+app.delete('/response-configs/:speciesId', authenticateToken, resetConfig);
+app.post('/response-configs/:speciesId/apply-preset/:presetId', authenticateToken, applyPreset);
 app.get('/control/presets', authenticateToken, listPresets);
 app.get('/audio-samples', authenticateToken, listAudioSamples);
 

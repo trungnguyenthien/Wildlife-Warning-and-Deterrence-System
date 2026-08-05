@@ -60,7 +60,7 @@ erDiagram
     }
     response_configs {
         varchar id PK
-        varchar camera_id FK
+        varchar user_id FK
         varchar species_id FK
         varchar last_modified_by FK
         varchar audio_sample_id
@@ -117,8 +117,7 @@ erDiagram
     users ||--o{ sms_recipients : "quản lý"
     users ||--o{ push_tokens : "sở hữu"
     users ||--o{ alert_reads : "đã đọc"
-    users ||--o{ response_configs : "cập nhật"
-    cameras ||--o{ response_configs : "thiết lập tại"
+    users ||--o{ response_configs : "sở hữu & cập nhật"
     cameras ||--o{ events : "ghi nhận"
     cameras ||--o{ alerts : "kích hoạt từ"
     species ||--o{ response_configs : "áp dụng cho"
@@ -247,12 +246,12 @@ Danh mục phân loại động vật hoang dã được thiết lập sẵn tro
 ---
 
 ### 2.6. Bảng `response_configs` (Thiết lập kịch bản phòng vệ tùy chỉnh)
-Lưu cấu hình ứng phó tự chọn cho từng cặp Camera + Loài động vật (thuộc đối tượng `DefendAction`).
+Lưu cấu hình ứng phó tự chọn cho từng cặp Người dùng + Loài động vật (thuộc đối tượng `DefendAction`).
 
 | Tên cột | Kiểu dữ liệu | Ràng buộc | Mô tả |
 |---|---|---|---|
 | `id` | `VARCHAR(50)` | `PRIMARY KEY` | ID cấu hình |
-| `camera_id` | `VARCHAR(50)` | `FOREIGN KEY` -> `cameras.id` | Áp dụng tại trạm camera nào |
+| `user_id` | `VARCHAR(50)` | `FOREIGN KEY` -> `users.id` | Áp dụng cho tài khoản người dùng nào |
 | `species_id` | `VARCHAR(50)` | `FOREIGN KEY` -> `species.id` | Áp dụng cho loài động vật nào |
 | `last_modified_by`| `VARCHAR(50)` | `FOREIGN KEY` -> `users.id` | Người dùng kiểm lâm cập nhật gần nhất |
 | `audio_sample_id` | `VARCHAR(50)` | `NULL` | ID âm thanh xua đuổi (`A_gunshot`, `A_growl`, ...) |
@@ -264,14 +263,14 @@ Lưu cấu hình ứng phó tự chọn cho từng cặp Camera + Loài động 
 | `silent_alert` | `BOOLEAN` | `NOT NULL` | `true` => Cảnh báo âm thầm (chỉ bắn SMS/FCM, không còi/đèn) |
 | `updated_at` | `TIMESTAMP` | `NOT NULL` | Thời điểm cập nhật cấu hình |
 
-*   *Khớp nối Unique:* Cặp `(camera_id, species_id)` phải là duy nhất (`UNIQUE(camera_id, species_id)`).
+*   *Khớp nối Unique:* Cặp `(user_id, species_id)` phải là duy nhất (`UNIQUE(user_id, species_id)`).
 
 
 *   **Quy trình CRUD:**
-    *   **READ:** Đọc khi tải cấu hình phòng vệ chi tiết của loài ([GET /response-configs?cameraId=&speciesId=](03-mobile_api.md#83-get-response-configscameraidspeciesid) - [Action 6.1: Load species configuration & sample lists](04-sequence-diagram.md#61-action-load-species-configuration-sample-lists)), xem danh sách cấu hình tại trạm ([GET /response-configs/{cameraId}](03-mobile_api.md#86-get-response-configscameraid-helper) - [Action 5.1: Load species list & configuration overview](04-sequence-diagram.md#51-action-load-species-list-configuration-overview)), hoặc khi hệ thống quét cấu hình ứng phó tự động khi phát hiện động vật.
-    *   **CREATE:** Thêm bản ghi cấu hình tùy chỉnh lần đầu cho một cặp (Camera, Loài) khi kiểm lâm nhấn Lưu cấu hình ([PUT /response-configs/{cameraId}/{speciesId}](03-mobile_api.md#82-put-response-configscameraidspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)).
-    *   **UPDATE:** Cập nhật khi kiểm lâm thay đổi kịch bản phòng vệ ([PUT /response-configs/{cameraId}/{speciesId}](03-mobile_api.md#82-put-response-configscameraidspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)) hoặc áp dụng preset mẫu ([POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}](03-mobile_api.md#85-post-response-configscameraidspeciesidapply-presetpresetid) - [Action 6.1: Load species configuration & sample lists](04-sequence-diagram.md#61-action-load-species-configuration-sample-lists)).
-    *   **DELETE:** Xóa cấu hình tùy chỉnh của loài để hệ thống quay về mặc định ([DELETE /response-configs/{cameraId}/{speciesId}](03-mobile_api.md#84-delete-response-configscameraidspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)).
+    *   **READ:** Đọc khi tải cấu hình phòng vệ chi tiết của loài ([GET /response-configs?speciesId=](03-mobile_api.md#83-get-response-configsspeciesid) - [Action 6.1: Load species configuration & sample lists](04-sequence-diagram.md#61-action-load-species-configuration-sample-lists)), xem danh sách cấu hình của user ([GET /response-configs](03-mobile_api.md#86-get-response-configs-helper) - [Action 5.1: Load species list & configuration overview](04-sequence-diagram.md#51-action-load-species-list-configuration-overview)), hoặc khi hệ thống quét cấu hình ứng phó tự động khi phát hiện động vật.
+    *   **CREATE:** Thêm bản ghi cấu hình tùy chỉnh lần đầu cho một cặp (Người dùng, Loài) khi kiểm lâm nhấn Lưu cấu hình ([PUT /response-configs/{speciesId}](03-mobile_api.md#82-put-response-configsspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)).
+    *   **UPDATE:** Cập nhật khi kiểm lâm thay đổi kịch bản phòng vệ ([PUT /response-configs/{speciesId}](03-mobile_api.md#82-put-response-configsspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)) hoặc áp dụng preset mẫu ([POST /response-configs/{speciesId}/apply-preset/{presetId}](03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid) - [Action 6.1: Load species configuration & sample lists](04-sequence-diagram.md#61-action-load-species-configuration-sample-lists)).
+    *   **DELETE:** Xóa cấu hình tùy chỉnh của loài để hệ thống quay về mặc định ([DELETE /response-configs/{speciesId}](03-mobile_api.md#84-delete-response-configsspeciesid) - [Action 6.2: Update species configuration](04-sequence-diagram.md#62-action-update-species-configuration)).
 
 ---
 
@@ -375,8 +374,8 @@ Quản lý việc đọc tin tức độc lập của từng tài khoản ngư�
 ## 3. Các cơ chế nghiệp vụ đặc thù
 
 ### 3.1. Cơ chế Fallback cấu hình phòng vệ (DefendAction Fallback)
-Khi trạm AI Server gửi dữ liệu nhận dạng về thông qua API `POST /cameras/{cameraId}/detections`, Mobile Server thực thi truy vấn để lấy cấu hình phòng vệ:
-1.  **Bước 1 (Truy vấn Cấu hình Tùy chỉnh):** Tìm bản ghi trong bảng `response_configs` có `camera_id = :current_camera_id` and `species_id = :detected_species_id`.
+Khi trạm AI Server gửi dữ liệu nhận dạng về thông qua API `POST /cameras/{cameraId}/detections`, Mobile Server truy vấn `owner_id` (userId) quản lý trạm camera tương ứng và thực thi truy vấn cấu hình phòng vệ:
+1.  **Bước 1 (Truy vấn Cấu hình Tùy chỉnh):** Tìm bản ghi trong bảng `response_configs` có `user_id = :owner_id` and `species_id = :detected_species_id`.
 2.  **Bước 2 (Fallback về cấu hình mặc định):** Nếu không tìm thấy cấu hình riêng biệt ở Bước 1, Mobile Server sẽ dựa trên trường `danger_level` của loài động vật đó trong bảng `species` để map sang kịch bản phòng vệ mẫu mặc định của trạm:
     *   `CRITICAL` -> Áp dụng cấu hình mặc định của Preset `critical_danger` (Cảnh báo âm thầm).
     *   `HIGH` / `MEDIUM` -> Áp dụng cấu hình mặc định của Preset `medium_danger` (Xua đuổi nhẹ).

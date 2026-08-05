@@ -247,40 +247,32 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
 *   **TC_SPC_LIST_SUCCESS_01: Retrieve species directory successfully**
     *   **Kết quả mong đợi (Expected Response):** `200 OK` trả về mảng danh mục các loài.
 
-#### 11. `GET /response-configs/{cameraId}` (Tải tất cả cấu hình đang áp dụng tại camera)
-*   **TC_CFG_LIST_SUCCESS_01: Retrieve all active custom config list for a camera**
-    *   **Điều kiện trước:** Camera `cam-001` có cấu hình tùy chỉnh cho các loài trong bảng `response_configs`.
-    *   **Kết quả mong đợi (Expected Response):** `200 OK` chứa danh sách cấu hình.
-*   **TC_CFG_LIST_FAILURE_01: Fail to retrieve config list for non-existent camera**
-    *   **Mô tả:** Mã camera truyền vào không tồn tại trong hệ thống.
-    *   **Đường dẫn gọi:** `/response-configs/cam-not-exist`
-    *   **Kết quả mong đợi (Expected Response):** `404 Not Found`.
+#### 11. `GET /response-configs` (Tải tất cả cấu hình đang áp dụng của Ranger)
+*   **TC_CFG_LIST_SUCCESS_01: Retrieve all active custom config list for current user**
+    *   **Điều kiện trước:** Người dùng hiện tại có cấu hình tùy chỉnh cho các loài trong bảng `response_configs`.
+    *   **Kết quả mong đợi (Expected Response):** `200 OK` chứa danh sách cấu hình của người dùng.
 
-#### 12. `GET /response-configs?cameraId=&speciesId=` (Tải cấu hình chi tiết của 1 loài tại camera)
+#### 12. `GET /response-configs?speciesId=` (Tải cấu hình chi tiết của 1 loài)
 *   **TC_CFG_DET_SUCCESS_01: Retrieve custom configuration successfully when custom record exists**
-    *   **Điều kiện trước:** Tồn tại cấu hình tùy chọn cho cặp `(cam-001, elephant)`.
+    *   **Điều kiện trước:** Tồn tại cấu hình tùy chọn cho cặp `(user_current, elephant)`.
     *   **Kết quả mong đợi (Expected Response):** `200 OK` trả về các thông số tùy chỉnh đã cấu hình.
 *   **TC_CFG_DET_SUCCESS_02: Fallback to danger level presets when no custom record exists**
-    *   **Điều kiện trước:** Không tồn tại cấu hình tùy chọn cho `(cam-001, elephant)`.
+    *   **Điều kiện trước:** Không tồn tại cấu hình tùy chọn cho `(user_current, elephant)`.
     *   **Kết quả mong đợi (Expected Response):** `200 OK` trả về các thông số mặc định của hệ thống dựa trên Preset Danger Level tương ứng của loài Voi.
-*   **TC_CFG_DET_FAILURE_01: Fail to retrieve config when cameraId query parameter is missing**
-    *   **Mô tả:** Thiếu tham số mã camera.
-    *   **Tham số truy vấn (Query):** `speciesId=elephant`
-    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_DET_FAILURE_02: Fail to retrieve config when speciesId query parameter is missing**
     *   **Mô tả:** Thiếu tham số mã loài.
-    *   **Tham số truy vấn (Query):** `cameraId=cam-001`
+    *   **Tham số truy vấn (Query):** (Không truyền gì)
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_DET_FAILURE_03: Fail to retrieve config when speciesId is invalid**
     *   **Mô tả:** Truyền mã loài không tồn tại trong danh mục loài.
-    *   **Tham số truy vấn (Query):** `cameraId=cam-001&speciesId=dragon`
+    *   **Tham số truy vấn (Query):** `speciesId=dragon`
     *   **Kết quả mong đợi (Expected Response):** `404 Not Found`.
 
-#### 13. `PUT /response-configs/{cameraId}/{speciesId}` (Lưu cấu hình phòng vệ tự chọn)
+#### 13. `PUT /response-configs/{speciesId}` (Lưu cấu hình phòng vệ tự chọn)
 *   **TC_CFG_SAVE_SUCCESS_01: Save custom configuration successfully**
     *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `200 OK` hoặc `201 Created` trả về cấu hình đã lưu.
-    *   **Xác thực Database (DB Verification):** Bản ghi được lưu/cập nhật thành công trong bảng `response_configs` với trường `last_modified_by` tự động cập nhật khớp với ID của user thực hiện.
+    *   **Xác thực Database (DB Verification):** Bản ghi được lưu/cập nhật thành công trong bảng `response_configs` với trường `user_id` khớp với ID của user thực hiện và `last_modified_by` khớp với ID của user thực hiện.
 *   **TC_CFG_SAVE_FAILURE_01: Fail to save config due to missing ledFlash**
     *   **Mô tả:** Thiếu trường ledFlash.
     *   **Dữ liệu gửi đi (Request Body):** `{ "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "silentAlert": false }`
@@ -314,23 +306,23 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": -5, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 
-#### 14. `DELETE /response-configs/{cameraId}/{speciesId}` (Xóa cấu hình tự chọn để quay về mặc định)
+#### 14. `DELETE /response-configs/{speciesId}` (Xóa cấu hình tự chọn để quay về mặc định)
 *   **TC_CFG_DEL_SUCCESS_01: Reset custom configuration back to default**
-    *   **Điều kiện trước:** Tồn tại bản ghi cấu hình tùy chỉnh cho `(cam-001, elephant)`.
+    *   **Điều kiện trước:** Tồn tại bản ghi cấu hình tùy chỉnh cho `(user_current, elephant)`.
     *   **Kết quả mong đợi (Expected Response):** `204 No Content` hoặc `200 OK`.
     *   **Xác thực Database (DB Verification):** Bản ghi tùy chỉnh bị xóa khỏi bảng `response_configs`.
 *   **TC_CFG_DEL_FAILURE_01: Fail to delete non-existent custom configuration**
-    *   **Mô tả:** Trả về lỗi khi yêu cầu xóa cấu hình tùy chỉnh của cặp camera/loài chưa từng được cấu hình.
-    *   **Đường dẫn gọi:** `/response-configs/cam-001/monkey`
+    *   **Mô tả:** Trả về lỗi khi yêu cầu xóa cấu hình tùy chỉnh của loài chưa từng được cấu hình.
+    *   **Đường dẫn gọi:** `/response-configs/monkey`
     *   **Kết quả mong đợi (Expected Response):** `404 Not Found`.
 
-#### 15. `POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}` (Áp dụng preset mẫu)
+#### 15. `POST /response-configs/{speciesId}/apply-preset/{presetId}` (Áp dụng preset mẫu)
 *   **TC_CFG_PRE_SUCCESS_01: Auto-fill configuration using preset values**
-    *   **Đường dẫn gọi:** `/response-configs/cam-001/elephant/apply-preset/critical_danger`
+    *   **Đường dẫn gọi:** `/response-configs/elephant/apply-preset/critical_danger`
     *   **Kết quả mong đợi (Expected Response):** `200 OK` trả về thông số cấu hình khớp với Preset mẫu `critical_danger`.
 *   **TC_CFG_PRE_FAILURE_01: Fail to apply preset with invalid presetId**
     *   **Mô tả:** Lỗi khi mã Preset mẫu truyền vào không tồn tại trong hệ thống.
-    *   **Đường dẫn gọi:** `/response-configs/cam-001/elephant/apply-preset/super_critical`
+    *   **Đường dẫn gọi:** `/response-configs/elephant/apply-preset/super_critical`
     *   **Kết quả mong đợi (Expected Response):** `404 Not Found`.
 
 ---

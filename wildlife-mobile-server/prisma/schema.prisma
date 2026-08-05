@@ -43,21 +43,22 @@ enum AlertType {
 }
 
 model User {
-  id              String           @id @default(uuid()) @db.VarChar(50)
-  username        String           @unique @db.VarChar(50)
-  passwordHash    String           @map("password_hash") @db.VarChar(255)
-  fullName        String           @map("full_name") @db.VarChar(100)
-  phoneNumber     String           @unique @map("phone_number") @db.VarChar(20)
-  email           String?          @db.VarChar(100)
-  role            Role
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
-  
+  id           String   @id @default(uuid()) @db.VarChar(50)
+  username     String   @unique @db.VarChar(50)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  fullName     String   @map("full_name") @db.VarChar(100)
+  phoneNumber  String   @unique @map("phone_number") @db.VarChar(20)
+  email        String?  @db.VarChar(100)
+  role         Role
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
   smsRecipients   SmsRecipient[]
   pushTokens      PushToken[]
   deviceTokens    DeviceToken[]
   alertReads      AlertRead[]
-  responseConfigs ResponseConfig[]
+  responseConfigs ResponseConfig[] @relation("UserResponseConfigs")
+  modifiedConfigs ResponseConfig[] @relation("UserModifiedConfigs")
   snapshots       Snapshot[]
 
   @@map("users")
@@ -71,7 +72,7 @@ model SmsRecipient {
   relation    SmsRelation
   createdAt   DateTime    @default(now()) @map("created_at")
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sms_recipients")
 }
@@ -84,7 +85,7 @@ model PushToken {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("push_tokens")
 }
@@ -100,23 +101,22 @@ model Camera {
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
 
-  responseConfigs ResponseConfig[]
-  events          Event[]
-  alerts          Alert[]
-  snapshots       Snapshot[]
+  events    Event[]
+  alerts    Alert[]
+  snapshots Snapshot[]
 
   @@map("cameras")
 }
 
 model Species {
-  id               String      @id @db.VarChar(50)
-  displayName      String      @map("display_name") @db.VarChar(100)
-  dangerLevel      DangerLevel @map("danger_level")
-  isHuman          Boolean     @map("is_human")
-  htmlDescription  String      @map("html_description") @db.Text
-  aggressionLevel  Int         @map("aggression_level")
-  recommendAction  String      @map("recommend_action") @db.Text
-  createdAt        DateTime    @default(now()) @map("created_at")
+  id              String      @id @db.VarChar(50)
+  displayName     String      @map("display_name") @db.VarChar(100)
+  dangerLevel     DangerLevel @map("danger_level")
+  isHuman         Boolean     @map("is_human")
+  htmlDescription String      @map("html_description") @db.Text
+  aggressionLevel Int         @map("aggression_level")
+  recommendAction String      @map("recommend_action") @db.Text
+  createdAt       DateTime    @default(now()) @map("created_at")
 
   responseConfigs ResponseConfig[]
   eventDetections EventDetection[]
@@ -125,24 +125,24 @@ model Species {
 }
 
 model ResponseConfig {
-  id                    String   @id @default(uuid()) @db.VarChar(50)
-  cameraId              String   @map("camera_id") @db.VarChar(50)
-  speciesId             String   @map("species_id") @db.VarChar(50)
-  lastModifiedBy        String   @map("last_modified_by") @db.VarChar(50)
-  audioSampleId         String?  @map("audio_sample_id") @db.VarChar(50)
-  audioIntensity        Int?     @map("audio_intensity")
-  ledFlashRate          String?  @map("led_flash_rate") @db.VarChar(20)
-  ledColor              String?  @map("led_color") @db.VarChar(20)
-  ledDurationSeconds    Int?     @map("led_duration_seconds")
-  speakerSampleId       String?  @map("speaker_sample_id") @db.VarChar(50)
-  silentAlert           Boolean  @map("silent_alert")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  id                 String   @id @default(uuid()) @db.VarChar(50)
+  userId             String   @map("user_id") @db.VarChar(50)
+  speciesId          String   @map("species_id") @db.VarChar(50)
+  lastModifiedBy     String   @map("last_modified_by") @db.VarChar(50)
+  audioSampleId      String?  @map("audio_sample_id") @db.VarChar(50)
+  audioIntensity     Int?     @map("audio_intensity")
+  ledFlashRate       String?  @map("led_flash_rate") @db.VarChar(20)
+  ledColor           String?  @map("led_color") @db.VarChar(20)
+  ledDurationSeconds Int?     @map("led_duration_seconds")
+  speakerSampleId    String?  @map("speaker_sample_id") @db.VarChar(50)
+  silentAlert        Boolean  @map("silent_alert")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
-  camera        Camera  @relation(fields: [cameraId], references: [id], onDelete: Cascade)
-  species       Species @relation(fields: [speciesId], references: [id], onDelete: Cascade)
-  user          User    @relation(fields: [lastModifiedBy], references: [id], onDelete: Restrict)
+  userOwner    User    @relation("UserResponseConfigs", fields: [userId], references: [id], onDelete: Cascade)
+  species      Species @relation(fields: [speciesId], references: [id], onDelete: Cascade)
+  userModifier User    @relation("UserModifiedConfigs", fields: [lastModifiedBy], references: [id], onDelete: Restrict)
 
-  @@unique([cameraId, speciesId])
+  @@unique([userId, speciesId])
   @@map("response_configs")
 }
 
@@ -174,12 +174,12 @@ model EventDetection {
 }
 
 model DeviceLog {
-  id               String    @id @default(uuid()) @db.VarChar(50)
-  eventId          String    @map("event_id") @db.VarChar(50)
-  deviceKey        String    @map("device_key") @db.VarChar(20)
-  action           String    @db.VarChar(20)
-  actionAt         DateTime  @map("action_at")
-  autoOffAt        DateTime? @map("auto_off_at")
+  id        String    @id @default(uuid()) @db.VarChar(50)
+  eventId   String    @map("event_id") @db.VarChar(50)
+  deviceKey String    @map("device_key") @db.VarChar(20)
+  action    String    @db.VarChar(20)
+  actionAt  DateTime  @map("action_at")
+  autoOffAt DateTime? @map("auto_off_at")
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
@@ -221,8 +221,8 @@ model Snapshot {
   url        String   @db.VarChar(255)
   uploadedAt DateTime @default(now()) @map("uploaded_at")
 
-  camera     Camera   @relation(fields: [cameraId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  camera Camera @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("snapshots")
 }
@@ -236,7 +236,7 @@ model DeviceToken {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("device_tokens")
 }

@@ -334,7 +334,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
                                                                          (scope cố định = ALL)
 ```
 
-Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất cả camera** trong hệ thống — chỉ có 1 scope duy nhất.
+Mọi thông số ứng phó được thiết lập **áp dụng chung cho tất cả camera thuộc quản lý của tài khoản kiểm lâm hiện tại** — chỉ có 1 scope duy nhất theo tài khoản.
 
 > 🚫 Tuyệt đối không có điều hướng nào nhảy thẳng sang `[SPECIES_CONFIG_DETAIL_SCREEN]` mà không qua `[SPECIES_CONFIG_LIST_SCREEN]` — vì cấu hình ứng phó **luôn gắn với 1 loài cụ thể**.
 

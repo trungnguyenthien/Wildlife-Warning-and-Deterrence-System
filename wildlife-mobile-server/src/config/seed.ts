@@ -164,7 +164,7 @@ export async function runSeed(prisma: PrismaClient) {
   await prisma.responseConfig.createMany({
     data: [
       {
-        cameraId: 'camera_01',
+        userId: ranger.id,
         speciesId: 'voi_rung',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_gunshot',
@@ -176,7 +176,7 @@ export async function runSeed(prisma: PrismaClient) {
         silentAlert: false
       },
       {
-        cameraId: 'camera_02',
+        userId: ranger.id,
         speciesId: 'ho_dong_duong',
         lastModifiedBy: ranger.id,
         audioSampleId: null,
@@ -188,7 +188,7 @@ export async function runSeed(prisma: PrismaClient) {
         silentAlert: true // Cảnh báo âm thầm đối với Hổ tại Cửa Rừng
       },
       {
-        cameraId: 'camera_03',
+        userId: ranger.id,
         speciesId: 'human_border_intruder',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_alarm_siren',
@@ -200,7 +200,7 @@ export async function runSeed(prisma: PrismaClient) {
         silentAlert: false
       },
       {
-        cameraId: 'camera_04',
+        userId: ranger.id,
         speciesId: 'nai_vang',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_dog_bark',
@@ -213,7 +213,7 @@ export async function runSeed(prisma: PrismaClient) {
       }
     ]
   });
-  console.log(`[ResponseConfig] Đã nạp sẵn cấu hình phòng vệ tùy chỉnh (Custom Config) cho nhiều cặp Camera-Loài.`);
+  console.log(`[ResponseConfig] Đã nạp sẵn cấu hình phòng vệ tùy chỉnh (Custom Config) cho Ranger.`);
 
   // 5. Tạo lịch sử Sự kiện & Cảnh báo (Event, Detection, Alert) phong phú trong 30 ngày qua
   console.log('[Event] Bắt đầu sinh ngẫu nhiên nhật ký sự kiện 30 ngày qua...');
