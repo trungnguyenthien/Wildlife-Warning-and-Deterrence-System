@@ -43,7 +43,20 @@ export function sendDeviceCommand(
         reject(new Error('Quá thời gian phản hồi từ AI Server (Timeout 5s).'));
       }, 5000);
 
-      // Đăng ký nhận tin nhắn phản hồi từ ACK Channel
+      // Chuẩn bị payload lệnh gửi đi
+      const commandPayload = {
+        event: 'DEVICE_COMMAND',
+        payload: {
+          commandId,
+          cameraId,
+          deviceKey,
+          action,
+          params
+        }
+      };
+
+      // Đăng ký nhận tin nhắn phản hồi từ ACK Channel TRƯỚC,
+      // rồi mới publish lệnh để tránh race condition bỏ lỡ ACK
       ackChannel.subscribe('message', (message) => {
         try {
           const data = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
@@ -69,30 +82,18 @@ export function sendDeviceCommand(
         } catch (err) {
           console.error('[Ably] Lỗi xử lý tin nhắn phản hồi ACK:', err);
         }
+      }).then(() => {
+        // Subscription đã được xác nhận active → bây giờ mới gửi lệnh đi
+        controlChannel.publish('message', commandPayload).catch((err) => {
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          if (realtime) {
+            realtime.close();
+          }
+          reject(err);
+        });
       }).catch((err) => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (realtime) {
-          realtime.close();
-        }
-        reject(err);
-      });
-
-      // Chuẩn bị payload lệnh gửi đi
-      const commandPayload = {
-        event: 'DEVICE_COMMAND',
-        payload: {
-          commandId,
-          cameraId,
-          deviceKey,
-          action,
-          params
-        }
-      };
-
-      // Gửi lệnh lên Control Channel
-      controlChannel.publish('message', commandPayload).catch((err) => {
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
