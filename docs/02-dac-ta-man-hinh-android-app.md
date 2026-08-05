@@ -474,6 +474,28 @@ Mọi thao tác **thêm / xoá** SĐT được thực hiện ngay khi user xác 
 
 ---
 
+## 8. Cơ chế thông báo đẩy (Push Notifications) & Điều hướng Deep Link
+
+Hệ thống tích hợp Firebase Cloud Messaging (FCM) để gửi thông báo cảnh báo nguy hiểm thời gian thực đến điện thoại của lực lượng kiểm lâm.
+
+### 8.1. Cấu hình hiển thị thông báo (Heads-up Notification)
+Để đảm bảo thông báo luôn được hiển thị dạng popup (heads-up banner) kèm âm thanh và rung trong mọi tình huống:
+* **Ứng dụng chạy ngầm (Background) hoặc bị tắt hoàn toàn (Closed/Killed):** Server đẩy tin nhắn dạng gói tin hỗn hợp (gồm cả đối tượng `notification` ở root của payload FCM và đối tượng `data`). Dịch vụ hệ thống của Google Play Services tự động tiếp nhận tin nhắn, định tuyến qua kênh có độ ưu tiên cao (`channel_critical_v2` hoặc `channel_default_v2` với mức cấu hình `IMPORTANCE_HIGH`) để vẽ popup.
+* **Ứng dụng đang hoạt động (Foreground):** FCM định tuyến tin nhắn vào hàm `onMessageReceived` của ứng dụng. Ứng dụng tự động dựng giao diện thông báo Native Android với độ ưu tiên `PRIORITY_HIGH` và `IMPORTANCE_HIGH`, đồng bộ hoàn toàn về mặt hiển thị trực quan với chế độ Background.
+* **Hành động phản ứng nhanh (Quick Action):** Với các thông báo khẩn cấp (nguy hiểm cấp độ `CRITICAL`), trên banner thông báo sẽ hiển thị trực tiếp nút hành động nhanh **"XUA ĐUỔI NGAY"** (`action_trigger = "deter"`). Nhấn nút này sẽ gửi lệnh kích hoạt thiết bị xua đuổi tại trạm tương ứng mà không yêu cầu người dùng phải mở màn hình chi tiết của app.
+
+### 8.2. Cơ chế điều hướng Deep Link (Click Notification)
+* Để duy trì trạng thái đăng nhập và tránh việc khởi động lại toàn bộ ứng dụng khi người dùng click vào thông báo lúc app đang chạy, `MainActivity` được cấu hình dưới chế độ chạy đơn bản (`android:launchMode="singleTask"`) kèm phương thức `setIntent(intent)`.
+* Khi người dùng tap vào thông báo, Intent chứa các trường thông tin bổ sung (`cameraId`, `eventId`, `type`, `speciesName`) được gửi đến `MainActivity`.
+* Dữ liệu được lưu trữ tạm thời trong `DeepLinkHandler.pendingDestination`.
+* Khi `[MAIN_SCREEN]` hoàn tất quá trình dựng giao diện (Compose), luồng phản xạ reactive `snapshotFlow` sẽ lập tức phát hiện trạng thái điểm đến đang chờ, thực hiện lệnh điều hướng (Push) đưa người dùng trực tiếp vào màn hình chi tiết camera `[CAMERA_VIEW_SCREEN]` hoặc chi tiết cảnh báo `[ALERT_DETAIL_SCREEN]` tương ứng.
+
+### 8.3. Cơ chế bỏ qua thời gian chờ (Bypass Cooldown) của Simulator
+* Để hỗ trợ công tác kiểm thử tích hợp (Integration Test) diễn ra nhanh chóng, request gửi từ công cụ giả lập `simulate_post_detections` sẽ được đính kèm tiêu đề HTTP đặc quyền `"X-Bypass-Cooldown": "true"`.
+* Backend khi nhận diện tiêu đề này sẽ tự động bỏ qua điều kiện kiểm tra khoảng thời gian trống 5 phút giữa các lần nhận diện liên tiếp trên cùng một trạm, luôn tạo mới một phiên sự kiện (`Event`) để tạo thông báo tức thời.
+
+---
+
 ## Phụ lục — Sơ đồ luồng chuyển màn hình
 
 ```mermaid
