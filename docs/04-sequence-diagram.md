@@ -7,8 +7,9 @@ Tài liệu này mô tả chi tiết luồng tương tác giữa các thành ph�
 ## Các Thành phần Hệ thống (Standardized Participants)
 
 - **Mobile:** Ứng dụng di động (Android Client) cài đặt trên điện thoại người dùng và kiểm lâm để tương tác với hệ thống.
-- **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với cả `AI_Server` và `Mobile`.
-- **AI_Server:** Máy chủ trí tuệ nhân tạo chạy mô hình nhận diện (YOLOv8), nhận hình ảnh từ `Camera` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` và điều hướng lệnh phản hồi để điều khiển `Camera`.
+- **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
+- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Mobile_Server` và `AI_Server` thay thế cho WebSocket trực tiếp.
+- **AI_Server:** Máy chủ trí tuệ nhân tạo chạy mô hình nhận diện (YOLOv8), nhận hình ảnh từ `Camera` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
 - **Camera:** Thiết bị camera chụp ảnh tại hiện trường (chỉ gửi ảnh về `AI_Server` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
 - **Database:** Cơ sở dữ liệu PostgreSQL lưu trữ trạng thái, cấu hình và nhật ký sự kiện.
 - **FCM (Firebase Cloud Messaging):** Dịch vụ trung gian gửi thông báo đẩy (Push notification) thời gian thực đến `Mobile`.
@@ -54,10 +55,11 @@ graph TD
     Mobile[Mobile]:::main
 
     FCM[FCM]:::ext
+    Ably[Ably Cloud Broker]:::ext
 
     %% Connections
     Camera -- "1. Sends raw image on motion" --> AI_Server
-    AI_Server -- "2. Sends image & detection results" --> Mobile_Server
+    AI_Server -- "2. Sends image & detection results (REST)" --> Mobile_Server
 
     %% Realtime warning paths
     Mobile_Server -- "3. Sends Push Request" --> FCM
@@ -65,8 +67,11 @@ graph TD
 
     %% User Actions
     Mobile -- "5. API Requests (REST)" --> Mobile_Server
-    Mobile_Server -- "6. Forward Control Command" --> AI_Server
-    AI_Server -- "7. Controls physically" --> Camera
+    Mobile_Server -- "6. Publish control (REST)" --> Ably
+    Ably -- "7. Broadcast command (WS)" --> AI_Server
+    AI_Server -- "8. Controls physically" --> Camera
+    AI_Server -- "9. Publish ACK (WS)" --> Ably
+    Ably -- "10. Deliver ACK" --> Mobile_Server
 ```
 
 ---
@@ -537,30 +542,45 @@ sequenceDiagram
     autonumber
     participant Mobile as Mobile
     participant Mobile_Server as Mobile_Server
+    participant Ably as Ably Broker (Cloud)
     participant AI_Server as AI_Server
     participant Camera as Camera
     participant Database as Database
 
-    Note over AI_Server, Mobile_Server: Kết nối WS /ws?userId={userId} đã được AI_Server thiết lập và duy trì
+    Note over AI_Server, Ably: AI_Server kết nối và subscribe kênh camera:control:{cameraId} (qua WebSocket)
     Note over Mobile, Camera: Người dùng bấm nút "Nghe thử" tại app
-    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (sampleId, durationSeconds)
+    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
     activate Mobile_Server
-    Mobile_Server->>AI_Server: WebSocket: Gửi DEVICE_COMMAND (commandId, cameraId, deviceKey, action: "TEST", params)
+    Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh camera:control:{cameraId}
+    Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh camera:ack:{cameraId})
+    activate Ably
+    Ably-->>AI_Server: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
+    deactivate Ably
     activate AI_Server
-    AI_Server->>Camera: Ra lệnh cho Loa phát thanh phát file âm thanh mẫu
+    AI_Server->>Camera: Ra lệnh cho Loa/LED/Rào điện thực thi thử nghiệm
     activate Camera
-    Camera-->>AI_Server: Phản hồi xác nhận loa đã phát xong
+    Camera-->>AI_Server: Phản hồi xác nhận thiết bị đã thực thi xong
     deactivate Camera
-    AI_Server-->>Mobile_Server: WebSocket: Phản hồi COMMAND_ACK (commandId, cameraId, status: "SUCCESS")
+    AI_Server->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh camera:ack:{cameraId} (SUCCESS)
     deactivate AI_Server
-    Mobile_Server->>Database: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vật lý (device_logs)
-    Database-->>Mobile_Server: Lưu thành công
-    Mobile_Server-->>Mobile: Response 200 OK
+    activate Ably
+    Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK
+    deactivate Ably
+    
+    alt Nhận được ACK trong vòng 5 giây
+        Mobile_Server->>Database: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vật lý (device_logs)
+        Database-->>Mobile_Server: Lưu thành công
+        Mobile_Server-->>Mobile: Response 200 OK (SUCCESS)
+        Mobile->>Mobile: Hiển thị thông báo "Kích hoạt thiết bị kiểm thử thành công"
+    else Quá 5 giây không nhận được ACK (Timeout)
+        Mobile_Server-->>Mobile: Response 504 Gateway Timeout (camera_offline)
+        Mobile->>Mobile: Hiển thị thông báo lỗi "Không thể kết nối tới camera hiện trường"
+    end
     deactivate Mobile_Server
-    Mobile->>Mobile: Hiển thị thông báo "Phát âm thanh kiểm thử thành công"
 ```
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#61-post-camerascameraiddevicesdevicekeytest)
+    *   [GET /auth/ably-token](./03-mobile_api.md#13a3-get-authably-token)
 
 ---
 

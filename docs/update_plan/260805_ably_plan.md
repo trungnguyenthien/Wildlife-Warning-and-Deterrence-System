@@ -50,9 +50,9 @@ Nô Tài sẽ cập nhật nội dung thiết kế kỹ thuật trong 4 tài li�
     *   *Trình tự gửi và phản hồi Downlink:* Cập nhật các bước gửi nhận bản tin `DEVICE_COMMAND` và `COMMAND_ACK` thông qua cơ chế Pub/Sub của các kênh Ably tương ứng (`camera:control:{cameraId}` và `camera:ack:{cameraId}`).
 
 ### 3.3. [ai_server_plan.md](../ai_server_plan.md)
-*   **Thay đổi Phần 4 (Giao tiếp Downlink):**
+*   **Thay đổi Mục 1.2 (Luồng thử nghiệm Downlink) & Mục 2.2 (Kênh truyền thời gian thực Ably):**
     *   Cập nhật đặc tả thư viện sử dụng: Khuyên dùng thư viện `ably` chính thức của Python thay vì thư viện `websockets` thuần.
-    *   Thay đổi kịch bản kết nối: Mô tả vòng lặp kết nối bằng khối `async with AblyRealtime` và cơ chế lắng nghe trên kênh `camera:control:{cameraId}`.
+    *   Thay đổi kịch bản kết nối: Mô tả vòng lặp kết nối bằng khối `async with AblyRealtime` và cơ chế lắng nghe trên các kênh Pub/Sub của Ably.
 
 ### 3.4. [ai-server-websocket.md](../ai-server-websocket.md)
 *   **Đổi tên tài liệu:** Thành `docs/ai-server-ably.md` để phù hợp với công nghệ mới.
