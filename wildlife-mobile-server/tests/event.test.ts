@@ -133,7 +133,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     } catch (err) {
       console.warn('DB Offline - bỏ qua nạp dữ liệu test event.', err);
     }
-  });
+  }, 30000);
 
   afterAll(async () => {
     await disconnectPrisma();

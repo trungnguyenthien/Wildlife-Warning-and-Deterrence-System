@@ -35,13 +35,13 @@ export function sendDeviceCommand(
       const controlChannel = realtime.channels.get(`camera:control:${cameraId}`);
       const ackChannel = realtime.channels.get(`camera:ack:${cameraId}`);
 
-      // Thiết lập timeout 5 giây chờ phản hồi
+      // Thiết lập timeout 9 giây chờ phản hồi (Vercel free tier giới hạn 10s)
       timeoutId = setTimeout(() => {
         if (realtime) {
           realtime.close();
         }
-        reject(new Error('Quá thời gian phản hồi từ AI Server (Timeout 5s).'));
-      }, 5000);
+        reject(new Error('Quá thời gian phản hồi từ AI Server (Timeout 9s).'));
+      }, 9000);
 
       // Chuẩn bị payload lệnh gửi đi
       const commandPayload = {
