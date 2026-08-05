@@ -174,11 +174,6 @@ async function main() {
         ledFlashRate: 'FAST',
         ledColor: 'RED',
         ledDurationSeconds: 20,
-        fenceLevel: 'HIGH',
-        fenceWarningLight: true,
-        fenceAutoNotify: true,
-        fenceAutoOffEnabled: true,
-        fenceAutoOffMinutes: 2,
         speakerSampleId: 'N_voi_rung',
         silentAlert: false
       },
@@ -191,11 +186,6 @@ async function main() {
         ledFlashRate: null,
         ledColor: null,
         ledDurationSeconds: 0,
-        fenceLevel: null,
-        fenceWarningLight: false,
-        fenceAutoNotify: false,
-        fenceAutoOffEnabled: false,
-        fenceAutoOffMinutes: 0,
         speakerSampleId: null,
         silentAlert: true // Cảnh báo âm thầm đối với Hổ tại Cửa Rừng
       },
@@ -208,11 +198,6 @@ async function main() {
         ledFlashRate: 'FAST',
         ledColor: 'STROBE',
         ledDurationSeconds: 30,
-        fenceLevel: null,
-        fenceWarningLight: true,
-        fenceAutoNotify: true,
-        fenceAutoOffEnabled: false,
-        fenceAutoOffMinutes: 0,
         speakerSampleId: 'N_thu_du',
         silentAlert: false
       },
@@ -225,11 +210,6 @@ async function main() {
         ledFlashRate: 'SLOW',
         ledColor: 'YELLOW',
         ledDurationSeconds: 10,
-        fenceLevel: 'LOW',
-        fenceWarningLight: false,
-        fenceAutoNotify: false,
-        fenceAutoOffEnabled: true,
-        fenceAutoOffMinutes: 1,
         speakerSampleId: null,
         silentAlert: false
       }
