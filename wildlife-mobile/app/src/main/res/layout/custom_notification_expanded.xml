@@ -6,7 +6,7 @@
     android:background="@drawable/bg_notification_card">
 
     <!-- Vạch lề trái biểu thị mức độ nguy hiểm -->
-    <View
+    <FrameLayout
         android:id="@+id/notification_indicator"
         android:layout_width="4dp"
         android:layout_height="match_parent"

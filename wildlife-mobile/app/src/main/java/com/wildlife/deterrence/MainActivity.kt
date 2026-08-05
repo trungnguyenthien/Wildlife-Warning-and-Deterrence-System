@@ -49,7 +49,12 @@ class MainActivity : ComponentActivity() {
     val cameraId = intent?.getStringExtra("cameraId")
     val speciesName = intent?.getStringExtra("speciesName")
 
-    if (type != null) {
+    android.util.Log.d("MainActivity", "handleIntent: type=$type, eventId=$eventId, cameraId=$cameraId, speciesName=$speciesName")
+
+    if (cameraId != null) {
+      android.util.Log.d("MainActivity", "DeepLink to CameraDetail: $cameraId")
+      DeepLinkHandler.pendingDestination = CameraDetail(cameraId)
+    } else if (type != null) {
       val navKey = when (type) {
         "animal.detected", "animal.escalated", "danger_alert" -> {
           if (eventId != null) AlertDetail(eventId, speciesName) else null
