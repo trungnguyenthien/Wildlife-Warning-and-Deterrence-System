@@ -1655,13 +1655,27 @@
         };
 
         const jsonStr = JSON.stringify(ackMsg);
-        ackChannel.publish('message', ackMsg, (err) => {
-          if (err) {
-            logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
+        try {
+          const res = ackChannel.publish('message', ackMsg);
+          if (res && typeof res.then === 'function') {
+            res.then(() => {
+              logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+            }).catch((err) => {
+              logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
+            });
           } else {
-            logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+            // Callback fallback
+            ackChannel.publish('message', ackMsg, (err) => {
+              if (err) {
+                logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
+              } else {
+                logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+              }
+            });
           }
-        });
+        } catch (pubErr) {
+          logToTerminal(`[ERROR] Lỗi khi thực thi publish ACK: ${pubErr.message}`, 'err');
+        }
 
         btnManualAck.disabled = true;
       }
