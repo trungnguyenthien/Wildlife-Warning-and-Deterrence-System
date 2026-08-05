@@ -74,14 +74,20 @@ export async function sendPushToAllDevices(
       return;
     }
 
+    const isCritical = payload?.dangerLevel === 'CRITICAL' || 
+                       payload?.type === 'animal.escalated' || 
+                       payload?.type === 'danger_alert';
+    const channelId = isCritical ? 'channel_critical_v2' : 'channel_default_v2';
+
     const message: MulticastMessage = {
-      data: {
-        title,
-        body,
-        ...(payload || {})
-      },
+      notification: { title, body },
+      data: payload || {},
       android: {
-        priority: 'high'
+        priority: 'high',
+        notification: {
+          channelId: channelId,
+          sound: 'default'
+        }
       },
       tokens: tokens
     };
