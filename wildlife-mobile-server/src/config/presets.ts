@@ -10,8 +10,6 @@ export interface DefenseConfig {
   speakerWarn: boolean;
   audioSampleId: string | null;
   audioIntensity: number;
-  electricFence: boolean;
-  electricFenceDuration: number;
   silentAlert: boolean;
 }
 
@@ -29,8 +27,6 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: false,
     audioSampleId: null,
     audioIntensity: 0,
-    electricFence: false,
-    electricFenceDuration: 0,
     silentAlert: true
   },
   [DangerLevel.MEDIUM]: {
@@ -40,8 +36,6 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
-    electricFence: false,
-    electricFenceDuration: 0,
     silentAlert: false
   },
   [DangerLevel.HIGH]: {
@@ -51,8 +45,6 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 80,
-    electricFence: false,
-    electricFenceDuration: 0,
     silentAlert: false
   },
   [DangerLevel.CRITICAL]: {
@@ -62,8 +54,6 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
-    electricFence: true,
-    electricFenceDuration: 15,
     silentAlert: false
   }
 };
@@ -76,8 +66,6 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
-    electricFence: true,
-    electricFenceDuration: 15,
     silentAlert: false
   },
   medium_danger: {
@@ -87,8 +75,6 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
-    electricFence: false,
-    electricFenceDuration: 0,
     silentAlert: false
   },
   intruder: {
@@ -98,8 +84,6 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,
-    electricFence: false,
-    electricFenceDuration: 0,
     silentAlert: false
   }
 };

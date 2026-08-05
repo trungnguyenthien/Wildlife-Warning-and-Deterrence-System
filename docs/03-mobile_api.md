@@ -108,7 +108,6 @@ sms                  — Gửi SMS cảnh báo cho người dân lân cận
 speaker              — Loa phát thanh AI tại trạm
 deterrent_audio      — Âm thanh xua đuổi (tần số thấp / siêu âm)
 led_flash            — Đèn LED flash nhiều màu
-electric_fence       — Hàng rào điện sinh học
 ranger_alert         — Gửi báo động về trạm Kiểm lâm
 ```
 
@@ -127,13 +126,6 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
     "flashRate": "4_per_sec",            // 2_per_sec / 4_per_sec / random
     "color": "red_white_alt",            // red / white / red_white_alt
     "durationSeconds": 60                // Thời lượng LED chớp (giây)
-  },
-  "fence": {
-    "level": "medium",                   // low / medium / high (mức dòng điện)
-    "warningLight": true,                // Có bật đèn cảnh báo màu hổ phách/đỏ tại hiện trường
-    "autoNotify": true,                  // Tự động SMS/Push khi kích hoạt hàng rào
-    "autoOffEnabled": true,              // Tự động tắt hàng rào sau 2 phút không có thú
-    "autoOffMinutes": 2                  // Thời gian tự ngắt (BẮT BUỘC >= 2)
   },
   "speaker": {
     "sampleId": "N_warning_thu"          // ID âm thanh cảnh báo người dân (bắt đầu bằng prefix 'N_')
@@ -462,25 +454,42 @@ Kết nối Server-Sent Events (SSE) để nhận các thông báo cập nhật 
 
 ### 6.1. `POST /cameras/{cameraId}/devices/{deviceKey}/test`
 
-Test audio / LED / loa. Mapping: nút "Nghe thử (Test Audio)" tại màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]`.
+Kích hoạt lệnh kiểm thử thiết bị ngoại vi tại hiện trường (LED/Loa/Rào điện). 
+
+**Luồng xử lý nội bộ (Ably-based):**
+1. Mobile Server nhận yêu cầu HTTP POST, trích xuất `cameraId`, `deviceKey` và các thông số `params`.
+2. Khởi tạo `Ably.Rest` và publish sự kiện `DEVICE_COMMAND` lên kênh `camera:control:{cameraId}`.
+3. Đồng thời đăng ký lắng nghe trên kênh `camera:ack:{cameraId}` để đợi phản hồi xác nhận từ camera.
+4. Nếu nhận được bản tin phản hồi `COMMAND_ACK` từ camera trong vòng **5 giây**, Mobile Server trả về kết quả `200 OK`.
+5. Nếu quá 5 giây mà không nhận được phản hồi, trả về lỗi `504 Gateway Timeout` (trạm camera offline hoặc mất kết nối).
 
 **Ví dụ:**
 ```
-POST /cameras/cam-001/devices/deterrent_audio/test
+POST /cameras/cam-001/devices/led/test
 ```
 
 **Request body**
 ```json
 {
-  "sampleId": "A_gunshot",
-  "durationSeconds": 3
+  "intensity": 80, // Cường độ (1-100), áp dụng cho Loa (volume) và LED (brightness)
+  "durationSeconds": 5, // Thời gian kích hoạt thử nghiệm
+  "audioSampleId": "A_gunshot" // File âm thanh thử nghiệm (nếu deviceKey là speaker)
 }
 ```
 
-**Response 202** (Accepted — lệnh đã gửi xuống field, kết quả qua push event `DEVICE_TEST_COMPLETED`)
+**Response 200 OK** (Kích hoạt và thực thi thành công tại trạm)
 ```json
-{ "testId": "t-991", "queuedAt": "..." }
+{
+  "status": "SUCCESS",
+  "commandId": "cmd-123-abc",
+  "message": "Thiết bị ngoại vi đã thực thi kiểm thử thành công tại hiện trường."
+}
 ```
+
+**Lỗi thường gặp**
+- `400 ERR_VALIDATION_FAILED` -> Cường độ hoặc thời gian test không hợp lệ.
+- `404 ERR_CAMERA_NOT_FOUND` -> `cameraId` không tồn tại trong hệ thống.
+- `504 Gateway Timeout` -> Không nhận được ACK từ AI Server (Thiết bị ngoại vi đang ngoại tuyến hoặc kết nối Ably bị gián đoạn).
 
 ---
 
@@ -503,7 +512,7 @@ Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (n
     {
       "id": "medium_danger",
       "displayName": "Thú vừa",
-      "description": "Bật âm thanh xua đuổi tần số siêu âm/chó sủa + đèn LED nhấp nháy + hàng rào điện nhẹ (áp dụng cho loài ít nguy hiểm).",
+      "description": "Bật âm thanh xua đuổi tần số siêu âm/chó sủa + đèn LED nhấp nháy (áp dụng cho loài ít nguy hiểm).",
       "config": "@DefendAction"
     },
     {
@@ -559,7 +568,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 8,
       "htmlDescription": "Loài bò sát lớn ăn thịt hoang dã, hoạt động chủ yếu ở <b>vùng nước ngọt lợ ven rừng</b>.<br/>Có tập tính săn mồi phục kích âm thầm ban đêm, lực cắn cực mạnh nguy hiểm cho con người và gia súc sát bờ nước.",
       "defense": {
-        "recommend": "Kịch bản ngăn chặn bằng hàng rào điện sinh học mức trung bình kết hợp đèn LED chớp nháy màu đỏ-trắng.",
+        "recommend": "Kịch bản ngăn chặn bằng đèn LED chớp nháy màu đỏ-trắng cường độ cao kết hợp còi báo động khẩn cấp.",
         "appSetting": "@DefendAction"
       }
     },
@@ -570,7 +579,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 2,
       "htmlDescription": "Thú ăn cỏ lành tính, nhút nhát, thường đi kiếm ăn theo bầy nhỏ vào lúc <i>bình minh</i> hoặc <i>hoàng hôn</i>.<br/>Thích ăn chồi non, dễ bị giật mình bởi tiếng động lạ và có xu hướng bỏ chạy nhanh.",
       "defense": {
-        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng, không gây hại hàng rào.",
+        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng.",
         "appSetting": "@DefendAction"
       }
     },
@@ -592,7 +601,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 1,
       "htmlDescription": "Động vật ăn lá cây trên cao, hiền lành, di chuyển chậm rãi và hầu như không gây ra xung đột hay phá hoại hoa màu.<br/>Hoạt động ban ngày, không có xu hướng tiếp cận khu dân cư.",
       "defense": {
-        "recommend": "Loài lành tính, chỉ cần ghi nhận log và bật đèn cảnh báo nhẹ nếu di chuyển sát hàng rào.",
+        "recommend": "Loài lành tính, chỉ cần ghi nhận nhật ký hoạt động.",
         "appSetting": "@DefendAction"
       }
     },
@@ -885,7 +894,28 @@ Cảnh báo đã phân luồng theo vai trò (mapping hiển thị tại tab `[S
 
 Enum `type`: `ANIMAL_RARE` (Kiểm lâm), `HIGHWAY_NEARBY` (Ban QL cao tốc), `HUMAN_BORDER` (Biên phòng), `INTRUDER` (Kiểm lâm / Biên phòng).
 
+### 11.2. `GET /alerts/{alertId}`
 
+Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
+
+**Response 200**
+```json
+{
+  "alertId": "alt-991",
+  "title": "Phát hiện HỔ tại Cam 2",
+  "alertType": "animal",
+  "imageUrl": "https://cdn.example.com/tiger.jpg",
+  "speciesName": "Hổ Đông Nam Á",
+  "speciesNameEn": "Indochinese Tiger",
+  "cameraCode": "cam-002",
+  "cameraName": "Trạm Rìa Rừng Cổng Bắc",
+  "dangerLevel": "CRITICAL",
+  "confidencePercent": 99,
+  "estimatedCount": 1,
+  "recordedAt": "10:15:00 · 22/07/2026",
+  "gpsCoordinate": "10.460, 106.124"
+}
+```
 
 ---
 
@@ -1016,53 +1046,48 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 
 ---
 
-### 13a.2. `WS /ws`
+### 13a.2. `WS /ws` (ĐÃ LOẠI BỎ / DEPRECATED)
 
-Kết nối WebSocket song công (duplex connection) từ AI Server / Camera hiện trường lên Mobile Server nhằm duy trì kênh đẩy lệnh điều khiển thời gian thực (Realtime Command Downlink) dùng chung cho mỗi User.
+> [!WARNING]
+> Kết nối WebSocket trực tiếp (`WS /ws`) đã được gỡ bỏ khỏi kiến trúc hệ thống để hỗ trợ hoàn toàn cơ chế Serverless (Vercel) và tối ưu hóa hạ tầng mạng. Tất cả các luồng Downlink/Test thiết bị được chuyển đổi sang nền tảng **Ably Pub/Sub Cloud Broker**.
+
+---
+
+### 13a.3. `GET /auth/ably-token`
+
+Cấp quyền kết nối Ably dưới dạng mã Token tạm thời (Token Authentication). Client (Android App hoặc AI Server Camera) sẽ dùng mã Token này để kết nối an toàn với máy chủ Ably mà không cần biết và không làm lộ API Key gốc.
+
+**Headers**
+
+| Field | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `Authorization` | string | Có | Định dạng `Bearer <JWT_Token>` của người dùng kiểm lâm hoặc trạm camera |
 
 **Query Parameters**
 
 | Field | Kiểu | Bắt buộc | Mô tả |
 |---|---|---|---|
-| `userId` | string | Có | ID của người dùng quản lý các trạm camera (để xác thực kết nối, ví dụ: `u_rg`) |
+| `clientId` | string | Không | ID định danh client khi giao tiếp trên Ably (mặc định: `anonymous`, khuyến nghị đặt tương ứng như `client-py`, `client-web`) |
 
-**Downlink Messages (Server gửi cho Client)**
+**Response Payload (`200 OK`)**
 
-Khi người dùng từ Mobile App kích hoạt kiểm thử loa/còi (`test`), Mobile Server sẽ gửi chủ động bản tin JSON thông báo qua kết nối WebSocket này đến trạm để thực thi tại chỗ:
+Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn để truyền thẳng vào SDK kết nối:
 
-*   **Bản tin điều khiển thiết bị (`DEVICE_COMMAND`):**
 ```json
 {
-  "event": "DEVICE_COMMAND",
-  "payload": {
-    "commandId": "cmd-123",
-    "cameraId": "cam-001",
-    "deviceKey": "deterrent_audio | speaker", 
-    "action": "TEST", // Chỉ hỗ trợ hành động TEST thử nghiệm thiết bị
-    "params": {
-      "volume": 80,
-      "sampleId": "A_gunshot" // ID âm thanh bắt đầu bằng prefix A_ hoặc N_
-    }
-  }
+  "keyName": "abc123.DEF456",
+  "clientId": "client-py",
+  "timestamp": 1691234567000,
+  "nonce": "unique-random-nonce-12345",
+  "mac": "generated-hmac-signature-by-server",
+  "ttl": 3600000,
+  "capability": "{\"camera:*\":[\"publish\",\"subscribe\"]}"
 }
 ```
 
-**Uplink Messages (Client phản hồi cho Server)**
-
-Sau khi thiết bị trạm AI Server thực thi xong lệnh vật lý tại hiện trường, nó phải gửi bản tin xác nhận trạng thái (Acknowledgment) trở lại Server:
-
-*   **Bản tin phản hồi (`COMMAND_ACK`):**
-```json
-{
-  "event": "COMMAND_ACK",
-  "payload": {
-    "commandId": "cmd-123",
-    "cameraId": "cam-001",
-    "status": "SUCCESS | FAILED",
-    "error": null
-  }
-}
-```
+**Lỗi thường gặp**
+- `401 ERR_UNAUTHORIZED` -> JWT Token không hợp lệ hoặc đã hết hạn.
+- `500 ERR_ABLY_SDK_ERROR` -> Lỗi gọi SDK Ably từ máy chủ khi sinh Token Request.
 
 ---
 
@@ -1093,6 +1118,7 @@ Sau khi thiết bị trạm AI Server thực thi xong lệnh vật lý tại hi�
 |---|---|---|---|
 | 10.5 | GET | `/stats/summary` | Tải dữ liệu tổng hợp biểu đồ và bản đồ nhiệt (heatmap) |
 | 11.2 | GET | `/alerts/feed` | Lấy luồng tin tức cảnh báo liên ngành được phân luồng |
+| 11.3 | GET | `/alerts/{alertId}` | Lấy chi tiết tin cảnh báo phát hiện |
 
 ### 14.5. Tab cài đặt (`[SETTING_TAB]`)
 
@@ -1149,9 +1175,10 @@ Sau khi thiết bị trạm AI Server thực thi xong lệnh vật lý tại hi�
 | 13.1 | GET | `/health` | Kiểm tra trạng thái hoạt động của hệ thống và AI server (CHỈ DÙNG ĐỂ TEST) |
 | 13.2 | GET | `/reference-data/danger-levels` | Lấy danh mục mức độ nguy hại để hỗ trợ hiển thị UI |
 | 13a.1 | POST | `/cameras/{cameraId}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
-| 13a.2 | WS | `/ws` | Kết nối WebSocket song công dùng chung theo UserID để nhận lệnh điều khiển thời gian thực |
+| 13a.2 | WS | `/ws` | (ĐÃ LOẠI BỎ) Kết nối WebSocket song công |
+| 13a.3 | GET | `/auth/ably-token` | API tích hợp: Cấp Token Request tạm thời phục vụ kết nối an toàn với Ably Cloud |
 
-**Tổng cộng: 37 API di động + 2 API tích hợp thiết bị (gồm 1 Webhook nhận diện và 1 WebSocket điều khiển; đã bỏ các chức năng ngôn ngữ, đổi mật khẩu, khôi phục mật khẩu, stream nghe thử âm thanh, và ghi đè trạng thái thiết bị thủ công).**
+**Tổng cộng: 38 API di động + 2 API tích hợp thiết bị (gồm 1 Webhook nhận diện và 1 API cấp Token Ably; đã bỏ kết nối WebSocket trực tiếp, chức năng ngôn ngữ, đổi mật khẩu, khôi phục mật khẩu, stream nghe thử âm thanh, và ghi đè trạng thái thiết bị thủ công).**
 
 ---
 

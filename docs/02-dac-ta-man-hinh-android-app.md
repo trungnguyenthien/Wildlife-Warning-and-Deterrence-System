@@ -258,7 +258,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 | `configure_defense_default_button` | Button | Label `Thiết lập hành vi ứng phó mặc định cho tất cả camera`. Mở `[SPECIES_CONFIG_LIST_SCREEN]` để user **chọn loài** cần cấu hình → mở `[SPECIES_CONFIG_DETAIL_SCREEN]` với **scope = `Áp dụng cho tất cả`** camera. Cấu hình theo từng loài áp dụng cho mọi camera trong hệ thống. |
 | `logout_button` | Button (Danger) | Label `Đăng xuất`. Xoá session → về `[LOGIN_SCREEN]`. |
 
-> 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Hàng rào / Kiểm lâm) ngay trong tab `[SETTING_TAB]`. Cấu hình các thiết bị này thuộc về **`[SPECIES_CONFIG_DETAIL_SCREEN]`** và phải đi qua `[SPECIES_CONFIG_LIST_SCREEN]` để chọn loài — vì thiết bị ứng phó phụ thuộc vào loài phát hiện (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), không thể cấu hình tách rời khỏi ngữ cảnh loài.
+> 💡 **Không có** toggle thiết bị ứng phó (SMS / Loa / Âm thanh / LED / Cảnh báo trạm / Kiểm lâm) ngay trong tab `[SETTING_TAB]`. Cấu hình các thiết bị này thuộc về **`[SPECIES_CONFIG_DETAIL_SCREEN]`** và phải đi qua `[SPECIES_CONFIG_LIST_SCREEN]` để chọn loài — vì thiết bị ứng phó phụ thuộc vào loài phát hiện (Silent Alert cho thú dữ, Active Deterrent cho thú vừa…), không thể cấu hình tách rời khỏi ngữ cảnh loài.
 
 ---
 
@@ -296,7 +296,7 @@ Nơi duy nhất để user chỉnh cài đặt cá nhân và quản trị tài k
 - Nhấn vào 1 dòng `camera_log_item` → mở `log_detail_lightbox` xem ảnh lớn + metadata đầy đủ.
 - `back_iconbutton` → `[MAIN_SCREEN]` (Android Stack mặc định).
 
-> 🚫 Màn này **không có** nút bật/tắt stream camera, không có toggle thiết bị ngoại vi (SMS / Loa / LED / Hàng rào / Kiểm lâm). Cấu hình thiết bị ứng phó (kể cả bật/tắt thiết bị cho camera này) thuộc về `[SPECIES_CONFIG_DETAIL_SCREEN]` — mở từ `configure_defense_default_button` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 3.3).
+> 🚫 Màn này **không có** nút bật/tắt stream camera, không có toggle thiết bị ngoại vi (SMS / Loa / LED / Cảnh báo trạm / Kiểm lâm). Cấu hình thiết bị ứng phó (kể cả bật/tắt thiết bị cho camera này) thuộc về `[SPECIES_CONFIG_DETAIL_SCREEN]` — mở từ `configure_defense_default_button` ở tab `[SETTING_TAB]` của `[MAIN_SCREEN]` (mục 3.3).
 
 ---
 
@@ -381,10 +381,6 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 | `led_frequency_dropdown` | Dropdown | Label `Tần suất LED`. Lựa chọn: `2 lần/giây` · `4 lần/giây` · `Nhấp nháy ngẫu nhiên`. |
 | `led_color_segmented` | SegmentedControl | Label `Màu sắc LED`. Lựa chọn: `Đỏ` · `Trắng` · `Đỏ xen kẽ Trắng`. |
 | `led_duration_input` | NumberInput | Label `Thời lượng LED (giây)`. |
-| `fence_current_level_dropdown` | Dropdown | Label `Mức dòng điện sinh học`. Lựa chọn: `Thấp` · `Trung bình` · `Mạnh`. |
-| `fence_warning_light_toggle` | Toggle | Label `Đèn cảnh báo vàng/đỏ nhấp nháy kèm theo`. |
-| `fence_notify_on_trigger_toggle` | Toggle | Label `Tự động gửi SMS/Push khi hàng rào hoạt động`. |
-| `fence_auto_off_hint_text` | Text (caption) | Label `Tự ngắt sau 2 phút không phát hiện thú` *(thông tin, không chỉnh)*. |
 | `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lấy danh sách ID mẫu phát loa nạp sẵn trong phần cứng từ mảng `citizenAlertSounds` của API `GET /audio-samples` (ID bắt đầu bằng prefix `N_`, ví dụ mặc định: `Mẫu 1 (Voi hoang dã)` · `Mẫu 2 (Thú dữ xâm lấn)` · `Mẫu 3 (Di tản lánh nạn)`). |
 | `notify_sms_toggle` | Toggle | Label `Gửi SMS`. |
 | `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. |

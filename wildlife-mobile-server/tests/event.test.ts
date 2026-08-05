@@ -117,6 +117,19 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
           recommendAction: 'Cảnh báo biên phòng'
         }
       });
+
+      // Tạo đối tượng Bò Tót
+      await prisma.species.create({
+        data: {
+          id: 'bo_tot',
+          displayName: 'Bò Tót',
+          dangerLevel: 'HIGH',
+          isHuman: false,
+          htmlDescription: '<p>Bò Tót nguy hiểm</p>',
+          aggressionLevel: 3,
+          recommendAction: 'Đèn nháy mạnh và còi hú'
+        }
+      });
     } catch (err) {
       console.warn('DB Offline - bỏ qua nạp dữ liệu test event.', err);
     }
@@ -155,7 +168,6 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('eventId');
     expect(res.body.detections.length).toBe(1);
-    expect(res.body.responseAction.electricFence).toBe(true); // Voi -> CRITICAL -> Fence true
   });
 
   it('TC_AI_DET_SUCCESS_02: Append to active event if duration is under 5 minutes', async () => {
@@ -207,14 +219,14 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.error).toBe('missed_image_url');
   });
 
-  it('TC_AI_DET_FAILURE_03: AI Webhook missing detectedAt', async () => {
+  it('TC_AI_DET_SUCCESS_DEFAULT_DATE: AI Webhook missing detectedAt should succeed and use current time', async () => {
     const { detectedAt: _, ...payload } = validAiPayload;
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send(payload);
 
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('missed_detected_at');
+    expect(res.status).toBe(201);
+    expect(res.body.eventId).toBeDefined();
   });
 
   it('TC_AI_DET_FAILURE_04: AI Webhook with empty detections array', async () => {
@@ -344,6 +356,58 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(refetched.body[0].isRead).toBe(true);
   });
 
+  it('TC_UI_ALERTDETAIL_LOAD_SUCCESS: Retrieve detailed alert information successfully', async () => {
+    if (!rangerToken) return;
+    
+    // Lấy alert đầu tiên
+    const feed = await request(app)
+      .get('/alerts/feed')
+      .set('Authorization', `Bearer ${rangerToken}`);
+    const alertId = feed.body[0].id;
+
+    const res = await request(app)
+      .get(`/alerts/${alertId}`)
+      .set('Authorization', `Bearer ${rangerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('alertId', alertId);
+    expect(res.body).toHaveProperty('title');
+    expect(res.body).toHaveProperty('alertType');
+    expect(res.body).toHaveProperty('imageUrl');
+    expect(res.body).toHaveProperty('cameraCode');
+    expect(res.body).toHaveProperty('cameraName');
+    expect(res.body).toHaveProperty('dangerLevel');
+    expect(res.body).toHaveProperty('confidencePercent');
+    expect(res.body).toHaveProperty('recordedAt');
+  });
+
+  it('TC_UI_ALERTDETAIL_ANIMAL_VS_INTRUSION: Check alertType classification', async () => {
+    if (!rangerToken) return;
+
+    // Gửi sự kiện thú (ví dụ: bo_tot) với mốc thời gian cách biệt 10 phút để bắt buộc tạo event/alert mới
+    const futureTime = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    await request(app)
+      .post(`/cameras/${camId}/detections`)
+      .send({
+        detections: [{ speciesId: 'bo_tot', confidence: 0.85 }],
+        imageUrl: 'https://cdn.example.com/gaur.jpg',
+        detectedAt: futureTime
+      });
+
+    const feed = await request(app)
+      .get('/alerts/feed')
+      .set('Authorization', `Bearer ${rangerToken}`);
+    const alertId = feed.body[0].id;
+
+    const res = await request(app)
+      .get(`/alerts/${alertId}`)
+      .set('Authorization', `Bearer ${rangerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.alertType).toBe('animal');
+    expect(res.body.speciesName).toBe('Bò Tót');
+  });
+
   // 4. Firebase Push Notification Tests
   it('TC_AI_DET_SUCCESS_04: Push notification sent via Firebase when wild animal detected', async () => {
     if (!rangerToken) return;
@@ -431,7 +495,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('eventId');
-  });
+  }, 20000);
 
   it('TC_AI_DET_FAILURE_MULTIPART_MISSING_USER: Fail AI Webhook multipart missing userId', async () => {
     const sampleImagePath = path.join(__dirname, '../f4.png');

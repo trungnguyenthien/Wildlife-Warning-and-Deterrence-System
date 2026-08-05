@@ -93,13 +93,7 @@ step_done "VS Code"
 
 # A4. PostgreSQL
 step_start "Cài đặt & khởi động PostgreSQL"
-if ! command -v psql &> /dev/null; then
-    log_info "Chưa tìm thấy PostgreSQL, đang cài qua winget..."
-    cmd.exe /c "winget install PostgreSQL.PostgreSQL --silent --accept-source-agreements --accept-package-agreements"
-    log_warn "EDB PostgreSQL Installer chạy ngầm - nếu có hộp thoại hiện ra, dùng mật khẩu 'password' và cổng 5432."
-else
-    log_skip "PostgreSQL đã có sẵn."
-fi
+log_skip "Tạm thời bỏ qua cài đặt PostgreSQL theo yêu cầu của Bệ Hạ."
 
 PG_BIN=""
 for v in 16 15 14; do
@@ -111,36 +105,41 @@ for v in 16 15 14; do
 done
 [ -n "$PG_BIN" ] && export PATH="$PG_BIN:$PATH"
 
-log_info "Đang khởi động dịch vụ PostgreSQL..."
-cmd.exe /c "net start postgresql-x64-16" &>/dev/null || \
-cmd.exe /c "net start postgresql-x64-15" &>/dev/null || \
-cmd.exe /c "net start postgresql-x64-14" &>/dev/null || log_warn "Không khởi động được service qua 'net start' (có thể đã chạy sẵn hoặc thiếu quyền admin)."
+if command -v psql &> /dev/null; then
+    log_info "Đang khởi động dịch vụ PostgreSQL..."
+    cmd.exe /c "net start postgresql-x64-16" &>/dev/null || \
+    cmd.exe /c "net start postgresql-x64-15" &>/dev/null || \
+    cmd.exe /c "net start postgresql-x64-14" &>/dev/null || log_warn "Không khởi động được service qua 'net start' (có thể đã chạy sẵn hoặc thiếu quyền admin)."
 
-log_info "Đang chờ dịch vụ PostgreSQL sẵn sàng..."
-if command -v pg_isready &> /dev/null; then
-    RETRY=0
-    until pg_isready -h localhost -p 5432 &>/dev/null; do
-        RETRY=$((RETRY + 1))
-        log_info "  ...chờ PostgreSQL (lần $RETRY)"
-        sleep 1
-        if [ "$RETRY" -ge 30 ]; then
-            log_warn "PostgreSQL chưa sẵn sàng sau 30s, tiếp tục nhưng bước tạo DB có thể lỗi."
-            break
-        fi
-    done
+    log_info "Đang chờ dịch vụ PostgreSQL sẵn sàng..."
+    if command -v pg_isready &> /dev/null; then
+        RETRY=0
+        until pg_isready -h localhost -p 5432 &>/dev/null; do
+            RETRY=$((RETRY + 1))
+            log_info "  ...chờ PostgreSQL (lần $RETRY)"
+            sleep 1
+            if [ "$RETRY" -ge 30 ]; then
+                log_warn "PostgreSQL chưa sẵn sàng sau 30s, tiếp tục nhưng bước tạo DB có thể lỗi."
+                break
+            fi
+        done
+    else
+        sleep 5
+    fi
+    log_info "Khởi tạo database (wildlife_dev, wildlife_test) nếu chưa tồn tại..."
+    PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_dev'" | grep -q 1 &>/dev/null || \
+    PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_dev;" &>/dev/null && log_info "Đã tạo database wildlife_dev." || log_skip "wildlife_dev đã tồn tại."
+
+    PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_test'" | grep -q 1 &>/dev/null || \
+    PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_test;" &>/dev/null && log_info "Đã tạo database wildlife_test." || log_skip "wildlife_test đã tồn tại."
 else
-    sleep 5
+    log_skip "Chưa cài đặt psql. Bỏ qua khởi động dịch vụ và tạo database."
 fi
-log_info "Khởi tạo database (wildlife_dev, wildlife_test) nếu chưa tồn tại..."
-PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_dev'" | grep -q 1 &>/dev/null || \
-PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_dev;" &>/dev/null && log_info "Đã tạo database wildlife_dev." || log_skip "wildlife_dev đã tồn tại."
-
-PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "SELECT 1 FROM pg_database WHERE datname = 'wildlife_test'" | grep -q 1 &>/dev/null || \
-PGPASSWORD=password psql -h localhost -U postgres -d postgres -c "CREATE DATABASE wildlife_test;" &>/dev/null && log_info "Đã tạo database wildlife_test." || log_skip "wildlife_test đã tồn tại."
 step_done "PostgreSQL"
 
 # A5. Node modules + env files + prisma
 step_start "Cài node_modules, tạo file .env, khởi tạo Prisma"
+cd "$SCRIPT_DIR/wildlife-mobile-server" || exit 1
 log_info "Đang chạy npm install (có thể mất vài phút)..."
 if command -v npm &> /dev/null; then
     npm install
@@ -180,10 +179,14 @@ else
 fi
 
 log_info "Đẩy schema Prisma lên database local (db push)..."
-if command -v npx &> /dev/null; then
-    npx dotenv-cli -e .env.local -- npx prisma db push
-elif command -v npx.cmd &> /dev/null; then
-    npx.cmd dotenv-cli -e .env.local -- npx.cmd prisma db push
+if command -v psql &> /dev/null; then
+    if command -v npx &> /dev/null; then
+        npx dotenv-cli -e .env.local -- npx prisma db push
+    elif command -v npx.cmd &> /dev/null; then
+        npx.cmd dotenv-cli -e .env.local -- npx.cmd prisma db push
+    fi
+else
+    log_warn "Không tìm thấy psql. Bỏ qua bước đẩy schema Prisma lên database local (db push)."
 fi
 
 log_info "Sinh Prisma client (generate)..."
@@ -193,6 +196,7 @@ elif command -v npx.cmd &> /dev/null; then
     npx.cmd prisma generate
 fi
 step_done "Node modules / env / Prisma"
+cd "$SCRIPT_DIR" || exit 1
 
 # A6. VS Code extensions
 step_start "Cài VS Code extensions"
@@ -239,32 +243,48 @@ setx_if_changed() {
 
 # B1. JDK 17
 step_start "Cài đặt JDK 17 (Microsoft OpenJDK)"
+PORTABLE_JDK="/c/Users/NGOC LAN/.openjdk/jdk-17.0.19+10"
+if [ -d "$PORTABLE_JDK" ]; then
+    export JAVA_HOME="$PORTABLE_JDK"
+    export PATH="$PORTABLE_JDK/bin:$PATH"
+    log_info "Tìm thấy JDK 17 di động tại $PORTABLE_JDK"
+fi
+
 if ! command -v java &> /dev/null; then
-    log_info "Chưa có Java, đang cài Microsoft OpenJDK 17 qua winget..."
-    cmd.exe /c "winget install Microsoft.OpenJDK.17 --silent --accept-source-agreements --accept-package-agreements"
-    log_info "winget install JDK hoàn tất (exit code $?)"
+    log_warn "Chưa tìm thấy Java trong PATH."
 else
     log_skip "Java đã có sẵn: $(java -version 2>&1 | head -n 1)"
 fi
 
-JAVA_HOME_PATH=$(find "/c/Program Files/Microsoft" -maxdepth 1 -iname "jdk-17*" 2>/dev/null | head -n 1)
+JAVA_HOME_PATH=""
+if [ -d "$PORTABLE_JDK" ]; then
+    JAVA_HOME_PATH="$PORTABLE_JDK"
+else
+    JAVA_HOME_PATH=$(find "/c/Program Files/Microsoft" -maxdepth 1 -iname "jdk-17*" 2>/dev/null | head -n 1)
+fi
+
 if [ -n "$JAVA_HOME_PATH" ]; then
     JAVA_HOME_WIN=$(to_win_path "$JAVA_HOME_PATH")
     setx_if_changed "JAVA_HOME" "$JAVA_HOME_WIN"
 else
-    log_warn "Không tìm thấy thư mục JDK 17 để set JAVA_HOME. Mở terminal mới sau khi cài xong rồi chạy lại script."
+    log_warn "Không tìm thấy thư mục JDK 17. Hãy tự cài đặt Microsoft OpenJDK 17 ngoài Windows."
 fi
 step_done "JDK 17"
 
 # B2. Android Studio
 step_start "Cài đặt Android Studio"
-ANDROID_SDK_DIR="$LOCALAPPDATA/Android/Sdk"
-[ -z "$LOCALAPPDATA" ] && ANDROID_SDK_DIR="$HOME/AppData/Local/Android/Sdk"
+# Tự động nhận diện thư mục SDK tùy chỉnh của Bệ Hạ
+if [ -d "$LOCALAPPDATA/Google/AndroidSDK" ]; then
+    ANDROID_SDK_DIR="$LOCALAPPDATA/Google/AndroidSDK"
+elif [ -d "$HOME/AppData/Local/Google/AndroidSDK" ]; then
+    ANDROID_SDK_DIR="$HOME/AppData/Local/Google/AndroidSDK"
+else
+    ANDROID_SDK_DIR="$LOCALAPPDATA/Android/Sdk"
+    [ -z "$LOCALAPPDATA" ] && ANDROID_SDK_DIR="$HOME/AppData/Local/Android/Sdk"
+fi
 
 if ! command -v studio64.exe &> /dev/null && [ ! -d "/c/Program Files/Android/Android Studio" ]; then
-    log_info "Chưa có Android Studio, đang cài qua winget..."
-    cmd.exe /c "winget install Google.AndroidStudio --silent --accept-source-agreements --accept-package-agreements"
-    log_info "winget install Android Studio hoàn tất (exit code $?)"
+    log_skip "Tạm thời bỏ qua tự động cài Android Studio theo yêu cầu của Bệ Hạ."
 else
     log_skip "Android Studio đã có sẵn."
 fi

@@ -15,6 +15,8 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <!-- Ably JS SDK -->
+    <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 
     <style>
       :root {
@@ -941,28 +943,27 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN: WebSocket & Hardware Simulator (Downlink) -->
+      <!-- RIGHT COLUMN: Ably Realtime & Hardware Simulator (Downlink) -->
       <section class="card" style="justify-content: flex-start;">
         <div class="card-title-bar">
-          <div class="card-title">WebSocket &amp; Hardware Simulator (Downlink)</div>
+          <div class="card-title">Ably Realtime &amp; Hardware Simulator (Downlink)</div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="ws-environment">Môi trường</label>
+            <label for="ws-environment">Môi trường Broker</label>
             <select id="ws-environment">
-              <option value="production">Production (Vercel)</option>
-              <option value="local">Local (localhost:5001)</option>
+              <option value="production">Ably Cloud Service</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="ws-url">WebSocket URL</label>
-            <input type="text" id="ws-url" value="wss://wildlife-warning-and-deterrence-sys.vercel.app" placeholder="Địa chỉ WebSocket..." required />
+            <label for="ws-url">Ably API Key (ABLY_AI_SERVER_API_KEY)</label>
+            <input type="text" id="ws-url" value="abc123.DEF456:ghIjKlmNoPqrSTuv_ai" placeholder="Nhập Ably API Key..." required />
           </div>
         </div>
 
         <div class="form-row" style="margin-top: -0.25rem;">
-          <button type="button" class="btn" id="btn-connect-ws" style="background-color: var(--success-accent); box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);">🔗 Kết nối WS</button>
+          <button type="button" class="btn" id="btn-connect-ws" style="background-color: var(--success-accent); box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);">🔗 Kết nối Ably</button>
           <button type="button" class="btn btn-danger-outline" id="btn-disconnect-ws" disabled>🔌 Ngắt kết nối</button>
         </div>
 
@@ -1044,7 +1045,9 @@
       // Browser state
       let activeDetections = [];
       let currentSelectedFile = null;
-      let wsConnection = null;
+      let ablyConnection = null;
+      let controlChannel = null;
+      let ackChannel = null;
       let lastReceivedCommand = null;
 
       // Active timers for hardware animation
@@ -1410,10 +1413,11 @@
           });
 
           let responseData;
+          const rawText = await response.text();
           try {
-            responseData = await response.json();
+            responseData = JSON.parse(rawText);
           } catch {
-            responseData = await response.text();
+            responseData = rawText;
           }
 
           if (response.ok) {
@@ -1459,66 +1463,72 @@
         if (ackError.disabled) ackError.value = '';
       });
 
-      // WebSocket connection setup
+      // Ably connection setup
       btnConnectWs.addEventListener('click', () => {
-        const userId = userIdInput.value.trim() || 'u_rg';
-        const baseWsUrl = wsUrlInput.value.trim();
-        const wsEndpointUrl = `${baseWsUrl}/ws?userId=${userId}`;
+        const ablyKey = wsUrlInput.value.trim();
+        const cameraId = cameraIdInput.value.trim() || 'CAM_EVT_01';
 
-        logToTerminal(`[SYSTEM] Bắt đầu kết nối WebSocket tới: ${wsEndpointUrl}`, 'sys');
+        if (!ablyKey) {
+          logToTerminal('[ERROR] Vui lòng nhập Ably API Key (AI Server Key).', 'err');
+          return;
+        }
+
+        logToTerminal(`[SYSTEM] Bắt đầu kết nối Ably Realtime cho Camera ID: ${cameraId}`, 'sys');
         btnConnectWs.disabled = true;
         connectionStatus.className = 'status-pill connecting';
         connectionStatus.textContent = 'CONNECTING';
 
         try {
-          wsConnection = new WebSocket(wsEndpointUrl);
+          ablyConnection = new Ably.Realtime({ key: ablyKey });
 
-          wsConnection.onopen = () => {
-            logToTerminal('[SYSTEM] Đã thiết lập kết nối thành công (CONNECTED). Lắng nghe tin nhắn...', 'sys');
+          ablyConnection.connection.on('connected', () => {
+            logToTerminal('[SYSTEM] Đã thiết lập kết nối Ably thành công (CONNECTED).', 'sys');
             btnDisconnectWs.disabled = false;
             btnConnectWs.disabled = true;
             connectionStatus.className = 'status-pill connected';
             connectionStatus.textContent = 'CONNECTED';
-          };
 
-          wsConnection.onclose = (event) => {
-            logToTerminal(`[SYSTEM] Ngắt kết nối WebSocket (Mã: ${event.code}).`, 'sys');
-            resetWsState();
-          };
+            // Đăng ký kênh truyền control và ack
+            controlChannel = ablyConnection.channels.get(`camera:control:${cameraId}`);
+            ackChannel = ablyConnection.channels.get(`camera:ack:${cameraId}`);
 
-          wsConnection.onerror = (err) => {
-            logToTerminal(`[ERROR] Lỗi kết nối WebSocket xảy ra.`, 'err');
-            console.error(err);
-            resetWsState();
-          };
-
-          wsConnection.onmessage = (event) => {
-            logToTerminal(`[RECEIVED] ${event.data}`, 'in');
-            
-            try {
-              const data = JSON.parse(event.data);
-              if (data.event === 'DEVICE_COMMAND') {
+            controlChannel.subscribe('message', (message) => {
+              const data = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
+              logToTerminal(`[RECEIVED] ${JSON.stringify(data)}`, 'in');
+              
+              if (data && data.event === 'DEVICE_COMMAND') {
                 handleDeviceCommand(data.payload);
               }
-            } catch (e) {
-              logToTerminal(`[ERROR] Không thể phân tích dữ liệu JSON: ${e.message}`, 'err');
-            }
-          };
+            });
+            logToTerminal(`[SYSTEM] Đang lắng nghe lệnh tại kênh: camera:control:${cameraId}`, 'sys');
+          });
+
+          ablyConnection.connection.on('closed', () => {
+            logToTerminal('[SYSTEM] Kết nối Ably đã đóng.', 'sys');
+            resetAblyState();
+          });
+
+          ablyConnection.connection.on('failed', (err) => {
+            logToTerminal(`[ERROR] Kết nối Ably thất bại: ${err.reason || err.message}`, 'err');
+            resetAblyState();
+          });
 
         } catch (e) {
-          logToTerminal(`[ERROR] Khởi chạy kết nối thất bại: ${e.message}`, 'err');
-          resetWsState();
+          logToTerminal(`[ERROR] Khởi chạy kết nối Ably thất bại: ${e.message}`, 'err');
+          resetAblyState();
         }
       });
 
       btnDisconnectWs.addEventListener('click', () => {
-        if (wsConnection) {
-          wsConnection.close();
+        if (ablyConnection) {
+          ablyConnection.close();
         }
       });
 
-      function resetWsState() {
-        wsConnection = null;
+      function resetAblyState() {
+        ablyConnection = null;
+        controlChannel = null;
+        ackChannel = null;
         btnConnectWs.disabled = false;
         btnDisconnectWs.disabled = true;
         btnManualAck.disabled = true;
@@ -1622,8 +1632,8 @@
 
       // Send ACK back
       function sendAckResponse() {
-        if (!wsConnection || wsConnection.readyState !== WebSocket.OPEN) {
-          logToTerminal('[ERROR] Không thể gửi ACK: Kết nối WebSocket đang đóng.', 'err');
+        if (!ablyConnection || !ackChannel) {
+          logToTerminal('[ERROR] Không thể gửi ACK: Chưa kết nối Ably.', 'err');
           return;
         }
         if (!lastReceivedCommand) {
@@ -1645,8 +1655,13 @@
         };
 
         const jsonStr = JSON.stringify(ackMsg);
-        wsConnection.send(jsonStr);
-        logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+        ackChannel.publish('message', ackMsg, (err) => {
+          if (err) {
+            logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
+          } else {
+            logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+          }
+        });
 
         btnManualAck.disabled = true;
       }

@@ -20,10 +20,21 @@ import com.wildlife.deterrence.ui.main.MainScreen
 import com.wildlife.deterrence.ui.screens.LoginScreen
 import com.wildlife.deterrence.ui.screens.RegisterScreen
 import com.wildlife.deterrence.ui.screens.SplashScreen
+import com.wildlife.deterrence.ui.screens.CameraDetailScreen
+import com.wildlife.deterrence.ui.screens.AlertDetailScreen
+import com.wildlife.deterrence.ui.screens.AllDetectionsScreen
 import com.wildlife.deterrence.viewmodel.LoginViewModel
 import com.wildlife.deterrence.viewmodel.MainViewModel
 import com.wildlife.deterrence.viewmodel.RegisterViewModel
 import com.wildlife.deterrence.viewmodel.SplashViewModel
+import com.wildlife.deterrence.viewmodel.CameraDetailViewModel
+import com.wildlife.deterrence.viewmodel.AlertDetailViewModel
+import com.wildlife.deterrence.viewmodel.AllDetectionsViewModel
+import com.wildlife.deterrence.ui.screens.SmsSetupScreen
+import com.wildlife.deterrence.viewmodel.SmsSetupViewModel
+import com.wildlife.deterrence.ui.screens.BehaviorSpeciesListScreen
+import com.wildlife.deterrence.ui.screens.BehaviorConfigScreen
+import com.wildlife.deterrence.viewmodel.BehaviorViewModel
 
 @Composable
 fun MainNavigation() {
@@ -97,14 +108,119 @@ fun MainNavigation() {
           val mainViewModel: MainViewModel = viewModel {
             MainViewModel(tokenManager)
           }
+
+          val pendingDeepLink = DeepLinkHandler.pendingDestination
+          LaunchedEffect(pendingDeepLink) {
+            if (pendingDeepLink != null) {
+              backStack.add(pendingDeepLink)
+              DeepLinkHandler.pendingDestination = null
+            }
+          }
+
           MainScreen(
             viewModel = mainViewModel,
+            tokenManager = tokenManager,
             onLogout = {
               tokenManager.deleteToken()
               backStack.clear()
               backStack.add(Login)
             },
+            onNavigateToCameraDetail = { cameraId ->
+              backStack.add(CameraDetail(cameraId))
+            },
+            onNavigateToAlertDetail = { alertId, speciesName ->
+              backStack.add(AlertDetail(alertId, speciesName))
+            },
+            onNavigateToAllDetections = { timeRange, speciesId, cameraId ->
+              backStack.add(AllDetections(timeRange, speciesId, cameraId))
+            },
+            onNavigateToSmsSetup = {
+              backStack.add(SmsSetup)
+            },
+            onNavigateToBehaviorSpeciesList = {
+              backStack.add(BehaviorSpeciesList)
+            },
             modifier = Modifier.safeDrawingPadding()
+          )
+        }
+
+        entry<SmsSetup> {
+          val smsSetupViewModel: SmsSetupViewModel = viewModel {
+            SmsSetupViewModel(tokenManager)
+          }
+          SmsSetupScreen(
+            viewModel = smsSetupViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            }
+          )
+        }
+
+        entry<BehaviorSpeciesList> {
+          val behaviorViewModel: BehaviorViewModel = viewModel {
+            BehaviorViewModel(tokenManager)
+          }
+          BehaviorSpeciesListScreen(
+            viewModel = behaviorViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            },
+            onSpeciesClick = { speciesId, speciesName ->
+              backStack.add(BehaviorConfig(speciesId, speciesName))
+            }
+          )
+        }
+
+        entry<BehaviorConfig> { key ->
+          val behaviorViewModel: BehaviorViewModel = viewModel {
+            BehaviorViewModel(tokenManager)
+          }
+          BehaviorConfigScreen(
+            speciesId = key.speciesId,
+            speciesName = key.speciesName,
+            viewModel = behaviorViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            }
+          )
+        }
+
+        entry<CameraDetail> { key ->
+          val cameraDetailViewModel: CameraDetailViewModel = viewModel {
+            CameraDetailViewModel(key.cameraId, tokenManager)
+          }
+          CameraDetailScreen(
+            viewModel = cameraDetailViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            }
+          )
+        }
+
+        entry<AlertDetail> { key ->
+          val alertDetailViewModel: AlertDetailViewModel = viewModel {
+            AlertDetailViewModel(key.alertId, key.speciesName, tokenManager)
+          }
+          AlertDetailScreen(
+            viewModel = alertDetailViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            }
+          )
+        }
+
+        entry<AllDetections> { key ->
+          val allDetectionsViewModel: AllDetectionsViewModel = viewModel {
+            AllDetectionsViewModel(key.timeRange, key.speciesId, key.cameraId, tokenManager)
+          }
+          AllDetectionsScreen(
+            viewModel = allDetectionsViewModel,
+            onBackClick = {
+              backStack.removeLastOrNull()
+            },
+            onAlertClick = { alertId, speciesName ->
+              backStack.add(AlertDetail(alertId, speciesName))
+            }
           )
         }
       },

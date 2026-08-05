@@ -16,8 +16,6 @@
 #      * speakerWarn (Boolean: true/false)
 #      * audioSampleId (String: A_gunshot, A_dog_bark, A_alarm_siren, null)
 #      * audioIntensity (Integer: 0-100)
-#      * electricFence (Boolean: true/false)
-#      * electricFenceDuration (Integer: >= 0)
 #      * silentAlert (Boolean: true/false)
 # ==============================================================================
 
@@ -25,7 +23,6 @@
   inheritPreset: "@critical_danger"
   override:
     ledIntensity: 100
-    electricFenceDuration: 15
     silentAlert: false
 
 - speciesId: "ho_dong_duong"
@@ -33,13 +30,11 @@
   override:
     ledColor: "RED"
     audioSampleId: "A_gunshot"
-    electricFence: false
 
 - speciesId: "monkey"
   inheritPreset: "@medium_danger"
   override:
     ledColor: "WHITE"
-    electricFence: false
     silentAlert: false
 
 - speciesId: "human_border_intruder"

@@ -89,8 +89,6 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
         speakerWarn: customConfig.speakerSampleId ? true : false,
         audioSampleId: customConfig.audioSampleId,
         audioIntensity: customConfig.audioIntensity,
-        electricFence: customConfig.fenceLevel ? true : false,
-        electricFenceDuration: customConfig.ledDurationSeconds, // Giả định trường tương đương
         silentAlert: customConfig.silentAlert
       });
     }
@@ -118,8 +116,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     speakerWarn,
     audioSampleId,
     audioIntensity,
-    electricFence,
-    electricFenceDuration,
     silentAlert
   } = req.body;
 
@@ -129,9 +125,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
   }
   if (speakerWarn === undefined) {
     return res.status(400).json({ error: 'missed_speaker_warn', message: 'Thiếu thông tin bắt buộc: speakerWarn.' });
-  }
-  if (electricFence === undefined) {
-    return res.status(400).json({ error: 'missed_electric_fence', message: 'Thiếu thông tin bắt buộc: electricFence.' });
   }
   if (silentAlert === undefined) {
     return res.status(400).json({ error: 'missed_silent_alert', message: 'Thiếu thông tin bắt buộc: silentAlert.' });
@@ -149,9 +142,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
   }
   if (audioIntensity !== undefined && (audioIntensity < 0 || audioIntensity > 100)) {
     return res.status(400).json({ error: 'invalid_audio_intensity', message: 'Cường độ âm lượng loa (audioIntensity) phải nằm trong khoảng từ 0 đến 100.' });
-  }
-  if (electricFenceDuration !== undefined && electricFenceDuration < 0) {
-    return res.status(400).json({ error: 'invalid_electric_fence_duration', message: 'Thời gian hàng rào điện (electricFenceDuration) phải lớn hơn hoặc bằng 0.' });
   }
 
   try {
@@ -172,7 +162,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       ledFlashRate: ledFlash ? 'FAST' : null,
       ledColor: ledColor || null,
       ledDurationSeconds: ledIntensity || 0, // Ánh xạ trường
-      fenceLevel: electricFence ? 'HIGH' : null,
       silentAlert,
       lastModifiedBy: req.user!.id
     };
@@ -198,8 +187,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       speakerWarn,
       audioSampleId: savedConfig.audioSampleId,
       audioIntensity: savedConfig.audioIntensity,
-      electricFence,
-      electricFenceDuration,
       silentAlert: savedConfig.silentAlert
     });
   } catch (error) {
@@ -263,7 +250,6 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
       ledFlashRate: preset.ledFlash ? 'FAST' : null,
       ledColor: (preset.ledColor as string | null) || null,
       ledDurationSeconds: typeof preset.ledIntensity === 'number' ? preset.ledIntensity : null,
-      fenceLevel: preset.electricFence ? 'HIGH' : null,
       silentAlert: typeof preset.silentAlert === 'boolean' ? preset.silentAlert : false,
       lastModifiedBy: req.user!.id
     };

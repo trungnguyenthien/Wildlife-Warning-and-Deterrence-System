@@ -689,3 +689,319 @@ Nếu ClientJS cũng subscribe channel đó (như code mẫu ở mục 5), publi
 - Không nên gọi `channels.get()` nhiều lần cho cùng channel với option khác nhau — nên khai báo 1 lần và tái sử dụng biến `channel`.
 - Khi test xong, nhớ gọi `close()` để giải phóng connection, tránh chiếm dụng giới hạn 200 concurrent connections không cần thiết.
 - **Riêng ClientWeb:** mỗi tab/trình duyệt mở là 1 connection riêng — nếu bạn để nhiều tab tool mở song song mà quên đóng, dễ chiếm dụng quota connections không cần thiết. Nên chủ động bấm Disconnect hoặc đóng tab khi không dùng.
+
+---
+
+# Hướng dẫn tích hợp Ably trên Vercel Serverless (Node.js)
+
+Tài liệu này hướng dẫn triển khai Ably Pub/Sub trong môi trường **Vercel Serverless Functions** (Node.js runtime). Khác với server dài hạn (long-running server), serverless function có giới hạn thời gian thực thi và không giữ được kết nối WebSocket liên tục, nên kiến trúc tích hợp cần thiết kế khác so với ClientJS/ClientPY/ClientWeb trong tài liệu trước.
+
+---
+
+## 0. Vì sao không dùng Realtime SDK trực tiếp trong Serverless Function
+
+Serverless Function có vòng đời: nhận request → xử lý → trả response → container có thể bị hủy hoặc đóng băng bất kỳ lúc nào. Nếu bạn khởi tạo `Ably.Realtime` (giữ kết nối WebSocket mở) bên trong 1 function:
+
+- Function trả response xong, Vercel có thể ngay lập tức đóng container → WebSocket bị ngắt.
+- Không có gì đảm bảo function đó sẽ tiếp tục "sống" để lắng nghe message tiếp theo.
+- Tốn thời gian khởi tạo + chờ connect chỉ để publish 1 message rồi đóng — lãng phí so với dùng REST.
+
+**Nguyên tắc thiết kế:** trong serverless, **publish thì dùng REST**, còn **subscribe (nhận real-time) phải chuyển ra khỏi serverless function** — đưa xuống trình duyệt (client-side) hoặc dùng cơ chế event-driven (Webhook/Queue) để Ably tự "gọi" lại serverless function khi có message mới, thay vì function tự ngồi chờ.
+
+---
+
+## 1. Kiến trúc tổng quan
+
+```mermaid
+graph TB
+    subgraph "Browser (Client-side)"
+        FE["Trang web<br/>(Ably Realtime SDK)"]
+    end
+    subgraph "Vercel Serverless Functions"
+        F1["/api/ably-token<br/>(cấp token cho browser)"]
+        F2["/api/publish<br/>(publish message, dùng REST)"]
+        F3["/api/ably-webhook<br/>(nhận sự kiện từ Ably)"]
+    end
+    subgraph "Ably Cloud"
+        CH["Channel"]
+        WH["Webhook Integration"]
+    end
+
+    FE -- "1. Lấy token" --> F1
+    F1 -- "createTokenRequest" --> FE
+    FE -- "2. Kết nối bằng token,<br/>subscribe channel" --> CH
+    F2 -- "3. REST publish" --> CH
+    CH -- "4. Deliver realtime" --> FE
+    CH -- "5. Trigger event" --> WH
+    WH -- "6. Gọi HTTP" --> F3
+```
+
+**Ba vai trò tách biệt rõ ràng:**
+
+| Thành phần | Vai trò | Dùng SDK nào |
+|---|---|---|
+| `/api/ably-token` | Cấp token ngắn hạn cho browser, tránh lộ API key gốc | `Ably.Rest` |
+| `/api/publish` | Publish message (server-to-channel), stateless, one-off | `Ably.Rest` |
+| Browser (client-side) | Subscribe, nhận message real-time liên tục | `Ably.Realtime` |
+| `/api/ably-webhook` | Nhận sự kiện từ Ably khi có message (event-driven, không cần giữ connection) | Không cần Ably SDK, chỉ là HTTP endpoint |
+
+---
+
+## 2. Chuẩn bị
+
+### 2.1. Cài đặt
+
+```bash
+npm install ably
+```
+
+### 2.2. Biến môi trường trên Vercel
+
+Vào **Project Settings → Environment Variables** trên Vercel Dashboard, thêm:
+
+| Key | Giá trị | Ghi chú |
+|---|---|---|
+| `ABLY_API_KEY` | `abc123.DEF456:ghIjKlmNoPqrSTuv` | Key gốc — chỉ dùng ở phía server (serverless function), **không bao giờ** đưa xuống client |
+
+> **Lưu ý:** Không đặt tiền tố `NEXT_PUBLIC_` (hoặc tương đương lộ ra client) cho biến này. API key phải chỉ tồn tại trong môi trường server-side của Vercel Function.
+
+### 2.3. Cấu trúc thư mục (ví dụ dùng Next.js App Router)
+
+```
+project/
+├── app/
+│   ├── api/
+│   │   ├── ably-token/route.js
+│   │   ├── publish/route.js
+│   │   └── ably-webhook/route.js
+│   └── page.js          # trang chứa client-side subscribe
+├── package.json
+```
+
+> Nếu dùng Vercel Functions thuần (không qua Next.js), cấu trúc là `api/ably-token.js`, `api/publish.js`, `api/ably-webhook.js` ở thư mục gốc — nội dung code bên dưới áp dụng tương tự, chỉ khác cách export handler.
+
+---
+
+## 3. Publish message từ Serverless Function (dùng REST)
+
+### 3.1. `app/api/publish/route.js`
+
+```javascript
+import Ably from 'ably';
+
+const rest = new Ably.Rest(process.env.ABLY_API_KEY);
+
+export async function POST(req) {
+  const { channelName, eventName, data } = await req.json();
+
+  if (!channelName || !data) {
+    return Response.json({ error: 'Thiếu channelName hoặc data' }, { status: 400 });
+  }
+
+  const channel = rest.channels.get(channelName);
+  await channel.publish(eventName || 'message', data);
+
+  return Response.json({ ok: true });
+}
+```
+
+### 3.2. Gọi thử bằng curl
+
+```bash
+curl -X POST https://your-app.vercel.app/api/publish \
+  -H "Content-Type: application/json" \
+  -d '{"channelName": "demo-channel", "eventName": "message", "data": {"text": "Xin chào từ Vercel"}}'
+```
+
+### 3.3. Vì sao dùng `Ably.Rest` chứ không phải `Ably.Realtime`
+
+`Ably.Rest` gửi 1 HTTP request đơn giản tới Ably để publish rồi kết thúc — không cần bắt tay (handshake) WebSocket, không cần chờ trạng thái `connected`. Phù hợp tuyệt đối với vòng đời ngắn của serverless function: request vào → publish → trả response → function kết thúc.
+
+---
+
+## 4. Cấp Token cho Browser (thay vì lộ API key)
+
+### 4.1. `app/api/ably-token/route.js`
+
+```javascript
+import Ably from 'ably';
+
+const rest = new Ably.Rest(process.env.ABLY_API_KEY);
+
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const clientId = searchParams.get('clientId') || 'anonymous';
+
+  const tokenRequest = await rest.auth.createTokenRequest({
+    clientId,
+    // Giới hạn quyền nếu cần, ví dụ chỉ cho publish/subscribe trên 1 channel cụ thể:
+    // capability: JSON.stringify({ 'demo-channel': ['publish', 'subscribe'] }),
+  });
+
+  return Response.json(tokenRequest);
+}
+```
+
+### 4.2. Browser dùng token này để kết nối
+
+```javascript
+const realtime = new Ably.Realtime({
+  authUrl: '/api/ably-token?clientId=client-web',
+});
+```
+
+Mỗi lần cần token mới (token hết hạn), Ably SDK ở browser tự động gọi lại `authUrl` — bạn không cần tự quản lý việc refresh token.
+
+---
+
+## 5. Subscribe (nhận message real-time) — thực hiện ở Browser
+
+### 5.1. Sơ đồ luồng
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant TokenAPI as /api/ably-token
+    participant Ably
+    participant PublishAPI as /api/publish
+
+    Browser->>TokenAPI: GET (xin token)
+    TokenAPI-->>Browser: tokenRequest
+    Browser->>Ably: connect(token)
+    Browser->>Ably: channel.subscribe('message', cb)
+
+    Note over PublishAPI,Ably: Một request khác (ví dụ từ CRON job, webhook, hoặc form submit)
+    PublishAPI->>Ably: REST publish('message', data)
+    Ably-->>Browser: deliver message realtime
+```
+
+### 5.2. Code phía Browser (component React ví dụ)
+
+```javascript
+'use client';
+import { useEffect, useState } from 'react';
+import Ably from 'ably';
+
+export default function ChatView() {
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const realtime = new Ably.Realtime({
+      authUrl: '/api/ably-token?clientId=client-web',
+    });
+
+    const channel = realtime.channels.get('demo-channel');
+
+    channel.subscribe('message', (msg) => {
+      setMessages((prev) => [...prev, msg.data]);
+    });
+
+    return () => {
+      realtime.close();
+    };
+  }, []);
+
+  return (
+    <ul>
+      {messages.map((m, i) => (
+        <li key={i}>{m.text}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+> Đây chính là vai trò **ClientWeb** đã mô tả ở tài liệu trước — chỉ khác là token lấy qua `/api/ably-token` (Vercel Function) thay vì hardcode API key trực tiếp.
+
+---
+
+## 6. Nhận sự kiện theo hướng Event-driven (Webhook) — thay thế cho việc "subscribe" trong serverless
+
+Nếu bạn thực sự cần **backend logic** (chạy trên Vercel) phản ứng lại mỗi khi có message mới trên channel — ví dụ: ghi log vào database, gửi notification, gọi API khác — thì không dùng subscribe theo kiểu giữ connection. Thay vào đó, cấu hình **Ably Integration (Webhook)** để Ably chủ động gọi HTTP tới serverless function của bạn mỗi khi có sự kiện.
+
+### 6.1. Sơ đồ
+
+```mermaid
+graph LR
+    A[Client bất kỳ publish message] --> CH[Ably Channel]
+    CH -- "Integration Rule<br/>(channel.message)" --> WH["POST tới<br/>/api/ably-webhook"]
+    WH --> DB[(Xử lý: lưu DB,<br/>gửi notification...)]
+```
+
+### 6.2. Cấu hình trên Ably Dashboard
+
+1. Vào app trên Ably Dashboard → tab **Integrations**.
+2. Chọn **New Integration Rule** → **Webhook** → **Generic**.
+3. **Source:** `Channel Lifecycle` hoặc `Channel Message` (tùy nhu cầu — thường chọn message để bắt mọi message publish).
+4. **Request URL:** `https://your-app.vercel.app/api/ably-webhook`.
+5. **Channel filter:** có thể giới hạn theo tên channel (ví dụ `demo-*`) để tránh nhận webhook không liên quan.
+
+### 6.3. `app/api/ably-webhook/route.js`
+
+```javascript
+export async function POST(req) {
+  const body = await req.json();
+
+  // body.messages là mảng các message Ably gửi kèm trong webhook
+  for (const msg of body.messages || []) {
+    console.log('[Webhook] Nhận message:', msg.data);
+    // TODO: xử lý — lưu DB, gửi email, gọi service khác...
+  }
+
+  return Response.json({ ok: true });
+}
+```
+
+> **Lưu ý bảo mật:** Nên xác thực request đến từ Ably (Ably hỗ trợ ký request bằng signature/HMAC hoặc bạn có thể thêm secret token vào query string của Request URL khi cấu hình) để tránh ai đó giả mạo gọi endpoint này.
+
+### 6.4. So sánh 2 cách "nhận message" trong hệ sinh thái Vercel
+
+| Cách | Phù hợp khi | Độ trễ | Độ phức tạp |
+|---|---|---|---|
+| Browser subscribe (mục 5) | Cần hiển thị real-time cho người dùng cuối (UI chat, dashboard) | Rất thấp (WebSocket) | Thấp |
+| Webhook → Serverless Function (mục 6) | Cần backend logic phản ứng với message (không hiển thị UI) | Có độ trễ nhỏ (HTTP round-trip qua Ably) | Trung bình (cần cấu hình Integration trên Ably Dashboard) |
+
+---
+
+## 7. Code mẫu tổng hợp — luồng hoàn chỉnh
+
+1. Browser gọi `/api/ably-token` → nhận token → kết nối Ably → subscribe `demo-channel`.
+2. Một nơi khác (form submit, CRON job, hoặc chính 1 API route khác) gọi `/api/publish` để gửi message.
+3. Ably deliver message tới browser đang subscribe (real-time).
+4. Song song, nếu có cấu hình Webhook, Ably cũng POST message đó tới `/api/ably-webhook` để backend xử lý thêm (ví dụ lưu log).
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant Vercel as Vercel Functions
+    participant Ably
+    participant Webhook as /api/ably-webhook
+
+    Browser->>Vercel: GET /api/ably-token
+    Vercel-->>Browser: token
+    Browser->>Ably: connect + subscribe
+
+    Note over Vercel,Ably: Sự kiện xảy ra (form submit...)
+    Vercel->>Ably: POST /api/publish → REST publish
+    Ably-->>Browser: deliver message (realtime)
+    Ably->>Webhook: POST webhook (event-driven)
+    Webhook->>Webhook: xử lý (lưu DB, log...)
+```
+
+---
+
+## 8. Chi phí message cần lưu ý (áp dụng nguyên tắc fan-out đã nêu ở tài liệu trước)
+
+- Publish qua `/api/publish` (REST) tính là **1 message** cho hành động publish, cộng thêm **1 message cho mỗi subscriber** nhận được (browser đang subscribe) — đúng công thức `1 + N` đã đề cập.
+- Nếu có cấu hình Webhook, việc Ably gọi tới `/api/ably-webhook` **không** tính thêm phí message riêng — webhook là cơ chế delivery tới 1 "subscriber" đặc biệt (HTTP endpoint), vẫn tính vào N như một subscriber thông thường.
+- Gói Free (6.000.000 message/tháng) vẫn đủ dùng cho nghiên cứu/demo với kiến trúc này, miễn không có quá nhiều browser đồng thời subscribe.
+
+---
+
+## 9. Tóm tắt các lưu ý quan trọng
+
+- **Không** khởi tạo `Ably.Realtime` bên trong serverless function để subscribe — luôn dùng `Ably.Rest` cho các thao tác publish một lần trong function.
+- **Không** đưa API key gốc xuống browser — luôn cấp token ngắn hạn qua 1 API route riêng (`/api/ably-token`).
+- Việc **subscribe/nhận real-time cho người dùng cuối** luôn thực hiện ở **browser (client-side)**, không phải trong serverless function.
+- Việc **backend cần phản ứng với message** (không phải hiển thị UI) nên dùng **Webhook Integration** của Ably thay vì cố gắng giữ kết nối trong function.
+- Đặt biến môi trường `ABLY_API_KEY` trên Vercel Dashboard, không hardcode trong code, không commit vào git.

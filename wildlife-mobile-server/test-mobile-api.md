@@ -278,48 +278,40 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
 
 #### 13. `PUT /response-configs/{cameraId}/{speciesId}` (Lưu cấu hình phòng vệ tự chọn)
 *   **TC_CFG_SAVE_SUCCESS_01: Save custom configuration successfully**
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "electricFence": true, "electricFenceDuration": 15, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `200 OK` hoặc `201 Created` trả về cấu hình đã lưu.
     *   **Xác thực Database (DB Verification):** Bản ghi được lưu/cập nhật thành công trong bảng `response_configs` với trường `last_modified_by` tự động cập nhật khớp với ID của user thực hiện.
 *   **TC_CFG_SAVE_FAILURE_01: Fail to save config due to missing ledFlash**
     *   **Mô tả:** Thiếu trường ledFlash.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "electricFence": true, "electricFenceDuration": 15, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_02: Fail to save config due to missing speakerWarn**
     *   **Mô tả:** Thiếu trường speakerWarn.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "audioSampleId": "A_gunshot", "audioIntensity": 85, "electricFence": true, "electricFenceDuration": 15, "silentAlert": false }`
-    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
-*   **TC_CFG_SAVE_FAILURE_03: Fail to save config due to missing electricFence**
-    *   **Mô tả:** Thiếu trường electricFence.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "electricFenceDuration": 15, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "audioSampleId": "A_gunshot", "audioIntensity": 85, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_04: Fail to save config due to missing silentAlert**
     *   **Mô tả:** Thiếu trường silentAlert.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85, "electricFence": true, "electricFenceDuration": 15 }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 90, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 85 }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_05: Fail to save config with invalid ledColor enum**
     *   **Mô tả:** Cường độ Led Color không thuộc Enum màu LED hỗ trợ (RED, YELLOW, WHITE, STROBE).
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "BLUE", "ledIntensity": 90, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "electricFence": false, "electricFenceDuration": 0, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "BLUE", "ledIntensity": 90, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_06: Fail to save config with ledIntensity too high**
     *   **Mô tả:** Cường độ LED lớn hơn 100%.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 150, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "electricFence": false, "electricFenceDuration": 0, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": 150, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_07: Fail to save config with ledIntensity negative**
     *   **Mô tả:** Cường độ LED nhỏ hơn 0%.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": -10, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "electricFence": false, "electricFenceDuration": 0, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": true, "ledColor": "RED", "ledIntensity": -10, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_08: Fail to save config with audioIntensity too high**
     *   **Mô tả:** Cường độ âm thanh loa lớn hơn 100%.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 120, "electricFence": false, "electricFenceDuration": 0, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": 120, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 *   **TC_CFG_SAVE_FAILURE_09: Fail to save config with audioIntensity negative**
     *   **Mô tả:** Cường độ âm thanh loa nhỏ hơn 0%.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": -5, "electricFence": false, "electricFenceDuration": 0, "silentAlert": false }`
-    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
-*   **TC_CFG_SAVE_FAILURE_10: Fail to save config with electricFenceDuration negative**
-    *   **Mô tả:** Thời gian sốc hàng rào điện nhỏ hơn 0.
-    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": false, "audioSampleId": "A_gunshot", "audioIntensity": 0, "electricFence": true, "electricFenceDuration": -10, "silentAlert": false }`
+    *   **Dữ liệu gửi đi (Request Body):** `{ "ledFlash": false, "ledColor": "RED", "ledIntensity": 0, "speakerWarn": true, "audioSampleId": "A_gunshot", "audioIntensity": -5, "silentAlert": false }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
 
 #### 14. `DELETE /response-configs/{cameraId}/{speciesId}` (Xóa cấu hình tự chọn để quay về mặc định)
@@ -513,3 +505,4 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
     *   **Kết quả mong đợi (Expected Response):** `201 Created` (hoặc `200 OK` tùy trường hợp gom nhóm sự kiện), sự kiện vẫn được lưu trữ vào DB.
     *   **Xác thực Side Effects:** Server in log lỗi khởi tạo/xác thực Firebase ra console, không crash ứng dụng.
+

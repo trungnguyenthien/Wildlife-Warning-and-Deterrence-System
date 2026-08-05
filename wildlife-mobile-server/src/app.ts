@@ -3,11 +3,11 @@ import cors from 'cors';
 import { authenticateToken } from './middlewares/auth';
 
 // Import các controller phẳng
-import { register, login, logout, me, updateMe } from './controllers/authController';
-import { listCameras, getCamera, renameCamera, streamCameras, testDevice } from './controllers/cameraController';
+import { register, login, logout, me, updateMe, getAblyToken } from './controllers/authController';
+import { listCameras, getCamera, renameCamera, streamCameras, testDevice, getCameraHistory } from './controllers/cameraController';
 import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples } from './controllers/configController';
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
-import { listEvents, listAlertFeed, readAlert, processDetection } from './controllers/eventController';
+import { listEvents, listAlertFeed, readAlert, processDetection, getAlertDetail, listNotificationsInbox } from './controllers/eventController';
 import { getSummary } from './controllers/statsController';
 import { uploadSnapshot } from './controllers/snapshotController';
 import { registerPushToken, deletePushToken } from './controllers/deviceController';
@@ -20,6 +20,18 @@ const upload = multer({ dest: '/tmp' });
 
 app.use(cors());
 app.use(express.json());
+
+// Rewrite /api/v1 prefix to / for compatibility with the spec
+app.use((req, _res, next) => {
+  if (req.url.startsWith('/api/v1')) {
+    req.url = req.url.substring(7);
+    if (!req.url.startsWith('/')) {
+      req.url = '/' + req.url;
+    }
+  }
+  next();
+});
+
 app.use('/tools', express.static(path.join(__dirname, '../../html_tool')));
 
 // ==========================================
@@ -35,6 +47,7 @@ app.get('/health', (_req, res) => {
 app.post('/auth/register', register);
 app.post('/auth/login', login);
 app.post('/auth/logout', authenticateToken, logout);
+app.get('/auth/ably-token', authenticateToken, getAblyToken);
 
 // ==========================================
 // 3. ENDPOINTS THÔNG TIN NGƯỜI DÙNG
@@ -48,6 +61,7 @@ app.patch('/users/me', authenticateToken, updateMe); // Chỉ dùng để test
 app.get('/cameras', authenticateToken, listCameras);
 app.get('/cameras/stream', authenticateToken, streamCameras);
 app.get('/cameras/:cameraId', authenticateToken, getCamera);
+app.get('/cameras/:cameraId/history', authenticateToken, getCameraHistory);
 app.patch('/cameras/:cameraId', authenticateToken, renameCamera);
 app.post('/cameras/:cameraId/devices/:deviceKey/test', authenticateToken, testDevice);
 app.post('/cameras/:cameraId/snapshots', authenticateToken, upload.single('image'), uploadSnapshot);
@@ -76,12 +90,14 @@ app.delete('/users/me/sms-recipients/:recipientId', authenticateToken, deleteSms
 // ==========================================
 app.post('/devices/push-token', authenticateToken, registerPushToken);
 app.delete('/devices/push-token', authenticateToken, deletePushToken);
+app.get('/notifications/inbox', authenticateToken, listNotificationsInbox);
 
 // ==========================================
 // 7. ENDPOINTS NHẬT KÝ SỰ KIỆN & CẢNH BÁO
 // ==========================================
 app.get('/events', authenticateToken, listEvents);
 app.get('/alerts/feed', authenticateToken, listAlertFeed);
+app.get('/alerts/:alertId', authenticateToken, getAlertDetail);
 app.post('/alerts/feed/:alertId/read', authenticateToken, readAlert);
 
 // ==========================================

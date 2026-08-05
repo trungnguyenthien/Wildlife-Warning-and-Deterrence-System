@@ -96,6 +96,19 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
       };
     }
 
+    // Tìm event gần nhất của camera này
+    const latestEvent = await prisma.event.findFirst({
+      where: { cameraId: camera.id },
+      orderBy: { detectedAt: 'desc' }
+    });
+    
+    const snapshot = latestEvent
+      ? {
+          url: latestEvent.snapshotUrl,
+          capturedAt: latestEvent.detectedAt.toISOString()
+        }
+      : null;
+
     return res.status(200).json({
       id: camera.id,
       name: camera.name,
@@ -106,6 +119,7 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
       },
       status: camera.status,
       liveFeedUrl: camera.liveFeedUrl,
+      snapshot,
       currentDetection
     });
   } catch (error) {
@@ -308,4 +322,109 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
     console.error('Lỗi khi gửi lệnh test thiết bị:', error);
     return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
   }
+}
+
+// 6. GET /cameras/:cameraId/history - Lấy lịch sử ghi nhận theo ngày
+export async function getCameraHistory(req: AuthenticatedRequest, res: Response) {
+  const { cameraId } = req.params;
+  const { date } = req.query; // YYYY-MM-DD
+  
+  try {
+    const camera = await prisma.camera.findUnique({
+      where: { id: cameraId }
+    });
+
+    if (!camera) {
+      return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
+    }
+
+    let startDate: Date;
+    let endDate: Date;
+
+    if (date) {
+      const dateStr = date as string;
+      startDate = new Date(`${dateStr}T00:00:00+07:00`);
+      endDate = new Date(`${dateStr}T23:59:59+07:00`);
+    } else {
+      // Hôm nay (GMT+7)
+      const now = new Date();
+      const localTime = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+      const yyyy = localTime.getUTCFullYear();
+      const mm = String(localTime.getUTCMonth() + 1).padStart(2, '0');
+      const dd = String(localTime.getUTCDate()).padStart(2, '0');
+      startDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00+07:00`);
+      endDate = new Date(`${yyyy}-${mm}-${dd}T23:59:59+07:00`);
+    }
+
+    const events = await prisma.event.findMany({
+      where: {
+        cameraId: cameraId,
+        detectedAt: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      orderBy: { detectedAt: 'desc' },
+      include: {
+        eventDetections: {
+          include: { species: true }
+        }
+      }
+    });
+
+    const result = events.map((evt) => {
+      const mainDetection = evt.eventDetections[0];
+      
+      return {
+        id: evt.id,
+        thumbnailUrl: evt.snapshotUrl,
+        speciesName: mainDetection?.species.displayName || null,
+        speciesNameEn: mainDetection?.species.id || null,
+        estimatedCount: evt.eventDetections.length > 0 ? evt.eventDetections.length : null,
+        confidencePercent: mainDetection ? Math.round(mainDetection.confidence * 100) : null,
+        recordedTime: formatTime(evt.detectedAt),
+        recordedDateLabel: formatDateLabel(evt.detectedAt)
+      };
+    });
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Lỗi khi lấy lịch sử camera:', error);
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
+  }
+}
+
+function formatTime(date: Date): string {
+  const local = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  const hh = String(local.getUTCHours()).padStart(2, '0');
+  const mm = String(local.getUTCMinutes()).padStart(2, '0');
+  const ss = String(local.getUTCSeconds()).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
+
+function formatDateLabel(date: Date): string {
+  const now = new Date();
+  const localDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  const localNow = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+  
+  const dDate = localDate.getUTCDate();
+  const dMonth = localDate.getUTCMonth();
+  const dYear = localDate.getUTCFullYear();
+  
+  const nDate = localNow.getUTCDate();
+  const nMonth = localNow.getUTCMonth();
+  const nYear = localNow.getUTCFullYear();
+  
+  if (dYear === nYear && dMonth === nMonth) {
+    if (dDate === nDate) {
+      return "Hôm nay";
+    } else if (dDate === nDate - 1) {
+      return "Hôm qua";
+    }
+  }
+  
+  const dd = String(dDate).padStart(2, '0');
+  const mm = String(dMonth + 1).padStart(2, '0');
+  const yyyy = dYear;
+  return `${dd}/${mm}/${yyyy}`;
 }

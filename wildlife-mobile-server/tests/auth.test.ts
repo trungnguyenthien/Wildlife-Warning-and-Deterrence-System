@@ -1,6 +1,55 @@
 import request from 'supertest';
-import app from '../src/app';
 import { clearDatabase, disconnectPrisma } from './helper';
+
+// Mock Ably SDK globally before loading app
+jest.mock('ably', () => {
+  return {
+    Rest: function() {
+      return {
+        auth: {
+          createTokenRequest: async function(params: any) {
+            return {
+              keyName: 'mock.key',
+              clientId: params?.clientId || 'mock-client',
+              timestamp: 1785899593000,
+              nonce: 'mock-nonce',
+              mac: 'mock-mac'
+            };
+          }
+        }
+      };
+    },
+    Realtime: function() {
+      return {
+        connection: {
+          once_async: async () => 'connected'
+        },
+        channels: {
+          get: () => ({
+            publish: async () => true,
+            subscribe: (_event: any, callback: any) => {
+              setTimeout(() => {
+                callback({
+                  data: {
+                    event: 'COMMAND_ACK',
+                    payload: {
+                      commandId: 'mock-cmd-id',
+                      status: 'SUCCESS',
+                      error: null
+                    }
+                  }
+                });
+              }, 50);
+            }
+          })
+        },
+        close: () => {}
+      };
+    }
+  };
+});
+
+import app from '../src/app';
 
 beforeAll(async () => {
   try {
@@ -243,6 +292,54 @@ describe('AUTH_ME & LOGOUT - Phiên đăng nhập', () => {
     const res = await request(app)
       .post('/auth/logout')
       .set('Authorization', 'Bearer this_is_a_totally_invalid_token_xyz');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('invalid_token');
+  });
+});
+
+describe('AUTH_ABLY_TOKEN - Lấy Ably Token Request', () => {
+  let authToken = '';
+
+  beforeAll(async () => {
+    try {
+      const res = await request(app)
+        .post('/auth/login')
+        .send({
+          username: 'test_ranger',
+          password: 'password123'
+        });
+      authToken = res.body.token;
+    } catch (err) {
+      console.warn('Lấy token kiểm thử thất bại.', err);
+    }
+  });
+
+  it('TC_AUTH_TOK_SUCCESS_01: Get Ably Token Request successfully with a valid JWT token', async () => {
+    if (!authToken) return;
+    const res = await request(app)
+      .get('/auth/ably-token')
+      .set('Authorization', `Bearer ${authToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('keyName');
+    expect(res.body.keyName).toBe('mock.key');
+    expect(res.body).toHaveProperty('nonce');
+    expect(res.body).toHaveProperty('mac');
+  });
+
+  it('TC_AUTH_TOK_FAILURE_01: Fail to get Ably Token Request without authorization header', async () => {
+    const res = await request(app)
+      .get('/auth/ably-token');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('missed_token');
+  });
+
+  it('TC_AUTH_TOK_FAILURE_02: Fail to get Ably Token Request with invalid JWT token', async () => {
+    const res = await request(app)
+      .get('/auth/ably-token')
+      .set('Authorization', 'Bearer invalid_format_jwt_token_for_ably');
+
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('invalid_token');
   });

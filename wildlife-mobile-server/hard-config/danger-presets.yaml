@@ -29,10 +29,6 @@
 #      * Giá trị cho phép: A_gunshot (Tiếng súng nổ), A_dog_bark (Tiếng chó sủa), A_alarm_siren (Tiếng còi hú khẩn cấp).
 #    - audioIntensity: Cường độ âm lượng của loa phát tại chỗ.
 #      * Kiểu dữ liệu: Integer (Số nguyên từ 0 đến 100).
-#    - electricFence: Kích hoạt xung điện của hàng rào bảo vệ.
-#      * Kiểu dữ liệu: Boolean (true hoặc false).
-#    - electricFenceDuration: Thời lượng kích hoạt xung điện của hàng rào (đơn vị giây).
-#      * Kiểu dữ liệu: Integer (Số nguyên lớn hơn hoặc bằng 0).
 #    - silentAlert: Chế độ cảnh báo âm thầm (Không kích hoạt còi/đèn tại trạm camera, chỉ âm thầm gửi Push/SMS).
 #      * Kiểu dữ liệu: Boolean (true hoặc false).
 # ==============================================================================
@@ -51,8 +47,6 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_gunshot"
     audioIntensity: 100
-    electricFence: true
-    electricFenceDuration: 15
     silentAlert: false
   medium_danger:
     ledFlash: true
@@ -61,8 +55,6 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_dog_bark"
     audioIntensity: 50
-    electricFence: false
-    electricFenceDuration: 0
     silentAlert: false
   intruder:
     ledFlash: true
@@ -71,6 +63,4 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_alarm_siren"
     audioIntensity: 90
-    electricFence: false
-    electricFenceDuration: 0
     silentAlert: false

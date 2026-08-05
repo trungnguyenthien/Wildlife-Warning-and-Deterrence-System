@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, AlertType, DangerLevel, Role } from '@prisma/client';
+import { PrismaClient, AlertType, DangerLevel, Role, Prisma } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { notifySSE } from './cameraController';
 import { sendPushToAllDevices } from '../config/firebase';
@@ -158,10 +158,13 @@ export async function readAlert(req: AuthenticatedRequest, res: Response) {
 // 4. POST /cameras/{cameraId}/detections - Webhook AI Server nhận dạng hiện trường
 export async function processDetection(req: Request, res: Response) {
   const { cameraId } = req.params;
-
   // 1. Parse fields (handles JSON or Multipart Form Data)
-  let rawDetections = req.body.detections;
-  let detections: any[] = [];
+  interface DetectionItem {
+    speciesId: string;
+    confidence: number;
+  }
+  const rawDetections = req.body.detections;
+  let parsedDetections: DetectionItem[] = [];
   let imageUrl = req.body.imageUrl;
   let detectedAt = req.body.detectedAt;
   const userId = req.body.userId;
@@ -230,7 +233,7 @@ export async function processDetection(req: Request, res: Response) {
   // Parse detections if it is a JSON string (Multipart mode)
   if (typeof rawDetections === 'string') {
     try {
-      detections = JSON.parse(rawDetections);
+      parsedDetections = JSON.parse(rawDetections);
     } catch (e) {
       return res.status(400).json({
         error: 'invalid_detections_json',
@@ -238,27 +241,29 @@ export async function processDetection(req: Request, res: Response) {
       });
     }
   } else {
-    detections = rawDetections;
+    parsedDetections = rawDetections;
   }
 
-  // Validation: Thiếu trường bắt buộc
-  if (!detections) {
+  // Nếu không truyền detectedAt, tự động sinh thời gian hiện tại
+  if (!detectedAt) {
+    detectedAt = new Date().toISOString();
+  }
+
+  // 3. Validation: Thiếu trường bắt buộc
+  if (!parsedDetections) {
     return res.status(400).json({ error: 'missed_detections', message: 'Thiếu thông tin bắt buộc: detections.' });
   }
   if (!imageUrl) {
     return res.status(400).json({ error: 'missed_image_url', message: 'Thiếu thông tin bắt buộc: imageUrl.' });
   }
-  if (!detectedAt) {
-    return res.status(400).json({ error: 'missed_detected_at', message: 'Thiếu thông tin bắt buộc: detectedAt.' });
-  }
 
   // Validation: Mảng detections trống rỗng
-  if (!Array.isArray(detections) || detections.length === 0) {
+  if (!Array.isArray(parsedDetections) || parsedDetections.length === 0) {
     return res.status(400).json({ error: 'invalid_detections', message: 'Dữ liệu nhận dạng (detections) phải là mảng và không được để trống.' });
   }
 
   // Validation: Sai khoảng độ tin cậy confidence
-  for (const det of detections) {
+  for (const det of parsedDetections) {
     if (det.confidence === undefined || det.confidence < 0 || det.confidence > 1) {
       return res.status(400).json({ error: 'invalid_confidence', message: 'Độ tin cậy nhận diện (confidence) phải nằm trong khoảng từ 0 đến 1.' });
     }
@@ -323,7 +328,7 @@ export async function processDetection(req: Request, res: Response) {
 
     // Ghi nhận chi tiết nhận dạng AI vào bảng event_detections
     const savedDetections = await Promise.all(
-      detections.map(async (det) => {
+      parsedDetections.map(async (det) => {
         // Kiểm tra xem loài có tồn tại không
         const species = await prisma.species.findUnique({
           where: { id: det.speciesId }
@@ -363,7 +368,7 @@ export async function processDetection(req: Request, res: Response) {
       let alertType = AlertType.INTRUDER as AlertType;
       if (mainSpecies.isHuman) {
         alertType = AlertType.HUMAN_BORDER as AlertType;
-      } else if (maxDangerLevel === DangerLevel.CRITICAL) {
+      } else {
         alertType = AlertType.ANIMAL_RARE as AlertType;
       }
 
@@ -380,10 +385,17 @@ export async function processDetection(req: Request, res: Response) {
 
       // Bắn Push Notification khi phát hiện thú rừng nguy hiểm (không phải người và nguy cơ từ MEDIUM trở lên)
       if (!mainSpecies.isHuman && maxDangerLevel !== DangerLevel.LOW) {
+        const isEscalated = maxDangerLevel === DangerLevel.CRITICAL;
         await sendPushToAllDevices(
-          'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
+          isEscalated ? 'Cảnh báo nguy khẩn: Phát hiện động vật nguy cấp' : 'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
           `Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name} (Độ nguy hiểm: ${maxDangerLevel})`,
-          { eventId, cameraId, speciesId: mainSpecies.id }
+          { 
+            eventId, 
+            cameraId, 
+            speciesId: mainSpecies.id,
+            type: isEscalated ? 'animal.escalated' : 'animal.detected',
+            dangerLevel: maxDangerLevel
+          }
         );
       }
     }
@@ -402,14 +414,12 @@ export async function processDetection(req: Request, res: Response) {
     let actionResponse = {
       ledFlash: defaultPreset.ledFlash,
       speakerWarn: defaultPreset.speakerWarn,
-      electricFence: defaultPreset.electricFence,
       silentAlert: defaultPreset.silentAlert
     };
     if (customConfig) {
       actionResponse = {
         ledFlash: customConfig.ledFlashRate ? true : false,
         speakerWarn: customConfig.speakerSampleId ? true : false,
-        electricFence: customConfig.fenceLevel ? true : false,
         silentAlert: customConfig.silentAlert
       };
     }
@@ -446,5 +456,182 @@ export async function processDetection(req: Request, res: Response) {
       return res.status(404).json({ error: err.message });
     }
     return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+  }
+}
+
+// 5. GET /alerts/:alertId - Lấy chi tiết cảnh báo phát hiện
+export async function getAlertDetail(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
+  }
+
+  const { alertId } = req.params;
+
+  try {
+    const alert = await prisma.alert.findUnique({
+      where: { id: alertId },
+      include: {
+        camera: true,
+        event: {
+          include: {
+            eventDetections: {
+              include: {
+                species: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!alert) {
+      return res.status(404).json({ error: 'not_found_alert', message: 'Không tìm thấy cảnh báo.' });
+    }
+
+    // Xác định species chính dựa vào dangerLevel hoặc là phần tử đầu tiên
+    const detections = alert.event.eventDetections;
+    let mainSpecies = detections[0]?.species || null;
+    let maxConfidence = detections[0]?.confidence || 0;
+
+    // Tìm loài có confidence cao nhất
+    detections.forEach((d) => {
+      if (d.confidence > maxConfidence) {
+        maxConfidence = d.confidence;
+        mainSpecies = d.species;
+      }
+    });
+
+    const isIntrusion = alert.type === AlertType.HUMAN_BORDER || alert.type === AlertType.INTRUDER || (mainSpecies?.isHuman ?? false);
+
+    // Ánh xạ tên tiếng Anh giả định nếu không có trong DB
+    const speciesNameEnMap: Record<string, string> = {
+      'voi_rung': 'Asian Elephant',
+      'bo_tot': 'Gaur',
+      'ho_dong_nam_a': 'Indochinese Tiger',
+      'lon_rung': 'Wild Boar',
+      'nguoi_la': 'Intruder / Unknown Person',
+      'human_border_intruder': 'Border Intruder / Unknown Person'
+    };
+
+    const speciesId = mainSpecies?.id || '';
+    const speciesNameEn = speciesNameEnMap[speciesId] || (mainSpecies ? mainSpecies.displayName : null);
+
+    // Định dạng ngày recordedAt: "HH:mm:ss · dd/MM/yyyy"
+    const date = alert.createdAt;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const recordedAt = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} · ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+
+    const gpsCoordinate = alert.camera ? `${alert.camera.latitude}, ${alert.camera.longitude}` : null;
+
+    const result = {
+      alertId: alert.id,
+      title: alert.title,
+      alertType: isIntrusion ? 'intrusion' : 'animal',
+      imageUrl: alert.event.snapshotUrl,
+      speciesName: mainSpecies ? mainSpecies.displayName : null,
+      speciesNameEn: speciesNameEn,
+      cameraCode: alert.camera.id,
+      cameraName: alert.camera.name,
+      dangerLevel: alert.dangerLevel,
+      confidencePercent: Math.round(maxConfidence * 100),
+      estimatedCount: detections.length,
+      recordedAt: recordedAt,
+      gpsCoordinate: gpsCoordinate
+    };
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Lỗi khi tải chi tiết cảnh báo:', error);
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
+  }
+}
+
+// 5. GET /notifications/inbox - Lấy danh sách thông báo đẩy nhận được trong app (chỉ dùng để test)
+export async function listNotificationsInbox(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'unauthorized', message: 'Truy cập bị từ chối.' });
+  }
+
+  const { page, size, unreadOnly } = req.query;
+  const pageNum = parseInt(page as string) || 0; // page 0-indexed theo spec
+  const sizeNum = parseInt(size as string) || 20;
+  const skip = pageNum * sizeNum;
+  const unreadOnlyBool = unreadOnly === 'true';
+
+  if (page !== undefined && (isNaN(pageNum) || pageNum < 0)) {
+    return res.status(400).json({ error: 'invalid_page', message: 'Tham số page không hợp lệ.' });
+  }
+  if (size !== undefined && (isNaN(sizeNum) || sizeNum <= 0)) {
+    return res.status(400).json({ error: 'invalid_size', message: 'Tham số size không hợp lệ.' });
+  }
+
+  try {
+    const alertFilter: Prisma.AlertWhereInput = {};
+    
+    // Phân quyền vai trò: CITIZEN không được xem HUMAN_BORDER
+    if (req.user.role === Role.CITIZEN) {
+      alertFilter.type = {
+        not: AlertType.HUMAN_BORDER
+      };
+    }
+
+    if (unreadOnlyBool) {
+      // Chỉ lấy tin chưa đọc (chưa có trong AlertRead của user này)
+      alertFilter.alertReads = {
+        none: {
+          userId: req.user.id
+        }
+      };
+    }
+
+    const total = await prisma.alert.count({ where: alertFilter });
+
+    const alerts = await prisma.alert.findMany({
+      where: alertFilter,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: sizeNum,
+      include: {
+        camera: true,
+        alertReads: {
+          where: { userId: req.user.id }
+        }
+      }
+    });
+
+    const items = alerts.map((alt) => {
+      // Map type của alert sang type của notification
+      let notifType = 'system.alert';
+      if (alt.type === AlertType.ANIMAL_RARE) {
+        notifType = alt.dangerLevel === DangerLevel.CRITICAL ? 'animal.escalated' : 'animal.detected';
+      } else if (alt.type === AlertType.HUMAN_BORDER) {
+        notifType = 'animal.escalated';
+      } else if (alt.type === AlertType.INTRUDER) {
+        notifType = 'animal.detected';
+      }
+
+      return {
+        id: alt.id,
+        type: notifType,
+        title: alt.title,
+        body: `Mức độ nguy hiểm: ${alt.dangerLevel} tại ${alt.camera.name}`,
+        cameraId: alt.cameraId,
+        eventId: alt.eventId,
+        isRead: alt.alertReads.length > 0,
+        createdAt: alt.createdAt.toISOString()
+      };
+    });
+
+    return res.status(200).json({
+      items,
+      pagination: {
+        page: pageNum,
+        size: sizeNum,
+        total
+      }
+    });
+  } catch (error) {
+    console.error('Lỗi khi tải inbox thông báo:', error);
+    return res.status(500).json({ error: 'internal_server_error', message: 'Lỗi máy chủ nội bộ.' });
   }
 }

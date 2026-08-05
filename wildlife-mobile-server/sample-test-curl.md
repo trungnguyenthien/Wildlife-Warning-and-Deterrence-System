@@ -129,7 +129,7 @@ curl -s "$BASE/audio-samples" -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 curl -s -X PUT "$BASE/response-configs/CAM_PROD_TEST/voi_rung" \
   -H "Authorization: Bearer $RANGER_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"ledFlash":true,"speakerWarn":true,"electricFence":true,"silentAlert":false,"ledColor":"RED","ledFlashRate":"FAST","ledDurationSeconds":10,"speakerSampleId":"warning_voice_1","audioIntensity":90,"fenceLevel":"HIGH","fenceWarningLight":true,"fenceAutoNotify":true,"fenceAutoOffEnabled":true,"fenceAutoOffMinutes":5}' | jq .
+  -d '{"ledFlash":true,"speakerWarn":true,"silentAlert":false,"ledColor":"RED","ledFlashRate":"FAST","ledDurationSeconds":10,"speakerSampleId":"warning_voice_1","audioIntensity":90}' | jq .
 
 # 5. GET /response-configs - Lấy chi tiết cấu hình tùy chỉnh của cặp camera/loài
 curl -s "$BASE/response-configs?cameraId=CAM_PROD_TEST&speciesId=voi_rung" \
