@@ -1,0 +1,1109 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wildlife Warning &amp; Deterrence - Mobile App Simulator</title>
+    <meta
+      name="description"
+      content="Simulate Android Client App connections, authentication, camera status querying, Event Stream (SSE), and hardware test triggers."
+    />
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-gradient: linear-gradient(135deg, #09150d 0%, #112516 100%);
+        --panel-bg: rgba(28, 53, 35, 0.7);
+        --panel-border: rgba(44, 76, 50, 0.5);
+        --input-bg: #0c1a10;
+        --input-border: #233d28;
+        --text-primary: #ffffff;
+        --text-secondary: #a3b8a8;
+        --primary-accent: #d4ac0d; /* Gold */
+        --primary-hover: #f4d03f; /* Bright Yellow */
+        --danger-accent: #ef5350;
+        --success-accent: #2e7d32;
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        --transition-speed: 0.2s;
+        --terminal-bg: #050a06;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        background: var(--bg-gradient);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 1.5rem;
+      }
+
+      header {
+        max-width: 1300px;
+        width: 100%;
+        margin: 0 auto 1.5rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      .header-logo-section {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .header-logo-box {
+        background: rgba(212, 172, 13, 0.15);
+        border: 1.5px solid var(--primary-accent);
+        border-radius: 8px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        color: var(--primary-accent);
+      }
+
+      h1 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--text-primary) 0%, var(--primary-hover) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .header-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .badge {
+        background: rgba(212, 172, 13, 0.1);
+        border: 1px solid rgba(212, 172, 13, 0.3);
+        color: var(--primary-accent);
+        padding: 0.2rem 0.6rem;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+
+      main {
+        max-width: 1300px;
+        width: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        flex-grow: 1;
+      }
+
+      @media (max-width: 950px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        padding: 1.5rem;
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .card-title-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--panel-border);
+        padding-bottom: 0.75rem;
+      }
+
+      .card-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--primary-accent);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      input[type="text"], input[type="password"], input[type="number"], select {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-primary);
+        padding: 0.65rem 0.85rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        transition: all var(--transition-speed);
+        width: 100%;
+      }
+
+      input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus {
+        outline: none;
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 2px rgba(212, 172, 13, 0.15);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* Buttons & Custom Control */
+      .btn {
+        background: var(--primary-accent);
+        color: #050a06;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(212, 172, 13, 0.25);
+      }
+
+      .btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(212, 172, 13, 0.35);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn:disabled {
+        background: #4a5c4f !important;
+        color: #8fa093 !important;
+        cursor: not-allowed;
+        box-shadow: none !important;
+        transform: none !important;
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1.5px solid var(--primary-accent);
+        color: var(--primary-accent);
+        box-shadow: none;
+      }
+
+      .btn-outline:hover {
+        background: rgba(212, 172, 13, 0.1);
+        color: var(--primary-hover);
+        border-color: var(--primary-hover);
+        box-shadow: none;
+      }
+
+      .btn-danger-outline {
+        background: transparent;
+        border: 1.5px solid var(--danger-accent);
+        color: var(--danger-accent);
+        box-shadow: none;
+      }
+
+      .btn-danger-outline:hover {
+        background: rgba(239, 83, 80, 0.1);
+        color: #ef5350;
+        border-color: #ef5350;
+        box-shadow: none;
+      }
+
+      .small-btn {
+        background: rgba(46, 125, 50, 0.2);
+        border: 1px solid var(--panel-border);
+        color: var(--text-secondary);
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        white-space: nowrap;
+      }
+
+      .small-btn:hover {
+        background: var(--success-accent);
+        color: var(--text-primary);
+        border-color: var(--success-accent);
+      }
+
+      /* Log Terminal Styling */
+      .terminal-container {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        background: var(--terminal-bg);
+        overflow: hidden;
+        min-height: 180px;
+        max-height: 250px;
+      }
+
+      .terminal-header {
+        background: rgba(28, 53, 35, 0.4);
+        padding: 0.5rem 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--panel-border);
+      }
+
+      .terminal-title {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-family: "Fira Code", monospace;
+      }
+
+      .terminal-body {
+        padding: 0.75rem;
+        overflow-y: auto;
+        flex-grow: 1;
+        font-family: "Fira Code", monospace;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .log-entry {
+        white-space: pre-wrap;
+      }
+
+      .log-entry.in { color: #f4d03f; } /* Incoming: Amber */
+      .log-entry.out { color: #81c784; } /* Outgoing: Green */
+      .log-entry.err { color: #e57373; } /* Error: Red */
+      .log-entry.sys { color: #80deea; } /* System: Cyan */
+
+      /* Custom list styling */
+      .list-box-container {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 8px;
+        padding: 0.5rem;
+        min-height: 150px;
+        max-height: 280px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .list-box-placeholder {
+        margin: auto;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        text-align: center;
+        line-height: 1.5;
+        opacity: 0.6;
+      }
+
+      /* Camera Cards Grid */
+      .camera-card {
+        background: rgba(28, 53, 35, 0.4);
+        border: 1px solid rgba(46, 125, 50, 0.2);
+        border-radius: 10px;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+      }
+
+      .camera-card:hover {
+        border-color: var(--primary-accent);
+        background: rgba(28, 53, 35, 0.6);
+        transform: translateY(-1px);
+      }
+
+      .camera-card.selected {
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 2px rgba(212, 172, 13, 0.2);
+      }
+
+      .cam-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .cam-card-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+      }
+
+      .cam-card-status {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 99px;
+      }
+
+      .cam-card-status.online {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        color: #4caf50;
+      }
+
+      .cam-card-status.offline {
+        background: rgba(158, 158, 158, 0.1);
+        border: 1px solid rgba(158, 158, 158, 0.3);
+        color: #9e9e9e;
+      }
+
+      .cam-card-body {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .cam-card-snapshot {
+        width: 90px;
+        height: 60px;
+        border-radius: 6px;
+        background-size: cover;
+        background-position: center;
+        border: 1px solid var(--panel-border);
+        flex-shrink: 0;
+        background-color: #000;
+      }
+
+      .cam-card-det-box {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        font-size: 0.7rem;
+        justify-content: center;
+        min-width: 0;
+      }
+
+      .cam-card-det-title {
+        font-weight: 700;
+        color: var(--primary-accent);
+      }
+
+      .cam-card-det-item {
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Response section */
+      .response-card {
+        background: #050a06;
+        border: 1px solid var(--panel-border);
+        border-radius: 8px;
+        padding: 0.75rem;
+        font-family: "Fira Code", monospace;
+        font-size: 0.75rem;
+        line-height: 1.4;
+        color: #81c784;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        min-height: 80px;
+        max-height: 150px;
+      }
+
+      /* Status Pill */
+      .status-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .status-pill {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 99px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .status-pill.closed {
+        background: rgba(239, 83, 80, 0.1);
+        border: 1px solid rgba(239, 83, 80, 0.3);
+        color: var(--danger-accent);
+      }
+
+      .status-pill.streaming {
+        background: rgba(76, 175, 80, 0.1);
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        color: #4caf50;
+        animation: pulse 1.5s infinite;
+      }
+
+      @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <div class="header-logo-section">
+        <div class="header-logo-box">📱</div>
+        <div>
+          <h1>Mobile App Simulator</h1>
+          <div class="header-subtitle">Bộ giả lập ứng dụng di động dành cho Kiểm lâm</div>
+        </div>
+      </div>
+      <div class="status-container">
+        <span class="badge">App v1.0</span>
+        <span class="status-pill closed" id="auth-status-pill">GUEST</span>
+      </div>
+    </header>
+
+    <main>
+      <!-- LEFT COLUMN: Authentication & Camera List -->
+      <section class="card">
+        <div class="card-title-bar">
+          <div class="card-title">Xác thực &amp; Danh sách Camera</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="server-environment">Môi trường</label>
+            <select id="server-environment">
+              <option value="production">Production (Vercel)</option>
+              <option value="local">Local (localhost:5001)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="server-url">REST Server URL</label>
+            <input type="text" id="server-url" value="https://wildlife-warning-and-deterrence-sys.vercel.app" placeholder="Địa chỉ máy chủ..." required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="auth-username">Tên đăng nhập (username)</label>
+            <input type="text" id="auth-username" value="ranger_evt" placeholder="Nhập tài khoản..." required />
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Mật khẩu (password)</label>
+            <input type="password" id="auth-password" value="password123" placeholder="Nhập mật khẩu..." required />
+          </div>
+        </div>
+
+        <button type="button" class="btn" id="btn-login">🔑 Đăng nhập hệ thống</button>
+
+        <div class="form-group">
+          <label>Mã JWT Access Token hiện tại</label>
+          <input type="text" id="auth-token-display" value="Chưa đăng nhập." readonly style="font-family: 'Fira Code', monospace; font-size: 0.75rem; color: var(--text-secondary); opacity: 0.7;" />
+        </div>
+
+        <div class="card-title-bar" style="border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 0.4rem; margin-top: 0.5rem;">
+          <div class="card-title" style="font-size: 0.85rem;">Danh sách Trạm Camera trực thuộc</div>
+          <button type="button" class="small-btn" id="btn-load-cameras" disabled>🔄 Tải danh sách</button>
+        </div>
+
+        <div class="list-box-container" id="camera-list-box">
+          <div class="list-box-placeholder">
+            Đăng nhập hệ thống trước khi truy vấn danh sách Camera.
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: SSE Event Stream & Device Testing -->
+      <section class="card" style="justify-content: flex-start;">
+        <div class="card-title-bar">
+          <div class="card-title">SSE Event Stream &amp; Device Testing</div>
+        </div>
+
+        <div class="card-title-bar" style="border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 0.4rem;">
+          <div class="card-title" style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+            Luồng sự kiện thời gian thực
+            <span class="status-pill closed" id="sse-status-pill" style="font-size: 0.6rem; padding: 0.05rem 0.4rem;">CLOSED</span>
+          </div>
+          <div style="display: flex; gap: 0.4rem;">
+            <button type="button" class="small-btn" id="btn-connect-sse" disabled>🔗 Kết nối</button>
+            <button type="button" class="small-btn" id="btn-disconnect-sse" disabled style="background-color: rgba(239, 83, 80, 0.15); color: #ef5350; border-color: rgba(239, 83, 80, 0.3);">🔌 Ngắt</button>
+          </div>
+        </div>
+
+        <div class="terminal-container" style="min-height: 110px; max-height: 140px;">
+          <div class="terminal-body" id="sse-log-terminal">
+            <div class="log-entry sys">[SYSTEM] Chưa thiết lập luồng kết nối SSE.</div>
+          </div>
+        </div>
+
+        <div class="card-title-bar" style="border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 0.4rem; margin-top: 0.5rem;">
+          <div class="card-title" style="font-size: 0.85rem;">Kiểm thử Thiết bị hiện trường</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="test-camera-id">cameraID mục tiêu</label>
+            <input type="text" id="test-camera-id" placeholder="Mã trạm camera (e.g. CAM_EVT_01)..." required />
+          </div>
+          <div class="form-group">
+            <label for="test-device-key">Thiết bị cần test (deviceKey)</label>
+            <select id="test-device-key">
+              <option value="speaker">Loa phát cảnh báo (speaker / deterrent_audio)</option>
+              <option value="led_light">Đèn LED chớp sáng (led_light)</option>
+              <option value="electric_fence">Hàng rào điện sinh học (electric_fence)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="test-duration">Thời gian kích hoạt (giây)</label>
+            <input type="number" id="test-duration" min="1" max="120" value="10" placeholder="Số giây chạy thử..." />
+          </div>
+          <div class="form-group">
+            <label for="test-intensity">Cường độ / Âm lượng (%)</label>
+            <input type="number" id="test-intensity" min="1" max="100" value="80" placeholder="Cường độ test..." />
+          </div>
+        </div>
+
+        <div class="form-group" id="audio-sample-container">
+          <label for="test-audio-sample">Âm thanh mẫu (audioSampleId)</label>
+          <select id="test-audio-sample">
+            <option value="A_gunshot">Tiếng súng nổ đanh (A_gunshot)</option>
+            <option value="A_growl">Tiếng gầm rú thú dữ (A_growl)</option>
+            <option value="A_dog_bark">Tiếng đàn chó săn sủa (A_dog_bark)</option>
+            <option value="A_explosion">Tiếng nổ lớn phá hủy (A_explosion)</option>
+            <option value="A_ultrasonic">Sóng siêu âm tần số cao (A_ultrasonic)</option>
+            <option value="N_warning_thu">Thông báo đẩy lùi thú rừng xâm nhập (N_warning_thu)</option>
+            <option value="N_siren">Tiếng còi hú khẩn cấp (N_siren)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Mẫu cURL kích hoạt kiểm thử</label>
+          <div class="terminal-container" style="min-height: 80px; max-height: 100px;">
+            <div class="terminal-body" style="padding: 0.5rem; color: #80deea;" id="curl-preview">
+              Chưa có cấu hình kiểm thử hợp lệ.
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn" id="btn-trigger-test" disabled style="background-color: var(--primary-accent);">
+          📣 Kích hoạt Kiểm thử Thiết bị (Post Test Command)
+        </button>
+
+        <div class="form-group">
+          <label>Kết quả kiểm thử từ Server (JSON Response)</label>
+          <div class="response-card" id="response-preview">// Kết quả kiểm thử sẽ hiển thị tại đây...</div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // State manager
+      let accessToken = null;
+      let sseReader = null;
+      let activeCameras = [];
+      let selectedCameraId = null;
+
+      // DOM Selectors
+      const serverEnvironment = document.getElementById('server-environment');
+      const serverUrlInput = document.getElementById('server-url');
+      
+      const authUsernameInput = document.getElementById('auth-username');
+      const authPasswordInput = document.getElementById('auth-password');
+      const btnLogin = document.getElementById('btn-login');
+      const authTokenDisplay = document.getElementById('auth-token-display');
+      const authStatusPill = document.getElementById('auth-status-pill');
+
+      const btnLoadCameras = document.getElementById('btn-load-cameras');
+      const cameraListBox = document.getElementById('camera-list-box');
+
+      const sseStatusPill = document.getElementById('sse-status-pill');
+      const btnConnectSse = document.getElementById('btn-connect-sse');
+      const btnDisconnectSse = document.getElementById('btn-disconnect-sse');
+      const sseLogTerminal = document.getElementById('sse-log-terminal');
+
+      const testCameraIdInput = document.getElementById('test-camera-id');
+      const testDeviceKeyInput = document.getElementById('test-device-key');
+      const testDurationInput = document.getElementById('test-duration');
+      const testIntensityInput = document.getElementById('test-intensity');
+      const audioSampleContainer = document.getElementById('audio-sample-container');
+      const testAudioSampleInput = document.getElementById('test-audio-sample');
+
+      const curlPreview = document.getElementById('curl-preview');
+      const btnTriggerTest = document.getElementById('btn-trigger-test');
+      const responsePreview = document.getElementById('response-preview');
+
+      // Cookie helper functions
+      function setCookie(name, value, days = 30) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
+      }
+
+      function getCookie(name) {
+        const matches = document.cookie.match(new RegExp(
+          "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+        ));
+        return matches ? decodeURIComponent(matches[1]) : undefined;
+      }
+
+      // Initial settings load
+      const savedRestUrl = getCookie('appRestUrl') || 'https://wildlife-warning-and-deterrence-sys.vercel.app';
+      const savedUsername = getCookie('appUsername') || 'ranger_evt';
+      const savedPassword = getCookie('appPassword') || 'password123';
+      const savedToken = getCookie('appAccessToken') || null;
+      const savedTestCameraId = getCookie('appTestCameraId') || 'camera_01';
+
+      serverUrlInput.value = savedRestUrl;
+      authUsernameInput.value = savedUsername;
+      authPasswordInput.value = savedPassword;
+      testCameraIdInput.value = savedTestCameraId;
+
+      if (savedRestUrl.includes('localhost') || savedRestUrl.includes('127.0.0.1')) {
+        serverEnvironment.value = 'local';
+      }
+
+      if (savedToken) {
+        setLoggedInState(savedToken);
+        // Tự động tải danh sách camera sau khi nạp token từ cookie
+        setTimeout(() => {
+          btnLoadCameras.click();
+        }, 300);
+      }
+
+      // Input change listeners
+      serverUrlInput.addEventListener('input', () => {
+        setCookie('appRestUrl', serverUrlInput.value.trim());
+        updateCurlPreview();
+      });
+      authUsernameInput.addEventListener('input', () => {
+        setCookie('appUsername', authUsernameInput.value.trim());
+      });
+      authPasswordInput.addEventListener('input', () => {
+        setCookie('appPassword', authPasswordInput.value.trim());
+      });
+
+      serverEnvironment.addEventListener('change', (e) => {
+        if (e.target.value === 'production') {
+          serverUrlInput.value = 'https://wildlife-warning-and-deterrence-sys.vercel.app';
+        } else {
+          serverUrlInput.value = 'http://localhost:5001';
+        }
+        setCookie('appRestUrl', serverUrlInput.value);
+        updateCurlPreview();
+      });
+
+      // Toggle display of audio options based on device chosen
+      testDeviceKeyInput.addEventListener('change', (e) => {
+        if (e.target.value === 'speaker') {
+          audioSampleContainer.classList.remove('hidden');
+        } else {
+          audioSampleContainer.classList.add('hidden');
+        }
+        updateCurlPreview();
+      });
+
+      testCameraIdInput.addEventListener('input', () => {
+        setCookie('appTestCameraId', testCameraIdInput.value.trim());
+        updateCurlPreview();
+      });
+      testDurationInput.addEventListener('input', updateCurlPreview);
+      testIntensityInput.addEventListener('input', updateCurlPreview);
+      testAudioSampleInput.addEventListener('change', updateCurlPreview);
+
+      // Login trigger
+      btnLogin.addEventListener('click', async () => {
+        btnLogin.disabled = true;
+        const username = authUsernameInput.value.trim();
+        const password = authPasswordInput.value.trim();
+        const baseUrl = serverUrlInput.value.trim();
+
+        try {
+          const res = await fetch(`${baseUrl}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.token) {
+            setCookie('appUsername', username);
+            setCookie('appPassword', password);
+            setLoggedInState(data.token);
+            alert("Đăng nhập thành công!");
+          } else {
+            alert("Đăng nhập thất bại: " + (data.message || 'Mật khẩu sai hoặc tài khoản không tồn tại.'));
+            setLoggedOutState();
+          }
+        } catch (e) {
+          alert("Lỗi kết nối máy chủ: " + e.message);
+          setLoggedOutState();
+        } finally {
+          btnLogin.disabled = false;
+        }
+      });
+
+      function setLoggedInState(token) {
+        accessToken = token;
+        setCookie('appAccessToken', token);
+        authTokenDisplay.value = token;
+        authStatusPill.className = 'status-pill connected';
+        authStatusPill.textContent = 'LOGGED IN';
+        
+        btnLoadCameras.disabled = false;
+        btnConnectSse.disabled = false;
+        btnTriggerTest.disabled = false;
+
+        updateCurlPreview();
+      }
+
+      function setLoggedOutState() {
+        accessToken = null;
+        setCookie('appAccessToken', '');
+        authTokenDisplay.value = 'Chưa đăng nhập.';
+        authStatusPill.className = 'status-pill closed';
+        authStatusPill.textContent = 'GUEST';
+
+        btnLoadCameras.disabled = true;
+        btnConnectSse.disabled = true;
+        btnTriggerTest.disabled = true;
+        disconnectSseStream();
+
+        updateCurlPreview();
+      }
+
+      // Fetch camera list
+      btnLoadCameras.addEventListener('click', async () => {
+        btnLoadCameras.disabled = true;
+        cameraListBox.innerHTML = '<div class="list-box-placeholder">Đang tải danh sách camera...</div>';
+        const baseUrl = serverUrlInput.value.trim();
+
+        try {
+          const res = await fetch(`${baseUrl}/cameras`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+
+          const data = await res.json();
+          if (res.ok && Array.isArray(data)) {
+            activeCameras = [];
+            // Lấy thêm chi tiết từng camera để có thông tin nhận diện động vật mới nhất
+            for (const cam of data) {
+              try {
+                const detailRes = await fetch(`${baseUrl}/cameras/${cam.id}`, {
+                  headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                if (detailRes.ok) {
+                  const detailData = await detailRes.json();
+                  detailData.snapshot = cam.snapshot; // Giữ lại snapshot từ danh sách
+                  activeCameras.push(detailData);
+                } else {
+                  activeCameras.push(cam);
+                }
+              } catch (e) {
+                activeCameras.push(cam);
+              }
+            }
+            renderCameras();
+          } else {
+            cameraListBox.innerHTML = `<div class="list-box-placeholder" style="color: var(--danger-accent);">Lỗi: ${data.message || 'Không thể lấy dữ liệu.'}</div>`;
+          }
+        } catch (e) {
+          cameraListBox.innerHTML = `<div class="list-box-placeholder" style="color: var(--danger-accent);">Lỗi kết nối: ${e.message}</div>`;
+        } finally {
+          btnLoadCameras.disabled = false;
+        }
+      });
+
+      function renderCameras() {
+        cameraListBox.innerHTML = '';
+        if (activeCameras.length === 0) {
+          cameraListBox.innerHTML = '<div class="list-box-placeholder">Không tìm thấy trạm camera nào trực thuộc.</div>';
+          return;
+        }
+
+        activeCameras.forEach(cam => {
+          const card = document.createElement('div');
+          card.className = `camera-card ${selectedCameraId === cam.id ? 'selected' : ''}`;
+          
+          const statusText = cam.status || 'OFFLINE';
+          const isOnline = statusText === 'ONLINE';
+
+          const currentDetection = cam.currentDetection;
+          const hasDet = !!currentDetection && currentDetection.detections && currentDetection.detections.length > 0;
+          const snapUrl = (cam.snapshot && cam.snapshot.url) ? cam.snapshot.url : '';
+
+          card.innerHTML = `
+            <div class="cam-card-header">
+              <span class="cam-card-title">${cam.name}</span>
+              <span class="cam-card-status ${isOnline ? 'online' : 'offline'}">${statusText}</span>
+            </div>
+            <div class="cam-card-body">
+              <div class="cam-card-snapshot" style="background-image: url('${snapUrl}');"></div>
+              <div class="cam-card-det-box">
+                <span class="cam-card-det-title">Nhận dạng hiện tại:</span>
+                ${hasDet ? currentDetection.detections.map(d => `<span class="cam-card-det-item">⚠️ ${d.speciesId} (${(d.confidence * 100).toFixed(0)}%)</span>`).join('') : '<span class="cam-card-det-item" style="opacity:0.6;">An toàn (Không phát hiện)</span>'}
+              </div>
+            </div>
+          `;
+
+          card.addEventListener('click', () => {
+            selectedCameraId = cam.id;
+            testCameraIdInput.value = cam.id;
+            setCookie('appTestCameraId', cam.id);
+            updateCurlPreview();
+            
+            // Re-render select styles
+            document.querySelectorAll('.camera-card').forEach(el => el.classList.remove('selected'));
+            card.classList.add('selected');
+          });
+
+          cameraListBox.appendChild(card);
+        });
+      }
+
+      // ==========================================
+      // SSE STREAM HANDLER (FETCH-BASED READER)
+      // ==========================================
+
+      function logToSseTerminal(message, type = 'sys') {
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${time}] ${message}`;
+        sseLogTerminal.appendChild(entry);
+        sseLogTerminal.scrollTop = sseLogTerminal.scrollHeight;
+      }
+
+      btnConnectSse.addEventListener('click', async () => {
+        if (!accessToken) return;
+
+        btnConnectSse.disabled = true;
+        btnDisconnectSse.disabled = false;
+        sseStatusPill.className = 'status-pill streaming';
+        sseStatusPill.textContent = 'STREAMING';
+        sseLogTerminal.innerHTML = '';
+        logToSseTerminal('[SYSTEM] Đang thiết lập kết nối Server-Sent Events (SSE)...', 'sys');
+
+        const baseUrl = serverUrlInput.value.trim();
+        const url = `${baseUrl}/cameras/stream`;
+
+        try {
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'text/event-stream'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server returned HTTP ${response.status}`);
+          }
+
+          logToSseTerminal('[SYSTEM] Đã kết nối EventStream. Đang lắng nghe sự kiện...', 'sys');
+          
+          const reader = response.body.getReader();
+          sseReader = reader; // save to close later
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n\n');
+            buffer = parts.pop();
+
+            for (const chunk of parts) {
+              if (chunk.trim()) {
+                handleSseChunk(chunk);
+              }
+            }
+          }
+
+          logToSseTerminal('[SYSTEM] Kênh truyền SSE đã bị đóng bởi máy chủ.', 'sys');
+          disconnectSseStream();
+
+        } catch (e) {
+          logToSseTerminal(`[ERROR] SSE Stream Error: ${e.message}`, 'err');
+          disconnectSseStream();
+        }
+      });
+
+      btnDisconnectSse.addEventListener('click', () => {
+        disconnectSseStream();
+      });
+
+      function disconnectSseStream() {
+        if (sseReader) {
+          try { sseReader.cancel(); } catch(e) {}
+          sseReader = null;
+        }
+        btnConnectSse.disabled = !accessToken;
+        btnDisconnectSse.disabled = true;
+        sseStatusPill.className = 'status-pill closed';
+        sseStatusPill.textContent = 'CLOSED';
+        logToSseTerminal('[SYSTEM] Kênh kết nối Event Stream (SSE) đã ngắt.', 'sys');
+      }
+
+      function handleSseChunk(chunk) {
+        logToSseTerminal(chunk, 'in');
+
+        // Automatically trigger reload cameras list if updates push
+        if (chunk.includes('camera-update') || chunk.includes('alert-update')) {
+          logToSseTerminal('[SYSTEM] Nhận tín hiệu camera-update. Tự động tải lại danh sách...', 'sys');
+          btnLoadCameras.click();
+        }
+      }
+
+      // ==========================================
+      // DEVICE TESTING LOGIC (POST COMMAND)
+      // ==========================================
+
+      function updateCurlPreview() {
+        const baseUrl = serverUrlInput.value.trim();
+        const cameraId = testCameraIdInput.value.trim() || 'camera_01';
+        let deviceKey = testDeviceKeyInput.value;
+        const duration = parseInt(testDurationInput.value) || 10;
+        const intensity = parseInt(testIntensityInput.value) || 80;
+        const sampleId = testAudioSampleInput.value;
+
+        // Map keys to actual backend properties if needed
+        if (deviceKey === 'led_light') deviceKey = 'led';
+        if (deviceKey === 'electric_fence') deviceKey = 'fence';
+
+        const payloadObj = {
+          durationSeconds: duration,
+          intensity: intensity
+        };
+
+        if (deviceKey === 'speaker') {
+          payloadObj.audioSampleId = sampleId;
+        }
+
+        const payloadStr = JSON.stringify(payloadObj);
+        const tokenSnippet = accessToken ? accessToken : '< Ranger_JWT_Token >';
+
+        const cmd = `curl -X POST "${baseUrl}/cameras/${cameraId}/devices/${deviceKey}/test" \\\n  -H "Authorization: Bearer ${tokenSnippet}" \\\n  -H "Content-Type: application/json" \\\n  -d '${payloadStr.replace(/'/g, "'\\''")}'`;
+        
+        curlPreview.textContent = cmd;
+      }
+
+      btnTriggerTest.addEventListener('click', async () => {
+        if (!accessToken) return;
+
+        btnTriggerTest.disabled = true;
+        responsePreview.textContent = '// Đang gửi yêu cầu test thiết bị lên Mobile Server...';
+
+        const baseUrl = serverUrlInput.value.trim();
+        const cameraId = testCameraIdInput.value.trim() || 'camera_01';
+        let deviceKey = testDeviceKeyInput.value;
+        const duration = parseInt(testDurationInput.value) || 10;
+        const intensity = parseInt(testIntensityInput.value) || 80;
+        const sampleId = testAudioSampleInput.value;
+
+        // Map keys to actual backend properties
+        if (deviceKey === 'led_light') deviceKey = 'led';
+        if (deviceKey === 'electric_fence') deviceKey = 'fence';
+
+        const payloadObj = {
+          durationSeconds: duration,
+          intensity: intensity
+        };
+
+        if (deviceKey === 'speaker') {
+          payloadObj.audioSampleId = sampleId;
+        }
+
+        const url = `${baseUrl}/cameras/${cameraId}/devices/${deviceKey}/test`;
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadObj)
+          });
+
+          let data;
+          try {
+            data = await res.json();
+          } catch {
+            data = await res.text();
+          }
+
+          if (res.ok) {
+            responsePreview.textContent = typeof data === 'object' ? JSON.stringify(data, null, 2) : data;
+            alert("Lệnh kiểm thử đã kích hoạt thành công!");
+          } else {
+            responsePreview.textContent = `Lỗi ${res.status} ${res.statusText}:\n` + 
+              (typeof data === 'object' ? JSON.stringify(data, null, 2) : data);
+          }
+
+        } catch (e) {
+          responsePreview.textContent = `Lỗi mạng kết nối: ${e.message}`;
+        } finally {
+          btnTriggerTest.disabled = false;
+        }
+      });
+
+      // Initial loading
+      updateCurlPreview();
+    </script>
+  </body>
+</html>

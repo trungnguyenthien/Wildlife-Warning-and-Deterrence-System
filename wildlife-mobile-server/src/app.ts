@@ -13,11 +13,14 @@ import { uploadSnapshot } from './controllers/snapshotController';
 import { registerPushToken, deletePushToken } from './controllers/deviceController';
 import multer from 'multer';
 
+import path from 'path';
+
 const app = express();
 const upload = multer({ dest: '/tmp' });
 
 app.use(cors());
 app.use(express.json());
+app.use('/tools', express.static(path.join(__dirname, '../../html_tool')));
 
 // ==========================================
 // 1. ENDPOINTS HỆ THỐNG & HEALTH CHECK
