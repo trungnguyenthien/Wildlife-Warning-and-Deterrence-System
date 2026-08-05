@@ -557,112 +557,77 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
 
 Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CONFIG_LIST_SCREEN]`.
 
-**Response 200**
+> **Nguồn dữ liệu duy nhất:** Tên loài (`displayName`) phải lấy từ API này. Tuyệt đối không hardcode tên loài trong bất kỳ module nào.
+
+**Response 200** — Mảng phẳng (flat array):
 ```json
-{
-  "items": [
-    {
-      "id": "crocodile",
-      "displayName": "Cá sấu",
-      "dangerLevel": "HIGH",
-      "aggressionLevel": 8,
-      "htmlDescription": "Loài bò sát lớn ăn thịt hoang dã, hoạt động chủ yếu ở <b>vùng nước ngọt lợ ven rừng</b>.<br/>Có tập tính săn mồi phục kích âm thầm ban đêm, lực cắn cực mạnh nguy hiểm cho con người và gia súc sát bờ nước.",
-      "defense": {
-        "recommend": "Kịch bản ngăn chặn bằng đèn LED chớp nháy màu đỏ-trắng cường độ cao kết hợp còi báo động khẩn cấp.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "deer",
-      "displayName": "Nai",
-      "dangerLevel": "LOW",
-      "aggressionLevel": 2,
-      "htmlDescription": "Thú ăn cỏ lành tính, nhút nhát, thường đi kiếm ăn theo bầy nhỏ vào lúc <i>bình minh</i> hoặc <i>hoàng hôn</i>.<br/>Thích ăn chồi non, dễ bị giật mình bởi tiếng động lạ và có xu hướng bỏ chạy nhanh.",
-      "defense": {
-        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "elephant",
-      "displayName": "Voi",
-      "dangerLevel": "CRITICAL",
-      "aggressionLevel": 9,
-      "htmlDescription": "Thú lớn di chuyển theo đàn gia đình (5-15 cá thể), sức tàn phá hoa màu <u>rất cao</u> khi xung đột đất đai.<br/>Có khứu giác và thính giác cực nhạy, dễ nổi giận tấn công nếu bị kích động bởi ánh sáng chớp mạnh hoặc tiếng ồn lớn.",
-      "defense": {
-        "recommend": "Kịch bản cảnh báo âm thầm (Silent Alert) gửi SMS/Push tức thì cho người dân và kiểm lâm, tuyệt đối không dùng loa/đèn chớp tại hiện trường tránh kích động voi dữ phá hoại.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "giraffe",
-      "displayName": "Hươu cao cổ",
-      "dangerLevel": "LOW",
-      "aggressionLevel": 1,
-      "htmlDescription": "Động vật ăn lá cây trên cao, hiền lành, di chuyển chậm rãi và hầu như không gây ra xung đột hay phá hoại hoa màu.<br/>Hoạt động ban ngày, không có xu hướng tiếp cận khu dân cư.",
-      "defense": {
-        "recommend": "Loài lành tính, chỉ cần ghi nhận nhật ký hoạt động.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "leopard",
-      "displayName": "Báo",
-      "dangerLevel": "CRITICAL",
-      "aggressionLevel": 9,
-      "htmlDescription": "Mèo lớn ăn thịt nguy hiểm, kỹ năng <b>leo trèo và ngụy trang</b> bậc thầy.<br/>Thường đi săn đơn độc về đêm, cực kỳ nhạy bén và có thể tấn công bất ngờ từ trên cao nếu cảm thấy bị đe dọa.",
-      "defense": {
-        "recommend": "Cảnh báo âm thầm: Gửi thông báo đẩy khẩn cấp cho kiểm lâm và người dân lân cận di tản, không kích hoạt loa còi tại chỗ.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "monkey",
-      "displayName": "Khỉ",
-      "dangerLevel": "LOW",
-      "aggressionLevel": 4,
-      "htmlDescription": "Động vật linh trưởng thông minh, sống theo đàn lớn.<br/>Rất nghịch ngợm, thường xuyên phá hoại nông sản, không sợ người và có khả năng leo trèo vượt qua các loại hàng rào thô sơ.",
-      "defense": {
-        "recommend": "Kịch bản xua đuổi chủ động: Sử dụng đèn LED chớp nhấp nháy ngẫu nhiên kết hợp tiếng chó sủa giả lập tần suất cao.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "rhino",
-      "displayName": "Tê giác",
-      "dangerLevel": "CRITICAL",
-      "aggressionLevel": 8,
-      "htmlDescription": "Động vật ăn cỏ cỡ lớn cực kỳ quý hiếm đang bị đe dọa tuyệt chủng.<br/>Thị lực <i>rất kém</i> nhưng thính giác và khứu giác nhạy bén; có thể lao vào tấn công điên cuồng nếu giật mình phát hiện vật lạ gần.",
-      "defense": {
-        "recommend": "Cảnh báo bảo vệ: Gửi tin nhắn khẩn cho Hạt Kiểm lâm triển khai bảo vệ tê giác, hạn chế các xung kích âm thanh đèn báo tại chỗ.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "snake",
-      "displayName": "Rắn",
-      "dangerLevel": "HIGH",
-      "aggressionLevel": 7,
-      "htmlDescription": "Bao gồm các loài rắn độc nguy hiểm bò sát sát đất. Ngụy trang tốt trong bụi rậm hoặc đống lá khô.<br/>Thường ẩn nấp gần chuồng trại kiếm mồi và sẽ cắn tự vệ nếu con người vô tình giẫm phải.",
-      "defense": {
-        "recommend": "Cảnh báo đề phòng: Tự động gửi SMS cảnh báo đề phòng có độc cho các hộ dân lân cận xung quanh khu vực phát hiện.",
-        "appSetting": "@DefendAction"
-      }
-    },
-    {
-      "id": "tiger",
-      "displayName": "Hổ",
-      "dangerLevel": "CRITICAL",
-      "aggressionLevel": 10,
-      "htmlDescription": "Thú ăn thịt đầu bảng, chúa tể rừng xanh cực kỳ hung dữ và nguy hiểm.<br/>Có tập tính lãnh thổ cao, đi săn đơn độc vào <u>ban đêm và rạng sáng</u>, có thể tấn công trực diện con người nếu phát hiện xâm nhập sâu.",
-      "defense": {
-        "recommend": "Nguy cấp - Cảnh báo âm thầm: Gửi thông báo đẩy và SMS khẩn cấp tức khắc cho kiểm lâm và toàn bộ người dân lân cận di tản lánh nạn, cấm tuyệt đối phát còi báo động tại trạm.",
-        "appSetting": "@DefendAction"
-      }
-    }
-  ]
-}
+[
+  {
+    "id": "voi_rung",
+    "displayName": "Voi Rừng Tây Nguyên",
+    "dangerLevel": "CRITICAL",
+    "isHuman": false,
+    "htmlDescription": "<p>Voi châu Á (Elephas maximus) phân bố tại Tây Nguyên. Cực kỳ nguy hiểm khi xung đột khu dân cư.</p>",
+    "aggressionLevel": 90,
+    "recommendAction": "Không kích động voi, tắt đèn pha, di tản khỏi khu vực hàng rào điện và gọi ngay cho trạm kiểm lâm.",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "ho_dong_duong",
+    "displayName": "Hổ Đông Dương",
+    "dangerLevel": "CRITICAL",
+    "isHuman": false,
+    "htmlDescription": "<p>Hổ Đông Dương (Panthera tigris corbetti). Loài thú ăn thịt đầu bảng nguy cấp cực kỳ cao.</p>",
+    "aggressionLevel": 95,
+    "recommendAction": "Đóng kín cửa chuồng trại gia súc, di tản trẻ nhỏ vào nhà kiên cố, tuyệt đối không săn đuổi.",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "monkey",
+    "displayName": "Khỉ Vàng",
+    "dangerLevel": "LOW",
+    "isHuman": false,
+    "htmlDescription": "<p>Khỉ vàng (Macaca mulatta) thường đi theo đàn phá hoại nông sản nhẹ.</p>",
+    "aggressionLevel": 30,
+    "recommendAction": "Sử dụng âm thanh chó sủa lớn hoặc chớp LED trắng để xua đuổi nhẹ nhàng khỏi ruộng rẫy.",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "nai_vang",
+    "displayName": "Nai Vàng Nam Bộ",
+    "dangerLevel": "MEDIUM",
+    "isHuman": false,
+    "htmlDescription": "<p>Nai vàng (Rusa unicolor) ăn cỏ, có thể đi vào phá hoa màu vào ban đêm.</p>",
+    "aggressionLevel": 10,
+    "recommendAction": "Kích hoạt hàng rào điện sinh học nhẹ và chớp LED vàng cảnh báo tại chỗ.",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "human_border_intruder",
+    "displayName": "Người lạ xâm nhập biên giới",
+    "dangerLevel": "HIGH",
+    "isHuman": true,
+    "htmlDescription": "<p>Đối tượng xâm nhập vùng cấm biên giới hoặc lâm tặc phá hoại rừng.</p>",
+    "aggressionLevel": 50,
+    "recommendAction": "Lực lượng Biên phòng và Kiểm lâm lập tức triển khai tuần tra hiện trường khẩn cấp.",
+    "createdAt": "2025-01-01T00:00:00.000Z"
+  }
+]
 ```
+
+**Schema fields:**
+
+| Field | Type | Mô tả |
+|---|---|---|
+| `id` | `string` | ID định danh loài (dùng làm key trong tất cả API khác) |
+| `displayName` | `string` | Tên hiển thị tiếng Việt (nguồn duy nhất, không hardcode ở nơi khác) |
+| `dangerLevel` | `"LOW" \| "MEDIUM" \| "HIGH" \| "CRITICAL"` | Mức độ nguy hiểm |
+| `isHuman` | `boolean` | `true` nếu là xâm phạm con người |
+| `htmlDescription` | `string` | Mô tả HTML về loài |
+| `aggressionLevel` | `number` | Mức độ hung dữ (0–100) |
+| `recommendAction` | `string` | Hướng dẫn ứng phó khuyến nghị |
+| `createdAt` | `string (ISO 8601)` | Thời điểm tạo bản ghi |
+
 
 ---
 

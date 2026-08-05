@@ -3,6 +3,11 @@
 # ==============================================================================
 # Hướng dẫn chi tiết cách cấu hình dành cho học sinh:
 #
+# 0. displayName:
+#    - Tên hiển thị tiếng Việt của loài. Đây là nguồn duy nhất để xác định tên loài.
+#    - Không được hardcode tên loài trong bất kỳ module nào khác.
+#    - Các module cần tên loài phải gọi thông qua API GET /species.
+#
 # 1. inheritPreset:
 #    - Tên kịch bản mẫu mà loài này muốn kế thừa (Khai báo trong danger-presets.yaml).
 #    - Giá trị hợp lệ: @critical_danger, @medium_danger, @intruder
@@ -20,24 +25,28 @@
 # ==============================================================================
 
 - speciesId: "voi_rung"
+  displayName: "Voi rừng"
   inheritPreset: "@critical_danger"
   override:
     ledIntensity: 100
     silentAlert: false
 
 - speciesId: "ho_dong_duong"
+  displayName: "Hổ Đông Dương"
   inheritPreset: "@critical_danger"
   override:
     ledColor: "RED"
     audioSampleId: "A_gunshot"
 
 - speciesId: "monkey"
+  displayName: "Khỉ"
   inheritPreset: "@medium_danger"
   override:
     ledColor: "WHITE"
     silentAlert: false
 
 - speciesId: "human_border_intruder"
+  displayName: "Người xâm phạm biên giới"
   inheritPreset: "@intruder"
   override:
     ledColor: "RED"

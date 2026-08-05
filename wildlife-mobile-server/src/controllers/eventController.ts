@@ -525,18 +525,8 @@ export async function getAlertDetail(req: AuthenticatedRequest, res: Response) {
 
     const isIntrusion = alert.type === AlertType.HUMAN_BORDER || alert.type === AlertType.INTRUDER || (mainSpecies?.isHuman ?? false);
 
-    // Ánh xạ tên tiếng Anh giả định nếu không có trong DB
-    const speciesNameEnMap: Record<string, string> = {
-      'voi_rung': 'Asian Elephant',
-      'bo_tot': 'Gaur',
-      'ho_dong_nam_a': 'Indochinese Tiger',
-      'lon_rung': 'Wild Boar',
-      'nguoi_la': 'Intruder / Unknown Person',
-      'human_border_intruder': 'Border Intruder / Unknown Person'
-    };
-
-    const speciesId = mainSpecies?.id || '';
-    const speciesNameEn = speciesNameEnMap[speciesId] || (mainSpecies ? mainSpecies.displayName : null);
+    // Tên hiển thị lấy từ DB (displayName là nguồn duy nhất, không hardcode)
+    const speciesNameEn = mainSpecies ? mainSpecies.displayName : null;
 
     // Định dạng ngày recordedAt: "HH:mm:ss · dd/MM/yyyy"
     const date = alert.createdAt;

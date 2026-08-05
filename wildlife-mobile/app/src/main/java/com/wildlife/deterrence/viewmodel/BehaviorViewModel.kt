@@ -27,7 +27,6 @@ data class BehaviorConfigUiModel(
 data class SpeciesInfoUiModel(
     val id: String,
     val name: String,
-    val icon: String,
     val dangerLevel: String // "Cao" | "Trung bình" | "Thấp"
 )
 
@@ -71,7 +70,6 @@ class BehaviorViewModel(
                     SpeciesInfoUiModel(
                         id = s.id,
                         name = s.displayName,
-                        icon = getEmojiForSpecies(s.displayName),
                         dangerLevel = getDangerLevelLabel(s.dangerLevel)
                     )
                 }
@@ -178,19 +176,6 @@ class BehaviorViewModel(
     }
 
     // Các hàm ánh xạ tiện ích giữa UI và Backend API
-    private fun getEmojiForSpecies(displayName: String): String {
-        val nameLower = displayName.lowercase()
-        return when {
-            nameLower.contains("voi") || nameLower.contains("elephant") -> "🐘"
-            nameLower.contains("hổ") || nameLower.contains("cọp") || nameLower.contains("tiger") -> "🐅"
-            nameLower.contains("nai") || nameLower.contains("hươu") || nameLower.contains("deer") -> "🦌"
-            nameLower.contains("khỉ") || nameLower.contains("monkey") -> "🐒"
-            nameLower.contains("heo") || nameLower.contains("lợn") || nameLower.contains("boar") -> "🐗"
-            nameLower.contains("sấu") || nameLower.contains("crocodile") || nameLower.contains("alligator") -> "🐊"
-            nameLower.contains("người") || nameLower.contains("human") || nameLower.contains("intruder") -> "👤"
-            else -> "🐾"
-        }
-    }
 
     private fun getDangerLevelLabel(dangerLevel: String): String {
         return when (dangerLevel) {
