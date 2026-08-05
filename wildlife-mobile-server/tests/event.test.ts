@@ -420,11 +420,11 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     process.env.PUSH_SERVICE_ACCOUNT_KEY_JSON = Buffer.from('{}').toString('base64');
     mockSendEachForMulticast.mockClear();
 
-    // Đăng ký một device token để đảm bảo có token gửi đi
+    // Đăng ký một device token để đảm bảo có token gửi đi (độ dài > 30 và không chứa test prefix)
     await prisma.deviceToken.create({
       data: {
         userId: rangerUserId,
-        fcmToken: 'fcm-token-test-123',
+        fcmToken: 'fcm_token_real_style_for_testing_purposes_1234567890',
         deviceModel: 'Pixel 6',
         osVersion: 'Android 13'
       }

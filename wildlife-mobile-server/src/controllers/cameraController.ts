@@ -275,11 +275,17 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
       }
     });
 
-    // Gửi lệnh điều khiển qua WebSocket và chờ phản hồi COMMAND_ACK từ AI Server
-    const user = req.user!;
+    // Tìm userId đã tải ảnh snapshot gần đây nhất của camera này để định tuyến Ably chính xác
+    const latestSnapshot = await prisma.snapshot.findFirst({
+      where: { cameraId },
+      orderBy: { uploadedAt: 'desc' }
+    });
+    const targetUserId = latestSnapshot?.userId || req.user!.id;
+
+    // Gửi lệnh điều khiển qua Ably và chờ phản hồi COMMAND_ACK từ AI Server
     try {
       await sendDeviceCommand(
-        user.id,
+        targetUserId,
         deviceLog.id,
         cameraId,
         deviceKey,
