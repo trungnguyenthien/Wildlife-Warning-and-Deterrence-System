@@ -43,6 +43,22 @@ fun MainNavigation() {
   val backStack = rememberNavBackStack(Splash)
   var registeredUsername by remember { mutableStateOf<String?>(null) }
 
+  // Xử lý DeepLink ở cấp độ Root để đảm bảo chuyển hướng chính xác bất kể trạng thái vòng đời app
+  val pendingDeepLink = DeepLinkHandler.pendingDestination
+  LaunchedEffect(pendingDeepLink, backStack.size) {
+    if (pendingDeepLink != null) {
+      // Chỉ thực hiện chuyển hướng khi người dùng đã đăng nhập (Main nằm trong backstack)
+      val hasMain = backStack.any { it == Main }
+      if (hasMain) {
+        if (backStack.lastOrNull() != pendingDeepLink) {
+          android.util.Log.d("Navigation", "Navigating to deep link destination: $pendingDeepLink")
+          backStack.add(pendingDeepLink)
+        }
+        DeepLinkHandler.pendingDestination = null
+      }
+    }
+  }
+
   NavDisplay(
     backStack = backStack,
     onBack = { backStack.removeLastOrNull() },
@@ -109,13 +125,7 @@ fun MainNavigation() {
             MainViewModel(tokenManager)
           }
 
-          val pendingDeepLink = DeepLinkHandler.pendingDestination
-          LaunchedEffect(pendingDeepLink) {
-            if (pendingDeepLink != null) {
-              backStack.add(pendingDeepLink)
-              DeepLinkHandler.pendingDestination = null
-            }
-          }
+
 
           MainScreen(
             viewModel = mainViewModel,
