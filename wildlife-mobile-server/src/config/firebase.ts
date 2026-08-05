@@ -50,12 +50,23 @@ export async function sendPushToAllDevices(
 
     const tokens = devices
       .map((d) => d.fcmToken)
-      .filter((token) => token && !token.startsWith('mock-token-'));
+      .filter((token) => {
+        if (!token) return false;
+        const lowerToken = token.toLowerCase();
+        // Lọc bỏ các token giả lập/kiểm thử
+        return !lowerToken.startsWith('mock-token-') && 
+               !lowerToken.startsWith('fcm-token-') && 
+               !lowerToken.startsWith('test-') && 
+               token.length > 30; // FCM Token thực tế luôn dài hơn 30 ký tự
+      });
 
     console.log(`[FCM-Sender] Tìm thấy ${devices.length} bản ghi token trong DB. Tổng số token thực tế hợp lệ (đã lọc bỏ mock tokens): ${tokens.length}`);
     devices.forEach((d, idx) => {
-      const isMock = d.fcmToken?.startsWith('mock-token-');
-      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Type=${isMock ? 'MOCK' : 'REAL'}, Token=${d.fcmToken || 'NULL'}`);
+      const isMock = !d.fcmToken || 
+                     d.fcmToken.toLowerCase().startsWith('mock-') || 
+                     d.fcmToken.toLowerCase().startsWith('fcm-token-') || 
+                     d.fcmToken.length <= 30;
+      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Type=${isMock ? 'MOCK/TEST' : 'REAL'}, Token=${d.fcmToken || 'NULL'}`);
     });
 
     if (tokens.length === 0) {
