@@ -75,8 +75,14 @@ export async function sendPushToAllDevices(
     }
 
     const message: MulticastMessage = {
-      notification: { title, body },
-      data: payload || {},
+      data: {
+        title,
+        body,
+        ...(payload || {})
+      },
+      android: {
+        priority: 'high'
+      },
       tokens: tokens
     };
 
