@@ -110,7 +110,7 @@ from ably import AblyRealtime
 from ably.util.exceptions import AblyException
 
 # Cấu hình kiểm thử trạm camera
-ABLY_API_KEY = os.environ.get("ABLY_API_KEY", "abc123.DEF456:ghIjKlmNoPqrSTuv")
+ABLY_AI_SERVER_API_KEY = os.environ.get("ABLY_AI_SERVER_API_KEY", "abc123.DEF456:ghIjKlmNoPqrSTuv_ai")
 CAMERA_ID = "camera_01"
 
 CONTROL_CHANNEL = f"camera:control:{CAMERA_ID}"
@@ -136,15 +136,15 @@ async def execute_hardware_test(device_key: str, params: dict):
     print(f"[Hardware] <<< HOÀN THÀNH thực thi thiết bị: {device_key.upper()}\n")
 
 async def main():
-    if not ABLY_API_KEY:
-        print("[AI Server] Lỗi: Chưa thiết lập biến môi trường ABLY_API_KEY")
+    if not ABLY_AI_SERVER_API_KEY:
+        print("[AI Server] Lỗi: Chưa thiết lập biến môi trường ABLY_AI_SERVER_API_KEY")
         return
 
     print(f"[AI Server] Khởi tạo kết nối tới Ably với Client ID: client-{CAMERA_ID}")
     
     try:
         # Khởi tạo realtime client kết nối an toàn wss://
-        async with AblyRealtime(ABLY_API_KEY, client_id=f"client-{CAMERA_ID}") as realtime:
+        async with AblyRealtime(ABLY_AI_SERVER_API_KEY, client_id=f"client-{CAMERA_ID}") as realtime:
             await realtime.connection.once_async("connected")
             print("[AI Server] Đã kết nối thành công tới Ably Cloud Broker!")
 
