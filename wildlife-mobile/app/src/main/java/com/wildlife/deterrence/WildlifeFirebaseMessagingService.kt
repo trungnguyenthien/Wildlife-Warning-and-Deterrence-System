@@ -46,17 +46,17 @@ object NotificationState {
 }
 
 object NotificationChannels {
-    const val CHANNEL_CRITICAL = "channel_critical"
-    const val CHANNEL_DEFAULT = "channel_default"
+    const val CHANNEL_CRITICAL = "channel_critical_v2"
+    const val CHANNEL_DEFAULT = "channel_default_v2"
 
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(NotificationManager::class.java) ?: return
 
-            // Channel Critical (Rung + Bypass DND + Alarm Sound, importance DEFAULT)
+            // Channel Critical (Rung + Bypass DND + Alarm Sound, importance HIGH)
             val criticalChannel = NotificationChannel(
                 CHANNEL_CRITICAL, "Cảnh báo nguy khẩn",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Phát hiện động vật nguy cấp cần xử lý ngay"
                 enableVibration(true)
@@ -69,10 +69,10 @@ object NotificationChannels {
                 setSound(soundUri, audioAttributes)
             }
 
-            // Channel Default (importance DEFAULT)
+            // Channel Default (importance HIGH)
             val defaultChannel = NotificationChannel(
                 CHANNEL_DEFAULT, "Thông báo thường",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Thông báo hệ thống, cập nhật thiết bị"
                 enableVibration(true)
@@ -187,10 +187,10 @@ object NotificationBuilder {
             .setAutoCancel(true)
 
         if (isCritical) {
-            builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(0xFFC62828.toInt())
         } else {
-            builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(0xFF2E7D32.toInt())
         }
 
