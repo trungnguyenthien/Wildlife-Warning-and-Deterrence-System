@@ -39,7 +39,6 @@ Khi thực hiện thay đổi, bảo trì hoặc bổ sung các tính năng liê
     *   **Cường độ sáng LED (`ledIntensity`):** Phải là số nguyên trong khoảng `[0, 100]` và ánh xạ vào cột `ledDurationSeconds` trong database Prisma.
     *   **Mẫu âm thanh (`audioSampleId`):** Phải là giá trị hợp lệ từ danh mục âm thanh mẫu (ví dụ: `A_gunshot`, `A_dog_bark`, `A_alarm_siren`).
     *   **Âm lượng loa (`audioIntensity`):** Phải là số nguyên từ `0` đến `100`.
-    *   **Hàng rào điện (`electricFenceDuration`):** Phải là số nguyên lớn hơn hoặc bằng `0` và ánh xạ vào cột `ledDurationSeconds` trong database Prisma.
 3.  **Bảo vệ runtime khi lỗi cú pháp YAML:** Module helper đọc tệp YAML phải có cơ chế fallback thông minh về bộ cấu hình mặc định (hoặc trả về lỗi nhẹ) để tránh việc máy chủ bị crash khi học sinh cấu hình sai cú pháp YAML.
 
 ## 5. Môi trường Production (Vercel)

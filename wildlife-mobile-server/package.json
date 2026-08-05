@@ -11,6 +11,7 @@
     "lint:fix": "eslint 'src/**/*.ts' --fix",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:seed": "npx prisma db seed",
     "test": "npx dotenv-cli -e .env.test -- jest --runInBand --detectOpenHandles",
     "test:report": "npx dotenv-cli -e .env.test -- jest --runInBand --detectOpenHandles --json --outputFile=test-report.json",
     "test:check": "node scripts/check-testcases.js",
@@ -48,5 +49,8 @@
     "ts-jest": "^29.2.3",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3"
+  },
+  "prisma": {
+    "seed": "tsx scripts/seed-prod-test-data.ts"
   }
 }

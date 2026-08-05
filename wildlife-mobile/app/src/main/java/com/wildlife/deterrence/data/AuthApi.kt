@@ -75,4 +75,35 @@ interface AuthApi {
     suspend fun getUserProfile(
         @Header("Authorization") authHeader: String
     ): Response<UserProfileResponse>
+
+    @GET("notifications/inbox")
+    suspend fun getNotificationsInbox(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 20,
+        @Query("unreadOnly") unreadOnly: Boolean = false
+    ): Response<InboxResponse>
 }
+
+data class InboxNotification(
+    val id: String,
+    val type: String,
+    val title: String,
+    val body: String,
+    val cameraId: String?,
+    val eventId: String?,
+    val isRead: Boolean,
+    val createdAt: String
+)
+
+data class PaginationInfo(
+    val page: Int,
+    val size: Int,
+    val total: Int
+)
+
+data class InboxResponse(
+    val items: List<InboxNotification>,
+    val pagination: PaginationInfo
+)
+

@@ -15,8 +15,8 @@
 - **Bối cảnh và Vấn đề:** Giải quyết xung đột nghiêm trọng giữa người dân sinh sống vùng đệm ven rừng và các loài động vật hoang dã xâm lấn gây hại hoa màu, đe dọa tính mạng.
 - **Giải pháp tích hợp:** Thiết lập cụm camera hồng ngoại ngoài trời kết nối máy chủ phân tích AI trung tâm và **ứng dụng di động Android (hướng dọc - Vertical-only)** dành cho người dân và kiểm lâm để kiểm soát trạng thái phòng vệ.
 - **Mô hình nhận dạng AI:** Tích hợp mô hình học sâu nhận dạng tự động loài, số lượng và mức độ nguy hiểm của động vật trong thời gian thực với tần suất 2 giây/lần và độ tin cậy >= 50%.
-- **Cảnh báo phân cấp thông minh:** Phân loại kịch bản ứng phó: âm thầm cảnh báo (Silent Alert) gửi tin nhắn SMS/thông báo đẩy trên app di động đối với các loài thú dữ nguy hiểm cao để người dân di tản, tránh kích động chúng; và chủ động phát chuông báo động, sóng âm xua đuổi hoặc hàng rào điện nhẹ đối với loài hiền hơn để bảo vệ hoa màu.
-- **Xua đuổi đa phương thức chủ động:** Người dùng có thể cấu hình hoặc kích hoạt từ xa các thiết bị sóng âm tần số thấp, đèn LED flash chớp nhiều màu, hàng rào điện sinh học phân cấp để xua đuổi thú hoang dã một cách nhân đạo.
+- **Cảnh báo phân cấp thông minh:** Phân loại kịch bản ứng phó: âm thầm cảnh báo (Silent Alert) gửi tin nhắn SMS/thông báo đẩy trên app di động đối với các loài thú dữ nguy hiểm cao để người dân di tản, tránh kích động chúng; và chủ động phát chuông báo động, sóng âm xua đuổi hoặc phát sóng âm tần số cao đối với loài hiền hơn để bảo vệ hoa màu.
+- **Xua đuổi đa phương thức chủ động:** Người dùng có thể cấu hình hoặc kích hoạt từ xa các thiết bị sóng âm tần số thấp, đèn LED flash chớp nhiều màu, còi hú báo động âm lượng lớn để xua đuổi thú hoang dã một cách nhân đạo.
 - **Hiệu quả thực nghiệm:** [Sẽ cập nhật số liệu khảo sát và hiệu quả xua đuổi thực tế sau khi triển khai chạy thử nghiệm lâm sàn].
 
 ---
@@ -40,7 +40,7 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 - Xây dựng một **ứng dụng di động Android** giám sát và cảnh báo trực quan, hiển thị luồng video (live feed) trực tiếp từ các camera hồng ngoại đặt ở rìa rừng, hỗ trợ tối ưu hướng màn hình xoay **Dọc (Vertical)**.
 - Tích hợp mô hình AI để nhận diện, phân tích loài, số lượng và mức độ nguy hiểm của động vật xâm nhập trong thời gian thực.
-- Triển khai cơ chế điều khiển ngoại vi thông minh trên điện thoại di động, tự động hoặc thủ công kích hoạt các phương án cảnh báo (SMS/Thông báo đẩy, loa phát thanh AI) và các công cụ xua đuổi (âm thanh tần số thấp, đèn LED flash, hàng rào điện) dựa trên mức độ nguy hiểm của thú.
+- Triển khai cơ chế điều khiển ngoại vi thông minh trên điện thoại di động, tự động hoặc thủ công kích hoạt các phương án cảnh báo (SMS/Thông báo đẩy, loa phát thanh AI) và các công cụ xua đuổi (âm thanh tần số thấp, đèn LED flash, còi hú khẩn cấp) dựa trên mức độ nguy hiểm của thú.
 
 ### 5.3. Đối tượng & phạm vi nghiên cứu
 
@@ -72,7 +72,7 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 
 Hệ thống được thiết kế theo mô hình kiến trúc phân tán gồm 4 thành phần cốt lõi nhằm tối ưu hóa khả năng phản ứng và quản trị:
 
-- **Hệ thống camera kèm cảnh báo tại hiện trường:** Đảm nhận việc thu thập hình ảnh hồng ngoại thời gian thực và trực tiếp kích hoạt các thiết bị cảnh báo/xua đuổi tại chỗ (loa phát, đèn chớp nhấp nháy, hàng rào điện sinh học và đèn cảnh báo đi kèm).
+- **Hệ thống camera kèm cảnh báo tại hiện trường:** Đảm nhận việc thu thập hình ảnh hồng ngoại thời gian thực và trực tiếp kích hoạt các thiết bị cảnh báo/xua đuổi tại chỗ (loa phát, đèn chớp nhấp nháy, còi hú báo động và các thiết bị xua đuổi).
 - **Server nhận dạng thú:** Nhận luồng dữ liệu hình ảnh từ hiện trường và chạy mô hình học sâu học máy (YOLOv8) để phân tích, nhận dạng loài, số lượng và độ tin cậy.
 - **Server Mobile:** Máy chủ dịch vụ di động đóng vai trò ghi nhận thông tin điều khiển ứng phó từ người dùng, quản lý tài khoản (Login/Đăng ký), lưu trữ và phân phối log lịch sử cũng như hình ảnh snapshot sự kiện.
 - **Ứng dụng di động Android (Android Mobile App):** Giao diện người dùng thực địa hỗ trợ đăng ký/đăng nhập, thực hiện điều khiển cấu hình phòng vệ từ xa và truy xuất xem log lịch sử trực quan.
@@ -83,7 +83,7 @@ Hệ thống được thiết kế theo mô hình kiến trúc phân tán gồm 
 flowchart TB
     subgraph Fields["Hiện trường (Field Devices)"]
         Cam["Hệ thống Camera hồng ngoại\n(Thu thập hình ảnh)"]
-        WarningDevices["Thiết bị cảnh báo tại chỗ\n(Loa phát, Đèn nháy, Hàng rào điện\n& Đèn cảnh báo hoạt động)"]
+        WarningDevices["Thiết bị cảnh báo tại chỗ\n(Loa phát, Đèn nháy, Còi hú báo động\n& Đèn chớp cảnh báo)"]
         Cam <--> WarningDevices
     end
 
@@ -144,7 +144,7 @@ flowchart TD
     CheckHigh -- No --> LowRisk["Kịch bản xua đuổi chủ động:
     1. Phát chuông cảnh báo/âm thanh siêu âm tại trạm
     2. Đèn LED flash nhấp nháy xua đuổi
-    3. Kích hoạt hàng rào điện sinh học mức nhẹ"]
+    3. Kích hoạt còi hú báo động mức âm lượng nhẹ"]
 
     HighRisk --> Log["Lưu log lịch sử sự kiện vào PostgreSQL"]
     LowRisk --> Log
@@ -159,7 +159,7 @@ flowchart TD
 - **Tần suất kiểm tra của máy chủ AI (Check Frequency):** Máy chủ AI thực hiện nhận diện và kiểm tra khung hình nhận được từ trạm camera để xác định có thú rừng hay không với tần suất **2 giây một lần** (cách 2 giây kiểm tra 1 lần).
 - **Bộ lọc độ tin cậy AI:** Hệ thống chỉ ghi nhận log sự kiện xâm nhập vào cơ sở dữ liệu khi kết quả nhận dạng của mô hình AI đạt độ tin cậy **từ 50% trở lên** (độ tin cậy >= 50% mới ghi), loại bỏ các nhận diện sai lệch hoặc không rõ nét.
 - **Bộ đệm thời gian ra quyết định:** Khi phát hiện động vật hoang dã, hệ thống không kích hoạt các công cụ xua đuổi ngay lập tức mà duy trì theo dõi trong **10 giây liên tục** (duy trì phát hiện >= 10 giây mới lên phương án xử lý). Điều này giúp hạn chế tối đa báo động giả do sai lệch nhận diện nhất thời hoặc do gió thổi làm rung lắc cây cối xung quanh trạm camera.
-- **Thời gian ngắt tự động hàng rào điện:** Hàng rào điện sẽ tự động ngắt hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để đảm bảo an toàn sinh học và tiết kiệm nguồn năng lượng ắc-quy tại trạm.
+- **Thời gian tắt tự động thiết bị xua đuổi:** Các thiết bị xua đuổi tại chỗ (loa phát, đèn chớp) sẽ tự động tắt sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để tiết kiệm nguồn năng lượng ắc-quy tại trạm.
 
 #### 7.2.2. Phân loại kịch bản cảnh báo liên ngành
 
@@ -194,7 +194,7 @@ sequenceDiagram
     else Phát hiện con người vùng biên giới
         Server->>Ranger: Gửi cảnh báo khẩn cấp tới Lực lượng Bộ đội Biên phòng
     else Động vật ít nguy hiểm (Khỉ, Nai...)
-        Server->>Cam: Kích hoạt chuông báo, LED nhấp nháy, hàng rào điện nhẹ để xua đuổi
+        Server->>Cam: Kích hoạt chuông báo, LED nhấp nháy, còi hú nhẹ để xua đuổi
         Server-->>Ranger: Gửi SMS/Push thông báo trạng thái
     end
 
@@ -224,7 +224,7 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
   - Mật khẩu bảo- **Luồng thiết lập:** Người dùng chọn Camera -> Chọn loài động vật -> Chọn kịch bản thiết lập nhanh -> Cấu hình chi tiết (nếu chọn kịch bản Tùy chỉnh).
 - **Tự thiết lập hành vi nhanh (Preset Scenarios Dropdown):** Cung cấp danh sách thả xuống (Dropdown list) chứa các kịch bản phòng vệ mẫu ứng phó nhanh cho loài đang chọn:
   - **Người lạ đột nhập:** Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
-  - **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, đồng thời kích hoạt dòng điện sinh học nhẹ chạy dọc hàng rào điện nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
+  - **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
   - **Thú cực kỳ nguy hiểm**: Kích hoạt kịch bản **cảnh báo âm thầm (Silent Alert)**; không kích hoạt loa hay đèn báo tại chỗ để tránh làm kích động thú dữ hoảng loạn tấn công, đồng thời gửi thông báo đẩy khẩn cấp cho người dân di tản và cơ quan quản lý.
   - **Tùy chỉnh**: Khi tùy chọn này được chọn, phần **Các nhóm cài đặt chi tiết** bên dưới mới xuất hiện để người dùng tự do điều chỉnh các thông số.
 - **Các nhóm cài đặt chi tiết (Defense Parameter Configurations - Chỉ hiển thị khi chọn kịch bản "Tùy chỉnh"):**
@@ -233,11 +233,11 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
     - Nút nghe thử (Test Audio) để kiểm tra âm thanh trước khi lưu.
   - **Đèn LED nhấp nháy:**
     - Cài đặt thời lượng nhấp nháy (Giây).
-  - **Hàng rào điện:**
-    - Lựa chọn mức độ dòng điện sinh học xua đuổi: _Thấp, Trung bình, hoặc Mạnh_.
-    - **Đèn cảnh báo đi kèm:** Tích hợp đèn cảnh báo chớp nháy màu hổ phách/đỏ tại hiện trường để răn đe động vật và cảnh báo người dân.
-    - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi hàng rào điện được kích hoạt.
-    - **Tự động ngắt hoạt động:** Hàng rào điện sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để đảm bảo an toàn và tiết kiệm điện năng.
+  - **Còi hú cảnh báo:**
+    - Lựa chọn mức độ còi hú xua đuổi: _Thấp, Trung bình, hoặc Mạnh_.
+    - **Đèn chớp đi kèm:** Tích hợp đèn cảnh báo chớp nháy màu đỏ tại hiện trường để răn đe động vật và cảnh báo người dân.
+    - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi phát hiện động vật.
+    - **Tự động ngắt hoạt động:** Còi hú và đèn chớp sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để tiết kiệm điện năng.
   - **Gửi cảnh báo bằng loa:**
     - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.�n phòng vệ mẫu cho toàn hệ thống từ xa.
   - **Nội dung:**
@@ -250,7 +250,7 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
 - **Tính năng cảnh báo tại chỗ:**
   - Khi có động vật hoang dã xâm nhập, màn hình xuất hiện **Banner cảnh báo nhấp nháy khẩn cấp**: _Tên Camera · Loài phát hiện · Thời gian phát hiện_ (Ví dụ: `Cam 1 · Phát hiện VOI · 9:04`).
   - Phân tích AI bên dưới: Loài, Số lượng cá thể, Mức độ nguy hiểm, Độ tin cậy AI.
-  - Cho phép người dùng ghi đè (override) bật/tắt thủ công nhanh các thiết bị ngoại vi của riêng trạm camera đó (bật/tắt SMS, Loa phát thanh, Âm thanh xua đuổi, Đèn LED nhấp nháy, Hàng rào điện, báo Kiểm lâm).
+  - Cho phép người dùng ghi đè (override) bật/tắt thủ công nhanh các thiết bị ngoại vi của riêng trạm camera đó (bật/tắt SMS, Loa phát thanh, Âm thanh xua đuổi, Đèn LED nhấp nháy, còi hú báo động, báo Kiểm lâm).
 
 #### 7.4.6. Màn hình [SETTING]
 
@@ -276,16 +276,16 @@ Màn hình này cho phép người dùng tùy biến và thiết lập trước 
     - Lựa chọn tần suất chớp: _2 lần/giây, 4 lần/giây, hoặc nhấp nháy ngẫu nhiên_.
     - Lựa chọn màu sắc LED: _Đỏ, Trắng, Đỏ xen kẽ Trắng_.
     - Cài đặt thời lượng nhấp nháy (Giây).
-  - **Hàng rào điện:**
-    - Lựa chọn mức độ dòng điện sinh học xua đuổi: _Thấp, Trung bình, hoặc Mạnh_.
-    - **Đèn cảnh báo đi kèm:** Tích hợp đèn cảnh báo chớp nháy màu hổ phách/đỏ tại hiện trường để răn đe động vật và cảnh báo người dân.
-    - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi hàng rào điện được kích hoạt.
-    - **Tự động ngắt hoạt động:** Hàng rào điện sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để đảm bảo an toàn và tiết kiệm điện năng.
+  - **Còi hú cảnh báo:**
+    - Lựa chọn mức độ còi hú xua đuổi: _Thấp, Trung bình, hoặc Mạnh_.
+    - **Đèn chớp đi kèm:** Tích hợp đèn cảnh báo chớp nháy màu đỏ tại hiện trường để răn đe động vật và cảnh báo người dân.
+    - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi phát hiện động vật.
+    - **Tự động ngắt hoạt động:** Còi hú và đèn chớp sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để tiết kiệm điện năng.
   - **Gửi cảnh báo bằng loa:**
     - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.
 - **Tự thiết lập hành vi nhanh (Preset Scenarios):** Cung cấp 3 nút bấm thao tác nhanh để áp dụng kịch bản phòng vệ mẫu cho loài đang chọn:
   - Nút **Người lạ đột nhập**: Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (tiếng súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
-  - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, đồng thời kích hoạt dòng điện sinh học nhẹ chạy dọc hàng rào điện nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
+  - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
   - Nút **Thú cực kỳ nguy hiểm**: Kích hoạt kịch bản **cảnh báo âm thầm (Silent Alert)**; không kích hoạt loa hay đèn báo tại chỗ để tránh làm kích động thú dữ hoảng loạn tấn công, đồng thời gửi thông báo đẩy khẩn cấp cho người dân di tản và cơ quan quản lý.
 
 ### 7.5. Cơ chế phân cấp thông báo và ứng phó (Notification & Response Hierarchy)
@@ -299,9 +299,9 @@ Hệ thống di động và ngoại vi IoT áp dụng cơ chế ứng phó phân
 
 2. **Kịch bản Xua đuổi Chủ động (Đối với động vật ít nguy hiểm/phá hoại hoa màu - Nai, Khỉ, Hươu cao cổ):**
    - **Nguyên lý ứng phó:** Chủ động kích hoạt các biện pháp xua đuổi thân thiện và cảnh báo an toàn tại hiện trường.
-   - **Phương thức xua đuổi:** Trạm camera kích hoạt phát chuông cảnh báo tần số thấp, hệ thống loa xua đuổi, đèn LED flash chớp nhiều màu, đồng thời kích hoạt dòng điện sinh học nhẹ (gây tê răn đe) chạy dọc hàng rào điện.
-   - **Đèn cảnh báo & Thông báo hàng rào:** Đi kèm hàng rào điện là đèn cảnh báo đỏ/vàng nhấp nháy tại hiện trường và hệ thống tự động gửi thông báo đẩy/tin nhắn SMS cho người dân vùng đệm biết hàng rào điện đã hoạt động.
-   - **Cơ chế ngắt tự động:** Hàng rào điện sẽ tự động ngắt hoạt động sau **2 phút** nếu AI không ghi nhận sự xuất hiện của thú rừng để bảo đảm an toàn sinh học và tiết kiệm nguồn điện năng.
+   - **Phương thức xua đuổi:** Trạm camera kích hoạt phát chuông cảnh báo tần số thấp, hệ thống loa xua đuổi, đèn LED flash chớp nhiều màu, đồng thời kích hoạt còi hú cảnh báo.
+   - **Đèn cảnh báo & Thông báo:** Đi kèm còi hú là đèn cảnh báo đỏ/vàng nhấp nháy tại hiện trường và hệ thống tự động gửi thông báo đẩy/tin nhắn SMS cho người dân vùng đệm biết.
+   - **Cơ chế ngắt tự động:** Hệ thống xua đuổi sẽ tự động ngắt hoạt động sau **2 phút** nếu AI không ghi nhận sự xuất hiện của thú rừng để bảo đảm an toàn sinh học và tiết kiệm nguồn điện năng.
 
 ---
 

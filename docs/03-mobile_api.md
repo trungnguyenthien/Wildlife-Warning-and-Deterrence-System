@@ -108,7 +108,6 @@ sms                  — Gửi SMS cảnh báo cho người dân lân cận
 speaker              — Loa phát thanh AI tại trạm
 deterrent_audio      — Âm thanh xua đuổi (tần số thấp / siêu âm)
 led_flash            — Đèn LED flash nhiều màu
-electric_fence       — Hàng rào điện sinh học
 ranger_alert         — Gửi báo động về trạm Kiểm lâm
 ```
 
@@ -127,13 +126,6 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
     "flashRate": "4_per_sec",            // 2_per_sec / 4_per_sec / random
     "color": "red_white_alt",            // red / white / red_white_alt
     "durationSeconds": 60                // Thời lượng LED chớp (giây)
-  },
-  "fence": {
-    "level": "medium",                   // low / medium / high (mức dòng điện)
-    "warningLight": true,                // Có bật đèn cảnh báo màu hổ phách/đỏ tại hiện trường
-    "autoNotify": true,                  // Tự động SMS/Push khi kích hoạt hàng rào
-    "autoOffEnabled": true,              // Tự động tắt hàng rào sau 2 phút không có thú
-    "autoOffMinutes": 2                  // Thời gian tự ngắt (BẮT BUỘC >= 2)
   },
   "speaker": {
     "sampleId": "N_warning_thu"          // ID âm thanh cảnh báo người dân (bắt đầu bằng prefix 'N_')
@@ -503,7 +495,7 @@ Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (n
     {
       "id": "medium_danger",
       "displayName": "Thú vừa",
-      "description": "Bật âm thanh xua đuổi tần số siêu âm/chó sủa + đèn LED nhấp nháy + hàng rào điện nhẹ (áp dụng cho loài ít nguy hiểm).",
+      "description": "Bật âm thanh xua đuổi tần số siêu âm/chó sủa + đèn LED nhấp nháy (áp dụng cho loài ít nguy hiểm).",
       "config": "@DefendAction"
     },
     {
@@ -559,7 +551,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 8,
       "htmlDescription": "Loài bò sát lớn ăn thịt hoang dã, hoạt động chủ yếu ở <b>vùng nước ngọt lợ ven rừng</b>.<br/>Có tập tính săn mồi phục kích âm thầm ban đêm, lực cắn cực mạnh nguy hiểm cho con người và gia súc sát bờ nước.",
       "defense": {
-        "recommend": "Kịch bản ngăn chặn bằng hàng rào điện sinh học mức trung bình kết hợp đèn LED chớp nháy màu đỏ-trắng.",
+        "recommend": "Kịch bản ngăn chặn bằng đèn LED chớp nháy màu đỏ-trắng cường độ cao kết hợp còi báo động khẩn cấp.",
         "appSetting": "@DefendAction"
       }
     },
@@ -570,7 +562,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 2,
       "htmlDescription": "Thú ăn cỏ lành tính, nhút nhát, thường đi kiếm ăn theo bầy nhỏ vào lúc <i>bình minh</i> hoặc <i>hoàng hôn</i>.<br/>Thích ăn chồi non, dễ bị giật mình bởi tiếng động lạ và có xu hướng bỏ chạy nhanh.",
       "defense": {
-        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng, không gây hại hàng rào.",
+        "recommend": "Kịch bản xua đuổi thân thiện bằng sóng âm tần số thấp / siêu âm xua đuổi nhẹ nhàng.",
         "appSetting": "@DefendAction"
       }
     },
@@ -592,7 +584,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
       "aggressionLevel": 1,
       "htmlDescription": "Động vật ăn lá cây trên cao, hiền lành, di chuyển chậm rãi và hầu như không gây ra xung đột hay phá hoại hoa màu.<br/>Hoạt động ban ngày, không có xu hướng tiếp cận khu dân cư.",
       "defense": {
-        "recommend": "Loài lành tính, chỉ cần ghi nhận log và bật đèn cảnh báo nhẹ nếu di chuyển sát hàng rào.",
+        "recommend": "Loài lành tính, chỉ cần ghi nhận nhật ký hoạt động.",
         "appSetting": "@DefendAction"
       }
     },
@@ -885,7 +877,28 @@ Cảnh báo đã phân luồng theo vai trò (mapping hiển thị tại tab `[S
 
 Enum `type`: `ANIMAL_RARE` (Kiểm lâm), `HIGHWAY_NEARBY` (Ban QL cao tốc), `HUMAN_BORDER` (Biên phòng), `INTRUDER` (Kiểm lâm / Biên phòng).
 
+### 11.2. `GET /alerts/{alertId}`
 
+Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
+
+**Response 200**
+```json
+{
+  "alertId": "alt-991",
+  "title": "Phát hiện HỔ tại Cam 2",
+  "alertType": "animal",
+  "imageUrl": "https://cdn.example.com/tiger.jpg",
+  "speciesName": "Hổ Đông Nam Á",
+  "speciesNameEn": "Indochinese Tiger",
+  "cameraCode": "cam-002",
+  "cameraName": "Trạm Rìa Rừng Cổng Bắc",
+  "dangerLevel": "CRITICAL",
+  "confidencePercent": 99,
+  "estimatedCount": 1,
+  "recordedAt": "10:15:00 · 22/07/2026",
+  "gpsCoordinate": "10.460, 106.124"
+}
+```
 
 ---
 
@@ -1093,6 +1106,7 @@ Sau khi thiết bị trạm AI Server thực thi xong lệnh vật lý tại hi�
 |---|---|---|---|
 | 10.5 | GET | `/stats/summary` | Tải dữ liệu tổng hợp biểu đồ và bản đồ nhiệt (heatmap) |
 | 11.2 | GET | `/alerts/feed` | Lấy luồng tin tức cảnh báo liên ngành được phân luồng |
+| 11.3 | GET | `/alerts/{alertId}` | Lấy chi tiết tin cảnh báo phát hiện |
 
 ### 14.5. Tab cài đặt (`[SETTING_TAB]`)
 

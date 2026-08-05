@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="@drawable/bg_notification_card">
+
+    <!-- Vạch lề trái biểu thị mức độ nguy hiểm -->
+    <View
+        android:id="@+id/notification_indicator"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="#BA1A1A"/>
+
+    <!-- Nội dung chính của thông báo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Container Icon dạng tròn -->
+            <FrameLayout
+                android:id="@+id/notification_icon_container"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_notification_icon_red"
+                android:layout_marginEnd="12dp">
+                
+                <ImageView
+                    android:id="@+id/notification_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_dialog_alert"
+                    android:tint="#BA1A1A"/>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/notification_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="CẢNH BÁO NGUY HIỂM"
+                    android:textColor="#BA1A1A"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"/>
+
+                <TextView
+                    android:id="@+id/notification_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bây giờ"
+                    android:textColor="#707A6C"
+                    android:textSize="10sp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Phần nội dung chính thụt lề 44dp để thẳng hàng với text tiêu đề -->
+        <TextView
+            android:id="@+id/notification_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="44dp"
+            android:text="Phát hiện VOI (Chỉ số 9/10) tại Camera 02 - Khu vực A1. Chạm để kích hoạt kịch bản xua đuổi."
+            android:textColor="#191C1D"
+            android:textSize="14sp"
+            android:lineSpacingMultiplier="1.2"/>
+    </LinearLayout>
+</LinearLayout>

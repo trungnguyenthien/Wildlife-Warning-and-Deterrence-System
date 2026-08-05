@@ -16,17 +16,21 @@ Bản kế hoạch này mô tả thiết kế và kiến trúc triển khai cho 
 
 Màn hình được đặt tại `ui/screens/CameraListTab.kt` và cấu thành từ các thành phần UI sau:
 
+*   **`screen_header`**: Khung tiêu đề gồm nút back (←) và tiêu đề màn hình, đồng bộ style với MAIN_SCREEN header.
 *   **`emergency_banner_container` (Khung cảnh báo khẩn cấp):** Banner hiển thị sticky ở phía trên cùng của tab khi có sự kiện cảnh báo động vật hoang dã nguy hiểm mới.
     *   `emergency_banner_analysis_text`: Text mô tả chi tiết con vật (Tên loài, độ tin cậy AI, mức độ nguy hiểm).
-*   **`camera_grid_list` (Danh sách lưới camera):** Hiển thị danh sách các camera card dưới dạng Grid.
-*   **`CameraCard` (Thẻ trạm camera):** Đại diện cho một trạm camera cụ thể, bao gồm:
-    *   `camera_status_indicator`: Đèn led nhỏ hiển thị trạng thái `🟢 Online` hoặc `⚪ Offline`.
-    *   `camera_name_text`: Tên của trạm camera (ví dụ: `Trạm Số 1`).
-    *   `camera_location_text`: Mô tả khu vực lắp đặt (ví dụ: `Rìa rừng Phía Nam`).
-    *   `camera_thumbnail_image`: Ảnh snapshot mới nhất chụp từ trạm có độ tin cậy AI ≥ 50%.
-    *   `warning_badge_overlay`: Badge đè lên ảnh thumbnail nhấp nháy đỏ khi có loài nguy hiểm xuất hiện mà chưa xem.
-    *   `snapshot_timestamp_overlay`: Thời gian hệ thống ghi nhận ảnh (HH:mm · dd/MM).
+*   **`camera_grid_list` (Danh sách lưới camera):** Hiển thị danh sách các camera card dưới dạng Grid (1 cột).
+*   **`StationCard` (Thẻ trạm camera):** Đại diện cho một trạm camera cụ thể, bao gồm:
+    *   `camera_thumbnail_image`: Ảnh snapshot mới nhất chụp từ trạm có độ tin cậy AI ≥ 50%, hiển thị dạng rộng đầy đủ theo tỉ lệ camera 16:9.
+    *   `offline_placeholder_state`: Trạng thái khi trạm Offline, hiển thị ảnh mờ/xám + icon camera gạch chéo ở giữa.
+    *   `warning_badge_overlay`: Badge cảnh báo đỏ đè lên góc trên-trái ảnh khi có phát hiện động vật nguy hiểm (tương tự `⚠ PHÁT HIỆN VOI · 92%`).
+    *   `station_status_badge`: Badge trạng thái `🟢 Online` / `🔴 Offline` đè lên góc trên-phải ảnh thumbnail (overlay trực tiếp trên ảnh).
+    *   `station_name_text`: Tên của trạm camera (ví dụ: `Trạm Số 1`), hiển thị đầu tiên bên dưới ảnh (không còn chấm tròn trạng thái).
+    *   `station_timestamp_text`: Hiển thị dưới tên trạm, kèm icon đồng hồ 🕐 (ví dụ: `🕐 14:30 · 27/07`). Khi Offline, đổi thành "Mất kết nối X giờ trước".
+    *   `camera_location_text`: Địa chỉ/mô tả khu vực lắp đặt (ví dụ: `Rìa rừng Phía Nam`), hiển thị dưới thời gian (màu chữ xám nhạt, cỡ nhỏ hơn tên trạm).
+    *   `station_action_button`: Nút hành động dạng icon tròn (ví dụ chuông) ở góc phải card, chỉ hiển thị khi `isOnline = true`.
     *   `camera_card_clickable_container`: Vùng clickable bao trùm toàn bộ card để mở màn hình chi tiết `[CAMERA_VIEW_SCREEN]`.
+*   **`bottom_nav_bar`**: Thanh điều hướng 3 tab (icon + label) đồng bộ với bottom_nav_bar của CAMERA_LIST_TAB, đổi label cho phù hợp chức năng màn hình trạm.
 
 ---
 
@@ -68,14 +72,14 @@ sequenceDiagram
 ### UI State:
 ```kotlin
 data class CameraListUiState(
-    val cameras: List<CameraUiModel> = emptyList(),
+    val stations: List<StationUiModel> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val isRefreshing: Boolean = false,
     val lastUpdated: Long = 0L
 )
 
-data class CameraUiModel(
+data class StationUiModel(
     val id: String,
     val name: String,
     val address: String,
@@ -85,7 +89,7 @@ data class CameraUiModel(
     val alertSpecies: String?,
     val alertConfidence: Int?,
     val timestampText: String,
-    val dangerLevel: String?
+    val offlineDurationText: String?
 )
 ```
 

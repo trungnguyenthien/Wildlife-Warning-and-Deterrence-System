@@ -2,8 +2,12 @@ package com.wildlife.deterrence.ui.main
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Badge
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -38,11 +42,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.ui.screens.CameraListTab
+import com.wildlife.deterrence.ui.screens.StatisticsTab
+import com.wildlife.deterrence.viewmodel.CameraListViewModel
+import com.wildlife.deterrence.viewmodel.StatisticsViewModel
 import com.wildlife.deterrence.ui.components.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,7 +82,13 @@ import java.util.UUID
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
+    tokenManager: TokenManager,
     onLogout: () -> Unit,
+    onNavigateToCameraDetail: (String) -> Unit,
+    onNavigateToAlertDetail: (String, String?) -> Unit,
+    onNavigateToAllDetections: (String, String?, String?) -> Unit,
+    onNavigateToSmsSetup: () -> Unit,
+    onNavigateToBehaviorSpeciesList: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val selectedTab by viewModel.selectedTab.collectAsState()
@@ -81,10 +98,12 @@ fun MainScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
+        android.util.Log.d("NotifPermission", "Granted: $isGranted")
         retrieveAndRegisterToken(context, viewModel)
     }
 
     LaunchedEffect(Unit) {
+        viewModel.fetchUnreadCount()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permissionCheck = ContextCompat.checkSelfPermission(
                 context,
@@ -100,9 +119,14 @@ fun MainScreen(
         }
     }
 
+    val unreadCount by com.wildlife.deterrence.NotificationState.unreadCount.collectAsState()
+
     LaunchedEffect(selectedTab) {
         if (selectedTab == 3) {
             viewModel.fetchUserProfile()
+        }
+        if (selectedTab == 2) {
+            com.wildlife.deterrence.NotificationState.clear()
         }
     }
 
@@ -122,10 +146,27 @@ fun MainScreen(
 
                 items.forEach { (label, icon, index) ->
                     NavigationBarItem(
-                        icon = { Icon(icon, contentDescription = label) },
+                        icon = {
+                            if (index == 2 && unreadCount > 0) {
+                                BadgedBox(
+                                    badge = { Badge { Text(unreadCount.toString()) } }
+                                ) {
+                                    Icon(icon, contentDescription = label)
+                                }
+                            } else {
+                                Icon(icon, contentDescription = label)
+                            }
+                        },
                         label = { Text(label) },
                         selected = selectedTab == index,
-                        onClick = { viewModel.selectTab(index) }
+                        onClick = { viewModel.selectTab(index) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }
@@ -138,16 +179,46 @@ fun MainScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when (selectedTab) {
-                0 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    BlankTabScreen(title = "Trạm Camera", subtitle = "Danh sách camera giám sát động vật hoang dã")
+                0 -> {
+                    val cameraListViewModel: CameraListViewModel = viewModel {
+                        CameraListViewModel(tokenManager)
+                    }
+                    CameraListTab(
+                        viewModel = cameraListViewModel,
+                        onCameraClick = { cameraId ->
+                            onNavigateToCameraDetail(cameraId)
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
-                1 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    BlankTabScreen(title = "Thống Kê", subtitle = "Biểu đồ tần suất xuất hiện và cảnh báo")
+                1 -> {
+                    val statisticsViewModel: StatisticsViewModel = viewModel {
+                        StatisticsViewModel(tokenManager)
+                    }
+                    StatisticsTab(
+                        viewModel = statisticsViewModel,
+                        onBackClick = { viewModel.selectTab(0) },
+                        onAlertClick = onNavigateToAlertDetail,
+                        onViewAllClick = {
+                            val uiState = statisticsViewModel.uiState.value
+                            onNavigateToAllDetections(
+                                uiState.selectedTimeRange,
+                                uiState.selectedSpeciesId,
+                                uiState.selectedCameraId
+                            )
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     BlankTabScreen(title = "Nhật Ký Cảnh Báo", subtitle = "Thông tin phát hiện động vật thời gian thực")
                 }
-                3 -> SettingsTabContent(viewModel = viewModel, onLogout = onLogout)
+                3 -> SettingsTabContent(
+                    viewModel = viewModel,
+                    onLogout = onLogout,
+                    onNavigateToSmsSetup = onNavigateToSmsSetup,
+                    onNavigateToBehaviorSpeciesList = onNavigateToBehaviorSpeciesList
+                )
                 else -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     BlankTabScreen(title = "Không tìm thấy", subtitle = "Tab không hợp lệ")
                 }
@@ -188,14 +259,27 @@ private fun BlankTabScreen(title: String, subtitle: String) {
 @Composable
 private fun SettingsTabContent(
     viewModel: MainViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToSmsSetup: () -> Unit,
+    onNavigateToBehaviorSpeciesList: () -> Unit
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
     val isLoadingProfile by viewModel.isLoadingProfile.collectAsState()
     val profileError by viewModel.profileError.collectAsState()
     val themeMode by ThemeSettings.themeMode.collectAsState()
+    val context = LocalContext.current
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    var showPermissionBanner by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            showPermissionBanner = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        }
+    }
 
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
@@ -215,6 +299,43 @@ private fun SettingsTabContent(
                 .fillMaxWidth()
                 .padding(vertical = 12.dp)
         )
+
+        if (showPermissionBanner) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Quyền thông báo chưa được cấp! Bạn có thể bỏ lỡ các cảnh báo nguy khẩn về thú rừng.",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Button(
+                        onClick = {
+                            val intent = Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.fromParts("package", context.packageName, null)
+                            }
+                            context.startActivity(intent)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text("Bật trong Cài đặt", fontSize = 12.sp)
+                    }
+                }
+            }
+        }
 
         // Card 1: User Profile Display (Compact horizontal Row layout with adaptive colors)
         val profileCardBg = if (isDark) Color(0xFF6E5906) else Color(0xFF2C4C2C)
@@ -348,7 +469,7 @@ private fun SettingsTabContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* Điều hướng sang SMS Config */ }
+                        .clickable { onNavigateToSmsSetup() }
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -379,7 +500,7 @@ private fun SettingsTabContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* Điều hướng sang Species Config */ }
+                        .clickable { onNavigateToBehaviorSpeciesList() }
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -393,11 +514,6 @@ private fun SettingsTabContent(
                     AppBodyText(
                         text = "Thiết lập hành vi ứng phó",
                         modifier = Modifier.weight(1f)
-                    )
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Navigate",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -472,15 +588,22 @@ private fun retrieveAndRegisterToken(context: Context, viewModel: MainViewModel)
             com.google.firebase.messaging.FirebaseMessaging.getInstance().token
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful && task.result != null) {
+                        android.util.Log.d("FCM_Token", "FCM Token thực tế: ${task.result}")
                         viewModel.registerDeviceToken(task.result)
                     } else {
-                        viewModel.registerDeviceToken("mock-token-fail-${UUID.randomUUID()}")
+                        val mockToken = "mock-token-fail-${UUID.randomUUID()}"
+                        android.util.Log.w("FCM_Token", "Không lấy được FCM token, dùng mock: $mockToken")
+                        viewModel.registerDeviceToken(mockToken)
                     }
                 }
         } else {
-            viewModel.registerDeviceToken("mock-token-noapp-${UUID.randomUUID()}")
+            val mockToken = "mock-token-noapp-${UUID.randomUUID()}"
+            android.util.Log.w("FCM_Token", "Không có FirebaseApp, dùng mock: $mockToken")
+            viewModel.registerDeviceToken(mockToken)
         }
     } catch (e: Throwable) {
-        viewModel.registerDeviceToken("mock-token-err-${UUID.randomUUID()}")
+        val mockToken = "mock-token-err-${UUID.randomUUID()}"
+        android.util.Log.e("FCM_Token", "Lỗi retrieveAndRegisterToken, dùng mock: $mockToken", e)
+        viewModel.registerDeviceToken(mockToken)
     }
 }

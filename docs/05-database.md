@@ -260,11 +260,6 @@ Lưu cấu hình ứng phó tự chọn cho từng cặp Camera + Loài động 
 | `led_flash_rate` | `VARCHAR(20)` | `NULL` | Tốc độ chớp led (`2_per_sec`, `4_per_sec`, `random`) |
 | `led_color` | `VARCHAR(20)` | `NULL` | Màu đèn led (`red`, `white`, `red_white_alt`) |
 | `led_duration_seconds`| `INTEGER` | `NULL` | Thời gian chớp led (giây) |
-| `fence_level` | `VARCHAR(20)` | `NULL` | Mức dòng điện hàng rào (`low`, `medium`, `high`) |
-| `fence_warning_light`| `BOOLEAN` | `NULL` | Bật đèn cảnh báo hổ phách/đỏ tại hàng rào |
-| `fence_auto_notify` | `BOOLEAN` | `NULL` | Tự động bắn thông báo khi hàng rào kích hoạt |
-| `fence_auto_off_enabled`| `BOOLEAN`| `NULL` | Tự động tắt hàng rào điện sinh học |
-| `fence_auto_off_minutes`| `INTEGER`| `NULL` | Thời gian tự ngắt hàng rào điện (bắt buộc ≥ 2) |
 | `speaker_sample_id`| `VARCHAR(50)` | `NULL` | ID mẫu phát loa cảnh báo người dân (`N_warning_voi`, ...) |
 | `silent_alert` | `BOOLEAN` | `NOT NULL` | `true` => Cảnh báo âm thầm (chỉ bắn SMS/FCM, không còi/đèn) |
 | `updated_at` | `TIMESTAMP` | `NOT NULL` | Thời điểm cập nhật cấu hình |

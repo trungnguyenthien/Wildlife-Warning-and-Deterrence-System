@@ -107,9 +107,7 @@ Tất cả bản tin đều là **JSON** với cấu trúc:
     "ledColor": "STROBE",
     "speakerWarn": true,
     "audioSampleId": "A_gunshot",
-    "audioIntensity": 80,
-    "electricFence": true,
-    "electricFenceDuration": 15
+    "audioIntensity": 80
   }
 }
 ```
@@ -210,8 +208,7 @@ async def handle_camera(websocket):
                     "cameraId": camera_id,
                     "actionId": "act-123",
                     "ledFlash": True,
-                    "speakerWarn": True,
-                    "electricFence": False
+                    "speakerWarn": True
                 }
             }))
 

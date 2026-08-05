@@ -9,7 +9,7 @@ Tài liệu này mô tả chi tiết luồng tương tác giữa các thành ph�
 - **Mobile:** Ứng dụng di động (Android Client) cài đặt trên điện thoại người dùng và kiểm lâm để tương tác với hệ thống.
 - **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với cả `AI_Server` và `Mobile`.
 - **AI_Server:** Máy chủ trí tuệ nhân tạo chạy mô hình nhận diện (YOLOv8), nhận hình ảnh từ `Camera` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` và điều hướng lệnh phản hồi để điều khiển `Camera`.
-- **Camera:** Thiết bị camera chụp ảnh tại hiện trường (chỉ gửi ảnh về `AI_Server` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, Hàng rào điện sinh học).
+- **Camera:** Thiết bị camera chụp ảnh tại hiện trường (chỉ gửi ảnh về `AI_Server` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
 - **Database:** Cơ sở dữ liệu PostgreSQL lưu trữ trạng thái, cấu hình và nhật ký sự kiện.
 - **FCM (Firebase Cloud Messaging):** Dịch vụ trung gian gửi thông báo đẩy (Push notification) thời gian thực đến `Mobile`.
 - **SMS Gateway:** Hệ thống gửi tin nhắn SMS cảnh báo khẩn cấp đến các số điện thoại đã đăng ký.
@@ -506,7 +506,7 @@ sequenceDiagram
 
 ### 6.2. Action: Update species configuration
 
-- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, cấp độ hàng rào điện, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình hoặc Đặt lại về mặc định.
+- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình hoặc Đặt lại về mặc định.
 
 ```mermaid
 sequenceDiagram
@@ -637,7 +637,7 @@ sequenceDiagram
 
 ### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
-- **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/hàng rào tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
+- **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/còi hú tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 - **Cơ chế gửi Push Notification:**
   - `Mobile_Server` phân tích danh sách loài phát hiện (`detections`).
   - Nếu phát hiện loài thú rừng nguy hiểm (có `isHuman` = false và `dangerLevel` từ `MEDIUM` trở lên như `MEDIUM`, `HIGH`, `CRITICAL`):
@@ -693,7 +693,7 @@ sequenceDiagram
     AI_Server->>Camera: Truyền lệnh điều khiển thiết bị vật lý ("@DefendAction")
     deactivate AI_Server
 
-    Note over Camera: Thực thi phòng vệ tại chỗ (Phát loa xua đuổi, nháy LED, bật hàng rào điện)
+    Note over Camera: Thực thi phòng vệ tại chỗ (Phát loa xua đuổi, nháy LED, bật còi hú báo động)
 ```
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)

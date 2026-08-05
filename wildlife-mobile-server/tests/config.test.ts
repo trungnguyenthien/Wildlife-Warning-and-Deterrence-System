@@ -110,8 +110,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
         speakerWarn: true,
         audioSampleId: 'A_gunshot',
         audioIntensity: 85,
-        electricFence: false,
-        electricFenceDuration: 0,
         silentAlert: false
       });
 
@@ -140,7 +138,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.status).toBe(200);
     // Voi châu á có dangerLevel = CRITICAL -> fallback preset
     expect(res.body.ledColor).toBe('STROBE');
-    expect(res.body.electricFence).toBe(true);
   });
 
   it('TC_CFG_DET_FAILURE_01: Fail to retrieve config when cameraId query parameter is missing', async () => {
@@ -181,8 +178,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 85,
-    electricFence: true,
-    electricFenceDuration: 20,
     silentAlert: false
   };
 
@@ -222,17 +217,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('missed_speaker_warn');
   });
 
-  it('TC_CFG_SAVE_FAILURE_03: Save config missing electricFence', async () => {
-    if (!token) return;
-    const { electricFence: _, ...payload } = validConfigPayload;
-    const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send(payload);
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('missed_electric_fence');
-  });
 
   it('TC_CFG_SAVE_FAILURE_04: Save config missing silentAlert', async () => {
     if (!token) return;
@@ -301,16 +285,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
     expect(res.body.error).toBe('invalid_audio_intensity');
   });
 
-  it('TC_CFG_SAVE_FAILURE_10: Save config with negative electric fence duration', async () => {
-    if (!token) return;
-    const res = await request(app)
-      .put(`/response-configs/${camId}/${speciesId}`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ ...validConfigPayload, electricFenceDuration: -10 });
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBe('invalid_electric_fence_duration');
-  });
 
   // 5. POST /response-configs/{cameraId}/{speciesId}/apply-preset/{presetId}
   it('TC_CFG_PRE_SUCCESS_01: Apply danger level preset successfully', async () => {
@@ -346,8 +320,6 @@ describe('RESPONSE CONFIGS TESTING SUITE', () => {
         ledIntensity: 90,
         speakerWarn: false,
         audioIntensity: 0,
-        electricFence: false,
-        electricFenceDuration: 0,
         silentAlert: false
       });
 

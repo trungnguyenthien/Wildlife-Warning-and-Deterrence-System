@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.wildlife.deterrence.NotificationState
 
 class MainViewModel(
     private val tokenManager: TokenManager,
@@ -37,6 +38,7 @@ class MainViewModel(
         if (cached != null) {
             _userProfile.value = cached
         }
+        fetchUnreadCount()
     }
 
     fun selectTab(index: Int) {
@@ -110,6 +112,26 @@ class MainViewModel(
             } catch (e: Exception) {
                 _isLoadingProfile.value = false
                 _profileError.value = "Error: ${e.message}"
+            }
+        }
+    }
+
+    fun fetchUnreadCount() {
+        val token = tokenManager.getToken() ?: return
+        val authHeader = "Bearer $token"
+        viewModelScope.launch {
+            try {
+                val response = authApi.getNotificationsInbox(
+                    token = authHeader,
+                    page = 0,
+                    size = 1,
+                    unreadOnly = true
+                )
+                if (response.isSuccessful && response.body() != null) {
+                    NotificationState.setUnreadCount(response.body()!!.pagination.total)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainViewModel", "Failed to fetch unread notifications count", e)
             }
         }
     }

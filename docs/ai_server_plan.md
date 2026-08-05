@@ -57,8 +57,6 @@ Dữ liệu giao tiếp được định nghĩa chi tiết tại Nhóm 12 của 
         "speakerWarn": true,
         "audioSampleId": "A_gunshot",
         "audioIntensity": 80,
-        "electricFence": true,
-        "electricFenceDuration": 15,
         "silentAlert": false
       }
     }
@@ -110,11 +108,9 @@ Dữ liệu cấu hình được chia làm hai mức độ chi tiết tùy thu�
     *   *Giá trị:* `true` (kích hoạt chớp sáng), `false` (tắt đèn).
 *   `speakerWarn`: Kích hoạt/Vô hiệu hóa hệ thống loa phát thanh cảnh báo.
     *   *Giá trị:* `true` (kích hoạt phát loa xua đuổi), `false` (tắt loa).
-*   `electricFence`: Kích hoạt/Vô hiệu hóa xung dòng điện của hàng rào sinh học.
-    *   *Giá trị:* `true` (kích hoạt phát xung điện), `false` (ngắt xung điện).
 *   `silentAlert`: Chế độ cảnh báo im lặng.
     *   *Giá trị:* 
-        *   `true`: Hệ thống chỉ ghi nhận nhật ký sự kiện, gửi SMS/Push cảnh báo về máy chủ/người dân, tuyệt đối **không kích hoạt** bất kỳ thiết bị xua đuổi vật lý nào tại chỗ (LED, Loa, Hàng rào đều tắt).
+        *   `true`: Hệ thống chỉ ghi nhận nhật ký sự kiện, gửi SMS/Push cảnh báo về máy chủ/người dân, tuyệt đối **không kích hoạt** bất kỳ thiết bị xua đuổi vật lý nào tại chỗ (LED, Loa đều tắt).
         *   `false`: Kích hoạt các thiết bị xua đuổi vật lý tại chỗ tương ứng theo cấu hình.
 
 ---
@@ -155,17 +151,4 @@ Khi thực hiện cấu hình sâu cho Camera hoặc nhận thông điệp đi�
 *   `audioIntensity` (hoặc `volume`): Cường độ âm lượng phát ra loa.
     *   *Tùy chọn giá trị hợp lệ:* Số nguyên từ `0` đến `100` (đại diện cho tỷ lệ phần trăm % công suất tối đa của âm ly).
 
-#### 3. Hệ thống Hàng rào điện sinh học
-*   `fenceLevel`: Mức điện áp xung kích của hàng rào điện sinh học.
-    *   *Tùy chọn giá trị hợp lệ:*
-        *   `low`: Xung điện áp nhẹ, gây tê nhẹ (dành cho động vật nhỏ hoặc cảnh cáo).
-        *   `medium`: Xung điện áp vừa, gây co cơ tức thời (dành cho thú vừa).
-        *   `high`: Xung điện áp mạnh, đẩy lùi ngay lập tức (dành cho thú lớn nguy hiểm cực độ).
-*   `electricFenceDuration`: Thời gian phát xung điện liên tục từ lúc kích hoạt.
-    *   *Tùy chọn giá trị hợp lệ:* Số nguyên tính bằng giây, từ `5` đến `60` giây.
-*   `fenceAutoOffMinutes`: Thời gian tự động ngắt hàng rào điện hoàn toàn nếu camera không phát hiện thêm chuyển động của động vật.
-    *   *Tùy chọn giá trị hợp lệ:* Số nguyên tính bằng phút, bắt buộc tối thiểu là `2` phút để đảm bảo an toàn sinh mạng cho người dân và vật nuôi trong vùng.
-*   `fenceWarningLight`: Bật/Tắt đèn báo động màu hổ phách chạy dọc theo hàng rào khi đang có điện.
-    *   *Giá trị:* `true` (bật đèn chớp hàng rào), `false` (tắt đèn chớp hàng rào).
-*   `fenceAutoNotify`: Tự động kích hoạt gửi tin nhắn SMS khẩn cấp khi hàng rào điện phát sinh dòng chạm (động vật chạm vào hàng rào).
-    *   *Giá trị:* `true` (gửi SMS khẩn cấp), `false` (chỉ ghi nhận nhật ký).
+
