@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -43,21 +44,9 @@ fun MainNavigation() {
   val backStack = rememberNavBackStack(Splash)
   var registeredUsername by remember { mutableStateOf<String?>(null) }
 
-  // Xử lý DeepLink ở cấp độ Root để đảm bảo chuyển hướng chính xác bất kể trạng thái vòng đời app
-  val pendingDeepLink = DeepLinkHandler.pendingDestination
-  LaunchedEffect(pendingDeepLink, backStack.size) {
-    if (pendingDeepLink != null) {
-      // Chỉ thực hiện chuyển hướng khi người dùng đã đăng nhập (Main nằm trong backstack)
-      val hasMain = backStack.any { it == Main }
-      if (hasMain) {
-        if (backStack.lastOrNull() != pendingDeepLink) {
-          android.util.Log.d("Navigation", "Navigating to deep link destination: $pendingDeepLink")
-          backStack.add(pendingDeepLink)
-        }
-        DeepLinkHandler.pendingDestination = null
-      }
-    }
-  }
+  // Root-level observer: chỉ đảm bảo luồng navigation đã sẵn sàng
+  // Việc xử lý deep link thực tế được thực hiện bên trong entry<Main> khi Main đã composed xong
+
 
   NavDisplay(
     backStack = backStack,
@@ -125,8 +114,30 @@ fun MainNavigation() {
             MainViewModel(tokenManager)
           }
 
-
-
+          // Khi Main đã compose xong, lắng nghe DeepLinkHandler và điều hướng tới màn hình đích
+          LaunchedEffect(Unit) {
+            snapshotFlow { DeepLinkHandler.pendingDestination }
+              .collect { destination ->
+                if (destination != null) {
+                  android.util.Log.d("Navigation", "[DeepLink][Main] Handling destination: $destination")
+                  when (destination) {
+                    is CameraDetail -> {
+                      backStack.add(destination)
+                      DeepLinkHandler.pendingDestination = null
+                    }
+                    is AlertDetail -> {
+                      backStack.add(destination)
+                      DeepLinkHandler.pendingDestination = null
+                    }
+                    else -> {
+                      // fallback: push destination trực tiếp
+                      backStack.add(destination)
+                      DeepLinkHandler.pendingDestination = null
+                    }
+                  }
+                }
+              }
+          }
           MainScreen(
             viewModel = mainViewModel,
             tokenManager = tokenManager,

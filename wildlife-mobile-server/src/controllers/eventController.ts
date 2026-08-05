@@ -305,7 +305,9 @@ export async function processDetection(req: Request, res: Response) {
     let isNewEvent = false;
 
     // Ràng buộc nghiệp vụ: Gom nhóm sự kiện nếu khoảng cách dưới 5 phút
-    if (latestEvent && Math.abs(detectionTime.getTime() - latestEvent.detectedAt.getTime()) < 5 * 60 * 1000) {
+    // Ngoại lệ: bỏ qua giới hạn nếu request đến từ công cụ simulate (header X-Bypass-Cooldown)
+    const bypassCooldown = req.headers['x-bypass-cooldown'] === 'true';
+    if (!bypassCooldown && latestEvent && Math.abs(detectionTime.getTime() - latestEvent.detectedAt.getTime()) < 5 * 60 * 1000) {
       eventId = latestEvent.id;
       // Cập nhật lại thời gian và ảnh snapshot mới nhất cho sự kiện đang diễn ra
       await prisma.event.update({
