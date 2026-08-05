@@ -656,6 +656,8 @@
       let sseReader = null;
       let activeCameras = [];
       let selectedCameraId = null;
+      let isSseActive = false;
+      let sseReconnectTimeout = null;
 
       // DOM Selectors
       const serverEnvironment = document.getElementById('server-environment');
@@ -927,60 +929,84 @@
         sseLogTerminal.scrollTop = sseLogTerminal.scrollHeight;
       }
 
-      btnConnectSse.addEventListener('click', async () => {
+      async function connectSseStream() {
         if (!accessToken) return;
+        isSseActive = true;
 
         btnConnectSse.disabled = true;
         btnDisconnectSse.disabled = false;
         sseStatusPill.className = 'status-pill streaming';
         sseStatusPill.textContent = 'STREAMING';
-        sseLogTerminal.innerHTML = '';
-        logToSseTerminal('[SYSTEM] Đang thiết lập kết nối Server-Sent Events (SSE)...', 'sys');
 
         const baseUrl = serverUrlInput.value.trim();
         const url = `${baseUrl}/cameras/stream`;
 
-        try {
-          const response = await fetch(url, {
-            headers: {
-              'Authorization': `Bearer ${accessToken}`,
-              'Accept': 'text/event-stream'
+        let retryDelay = 2000;
+
+        while (isSseActive) {
+          try {
+            logToSseTerminal('[SYSTEM] Đang thiết lập kết nối Server-Sent Events (SSE)...', 'sys');
+            const response = await fetch(url, {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Accept': 'text/event-stream'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`Server returned HTTP ${response.status}`);
             }
-          });
 
-          if (!response.ok) {
-            throw new Error(`Server returned HTTP ${response.status}`);
-          }
+            logToSseTerminal('[SYSTEM] Đã kết nối EventStream. Đang lắng nghe sự kiện...', 'sys');
+            retryDelay = 2000; // Reset delay on successful connection
 
-          logToSseTerminal('[SYSTEM] Đã kết nối EventStream. Đang lắng nghe sự kiện...', 'sys');
-          
-          const reader = response.body.getReader();
-          sseReader = reader; // save to close later
-          const decoder = new TextDecoder();
-          let buffer = '';
+            const reader = response.body.getReader();
+            sseReader = reader;
+            const decoder = new TextDecoder();
+            let buffer = '';
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            while (isSseActive) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-            buffer += decoder.decode(value, { stream: true });
-            const parts = buffer.split('\n\n');
-            buffer = parts.pop();
+              buffer += decoder.decode(value, { stream: true });
+              const parts = buffer.split('\n\n');
+              buffer = parts.pop();
 
-            for (const chunk of parts) {
-              if (chunk.trim()) {
-                handleSseChunk(chunk);
+              for (const chunk of parts) {
+                if (chunk.trim()) {
+                  handleSseChunk(chunk);
+                }
               }
             }
+
+            if (isSseActive) {
+              logToSseTerminal('[SYSTEM] Kênh truyền SSE bị đóng bởi máy chủ. Tự động kết nối lại...', 'sys');
+            }
+
+          } catch (e) {
+            if (isSseActive) {
+              logToSseTerminal(`[ERROR] Lỗi SSE: ${e.message}. Sẽ kết nối lại sau ${retryDelay / 1000}s...`, 'err');
+              sseStatusPill.className = 'status-pill closed';
+              sseStatusPill.textContent = 'CONNECTING...';
+
+              await new Promise(resolve => {
+                sseReconnectTimeout = setTimeout(resolve, retryDelay);
+              });
+              retryDelay = Math.min(retryDelay * 2, 30000); // Exponential backoff up to 30s
+            }
+          } finally {
+            if (sseReader) {
+              try { sseReader.cancel(); } catch(e) {}
+              sseReader = null;
+            }
           }
-
-          logToSseTerminal('[SYSTEM] Kênh truyền SSE đã bị đóng bởi máy chủ.', 'sys');
-          disconnectSseStream();
-
-        } catch (e) {
-          logToSseTerminal(`[ERROR] SSE Stream Error: ${e.message}`, 'err');
-          disconnectSseStream();
         }
+      }
+
+      btnConnectSse.addEventListener('click', () => {
+        sseLogTerminal.innerHTML = '';
+        connectSseStream();
       });
 
       btnDisconnectSse.addEventListener('click', () => {
@@ -988,6 +1014,11 @@
       });
 
       function disconnectSseStream() {
+        isSseActive = false;
+        if (sseReconnectTimeout) {
+          clearTimeout(sseReconnectTimeout);
+          sseReconnectTimeout = null;
+        }
         if (sseReader) {
           try { sseReader.cancel(); } catch(e) {}
           sseReader = null;
