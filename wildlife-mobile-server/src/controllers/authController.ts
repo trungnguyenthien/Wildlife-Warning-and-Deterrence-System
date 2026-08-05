@@ -3,6 +3,9 @@ import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import { AuthenticatedRequest } from '../middlewares/auth';
+import Ably from 'ably';
+
+const ablyRest = new Ably.Rest({ key: process.env.ABLY_MOBILE_SERVER_API_KEY || 'mock.key:mock' });
 
 const prisma = new PrismaClient();
 
@@ -265,5 +268,21 @@ export async function updateMe(req: AuthenticatedRequest, res: Response) {
   } catch (error) {
     console.error('Lỗi khi cập nhật tài khoản:', error);
     return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
+  }
+}
+
+// Lấy Ably Token Request cho client xác thực
+export async function getAblyToken(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'unauthorized_session', message: 'Truy cập bị từ chối.' });
+  }
+
+  try {
+    const clientId = (req.query.clientId as string) || req.user.id;
+    const tokenRequest = await ablyRest.auth.createTokenRequest({ clientId });
+    return res.status(200).json(tokenRequest);
+  } catch (error) {
+    console.error('Lỗi khi tạo Ably Token Request:', error);
+    return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ khi cấp token Ably.' });
   }
 }

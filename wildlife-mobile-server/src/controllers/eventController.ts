@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient, AlertType, DangerLevel, Role } from '@prisma/client';
+import { PrismaClient, AlertType, DangerLevel, Role, Prisma } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { notifySSE } from './cameraController';
 import { sendPushToAllDevices } from '../config/firebase';
@@ -159,8 +159,12 @@ export async function readAlert(req: AuthenticatedRequest, res: Response) {
 export async function processDetection(req: Request, res: Response) {
   const { cameraId } = req.params;
   // 1. Parse fields (handles JSON or Multipart Form Data)
-  let rawDetections = req.body.detections;
-  let parsedDetections: any[] = [];
+  interface DetectionItem {
+    speciesId: string;
+    confidence: number;
+  }
+  const rawDetections = req.body.detections;
+  let parsedDetections: DetectionItem[] = [];
   let imageUrl = req.body.imageUrl;
   let detectedAt = req.body.detectedAt;
   const userId = req.body.userId;
@@ -324,7 +328,7 @@ export async function processDetection(req: Request, res: Response) {
 
     // Ghi nhận chi tiết nhận dạng AI vào bảng event_detections
     const savedDetections = await Promise.all(
-      parsedDetections.map(async (det: any) => {
+      parsedDetections.map(async (det) => {
         // Kiểm tra xem loài có tồn tại không
         const species = await prisma.species.findUnique({
           where: { id: det.speciesId }
@@ -364,7 +368,7 @@ export async function processDetection(req: Request, res: Response) {
       let alertType = AlertType.INTRUDER as AlertType;
       if (mainSpecies.isHuman) {
         alertType = AlertType.HUMAN_BORDER as AlertType;
-      } else if (maxDangerLevel === DangerLevel.CRITICAL) {
+      } else {
         alertType = AlertType.ANIMAL_RARE as AlertType;
       }
 
@@ -562,7 +566,7 @@ export async function listNotificationsInbox(req: AuthenticatedRequest, res: Res
   }
 
   try {
-    const alertFilter: any = {};
+    const alertFilter: Prisma.AlertWhereInput = {};
     
     // Phân quyền vai trò: CITIZEN không được xem HUMAN_BORDER
     if (req.user.role === Role.CITIZEN) {

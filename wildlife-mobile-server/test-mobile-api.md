@@ -239,14 +239,6 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Tham số truy vấn (Query):** `page=1&size=abc`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request` hoặc server tự chuyển về mặc định size = 10.
 
-#### 9.1. `GET /alerts/:alertId` (Lấy thông tin chi tiết của một tin cảnh báo cụ thể)
-*   **TC_UI_ALERTDETAIL_LOAD_SUCCESS: Retrieve detailed alert information successfully**
-    *   **Điều kiện trước:** Tồn tại tin cảnh báo phát hiện động vật hoang dã.
-    *   **Kết quả mong đợi (Expected Response):** `200 OK` chứa chi tiết tin cảnh báo (ảnh phát hiện, tên loài, độ tin cậy AI, số lượng, v.v.).
-*   **TC_UI_ALERTDETAIL_ANIMAL_VS_INTRUSION: Check alertType classification**
-    *   **Mô tả:** Đảm bảo hệ thống phân loại đúng `alertType` là `intrusion` đối với trường hợp phát hiện người xâm nhập biên giới.
-    *   **Kết quả mong đợi (Expected Response):** `200 OK` với trường `alertType` bằng `"intrusion"`.
-
 ---
 
 ### 2.4. Nhóm Cấu hình phòng vệ (`[SPECIES_CONFIG_LIST_SCREEN]` / `[SPECIES_CONFIG_DETAIL_SCREEN]`)
@@ -513,3 +505,4 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
     *   **Kết quả mong đợi (Expected Response):** `201 Created` (hoặc `200 OK` tùy trường hợp gom nhóm sự kiện), sự kiện vẫn được lưu trữ vào DB.
     *   **Xác thực Side Effects:** Server in log lỗi khởi tạo/xác thực Firebase ra console, không crash ứng dụng.
+

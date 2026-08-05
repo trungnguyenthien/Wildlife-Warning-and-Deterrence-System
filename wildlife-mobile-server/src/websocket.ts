@@ -1,117 +1,17 @@
-import { IncomingMessage, Server } from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
-import parse from 'url';
-import { PrismaClient } from '@prisma/client';
+import Ably from 'ably';
 
-const prisma = new PrismaClient();
-
-// Quản lý các kết nối WebSocket đang hoạt động theo userId
-const userSockets = new Map<string, WebSocket>();
-
-const pendingCommands = new Map<string, {
-  resolve: (value: unknown) => void;
-  reject: (reason: Error) => void;
-  timeoutId: NodeJS.Timeout;
-}>();
-
-export function setupWebSocket(server: Server) {
-  const wss = new WebSocketServer({ noServer: true });
-
-  // Xử lý nâng cấp kết nối từ HTTP Server
-  server.on('upgrade', async (request: IncomingMessage, socket, head) => {
-    const { pathname, query } = parse.parse(request.url || '', true);
-
-    if (pathname !== '/ws') {
-      return;
-    }
-
-    const userId = query.userId as string;
-    if (!userId) {
-      socket.write('HTTP/1.1 400 Bad Request\r\n\r\n');
-      socket.destroy();
-      return;
-    }
-
-    try {
-      // Xác thực userId tồn tại trong DB
-      const user = await prisma.user.findUnique({
-        where: { id: userId }
-      });
-
-      if (!user) {
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
-        socket.destroy();
-        return;
-      }
-
-      // Thực hiện nâng cấp kết nối
-      wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request, userId);
-      });
-    } catch (error) {
-      console.error('Lỗi khi nâng cấp kết nối WS:', error);
-      socket.write('HTTP/1.1 500 Internal Server Error\r\n\r\n');
-      socket.destroy();
-    }
-  });
-
-  // Khi kết nối WebSocket được thiết lập thành công
-  wss.on('connection', (ws: WebSocket, _request: IncomingMessage, userId: string) => {
-    console.log(`[WS] User ${userId} đã kết nối.`);
-    
-    // Lưu socket vào Map (ghi đè nếu có kết nối cũ của cùng một user)
-    const oldSocket = userSockets.get(userId);
-    if (oldSocket) {
-      oldSocket.close();
-    }
-    userSockets.set(userId, ws);
-
-    ws.on('message', (message: string) => {
-      try {
-        const data = JSON.parse(message);
-        
-        // Xử lý bản tin phản hồi COMMAND_ACK từ AI Server
-        if (data.event === 'COMMAND_ACK' && data.payload) {
-          const { commandId, status, error } = data.payload;
-          const pending = pendingCommands.get(commandId);
-          
-          if (pending) {
-            clearTimeout(pending.timeoutId);
-            pendingCommands.delete(commandId);
-
-            if (status === 'SUCCESS') {
-              pending.resolve(data.payload);
-            } else {
-              pending.reject(new Error(error || 'AI Server phản hồi thất bại.'));
-            }
-          }
-        }
-      } catch (err) {
-        console.error('[WS] Lỗi xử lý tin nhắn nhận được:', err);
-      }
-    });
-
-    ws.on('close', () => {
-      console.log(`[WS] User ${userId} đã ngắt kết nối.`);
-      if (userSockets.get(userId) === ws) {
-        userSockets.delete(userId);
-      }
-    });
-
-    ws.on('error', (err) => {
-      console.error(`[WS] Lỗi kết nối của User ${userId}:`, err);
-      if (userSockets.get(userId) === ws) {
-        userSockets.delete(userId);
-      }
-    });
-  });
+/**
+ * WebSocket setup function - No-op since we migrated to Ably Pub/Sub Cloud.
+ */
+export function setupWebSocket(_server?: unknown) {
+  console.log('[Ably] Raw WebSockets disabled. Using Ably Cloud Broker for real-time messaging.');
 }
 
 /**
- * Gửi lệnh điều khiển thiết bị xuống AI Server qua WebSocket và đợi phản hồi COMMAND_ACK
+ * Gửi lệnh điều khiển thiết bị xuống AI Server qua Ably Pub/Sub và đợi phản hồi COMMAND_ACK trên kênh ack
  */
 export function sendDeviceCommand(
-  userId: string,
+  _userId: string,
   commandId: string,
   cameraId: string,
   deviceKey: string,
@@ -119,33 +19,98 @@ export function sendDeviceCommand(
   params: Record<string, unknown>
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
-    const ws = userSockets.get(userId);
-    
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      return reject(new Error('AI Server của người dùng hiện đang ngoại tuyến (Offline).'));
+    const key = process.env.ABLY_MOBILE_SERVER_API_KEY;
+    if (!key) {
+      return reject(new Error('Chưa thiết lập cấu hình khóa ABLY_MOBILE_SERVER_API_KEY trên server.'));
     }
 
-    const commandPayload = {
-      event: 'DEVICE_COMMAND',
-      payload: {
-        commandId,
-        cameraId,
-        deviceKey,
-        action,
-        params
+    let realtime: Ably.Realtime | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
+    try {
+      // Khởi tạo Realtime client kết nối thời gian thực wss://
+      realtime = new Ably.Realtime({ key });
+
+      // Lấy các kênh truyền tương ứng
+      const controlChannel = realtime.channels.get(`camera:control:${cameraId}`);
+      const ackChannel = realtime.channels.get(`camera:ack:${cameraId}`);
+
+      // Thiết lập timeout 5 giây chờ phản hồi
+      timeoutId = setTimeout(() => {
+        if (realtime) {
+          realtime.close();
+        }
+        reject(new Error('Quá thời gian phản hồi từ AI Server (Timeout 5s).'));
+      }, 5000);
+
+      // Đăng ký nhận tin nhắn phản hồi từ ACK Channel
+      ackChannel.subscribe('message', (message) => {
+        try {
+          const data = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
+          
+          if (data && data.event === 'COMMAND_ACK' && data.payload) {
+            const { commandId: ackCmdId, status, error } = data.payload;
+            
+            if (ackCmdId === commandId) {
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
+              if (realtime) {
+                realtime.close();
+              }
+
+              if (status === 'SUCCESS') {
+                resolve(data.payload);
+              } else {
+                reject(new Error(error || 'AI Server phản hồi thất bại.'));
+              }
+            }
+          }
+        } catch (err) {
+          console.error('[Ably] Lỗi xử lý tin nhắn phản hồi ACK:', err);
+        }
+      }).catch((err) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        if (realtime) {
+          realtime.close();
+        }
+        reject(err);
+      });
+
+      // Chuẩn bị payload lệnh gửi đi
+      const commandPayload = {
+        event: 'DEVICE_COMMAND',
+        payload: {
+          commandId,
+          cameraId,
+          deviceKey,
+          action,
+          params
+        }
+      };
+
+      // Gửi lệnh lên Control Channel
+      controlChannel.publish('message', commandPayload).catch((err) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        if (realtime) {
+          realtime.close();
+        }
+        reject(err);
+      });
+
+    } catch (error: unknown) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
       }
-    };
-
-    // Gửi lệnh qua WebSocket
-    ws.send(JSON.stringify(commandPayload));
-
-    // Thiết lập timeout 5 giây chờ phản hồi
-    const timeoutId = setTimeout(() => {
-      pendingCommands.delete(commandId);
-      reject(new Error('Quá thời gian phản hồi từ AI Server (Timeout 5s).'));
-    }, 5000);
-
-    // Lưu vào danh sách chờ
-    pendingCommands.set(commandId, { resolve, reject, timeoutId });
+      if (realtime) {
+        realtime.close();
+      }
+      const err = error as Error;
+      reject(new Error(err.message || 'Lỗi khi gửi lệnh qua Ably.'));
+    }
   });
 }

@@ -117,6 +117,19 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
           recommendAction: 'Cảnh báo biên phòng'
         }
       });
+
+      // Tạo đối tượng Bò Tót
+      await prisma.species.create({
+        data: {
+          id: 'bo_tot',
+          displayName: 'Bò Tót',
+          dangerLevel: 'HIGH',
+          isHuman: false,
+          htmlDescription: '<p>Bò Tót nguy hiểm</p>',
+          aggressionLevel: 3,
+          recommendAction: 'Đèn nháy mạnh và còi hú'
+        }
+      });
     } catch (err) {
       console.warn('DB Offline - bỏ qua nạp dữ liệu test event.', err);
     }
@@ -371,13 +384,14 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   it('TC_UI_ALERTDETAIL_ANIMAL_VS_INTRUSION: Check alertType classification', async () => {
     if (!rangerToken) return;
 
-    // Gửi sự kiện thú (ví dụ: bo_tot)
+    // Gửi sự kiện thú (ví dụ: bo_tot) với mốc thời gian cách biệt 10 phút để bắt buộc tạo event/alert mới
+    const futureTime = new Date(Date.now() + 10 * 60 * 1000).toISOString();
     await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
         detections: [{ speciesId: 'bo_tot', confidence: 0.85 }],
         imageUrl: 'https://cdn.example.com/gaur.jpg',
-        detectedAt: new Date().toISOString()
+        detectedAt: futureTime
       });
 
     const feed = await request(app)

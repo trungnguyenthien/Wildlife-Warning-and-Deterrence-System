@@ -3,7 +3,7 @@ import cors from 'cors';
 import { authenticateToken } from './middlewares/auth';
 
 // Import các controller phẳng
-import { register, login, logout, me, updateMe } from './controllers/authController';
+import { register, login, logout, me, updateMe, getAblyToken } from './controllers/authController';
 import { listCameras, getCamera, renameCamera, streamCameras, testDevice, getCameraHistory } from './controllers/cameraController';
 import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples } from './controllers/configController';
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
@@ -35,6 +35,7 @@ app.get('/health', (_req, res) => {
 app.post('/auth/register', register);
 app.post('/auth/login', login);
 app.post('/auth/logout', authenticateToken, logout);
+app.get('/auth/ably-token', authenticateToken, getAblyToken);
 
 // ==========================================
 // 3. ENDPOINTS THÔNG TIN NGƯỜI DÙNG
