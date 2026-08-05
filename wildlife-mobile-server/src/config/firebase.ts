@@ -55,7 +55,7 @@ export async function sendPushToAllDevices(
     console.log(`[FCM-Sender] Tìm thấy ${devices.length} bản ghi token trong DB. Tổng số token thực tế hợp lệ (đã lọc bỏ mock tokens): ${tokens.length}`);
     devices.forEach((d, idx) => {
       const isMock = d.fcmToken?.startsWith('mock-token-');
-      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Type=${isMock ? 'MOCK' : 'REAL'}, Token=${d.fcmToken ? (d.fcmToken.substring(0, 15) + '...') : 'NULL'}`);
+      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Type=${isMock ? 'MOCK' : 'REAL'}, Token=${d.fcmToken || 'NULL'}`);
     });
 
     if (tokens.length === 0) {

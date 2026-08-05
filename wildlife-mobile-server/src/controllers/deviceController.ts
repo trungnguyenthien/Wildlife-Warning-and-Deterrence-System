@@ -9,7 +9,7 @@ export async function registerPushToken(req: AuthenticatedRequest, res: Response
   const { fcmToken, deviceModel, osVersion } = req.body;
   const userId = req.user?.id;
 
-  console.log(`[PushToken-Register] Yêu cầu đăng ký token: userId=${userId}, fcmToken=${fcmToken ? (fcmToken.substring(0, 15) + '...') : 'NULL'}, deviceModel=${deviceModel}, osVersion=${osVersion}`);
+  console.log(`[PushToken-Register] Yêu cầu đăng ký token: userId=${userId}, fcmToken=${fcmToken || 'NULL'}, deviceModel=${deviceModel}, osVersion=${osVersion}`);
 
   if (!userId) {
     console.warn('[PushToken-Register] Đăng ký thất bại: Người dùng chưa đăng nhập.');
