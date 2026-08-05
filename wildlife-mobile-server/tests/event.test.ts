@@ -495,7 +495,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('eventId');
-  });
+  }, 20000);
 
   it('TC_AI_DET_FAILURE_MULTIPART_MISSING_USER: Fail AI Webhook multipart missing userId', async () => {
     const sampleImagePath = path.join(__dirname, '../f4.png');

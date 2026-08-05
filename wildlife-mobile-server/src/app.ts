@@ -20,6 +20,18 @@ const upload = multer({ dest: '/tmp' });
 
 app.use(cors());
 app.use(express.json());
+
+// Rewrite /api/v1 prefix to / for compatibility with the spec
+app.use((req, _res, next) => {
+  if (req.url.startsWith('/api/v1')) {
+    req.url = req.url.substring(7);
+    if (!req.url.startsWith('/')) {
+      req.url = '/' + req.url;
+    }
+  }
+  next();
+});
+
 app.use('/tools', express.static(path.join(__dirname, '../../html_tool')));
 
 // ==========================================

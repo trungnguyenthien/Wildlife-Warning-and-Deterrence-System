@@ -1413,10 +1413,11 @@
           });
 
           let responseData;
+          const rawText = await response.text();
           try {
-            responseData = await response.json();
+            responseData = JSON.parse(rawText);
           } catch {
-            responseData = await response.text();
+            responseData = rawText;
           }
 
           if (response.ok) {
