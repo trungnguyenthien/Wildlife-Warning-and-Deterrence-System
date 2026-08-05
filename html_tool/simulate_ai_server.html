@@ -1591,7 +1591,7 @@
         speakerIndicator.classList.remove('active');
 
         const sampleId = params.sampleId || 'A_gunshot';
-        const volume = params.volume || 80;
+        const volume = params.intensity || params.volume || 80;
         const duration = (params.durationSeconds || 10) * 1000;
 
         speakerIndicator.classList.add('active');
