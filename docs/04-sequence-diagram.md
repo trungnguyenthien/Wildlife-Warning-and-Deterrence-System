@@ -547,12 +547,12 @@ sequenceDiagram
     participant Camera as Camera
     participant Database as Database
 
-    Note over AI_Server, Ably: AI_Server kết nối và subscribe kênh camera:control:{cameraId} (qua WebSocket)
+    Note over AI_Server, Ably: AI_Server kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
     Note over Mobile, Camera: Người dùng bấm nút "Nghe thử" tại app
     Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
     activate Mobile_Server
-    Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh camera:control:{cameraId}
-    Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh camera:ack:{cameraId})
+    Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
+    Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh user:ack:{userId})
     activate Ably
     Ably-->>AI_Server: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
     deactivate Ably
@@ -561,7 +561,7 @@ sequenceDiagram
     activate Camera
     Camera-->>AI_Server: Phản hồi xác nhận thiết bị đã thực thi xong
     deactivate Camera
-    AI_Server->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh camera:ack:{cameraId} (SUCCESS)
+    AI_Server->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
     deactivate AI_Server
     activate Ably
     Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK

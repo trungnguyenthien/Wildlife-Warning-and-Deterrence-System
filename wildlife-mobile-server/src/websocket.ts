@@ -11,7 +11,7 @@ export function setupWebSocket(_server?: unknown) {
  * Gửi lệnh điều khiển thiết bị xuống AI Server qua Ably Pub/Sub và đợi phản hồi COMMAND_ACK trên kênh ack
  */
 export function sendDeviceCommand(
-  _userId: string,
+  userId: string,
   commandId: string,
   cameraId: string,
   deviceKey: string,
@@ -39,8 +39,8 @@ export function sendDeviceCommand(
       realtime = new Ably.Realtime({ key });
 
       // Lấy các kênh truyền tương ứng
-      const controlChannel = realtime.channels.get(`camera:control:${cameraId}`);
-      const ackChannel = realtime.channels.get(`camera:ack:${cameraId}`);
+      const controlChannel = realtime.channels.get(`user:control:${userId}`);
+      const ackChannel = realtime.channels.get(`user:ack:${userId}`);
 
       // Thiết lập timeout 9 giây chờ phản hồi (Vercel free tier giới hạn 10s)
       timeoutId = setTimeout(() => {

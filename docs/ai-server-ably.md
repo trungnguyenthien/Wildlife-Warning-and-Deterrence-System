@@ -22,10 +22,10 @@ Trong kiến trúc mới, thay vì duy trì các socket kết nối trực tiế
   └────────────────┘   └─────────┘   └───────────────┘
 ```
 
-1.  **Thiết lập lắng nghe:** AI Server dùng SDK Ably kết nối (qua WebSocket an toàn `wss://`) đến máy chủ Ably và Đăng ký (Subscribe) lắng nghe trên kênh điều khiển `camera:control:{cameraId}` với sự kiện `DEVICE_COMMAND`.
+1.  **Thiết lập lắng nghe:** AI Server dùng SDK Ably kết nối (qua WebSocket an toàn `wss://`) đến máy chủ Ably và Đăng ký (Subscribe) lắng nghe trên kênh điều khiển `user:control:{userId}` với sự kiện `DEVICE_COMMAND`.
 2.  **Đẩy lệnh điều khiển:** Khi Mobile App gửi yêu cầu kiểm thử, Mobile Server (chạy stateless trên Vercel) chỉ cần thực hiện 1 request HTTP POST REST nhanh gọn gửi lệnh `DEVICE_COMMAND` lên Ably Cloud rồi kết thúc tiến trình.
 3.  **Phát tin:** Ably Cloud tự động điều phối, đẩy lệnh qua kết nối WebSocket thời gian thực sẵn có xuống cho AI Server.
-4.  **Xác nhận lệnh:** AI Server thi hành lệnh vật lý ở trạm, sau đó gửi phản hồi `COMMAND_ACK` qua WebSocket lên kênh `camera:ack:{cameraId}` để Ably chuyển về cho Mobile Server hoàn tất request HTTP.
+4.  **Xác nhận lệnh:** AI Server thi hành lệnh vật lý ở trạm, sau đó gửi phản hồi `COMMAND_ACK` qua WebSocket lên kênh `user:ack:{userId}` để Ably chuyển về cho Mobile Server hoàn tất request HTTP.
 
 ---
 
@@ -45,12 +45,12 @@ Trong kiến trúc mới, thay vì duy trì các socket kết nối trực tiế
 
 ## 3. Thiết kế Kênh truyền tin (Channel Design)
 
-Để tối ưu chi phí tin nhắn, mỗi trạm camera sẽ giao tiếp qua hai kênh độc lập:
+Để tối ưu chi phí tin nhắn, mỗi tài khoản kiểm lâm/trạm sẽ giao tiếp qua hai kênh độc lập:
 
-1.  **Kênh điều khiển (Control Channel):** `camera:control:{cameraId}`
+1.  **Kênh điều khiển (Control Channel):** `user:control:{userId}`
     *   *Event:* `DEVICE_COMMAND`
     *   *Hướng đi:* Mobile Server (Publish REST) -> Ably -> AI Server (Subscribe WebSocket).
-2.  **Kênh phản hồi ACK (ACK Channel):** `camera:ack:{cameraId}`
+2.  **Kênh phản hồi ACK (ACK Channel):** `user:ack:{userId}`
     *   *Event:* `COMMAND_ACK`
     *   *Hướng đi:* AI Server (Publish WebSocket) -> Ably -> Mobile Server (Subscribe REST/Short-live).
 
@@ -111,10 +111,10 @@ from ably.util.exceptions import AblyException
 
 # Cấu hình kiểm thử trạm camera
 ABLY_AI_SERVER_API_KEY = os.environ.get("ABLY_AI_SERVER_API_KEY", "abc123.DEF456:ghIjKlmNoPqrSTuv_ai")
-CAMERA_ID = "camera_01"
+USER_ID = os.environ.get("ABLY_USER_ID", "user_01")
 
-CONTROL_CHANNEL = f"camera:control:{CAMERA_ID}"
-ACK_CHANNEL = f"camera:ack:{CAMERA_ID}"
+CONTROL_CHANNEL = f"user:control:{USER_ID}"
+ACK_CHANNEL = f"user:ack:{USER_ID}"
 
 async def execute_hardware_test(device_key: str, params: dict):
     """
@@ -140,11 +140,11 @@ async def main():
         print("[AI Server] Lỗi: Chưa thiết lập biến môi trường ABLY_AI_SERVER_API_KEY")
         return
 
-    print(f"[AI Server] Khởi tạo kết nối tới Ably với Client ID: client-{CAMERA_ID}")
+    print(f"[AI Server] Khởi tạo kết nối tới Ably với Client ID: client-{USER_ID}")
     
     try:
         # Khởi tạo realtime client kết nối an toàn wss://
-        async with AblyRealtime(ABLY_AI_SERVER_API_KEY, client_id=f"client-{CAMERA_ID}") as realtime:
+        async with AblyRealtime(ABLY_AI_SERVER_API_KEY, client_id=f"client-{USER_ID}") as realtime:
             await realtime.connection.once_async("connected")
             print("[AI Server] Đã kết nối thành công tới Ably Cloud Broker!")
 
@@ -163,10 +163,11 @@ async def main():
                         return
                         
                     command_id = payload.get("commandId")
+                    camera_id = payload.get("cameraId", "unknown")
                     device_key = payload.get("deviceKey")
                     params = payload.get("params", {})
 
-                    print(f"[AI Server] Nhận lệnh test [{command_id}] cho thiết bị: {device_key}")
+                    print(f"[AI Server] Nhận lệnh test [{command_id}] cho camera [{camera_id}], thiết bị: {device_key}")
                     
                     # 1. Thực thi phần cứng
                     await execute_hardware_test(device_key, params)
@@ -176,13 +177,13 @@ async def main():
                         "event": "COMMAND_ACK",
                         "payload": {
                             "commandId": command_id,
-                            "cameraId": CAMERA_ID,
+                            "cameraId": camera_id,
                             "status": "SUCCESS",
                             "error": None
                         }
                     }
                     await ack_chan.publish("message", ack_payload)
-                    print(f"[AI Server] Đã gửi xác nhận COMMAND_ACK cho lệnh: {command_id}")
+                    print(f"[AI Server] Đã gửi xác nhận COMMAND_ACK cho lệnh: {command_id} của camera: {camera_id}")
                     
                 except Exception as err:
                     print(f"[AI Server] Lỗi xử lý lệnh: {err}")
@@ -192,7 +193,7 @@ async def main():
                             "event": "COMMAND_ACK",
                             "payload": {
                                 "commandId": payload.get("commandId", "unknown"),
-                                "cameraId": CAMERA_ID,
+                                "cameraId": payload.get("cameraId", "unknown"),
                                 "status": "FAILED",
                                 "error": str(err)
                             }

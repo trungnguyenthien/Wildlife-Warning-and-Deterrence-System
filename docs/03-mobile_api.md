@@ -458,8 +458,8 @@ Kích hoạt lệnh kiểm thử thiết bị ngoại vi tại hiện trường 
 
 **Luồng xử lý nội bộ (Ably-based):**
 1. Mobile Server nhận yêu cầu HTTP POST, trích xuất `cameraId`, `deviceKey` và các thông số `params`.
-2. Khởi tạo `Ably.Rest` và publish sự kiện `DEVICE_COMMAND` lên kênh `camera:control:{cameraId}`.
-3. Đồng thời đăng ký lắng nghe trên kênh `camera:ack:{cameraId}` để đợi phản hồi xác nhận từ camera.
+2. Khởi tạo `Ably.Rest` và publish sự kiện `DEVICE_COMMAND` lên kênh `user:control:{userId}`.
+3. Đồng thời đăng ký lắng nghe trên kênh `user:ack:{userId}` để đợi phản hồi xác nhận từ camera.
 4. Nếu nhận được bản tin phản hồi `COMMAND_ACK` từ camera trong vòng **5 giây**, Mobile Server trả về kết quả `200 OK`.
 5. Nếu quá 5 giây mà không nhận được phản hồi, trả về lỗi `504 Gateway Timeout` (trạm camera offline hoặc mất kết nối).
 

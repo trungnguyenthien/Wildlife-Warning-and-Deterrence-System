@@ -1466,14 +1466,14 @@
       // Ably connection setup
       btnConnectWs.addEventListener('click', () => {
         const ablyKey = wsUrlInput.value.trim();
-        const cameraId = cameraIdInput.value.trim() || 'CAM_EVT_01';
+        const userId = userIdInput.value.trim() || 'user_01';
 
         if (!ablyKey) {
           logToTerminal('[ERROR] Vui lòng nhập Ably API Key (AI Server Key).', 'err');
           return;
         }
 
-        logToTerminal(`[SYSTEM] Bắt đầu kết nối Ably Realtime cho Camera ID: ${cameraId}`, 'sys');
+        logToTerminal(`[SYSTEM] Bắt đầu kết nối Ably Realtime cho User ID: ${userId}`, 'sys');
         btnConnectWs.disabled = true;
         connectionStatus.className = 'status-pill connecting';
         connectionStatus.textContent = 'CONNECTING';
@@ -1489,8 +1489,8 @@
             connectionStatus.textContent = 'CONNECTED';
 
             // Đăng ký kênh truyền control và ack
-            controlChannel = ablyConnection.channels.get(`camera:control:${cameraId}`);
-            ackChannel = ablyConnection.channels.get(`camera:ack:${cameraId}`);
+            controlChannel = ablyConnection.channels.get(`user:control:${userId}`);
+            ackChannel = ablyConnection.channels.get(`user:ack:${userId}`);
 
             controlChannel.subscribe('message', (message) => {
               const data = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
@@ -1500,7 +1500,7 @@
                 handleDeviceCommand(data.payload);
               }
             });
-            logToTerminal(`[SYSTEM] Đang lắng nghe lệnh tại kênh: camera:control:${cameraId}`, 'sys');
+            logToTerminal(`[SYSTEM] Đang lắng nghe lệnh tại kênh: user:control:${userId}`, 'sys');
           });
 
           ablyConnection.connection.on('closed', () => {
@@ -1542,8 +1542,8 @@
         lastReceivedCommand = payload;
         btnManualAck.disabled = false;
 
-        const { deviceKey, action, params, commandId } = payload;
-        logToTerminal(`[COMMAND] Nhận lệnh từ thiết bị. Khóa: ${deviceKey}, Hành động: ${action}, CommandID: ${commandId}`, 'sys');
+        const { deviceKey, action, params, commandId, cameraId } = payload;
+        logToTerminal(`[COMMAND] Nhận lệnh cho camera [${cameraId || 'unknown'}]. Thiết bị: ${deviceKey}, Hành động: ${action}, CommandID: ${commandId}`, 'sys');
 
         // Trigger hardware mockup animations based on deviceKey
         if (deviceKey === 'led_light' || deviceKey === 'ledFlash') {
