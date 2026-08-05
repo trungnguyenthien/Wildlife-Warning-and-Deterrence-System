@@ -158,6 +158,9 @@ export async function readAlert(req: AuthenticatedRequest, res: Response) {
 // 4. POST /cameras/{cameraId}/detections - Webhook AI Server nhận dạng hiện trường
 export async function processDetection(req: Request, res: Response) {
   const { cameraId } = req.params;
+  
+  console.log(`[Detection-Webhook] Nhận request: cameraId=${cameraId}, hasFile=${req.file ? 'YES' : 'NO'}, body=${JSON.stringify(req.body)}`);
+
   // 1. Parse fields (handles JSON or Multipart Form Data)
   interface DetectionItem {
     speciesId: string;
@@ -372,7 +375,8 @@ export async function processDetection(req: Request, res: Response) {
         alertType = AlertType.ANIMAL_RARE as AlertType;
       }
 
-      await prisma.alert.create({
+      console.log(`[Detection-Workflow] Kích hoạt sự kiện mới! Đang tạo Alert trong DB: type=${alertType}, title=Phát hiện ${mainSpecies.displayName}, dangerLevel=${maxDangerLevel}`);
+      const newAlert = await prisma.alert.create({
         data: {
           id: `alt-${Date.now()}`,
           type: alertType,
@@ -382,10 +386,15 @@ export async function processDetection(req: Request, res: Response) {
           eventId
         }
       });
+      console.log(`[Detection-Workflow] Đã tạo Alert thành công! Alert ID: ${newAlert.id}`);
 
       // Bắn Push Notification khi phát hiện thú rừng nguy hiểm (không phải người và nguy cơ từ MEDIUM trở lên)
-      if (!mainSpecies.isHuman && maxDangerLevel !== DangerLevel.LOW) {
+      const isPushConditionMet = !mainSpecies.isHuman && maxDangerLevel !== DangerLevel.LOW;
+      console.log(`[Detection-Workflow] Kiểm tra điều kiện gửi Push Notification: isHuman=${mainSpecies.isHuman}, maxDangerLevel=${maxDangerLevel} -> Điều kiện thỏa mãn: ${isPushConditionMet}`);
+      
+      if (isPushConditionMet) {
         const isEscalated = maxDangerLevel === DangerLevel.CRITICAL;
+        console.log(`[Detection-Workflow] Tiến hành gọi sendPushToAllDevices: isEscalated=${isEscalated}`);
         await sendPushToAllDevices(
           isEscalated ? 'Cảnh báo nguy khẩn: Phát hiện động vật nguy cấp' : 'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
           `Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name} (Độ nguy hiểm: ${maxDangerLevel})`,
@@ -397,7 +406,11 @@ export async function processDetection(req: Request, res: Response) {
             dangerLevel: maxDangerLevel
           }
         );
+      } else {
+        console.log(`[Detection-Workflow] Bỏ qua gửi Push Notification do không thỏa mãn điều kiện (phát hiện con người hoặc độ nguy hại là LOW).`);
       }
+    } else {
+      console.log(`[Detection-Workflow] Nhận diện được gộp nhóm vào Event cũ ${eventId}. Không tạo Alert mới hay gửi Push.`);
     }
 
     // Tra cứu hành động phòng vệ (Custom Config hoặc Preset mặc định)

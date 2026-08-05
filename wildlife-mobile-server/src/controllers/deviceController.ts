@@ -9,11 +9,15 @@ export async function registerPushToken(req: AuthenticatedRequest, res: Response
   const { fcmToken, deviceModel, osVersion } = req.body;
   const userId = req.user?.id;
 
+  console.log(`[PushToken-Register] Yêu cầu đăng ký token: userId=${userId}, fcmToken=${fcmToken ? (fcmToken.substring(0, 15) + '...') : 'NULL'}, deviceModel=${deviceModel}, osVersion=${osVersion}`);
+
   if (!userId) {
+    console.warn('[PushToken-Register] Đăng ký thất bại: Người dùng chưa đăng nhập.');
     return res.status(401).json({ error: 'unauthorized', message: 'Truy cập bị từ chối: Người dùng chưa đăng nhập.' });
   }
 
   if (!fcmToken) {
+    console.warn('[PushToken-Register] Đăng ký thất bại: Thiếu fcmToken.');
     return res.status(400).json({ error: 'missed_fcm_token', message: 'Thiếu thông tin bắt buộc: fcmToken.' });
   }
 
@@ -21,7 +25,8 @@ export async function registerPushToken(req: AuthenticatedRequest, res: Response
     const modelStr = deviceModel || 'Unknown';
     const osStr = osVersion || 'Unknown';
 
-    await prisma.deviceToken.upsert({
+    console.log(`[PushToken-Register] Thực hiện lưu/cập nhật token vào cơ sở dữ liệu cho userId: ${userId}...`);
+    const record = await prisma.deviceToken.upsert({
       where: { fcmToken },
       update: {
         userId,
@@ -35,13 +40,14 @@ export async function registerPushToken(req: AuthenticatedRequest, res: Response
         osVersion: osStr,
       },
     });
+    console.log(`[PushToken-Register] Đã lưu token thành công! Record ID: ${record.id}`);
 
     return res.status(201).json({
       registered: true,
       registeredAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Lỗi khi đăng ký Device Push Token:', error);
+    console.error('[PushToken-Register] Lỗi khi đăng ký Device Push Token:', error);
     return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ trong quá trình đăng ký thiết bị.' });
   }
 }
