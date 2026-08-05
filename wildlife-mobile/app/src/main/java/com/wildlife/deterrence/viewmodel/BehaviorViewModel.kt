@@ -1,10 +1,15 @@
 package com.wildlife.deterrence.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.data.NetworkClient
+import com.wildlife.deterrence.data.ResponseConfigData
+import com.wildlife.deterrence.data.SaveResponseConfigRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class BehaviorConfigUiModel(
     val speciesId: String,
@@ -47,10 +52,47 @@ class BehaviorViewModel(
     }
 
     fun loadSpeciesList() {
-        _speciesListState.value = BehaviorSpeciesListUiState(
-            speciesList = defaultSpeciesList,
-            isLoading = false
-        )
+        _speciesListState.value = BehaviorSpeciesListUiState(isLoading = true)
+
+        val token = tokenManager.getToken()
+        if (token == null) {
+            _speciesListState.value = BehaviorSpeciesListUiState(
+                error = "Chưa đăng nhập hệ thống",
+                isLoading = false
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // 1. Tải danh mục loài từ API
+                val responseList = NetworkClient.cameraApi.getSpecies("Bearer $token")
+                val mappedList = responseList.map { s ->
+                    SpeciesInfoUiModel(
+                        id = s.id,
+                        name = s.displayName,
+                        icon = getEmojiForSpecies(s.displayName),
+                        dangerLevel = getDangerLevelLabel(s.dangerLevel)
+                    )
+                }
+
+                // 2. Tải danh sách cấu hình hiện tại của user từ API
+                val responseConfigs = NetworkClient.configApi.getConfigs("Bearer $token")
+                responseConfigs.forEach { config ->
+                    _configsMap[config.speciesId] = mapBackendConfigToUi(config)
+                }
+
+                _speciesListState.value = BehaviorSpeciesListUiState(
+                    speciesList = mappedList,
+                    isLoading = false
+                )
+            } catch (e: Exception) {
+                _speciesListState.value = BehaviorSpeciesListUiState(
+                    error = "Lỗi kết nối API: ${e.message}",
+                    isLoading = false
+                )
+            }
+        }
     }
 
     fun getConfigForSpecies(speciesId: String): BehaviorConfigUiModel {
@@ -59,6 +101,28 @@ class BehaviorViewModel(
 
     fun saveConfigForSpecies(speciesId: String, config: BehaviorConfigUiModel) {
         _configsMap[speciesId] = config
+
+        val token = tokenManager.getToken() ?: return
+        viewModelScope.launch {
+            try {
+                val req = SaveResponseConfigRequest(
+                    ledFlash = config.presetType != "custom" || config.ledFrequency != "Không",
+                    ledColor = mapLedColorToBackend(config.ledColor),
+                    ledIntensity = config.ledDuration,
+                    speakerWarn = !config.silentAlertSms,
+                    audioSampleId = mapAudioTypeToId(config.audioType),
+                    audioIntensity = config.audioVolume,
+                    silentAlert = config.silentAlertSms
+                )
+                NetworkClient.configApi.saveConfig(
+                    token = "Bearer $token",
+                    speciesId = speciesId,
+                    body = req
+                )
+            } catch (e: Exception) {
+                System.err.println("Lỗi khi lưu cấu hình lên server: ${e.message}")
+            }
+        }
     }
 
     fun applyPreset(speciesId: String, presetType: String): BehaviorConfigUiModel {
@@ -104,7 +168,7 @@ class BehaviorViewModel(
     }
 
     private fun createDefaultConfigForSpecies(speciesId: String): BehaviorConfigUiModel {
-        val species = defaultSpeciesList.find { it.id == speciesId }
+        val species = _speciesListState.value.speciesList.find { it.id == speciesId }
         val defaultPreset = when (species?.dangerLevel) {
             "Cao" -> "critical"
             "Trung bình" -> "medium_animal"
@@ -113,14 +177,98 @@ class BehaviorViewModel(
         return applyPreset(speciesId, defaultPreset)
     }
 
-    companion object {
-        val defaultSpeciesList = listOf(
-            SpeciesInfoUiModel("voi", "Voi", "🐘", "Cao"),
-            SpeciesInfoUiModel("cop", "Cọp", "🐅", "Cao"),
-            SpeciesInfoUiModel("nai", "Nai", "🦌", "Thấp"),
-            SpeciesInfoUiModel("khi", "Khỉ", "🐒", "Trung bình"),
-            SpeciesInfoUiModel("heo_rung", "Heo rừng", "🐗", "Trung bình"),
-            SpeciesInfoUiModel("ca_sau", "Cá sấu", "🐊", "Cao")
+    // Các hàm ánh xạ tiện ích giữa UI và Backend API
+    private fun getEmojiForSpecies(displayName: String): String {
+        val nameLower = displayName.lowercase()
+        return when {
+            nameLower.contains("voi") || nameLower.contains("elephant") -> "🐘"
+            nameLower.contains("hổ") || nameLower.contains("cọp") || nameLower.contains("tiger") -> "🐅"
+            nameLower.contains("nai") || nameLower.contains("hươu") || nameLower.contains("deer") -> "🦌"
+            nameLower.contains("khỉ") || nameLower.contains("monkey") -> "🐒"
+            nameLower.contains("heo") || nameLower.contains("lợn") || nameLower.contains("boar") -> "🐗"
+            nameLower.contains("sấu") || nameLower.contains("crocodile") || nameLower.contains("alligator") -> "🐊"
+            nameLower.contains("người") || nameLower.contains("human") || nameLower.contains("intruder") -> "👤"
+            else -> "🐾"
+        }
+    }
+
+    private fun getDangerLevelLabel(dangerLevel: String): String {
+        return when (dangerLevel) {
+            "CRITICAL", "HIGH" -> "Cao"
+            "MEDIUM" -> "Trung bình"
+            else -> "Thấp"
+        }
+    }
+
+    private fun mapAudioTypeToId(type: String): String? {
+        return when (type) {
+            "Tiếng súng", "Tiếng súng nổ đe dọa" -> "A_gunshot"
+            "Tiếng chó sủa lớn", "Tiếng chó sủa dữ dội", "Tiếng gầm" -> "A_dog_bark"
+            "Tiếng nổ giả lập", "Tiếng còi hú khẩn cấp" -> "A_alarm_siren"
+            "Phát loa cảnh báo" -> "S_warn_citizen"
+            else -> null
+        }
+    }
+
+    private fun mapAudioIdToType(id: String?): String {
+        return when (id) {
+            "A_gunshot" -> "Tiếng súng"
+            "A_dog_bark" -> "Tiếng chó sủa lớn"
+            "A_alarm_siren" -> "Tiếng nổ giả lập"
+            "S_warn_citizen" -> "Phát loa cảnh báo"
+            else -> "Không có"
+        }
+    }
+
+    private fun mapLedColorToBackend(color: String): String? {
+        return when (color) {
+            "Đỏ" -> "RED"
+            "Trắng" -> "WHITE"
+            "Đỏ xen trắng" -> "STROBE"
+            "Vàng" -> "YELLOW"
+            else -> null
+      }
+    }
+
+    private fun mapBackendToLedColor(color: String?): String {
+        return when (color) {
+            "RED" -> "Đỏ"
+            "WHITE" -> "Trắng"
+            "STROBE" -> "Đỏ xen trắng"
+            "YELLOW" -> "Vàng"
+            else -> "Trắng"
+        }
+    }
+
+    private fun mapBackendConfigToUi(data: ResponseConfigData): BehaviorConfigUiModel {
+        val audioType = mapAudioIdToType(data.audioSampleId)
+        val ledColor = mapBackendToLedColor(data.ledColor)
+
+        val presetType = if (data.id == null) {
+            "critical"
+        } else {
+            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 90) {
+                "critical"
+            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark") {
+                "medium_animal"
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren") {
+                "intruder"
+            } else {
+                "custom"
+            }
+        }
+
+        return BehaviorConfigUiModel(
+            speciesId = data.speciesId,
+            presetType = presetType,
+            audioType = audioType,
+            audioVolume = data.audioIntensity,
+            ledFrequency = if (data.ledFlash) "4 lần/giây" else "2 lần/giây",
+            ledColor = ledColor,
+            ledDuration = data.ledIntensity,
+            sirenSampleId = "Mẫu 1",
+            silentAlertSms = data.silentAlert,
+            silentAlertPush = true
         )
     }
 }

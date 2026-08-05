@@ -638,17 +638,11 @@
             type="text"
             id="species-id-input"
             list="species-presets"
-            placeholder="Nhập mã loài vật (e.g. voi_rung, ho_dong_duong)..."
-            value="voi_rung"
+            placeholder="Nhập mã loài vật..."
+            value=""
           />
           <datalist id="species-presets">
-            <option value="voi_rung">Voi Rừng Tây Nguyên (voi_rung)</option>
-            <option value="ho_dong_duong">Hổ Đông Dương (ho_dong_duong)</option>
-            <option value="monkey">Khỉ Vàng (monkey)</option>
-            <option value="nai_vang">Nai Vàng Nam Bộ (nai_vang)</option>
-            <option value="human_border_intruder">
-              Người lạ xâm nhập (human_border_intruder)
-            </option>
+            <!-- Được nạp động qua API -->
           </datalist>
         </div>
 
@@ -1116,9 +1110,38 @@
         });
       });
 
+      async function fetchSpeciesList() {
+        const token = getCookie("appAccessToken");
+        if (!token) {
+          console.warn("Không tìm thấy appAccessToken trong cookie. Sử dụng ô nhập tự do.");
+          return;
+        }
+        try {
+          const res = await fetch(`${PRODUCTION_BASE_URL}/species`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const species = await res.json();
+            const datalist = document.getElementById("species-presets");
+            if (datalist) {
+              datalist.innerHTML = "";
+              species.forEach(s => {
+                const opt = document.createElement("option");
+                opt.value = s.id;
+                opt.textContent = `${s.displayName} (${s.id})`;
+                datalist.appendChild(opt);
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Không thể tải danh sách loài từ API:", e);
+        }
+      }
+
       // Initial setup
       renderDetections();
       updateCurlPreview();
+      fetchSpeciesList();
     </script>
   </body>
 </html>

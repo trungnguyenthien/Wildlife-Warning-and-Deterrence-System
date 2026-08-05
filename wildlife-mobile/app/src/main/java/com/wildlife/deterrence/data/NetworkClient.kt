@@ -29,5 +29,6 @@ object NetworkClient {
     val cameraApi: CameraApi = retrofit.create(CameraApi::class.java)
     val alertApi: AlertApi = retrofit.create(AlertApi::class.java)
     val smsApi: SmsApi = retrofit.create(SmsApi::class.java)
+    val configApi: ConfigApi = retrofit.create(ConfigApi::class.java)
     val sseClient: SseClient = SseClient(okHttpClient)
 }
