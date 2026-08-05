@@ -26,8 +26,15 @@ export function sendDeviceCommand(
 
     let realtime: Ably.Realtime | null = null;
     let timeoutId: NodeJS.Timeout | null = null;
+    let keepAliveInterval: NodeJS.Timeout | null = null;
 
     try {
+      // Thiết lập interval để giữ Event Loop bận rộn, tránh việc Vercel suspend container
+      keepAliveInterval = setInterval(() => {
+        // Hoạt động CPU nhẹ giữ container hoạt động
+        Math.random();
+      }, 200);
+
       // Khởi tạo Realtime client kết nối thời gian thực wss://
       realtime = new Ably.Realtime({ key });
 
@@ -37,6 +44,9 @@ export function sendDeviceCommand(
 
       // Thiết lập timeout 9 giây chờ phản hồi (Vercel free tier giới hạn 10s)
       timeoutId = setTimeout(() => {
+        if (keepAliveInterval) {
+          clearInterval(keepAliveInterval);
+        }
         if (realtime) {
           realtime.close();
         }
@@ -65,6 +75,9 @@ export function sendDeviceCommand(
             const { commandId: ackCmdId, status, error } = data.payload;
             
             if (ackCmdId === commandId) {
+              if (keepAliveInterval) {
+                clearInterval(keepAliveInterval);
+              }
               if (timeoutId) {
                 clearTimeout(timeoutId);
               }
@@ -85,6 +98,9 @@ export function sendDeviceCommand(
       }).then(() => {
         // Subscription đã được xác nhận active → bây giờ mới gửi lệnh đi
         controlChannel.publish('message', commandPayload).catch((err) => {
+          if (keepAliveInterval) {
+            clearInterval(keepAliveInterval);
+          }
           if (timeoutId) {
             clearTimeout(timeoutId);
           }
@@ -94,6 +110,9 @@ export function sendDeviceCommand(
           reject(err);
         });
       }).catch((err) => {
+        if (keepAliveInterval) {
+          clearInterval(keepAliveInterval);
+        }
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
@@ -104,6 +123,9 @@ export function sendDeviceCommand(
       });
 
     } catch (error: unknown) {
+      if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+      }
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
