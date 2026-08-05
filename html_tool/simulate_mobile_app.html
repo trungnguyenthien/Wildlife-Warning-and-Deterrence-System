@@ -52,7 +52,7 @@
       }
 
       header {
-        max-width: 1300px;
+        max-width: 1600px;
         width: 100%;
         margin: 0 auto 1.5rem auto;
         display: flex;
@@ -110,19 +110,146 @@
       }
 
       main {
-        max-width: 1300px;
+        max-width: 1600px;
         width: 100%;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1.2fr;
         gap: 1.5rem;
         flex-grow: 1;
       }
 
-      @media (max-width: 950px) {
+      @media (max-width: 1200px) {
+        main {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 800px) {
         main {
           grid-template-columns: 1fr;
         }
+      }
+
+      /* Switch Toggle Styling */
+      .switch-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 22px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider-round {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: var(--input-bg);
+        border: 1px solid var(--input-border);
+        transition: .3s;
+        border-radius: 34px;
+      }
+      .slider-round:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--text-secondary);
+        transition: .3s;
+        border-radius: 50%;
+      }
+      input:checked + .slider-round {
+        background-color: var(--success-accent);
+        border-color: var(--success-accent);
+      }
+      input:checked + .slider-round:before {
+        transform: translateX(22px);
+        background-color: #ffffff;
+      }
+
+      /* Collapsible Container */
+      .collapsible-container {
+        border: 1px solid var(--input-border);
+        border-radius: 6px;
+        background: var(--input-bg);
+        overflow: hidden;
+        margin-top: 0.5rem;
+      }
+      .collapsible-header {
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.65rem 0.85rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+      }
+      .collapsible-body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        border-top: 1px solid var(--input-border);
+      }
+      .collapsed .collapsible-body {
+        display: none;
+      }
+
+      /* Radio Group Horizontal */
+      .radio-group-horizontal {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+      @media (max-width: 400px) {
+        .radio-group-horizontal {
+          grid-template-columns: 1fr;
+        }
+      }
+      .radio-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--input-border);
+        background: var(--input-bg);
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        text-align: center;
+      }
+      .radio-tile input {
+        display: none;
+      }
+      .radio-tile-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+      .radio-tile:hover {
+        border-color: var(--primary-accent);
+      }
+      .radio-tile.active {
+        background: rgba(212, 172, 13, 0.08);
+        border-color: var(--primary-accent);
+      }
+      .radio-tile.active .radio-tile-label {
+        color: var(--primary-accent);
       }
 
       .card {
@@ -648,6 +775,152 @@
           <div class="response-card" id="response-preview">// Kết quả kiểm thử sẽ hiển thị tại đây...</div>
         </div>
       </section>
+
+      <!-- THIRD COLUMN: Response Configurations -->
+      <section class="card" id="defense-config-card" style="justify-content: flex-start;">
+        <div class="card-title-bar">
+          <div class="card-title">Cấu hình phòng vệ theo loài</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="config-camera-id">Camera áp dụng</label>
+            <select id="config-camera-id">
+              <option value="">-- Chọn Camera --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="config-species-id">Loài động vật</label>
+            <select id="config-species-id">
+              <option value="">-- Chọn Loài --</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" class="btn" id="btn-load-config" disabled style="background-color: var(--success-accent); color: #ffffff;">
+          🔍 Tải cấu hình hiện tại
+        </button>
+
+        <div class="card-title-bar" style="border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 0.4rem; margin-top: 0.5rem;">
+          <div class="card-title" style="font-size: 0.85rem;">Kịch bản nhanh (Presets)</div>
+        </div>
+
+        <div class="radio-group-horizontal" id="preset-radio-group">
+          <div class="radio-tile" id="tile-preset-intruder">
+            <input type="radio" name="preset-selection" id="preset-intruder" value="intruder" />
+            <span class="radio-tile-label">👤 Người lạ đột nhập</span>
+          </div>
+          <div class="radio-tile" id="tile-preset-medium">
+            <input type="radio" name="preset-selection" id="preset-medium" value="medium_danger" />
+            <span class="radio-tile-label">🐒 Thú vừa</span>
+          </div>
+          <div class="radio-tile" id="tile-preset-critical">
+            <input type="radio" name="preset-selection" id="preset-critical" value="critical_danger" />
+            <span class="radio-tile-label">🐘 Thú nguy hiểm</span>
+          </div>
+          <div class="radio-tile id-preset-custom active" id="tile-preset-custom">
+            <input type="radio" name="preset-selection" id="preset-custom" value="custom" checked />
+            <span class="radio-tile-label">⚙️ Tùy chỉnh</span>
+          </div>
+        </div>
+
+        <div class="collapsible-container collapsed" id="custom-params-container">
+          <div class="collapsible-header" id="custom-params-header">
+            <span>🛠️ Tùy chỉnh nâng cao</span>
+            <span id="custom-params-arrow">▼</span>
+          </div>
+          <div class="collapsible-body">
+            <div class="form-group">
+              <label for="config-audio-sample">Âm thanh xua đuổi</label>
+              <select id="config-audio-sample">
+                <option value="">-- Không có --</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="config-speaker-sample">Mẫu nội dung phát loa</label>
+              <select id="config-speaker-sample">
+                <option value="">-- Không có --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="config-audio-intensity">Cường độ âm lượng (1-100%)</label>
+              <input type="range" id="config-audio-intensity" min="0" max="100" value="80" style="width: 100%; cursor: pointer;" />
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);">
+                <span>Câm</span>
+                <span id="audio-intensity-value">80%</span>
+                <span>Tối đa</span>
+              </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--input-border); margin: 0.25rem 0;" />
+
+            <div class="switch-container">
+              <label>Đèn LED chớp sáng</label>
+              <label class="switch">
+                <input type="checkbox" id="config-led-flash" checked />
+                <span class="slider-round"></span>
+              </label>
+            </div>
+
+            <div class="form-row" id="led-settings-row">
+              <div class="form-group">
+                <label for="config-led-color">Màu sắc LED</label>
+                <select id="config-led-color">
+                  <option value="RED">Đỏ (RED)</option>
+                  <option value="YELLOW">Vàng (YELLOW)</option>
+                  <option value="WHITE">Trắng (WHITE)</option>
+                  <option value="STROBE">Chớp xen kẽ (STROBE)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="config-led-duration">Thời lượng LED (giây)</label>
+                <input type="number" id="config-led-duration" min="0" max="120" value="15" />
+              </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--input-border); margin: 0.25rem 0;" />
+
+            <div class="switch-container">
+              <label>Silent Alert (Báo động im lặng)</label>
+              <label class="switch">
+                <input type="checkbox" id="config-silent-alert" />
+                <span class="slider-round"></span>
+              </label>
+            </div>
+
+            <div class="switch-container">
+              <label>Gửi tin nhắn SMS cảnh báo</label>
+              <label class="switch">
+                <input type="checkbox" id="config-notify-sms" checked />
+                <span class="slider-round"></span>
+              </label>
+            </div>
+
+            <div class="switch-container">
+              <label>Gửi thông báo Push Notification</label>
+              <label class="switch">
+                <input type="checkbox" id="config-notify-push" checked />
+                <span class="slider-round"></span>
+              </label>
+            </div>
+            
+            <button type="button" class="btn" id="btn-test-config-sound" style="background-color: rgba(212, 172, 13, 0.15); border: 1px solid var(--primary-accent); color: var(--primary-accent); padding: 0.5rem; font-size: 0.8rem; margin-top: 0.25rem;">
+              🔊 Nghe thử (Test Audio tại chỗ)
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <button type="button" class="btn" id="btn-save-config" disabled style="background-color: var(--primary-accent);">
+            💾 Lưu cấu hình
+          </button>
+          <button type="button" class="btn" id="btn-reset-config" disabled style="background-color: rgba(239, 83, 80, 0.15); color: #ef5350; border: 1px solid rgba(239, 83, 80, 0.3);">
+            🔄 Đặt lại mặc định
+          </button>
+        </div>
+      </section>
     </main>
 
     <script>
@@ -810,6 +1083,7 @@
         btnTriggerTest.disabled = false;
 
         updateCurlPreview();
+        loadResponseConfigMetadata();
       }
 
       function setLoggedOutState() {
@@ -825,6 +1099,7 @@
         disconnectSseStream();
 
         updateCurlPreview();
+        disableResponseConfigForm();
       }
 
       // Fetch camera list
@@ -876,6 +1151,19 @@
           return;
         }
 
+        // Đồng bộ hóa danh mục Camera trong Cấu hình phòng vệ
+        const configCamSelect = document.getElementById('config-camera-id');
+        configCamSelect.innerHTML = '<option value="">-- Chọn Camera --</option>';
+        activeCameras.forEach(cam => {
+          const opt = document.createElement('option');
+          opt.value = cam.id;
+          opt.textContent = `${cam.name} (${cam.id})`;
+          configCamSelect.appendChild(opt);
+        });
+        if (selectedCameraId) {
+          configCamSelect.value = selectedCameraId;
+        }
+
         activeCameras.forEach(cam => {
           const card = document.createElement('div');
           card.className = `camera-card ${selectedCameraId === cam.id ? 'selected' : ''}`;
@@ -906,6 +1194,12 @@
             testCameraIdInput.value = cam.id;
             setCookie('appTestCameraId', cam.id);
             updateCurlPreview();
+            
+            // Đồng bộ sang bên Cấu hình phòng vệ và kích hoạt tải cấu hình
+            if (configCamSelect) {
+              configCamSelect.value = cam.id;
+              loadResponseConfig();
+            }
             
             // Re-render select styles
             document.querySelectorAll('.camera-card').forEach(el => el.classList.remove('selected'));
@@ -1130,6 +1424,414 @@
           responsePreview.textContent = `Lỗi mạng kết nối: ${e.message}`;
         } finally {
           btnTriggerTest.disabled = false;
+        }
+      });
+
+      // ==========================================
+      // RESPONSE CONFIGURATIONS LOGIC
+      // ==========================================
+
+      const configCameraId = document.getElementById('config-camera-id');
+      const configSpeciesId = document.getElementById('config-species-id');
+      const btnLoadConfig = document.getElementById('btn-load-config');
+      const customParamsContainer = document.getElementById('custom-params-container');
+      const customParamsHeader = document.getElementById('custom-params-header');
+      const customParamsArrow = document.getElementById('custom-params-arrow');
+      
+      const configAudioSample = document.getElementById('config-audio-sample');
+      const configSpeakerSample = document.getElementById('config-speaker-sample');
+      const configAudioIntensity = document.getElementById('config-audio-intensity');
+      const audioIntensityValue = document.getElementById('audio-intensity-value');
+      
+      const configLedFlash = document.getElementById('config-led-flash');
+      const configLedColor = document.getElementById('config-led-color');
+      const configLedDuration = document.getElementById('config-led-duration');
+      const ledSettingsRow = document.getElementById('led-settings-row');
+      
+      const configSilentAlert = document.getElementById('config-silent-alert');
+      const configNotifySms = document.getElementById('config-notify-sms');
+      const configNotifyPush = document.getElementById('config-notify-push');
+      
+      const btnTestConfigSound = document.getElementById('btn-test-config-sound');
+      const btnSaveConfig = document.getElementById('btn-save-config');
+      const btnResetConfig = document.getElementById('btn-reset-config');
+
+      // Manual collapsible toggle
+      customParamsHeader.addEventListener('click', () => {
+        customParamsContainer.classList.toggle('collapsed');
+        customParamsArrow.textContent = customParamsContainer.classList.contains('collapsed') ? '▼' : '▲';
+      });
+
+      // LED Flash toggle enables/disables color/duration row
+      configLedFlash.addEventListener('change', () => {
+        if (configLedFlash.checked) {
+          ledSettingsRow.style.opacity = '1';
+          configLedColor.disabled = false;
+          configLedDuration.disabled = false;
+        } else {
+          ledSettingsRow.style.opacity = '0.5';
+          configLedColor.disabled = true;
+          configLedDuration.disabled = true;
+        }
+      });
+
+      // Audio slider label
+      configAudioIntensity.addEventListener('input', () => {
+        audioIntensityValue.textContent = `${configAudioIntensity.value}%`;
+      });
+
+      // Preset radio buttons event listeners
+      document.querySelectorAll('input[name="preset-selection"]').forEach(radio => {
+        radio.closest('.radio-tile').addEventListener('click', () => {
+          radio.checked = true;
+          handlePresetSelection(radio.value);
+        });
+      });
+
+      function handlePresetSelection(preset) {
+        // Update active class on tiles
+        document.querySelectorAll('.radio-tile').forEach(tile => tile.classList.remove('active'));
+        const activeTile = document.getElementById(`tile-preset-${preset === 'medium_danger' ? 'medium' : preset === 'critical_danger' ? 'critical' : preset}`);
+        if (activeTile) activeTile.classList.add('active');
+
+        if (preset !== 'custom') {
+          // Collapse custom container
+          customParamsContainer.classList.add('collapsed');
+          customParamsArrow.textContent = '▼';
+          
+          // Fill values based on preset
+          if (preset === 'intruder') {
+            configLedFlash.checked = true;
+            configLedColor.value = 'RED';
+            configLedDuration.value = 30;
+            configLedFlash.dispatchEvent(new Event('change'));
+
+            configAudioSample.value = 'A_alarm_siren';
+            configAudioIntensity.value = 90;
+            audioIntensityValue.textContent = '90%';
+
+            configSilentAlert.checked = false;
+            configNotifySms.checked = true;
+            configNotifyPush.checked = true;
+          } else if (preset === 'medium_danger') {
+            configLedFlash.checked = true;
+            configLedColor.value = 'YELLOW';
+            configLedDuration.value = 10;
+            configLedFlash.dispatchEvent(new Event('change'));
+
+            configAudioSample.value = 'A_dog_bark';
+            configAudioIntensity.value = 50;
+            audioIntensityValue.textContent = '50%';
+
+            configSilentAlert.checked = false;
+            configNotifySms.checked = false;
+            configNotifyPush.checked = true;
+          } else if (preset === 'critical_danger') {
+            configLedFlash.checked = true;
+            configLedColor.value = 'STROBE';
+            configLedDuration.value = 100;
+            configLedFlash.dispatchEvent(new Event('change'));
+
+            configAudioSample.value = 'A_gunshot';
+            configAudioIntensity.value = 100;
+            audioIntensityValue.textContent = '100%';
+
+            configSilentAlert.checked = false;
+            configNotifySms.checked = true;
+            configNotifyPush.checked = true;
+          }
+        } else {
+          // Expand custom container
+          customParamsContainer.classList.remove('collapsed');
+          customParamsArrow.textContent = '▲';
+        }
+      }
+
+      function updatePresetUI(preset) {
+        document.querySelectorAll('.radio-tile').forEach(tile => tile.classList.remove('active'));
+        const activeTile = document.getElementById(`tile-preset-${preset === 'medium_danger' ? 'medium' : preset === 'critical_danger' ? 'critical' : preset}`);
+        if (activeTile) activeTile.classList.add('active');
+        
+        if (preset === 'custom') {
+          customParamsContainer.classList.remove('collapsed');
+          customParamsArrow.textContent = '▲';
+        } else {
+          customParamsContainer.classList.add('collapsed');
+          customParamsArrow.textContent = '▼';
+        }
+      }
+
+      async function loadResponseConfigMetadata() {
+        const baseUrl = serverUrlInput.value.trim();
+        try {
+          // 1. Tải danh mục loài (species)
+          const speciesRes = await fetch(`${baseUrl}/species`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (speciesRes.ok) {
+            const speciesData = await speciesRes.json();
+            configSpeciesId.innerHTML = '<option value="">-- Chọn Loài --</option>';
+            speciesData.forEach(s => {
+              const opt = document.createElement('option');
+              opt.value = s.id;
+              opt.textContent = `${s.displayName} (${s.id})`;
+              configSpeciesId.appendChild(opt);
+            });
+          }
+
+          // 2. Tải danh mục âm thanh mẫu (audio-samples)
+          const audioRes = await fetch(`${baseUrl}/audio-samples`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (audioRes.ok) {
+            const audioData = await audioRes.json();
+            
+            // Điền âm thanh xua đuổi
+            configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
+            if (audioData.audio_samples && Array.isArray(audioData.audio_samples)) {
+              audioData.audio_samples.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.id;
+                opt.textContent = `${a.name} (${a.id})`;
+                configAudioSample.appendChild(opt);
+              });
+            }
+
+            // Điền mẫu phát loa cảnh báo
+            configSpeakerSample.innerHTML = '<option value="">-- Không có --</option>';
+            if (audioData.speaker_samples && Array.isArray(audioData.speaker_samples)) {
+              audioData.speaker_samples.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.name} (${s.id})`;
+                configSpeakerSample.appendChild(opt);
+              });
+            }
+          }
+
+          // Kích hoạt các nút thao tác
+          btnLoadConfig.disabled = false;
+          btnSaveConfig.disabled = false;
+          btnResetConfig.disabled = false;
+
+          // Nếu có selectedCameraId thì đồng bộ sang và chọn
+          if (selectedCameraId) {
+            configCameraId.value = selectedCameraId;
+          }
+        } catch (e) {
+          console.error("Lỗi khi tải metadata cấu hình:", e);
+        }
+      }
+
+      function disableResponseConfigForm() {
+        btnLoadConfig.disabled = true;
+        btnSaveConfig.disabled = true;
+        btnResetConfig.disabled = true;
+        configCameraId.innerHTML = '<option value="">-- Chọn Camera --</option>';
+        configSpeciesId.innerHTML = '<option value="">-- Chọn Loài --</option>';
+        configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
+        configSpeakerSample.innerHTML = '<option value="">-- Không có --</option>';
+      }
+
+      async function loadResponseConfig() {
+        const cameraId = configCameraId.value;
+        const speciesId = configSpeciesId.value;
+        if (!cameraId || !speciesId) return;
+
+        btnLoadConfig.disabled = true;
+        const baseUrl = serverUrlInput.value.trim();
+
+        try {
+          const res = await fetch(`${baseUrl}/response-configs?cameraId=${cameraId}&speciesId=${speciesId}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            
+            // Điền dữ liệu vào form
+            configLedFlash.checked = !!data.ledFlash;
+            configLedColor.value = data.ledColor || 'RED';
+            configLedDuration.value = data.ledIntensity || 15;
+            configLedFlash.dispatchEvent(new Event('change'));
+
+            configAudioSample.value = data.audioSampleId || '';
+            configAudioIntensity.value = data.audioIntensity || 80;
+            audioIntensityValue.textContent = `${data.audioIntensity || 80}%`;
+
+            configSilentAlert.checked = !!data.silentAlert;
+            configNotifySms.checked = !data.silentAlert;
+            configNotifyPush.checked = true;
+
+            // Xác định xem cấu hình này có thuộc Preset mặc định nào không
+            let preset = 'custom';
+            if (!data.id) {
+              if (data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot') {
+                preset = 'critical_danger';
+              } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark') {
+                preset = 'medium_danger';
+              } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren') {
+                preset = 'intruder';
+              }
+            }
+
+            // Đồng bộ trạng thái Radio
+            document.querySelectorAll('input[name="preset-selection"]').forEach(r => {
+              r.checked = (r.value === preset);
+            });
+            updatePresetUI(preset);
+          } else {
+            console.warn("Lỗi tải cấu hình:", res.status);
+          }
+        } catch (e) {
+          console.error("Lỗi khi tải cấu hình:", e);
+        } finally {
+          btnLoadConfig.disabled = false;
+        }
+      }
+
+      // Đăng ký bộ lắng nghe sự kiện
+      configCameraId.addEventListener('change', loadResponseConfig);
+      configSpeciesId.addEventListener('change', loadResponseConfig);
+      btnLoadConfig.addEventListener('click', loadResponseConfig);
+
+      btnSaveConfig.addEventListener('click', async () => {
+        const cameraId = configCameraId.value;
+        const speciesId = configSpeciesId.value;
+        const baseUrl = serverUrlInput.value.trim();
+
+        if (!cameraId || !speciesId) {
+          alert("Vui lòng chọn đầy đủ Camera và Loài động vật.");
+          return;
+        }
+
+        btnSaveConfig.disabled = true;
+
+        const ledFlash = configLedFlash.checked;
+        const ledColor = configLedColor.value;
+        const ledIntensity = parseInt(configLedDuration.value) || 0;
+        const speakerWarn = !configSilentAlert.checked; 
+        const audioSampleId = configAudioSample.value || null;
+        const audioIntensity = parseInt(configAudioIntensity.value) || 0;
+        const silentAlert = configSilentAlert.checked;
+
+        try {
+          const res = await fetch(`${baseUrl}/response-configs/${cameraId}/${speciesId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              ledFlash,
+              ledColor,
+              ledIntensity,
+              speakerWarn,
+              audioSampleId,
+              audioIntensity,
+              silentAlert
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert("Đã lưu cấu hình phòng vệ thành công!");
+            // Đặt radio preset thành Custom
+            document.querySelectorAll('input[name="preset-selection"]').forEach(r => {
+              r.checked = (r.value === 'custom');
+            });
+            updatePresetUI('custom');
+          } else {
+            alert(`Lưu thất bại: ${data.message || 'Lỗi không xác định.'}`);
+          }
+        } catch (e) {
+          alert(`Lỗi kết nối: ${e.message}`);
+        } finally {
+          btnSaveConfig.disabled = false;
+        }
+      });
+
+      btnResetConfig.addEventListener('click', async () => {
+        const cameraId = configCameraId.value;
+        const speciesId = configSpeciesId.value;
+        const baseUrl = serverUrlInput.value.trim();
+
+        if (!cameraId || !speciesId) {
+          alert("Vui lòng chọn đầy đủ Camera và Loài động vật.");
+          return;
+        }
+
+        if (!confirm("Bạn có chắc chắn muốn xóa cấu hình tùy chọn và đặt lại về mặc định của hệ thống?")) {
+          return;
+        }
+
+        btnResetConfig.disabled = true;
+
+        try {
+          const res = await fetch(`${baseUrl}/response-configs/${cameraId}/${speciesId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          });
+
+          if (res.ok || res.status === 204) {
+            alert("Đã đặt lại cấu hình về mặc định thành công!");
+            await loadResponseConfig();
+          } else {
+            const data = await res.json().catch(() => ({}));
+            alert(`Đặt lại thất bại: ${data.message || 'Lỗi không xác định.'}`);
+          }
+        } catch (e) {
+          alert(`Lỗi kết nối: ${e.message}`);
+        } finally {
+          btnResetConfig.disabled = false;
+        }
+      });
+
+      btnTestConfigSound.addEventListener('click', async () => {
+        const cameraId = configCameraId.value;
+        const audioSampleId = configAudioSample.value;
+        const audioIntensity = parseInt(configAudioIntensity.value) || 0;
+        const baseUrl = serverUrlInput.value.trim();
+
+        if (!cameraId) {
+          alert("Vui lòng chọn Camera cần nghe thử.");
+          return;
+        }
+        if (!audioSampleId) {
+          alert("Vui lòng chọn âm thanh xua đuổi trước khi nghe thử.");
+          return;
+        }
+
+        btnTestConfigSound.disabled = true;
+        const originalText = btnTestConfigSound.textContent;
+        btnTestConfigSound.textContent = "⌛ Đang gửi lệnh nghe thử...";
+
+        try {
+          const res = await fetch(`${baseUrl}/cameras/${cameraId}/devices/speaker/test`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              durationSeconds: 10,
+              intensity: audioIntensity,
+              audioSampleId: audioSampleId
+            })
+          });
+
+          if (res.ok) {
+            alert("Đã kích hoạt còi phát thử âm thanh thành công tại hiện trường!");
+          } else {
+            const data = await res.json().catch(() => ({}));
+            alert(`Nghe thử thất bại: ${data.message || 'Lỗi không xác định.'}`);
+          }
+        } catch (e) {
+          alert(`Lỗi kết nối: ${e.message}`);
+        } finally {
+          btnTestConfigSound.textContent = originalText;
+          btnTestConfigSound.disabled = false;
         }
       });
 
