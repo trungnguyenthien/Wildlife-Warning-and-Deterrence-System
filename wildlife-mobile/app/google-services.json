@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "925590810176",
+    "project_id": "wildlife-alert-6911f",
+    "storage_bucket": "wildlife-alert-6911f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:925590810176:android:0fca3353cc056b805e39a5",
+        "android_client_info": {
+          "package_name": "com.wildlife.deterrence"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxmuj-4wKxV5zSITrW0GNvchCATxtrdp4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

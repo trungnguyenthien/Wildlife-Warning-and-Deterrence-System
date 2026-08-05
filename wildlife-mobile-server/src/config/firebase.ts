@@ -48,14 +48,18 @@ export async function sendPushToAllDevices(
       select: { fcmToken: true, userId: true, deviceModel: true }
     });
 
-    const tokens = devices.map((d) => d.fcmToken).filter(Boolean);
-    console.log(`[FCM-Sender] Tìm thấy ${devices.length} bản ghi token trong DB. Tổng số token hợp lệ lọc ra: ${tokens.length}`);
+    const tokens = devices
+      .map((d) => d.fcmToken)
+      .filter((token) => token && !token.startsWith('mock-token-'));
+
+    console.log(`[FCM-Sender] Tìm thấy ${devices.length} bản ghi token trong DB. Tổng số token thực tế hợp lệ (đã lọc bỏ mock tokens): ${tokens.length}`);
     devices.forEach((d, idx) => {
-      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Token=${d.fcmToken ? (d.fcmToken.substring(0, 15) + '...') : 'NULL'}`);
+      const isMock = d.fcmToken?.startsWith('mock-token-');
+      console.log(`- Token [${idx + 1}]: UserID=${d.userId}, Model=${d.deviceModel}, Type=${isMock ? 'MOCK' : 'REAL'}, Token=${d.fcmToken ? (d.fcmToken.substring(0, 15) + '...') : 'NULL'}`);
     });
 
     if (tokens.length === 0) {
-      console.log('[FCM-Sender] Không tìm thấy token thiết bị nào trong cơ sở dữ liệu để gửi.');
+      console.log('[FCM-Sender] Không tìm thấy token thiết bị thực tế nào trong cơ sở dữ liệu để gửi (chỉ có các mock token hoặc không có token).');
       return;
     }
 
