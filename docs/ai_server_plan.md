@@ -20,10 +20,10 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
 *   **Tham chiếu:** [04-sequence-diagram.md: Action 6.3 (Test speaker sound at camera station)](./04-sequence-diagram.md#63-action-test-speaker-sound-at-camera-station-ai_server)
 *   **Quy trình xử lý:**
     1.  AI Server lấy Token xác thực từ API và thiết lập kết nối an toàn (WebSocket) đến máy chủ Ably Cloud.
-    2.  AI Server đăng ký (Subscribe) kênh lắng nghe điều khiển `camera:control:{cameraId}` với tên sự kiện `DEVICE_COMMAND`.
+    2.  AI Server đăng ký (Subscribe) kênh lắng nghe điều khiển `user:control:{userId}` với tên sự kiện `DEVICE_COMMAND`.
     3.  Khi Kiểm lâm bấm "Test" thiết bị trên ứng dụng di động, Mobile Server sẽ gọi REST API của Ably để publish thông điệp điều khiển.
     4.  AI Server nhận được thông điệp thời gian thực từ Ably Cloud và thực thi kích hoạt vật lý tại Camera (ví dụ: phát âm thanh thử nghiệm).
-    5.  Sau khi thực thi xong, AI Server gửi (Publish) phản hồi xác nhận trạng thái thực thi thành công/thất bại (`COMMAND_ACK`) lên kênh Ably `camera:ack:{cameraId}` để Mobile Server nhận kết quả.
+    5.  Sau khi thực thi xong, AI Server gửi (Publish) phản hồi xác nhận trạng thái thực thi thành công/thất bại (`COMMAND_ACK`) lên kênh Ably `user:ack:{userId}` để Mobile Server nhận kết quả.
 
 ---
 
@@ -47,19 +47,27 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
 *   **Content-Type:** `multipart/form-data`
 *   **Tham số gửi đi (Form-data):**
     *   `image`: File ảnh chụp dạng nhị phân (Binary).
-    *   `userId`: ID người quản lý trạm camera (mã hex 4 ký tự, ví dụ: `u_rg`).
+    *   `userId`: ID người quản lý trạm camera (mã hex 4 ký tự, ví dụ: `9f3a`).
     *   `detections`: Chuỗi JSON danh sách con vật phát hiện, định dạng: `[{"speciesId":"elephant","confidence":0.92}]`.
 *   **Kết quả phản hồi (201 Created JSON):**
     ```json
     {
       "eventId": "evt-456",
+      "cameraId": "cam-001",
+      "detections": [
+        { "speciesId": "elephant", "confidence": 0.92 }
+      ],
+      "imageUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
+      "detectedAt": "2026-07-19T04:55:00+07:00",
       "responseAction": {
         "ledFlash": true,
-        "ledColor": "STROBE",
-        "ledIntensity": 100,
+        "ledColor": "red",
+        "ledIntensity": 20,
+        "ledFlashRate": "4_per_sec",
         "speakerWarn": true,
         "audioSampleId": "A_gunshot",
         "audioIntensity": 80,
+        "speakerSampleId": "N_warning_thu",
         "silentAlert": false
       }
     }
@@ -71,7 +79,7 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
     *   AI Server (trạm camera) kết nối với Ably Cloud, lắng nghe sự kiện trên kênh điều khiển của riêng trạm đó.
     *   Tất cả các bản tin truyền tải dưới dạng JSON qua giao thức WebSocket của Ably.
 *   **Kênh nhận lệnh điều khiển (Control Channel):**
-    *   *Tên kênh:* `camera:control:{cameraId}`
+    *   *Tên kênh:* `user:control:{userId}`
     *   *Sự kiện (Event Name):* `DEVICE_COMMAND`
     *   *Payload:*
         ```json
@@ -91,7 +99,7 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
         }
         ```
 *   **Kênh phản hồi xác nhận lệnh (ACK Channel):**
-    *   *Tên kênh:* `camera:ack:{cameraId}`
+    *   *Tên kênh:* `user:ack:{userId}`
     *   *Sự kiện (Event Name):* `COMMAND_ACK`
     *   *Payload:*
         ```json
@@ -133,22 +141,19 @@ Khi thực hiện cấu hình sâu cho Camera hoặc nhận thông điệp đi�
 
 #### 1. Hệ thống Đèn LED chớp sáng
 *   `ledColor`: Màu sắc phát sáng của đèn LED chớp.
-    *   *Tùy chọn giá trị hợp lệ (Option Values):*
-        *   `STROBE`: Nhấp nháy liên tục cường độ cao (mặc định cho mức CRITICAL).
-        *   `RED`: Ánh sáng đỏ cảnh báo nguy hiểm mạnh (mức HIGH).
-        *   `YELLOW`: Ánh sáng vàng cảnh báo (mức MEDIUM).
-        *   `WHITE`: Ánh sáng trắng công suất cao xua đuổi.
-        *   `red_white_alt`: Đỏ và trắng chớp nháy xen kẽ (Custom configuration).
+    *   *Tùy chọn giá trị hợp lệ (khớp đặc tả 03 & schema 05):*
+        *   `red`: Ánh sáng đỏ cảnh báo nguy hiểm mạnh.
+        *   `white`: Ánh sáng trắng công suất cao xua đuổi.
+        *   `red_white_alt`: Đỏ và trắng chớp nháy xen kẽ.
         *   `null`: Không chỉ định màu.
 *   `ledFlashRate`: Tần suất nhấp nháy của LED.
     *   *Tùy chọn giá trị hợp lệ:*
         *   `2_per_sec`: Nháy 2 lần mỗi giây (tiêu chuẩn).
         *   `4_per_sec`: Nháy nhanh 4 lần mỗi giây (gây kích động thị giác thú mạnh).
         *   `random`: Nháy ngẫu nhiên để động vật không làm quen được tần số.
-*   `ledIntensity`: Cường độ sáng của đèn LED.
-    *   *Tùy chọn giá trị hợp lệ:* Số nguyên từ `0` đến `100` (đại diện cho tỷ lệ phần trăm % công suất bóng LED).
-*   `ledDurationSeconds`: Thời gian duy trì chu kỳ chớp LED.
-    *   *Tùy chọn giá trị hợp lệ:* Số nguyên đại diện cho số giây, giới hạn từ `10` đến `120` giây.
+        *   `null`: Không nhấp nháy.
+*   `ledIntensity`: **Thời lượng chớp LED (đơn vị giây)** — theo đặc tả 03, trường này tương đương cột `led_duration_seconds` trong bảng `response_configs` của tài liệu 05.
+    *   *Tùy chọn giá trị hợp lệ:* Số nguyên `>= 0` biểu thị tổng số giây duy trì chu kỳ chớp LED (ví dụ `20` = 20 giây).
 
 #### 2. Hệ thống Loa phát thanh xua đuổi
 *   `audioSampleId` (hoặc `speakerSampleId` đối với loa cảnh báo dân cư vùng lân cận): ID của tệp tin âm thanh mẫu được nạp sẵn trong thẻ nhớ local của trạm Camera.
@@ -158,9 +163,10 @@ Khi thực hiện cấu hình sâu cho Camera hoặc nhận thông điệp đi�
         *   `A_dog_bark`: Tiếng đàn chó săn sủa dữ dội.
         *   `A_explosion`: Tiếng nổ lớn phá hủy.
         *   `A_ultrasonic`: Phát sóng siêu âm tần số cao (khiến màng nhĩ thú khó chịu nhưng tai người không nghe thấy).
-    *   *Tùy chọn giá trị hợp lệ cho âm thanh cảnh báo cư dân (bắt đầu bằng tiền tố `N_`):*
-        *   `N_warning_thu`: Loa phát thanh giọng nói cảnh báo phát hiện động vật hoang dã xâm nhập.
-        *   `N_siren`: Tiếng còi hú cảnh sát/cứu hỏa khẩn cấp.
+    *   *Tùy chọn giá trị hợp lệ cho âm thanh cảnh báo cư dân (bắt đầu bằng tiền tố `N_`, khớp danh mục `/audio-samples` của 03):*
+        *   `N_warning_voi`: Loa phát thanh cảnh báo voi hoang dã xuất hiện (Mẫu 1).
+        *   `N_warning_thu`: Loa phát thanh giọng nói cảnh báo phát hiện động vật hoang dã xâm nhập (Mẫu 2).
+        *   `N_warning_tian`: Thông báo chỉ dẫn di tản, lánh nạn (Mẫu 3).
 *   `audioIntensity` (hoặc `volume`): Cường độ âm lượng phát ra loa.
     *   *Tùy chọn giá trị hợp lệ:* Số nguyên từ `0` đến `100` (đại diện cho tỷ lệ phần trăm % công suất tối đa của âm ly).
 
