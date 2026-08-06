@@ -19,7 +19,8 @@ data class ResponseConfigData(
     val audioSampleId: String?,
     val audioIntensity: Int,
     val silentAlert: Boolean,
-    val ledFlashRate: String? = null
+    val ledFlashRate: String? = null,
+    val speakerSampleId: String? = null
 )
 
 data class SaveResponseConfigRequest(
@@ -30,7 +31,8 @@ data class SaveResponseConfigRequest(
     val audioSampleId: String?,
     val audioIntensity: Int,
     val silentAlert: Boolean,
-    val ledFlashRate: String? = null
+    val ledFlashRate: String? = null,
+    val speakerSampleId: String? = null
 )
 
 interface ConfigApi {

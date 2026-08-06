@@ -121,7 +121,13 @@ class BehaviorViewModel(
                     audioSampleId = mapAudioTypeToId(config.audioType),
                     audioIntensity = config.audioVolume,
                     silentAlert = config.silentAlertSms,
-                    ledFlashRate = ledFlashRate
+                    ledFlashRate = ledFlashRate,
+                    speakerSampleId = when (config.sirenSampleId) {
+                        "Mẫu 1" -> "N_voi_rung"
+                        "Mẫu 2" -> "N_thu_du"
+                        "Mẫu 3" -> "N_di_tan"
+                        else -> null
+                    }
                 )
                 configApi.saveConfig(
                     token = "Bearer $token",
@@ -243,11 +249,11 @@ class BehaviorViewModel(
         val presetType = if (data.id == null) {
             "critical"
         } else {
-            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random") {
+            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random" && (data.speakerSampleId == null || data.speakerSampleId == "N_voi_rung")) {
                 "critical"
-            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec") {
+            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "N_thu_du")) {
                 "medium_animal"
-            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec") {
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "N_thu_du")) {
                 "intruder"
             } else {
                 "custom"
@@ -261,6 +267,13 @@ class BehaviorViewModel(
             else -> if (data.ledFlash) "4 lần/giây" else "Không"
         }
 
+        val sirenSampleId = when (data.speakerSampleId) {
+            "N_voi_rung" -> "Mẫu 1"
+            "N_thu_du" -> "Mẫu 2"
+            "N_di_tan" -> "Mẫu 3"
+            else -> "Mẫu 1"
+        }
+
         return BehaviorConfigUiModel(
             speciesId = data.speciesId,
             presetType = presetType,
@@ -269,7 +282,7 @@ class BehaviorViewModel(
             ledFrequency = ledFrequency,
             ledColor = ledColor,
             ledDuration = data.ledIntensity,
-            sirenSampleId = "Mẫu 1",
+            sirenSampleId = sirenSampleId,
             silentAlertSms = data.silentAlert,
             silentAlertPush = true
         )

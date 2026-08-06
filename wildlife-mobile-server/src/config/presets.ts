@@ -12,6 +12,7 @@ export interface DefenseConfig {
   audioIntensity: number;
   silentAlert: boolean;
   ledFlashRate?: string | null;
+  speakerSampleId?: string | null;
 }
 
 interface AnimalRecommendRaw {
@@ -29,7 +30,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: null,
     audioIntensity: 0,
     silentAlert: true,
-    ledFlashRate: null
+    ledFlashRate: null,
+    speakerSampleId: null
   },
   [DangerLevel.MEDIUM]: {
     ledFlash: true,
@@ -39,7 +41,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
     silentAlert: false,
-    ledFlashRate: '2_per_sec'
+    ledFlashRate: '2_per_sec',
+    speakerSampleId: 'N_thu_du'
   },
   [DangerLevel.HIGH]: {
     ledFlash: true,
@@ -49,7 +52,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,
     silentAlert: false,
-    ledFlashRate: '4_per_sec'
+    ledFlashRate: '4_per_sec',
+    speakerSampleId: 'N_thu_du'
   },
   [DangerLevel.CRITICAL]: {
     ledFlash: true,
@@ -59,7 +63,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
     silentAlert: false,
-    ledFlashRate: 'random'
+    ledFlashRate: 'random',
+    speakerSampleId: 'N_voi_rung'
   }
 };
 
@@ -72,7 +77,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
     silentAlert: false,
-    ledFlashRate: 'random'
+    ledFlashRate: 'random',
+    speakerSampleId: 'N_voi_rung'
   },
   medium_danger: {
     ledFlash: true,
@@ -82,7 +88,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
     silentAlert: false,
-    ledFlashRate: '2_per_sec'
+    ledFlashRate: '2_per_sec',
+    speakerSampleId: 'N_thu_du'
   },
   intruder: {
     ledFlash: true,
@@ -92,7 +99,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,
     silentAlert: false,
-    ledFlashRate: '4_per_sec'
+    ledFlashRate: '4_per_sec',
+    speakerSampleId: 'N_thu_du'
   }
 };
 

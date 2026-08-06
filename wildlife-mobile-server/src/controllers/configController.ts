@@ -38,6 +38,7 @@ export async function listConfigs(req: AuthenticatedRequest, res: Response) {
       speakerWarn: c.audioSampleId ? true : false,
       audioSampleId: c.audioSampleId,
       audioIntensity: c.audioIntensity,
+      speakerSampleId: c.speakerSampleId,
       silentAlert: c.silentAlert,
       updatedAt: c.updatedAt.toISOString()
     }));
@@ -88,6 +89,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
         speakerWarn: customConfig.speakerSampleId ? true : false,
         audioSampleId: customConfig.audioSampleId,
         audioIntensity: customConfig.audioIntensity,
+        speakerSampleId: customConfig.speakerSampleId,
         silentAlert: customConfig.silentAlert
       });
     }
@@ -105,7 +107,6 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
   }
 }
 
-// 4. PUT /response-configs/{cameraId}/{speciesId} - Lưu cấu hình phòng vệ tùy chọn
 // 4. PUT /response-configs/{speciesId} - Lưu cấu hình phòng vệ tùy chọn
 export async function saveConfig(req: AuthenticatedRequest, res: Response) {
   const userId = req.user!.id;
@@ -118,6 +119,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     speakerWarn,
     audioSampleId,
     audioIntensity,
+    speakerSampleId,
     silentAlert
   } = req.body;
 
@@ -165,6 +167,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       ledFlashRate: ledFlashRate !== undefined ? ledFlashRate : (ledFlash ? 'FAST' : null),
       ledColor: ledColor || null,
       ledDurationSeconds: ledIntensity || 0, // Ánh xạ trường
+      speakerSampleId: speakerSampleId || null,
       silentAlert,
       lastModifiedBy: userId
     };
@@ -191,6 +194,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       speakerWarn,
       audioSampleId: savedConfig.audioSampleId,
       audioIntensity: savedConfig.audioIntensity,
+      speakerSampleId: savedConfig.speakerSampleId,
       silentAlert: savedConfig.silentAlert
     });
   } catch (error) {

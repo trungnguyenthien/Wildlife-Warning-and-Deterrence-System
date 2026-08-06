@@ -838,13 +838,6 @@
             </div>
             
             <div class="form-group">
-              <label for="config-speaker-sample">Mẫu nội dung phát loa</label>
-              <select id="config-speaker-sample">
-                <option value="">-- Không có --</option>
-              </select>
-            </div>
-
-            <div class="form-group">
               <label for="config-audio-intensity">Cường độ âm lượng (1-100%)</label>
               <input type="range" id="config-audio-intensity" min="0" max="100" value="80" style="width: 100%; cursor: pointer;" />
               <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);">
@@ -890,16 +883,19 @@
 
             <hr style="border: none; border-top: 1px solid var(--input-border); margin: 0.25rem 0;" />
 
-            <div class="switch-container">
-              <label>Silent Alert (Báo động im lặng)</label>
-              <label class="switch">
-                <input type="checkbox" id="config-silent-alert" />
-                <span class="slider-round"></span>
-              </label>
+            <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.85rem; letter-spacing: 0.05em; text-transform: uppercase;">
+              Phát Cảnh Báo
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+              <label for="config-speaker-sample">Mẫu nội dung loa</label>
+              <select id="config-speaker-sample" style="width: 100%;">
+                <option value="">-- Không có --</option>
+              </select>
             </div>
 
             <div class="switch-container">
-              <label>Gửi tin nhắn SMS cảnh báo</label>
+              <label>Gửi SMS</label>
               <label class="switch">
                 <input type="checkbox" id="config-notify-sms" checked />
                 <span class="slider-round"></span>
@@ -907,7 +903,7 @@
             </div>
 
             <div class="switch-container">
-              <label>Gửi thông báo Push Notification</label>
+              <label>Gửi Push Notification</label>
               <label class="switch">
                 <input type="checkbox" id="config-notify-push" checked />
                 <span class="slider-round"></span>
@@ -1457,7 +1453,6 @@
       const configLedDuration = document.getElementById('config-led-duration');
       const ledSettingsRow = document.getElementById('led-settings-row');
       
-      const configSilentAlert = document.getElementById('config-silent-alert');
       const configNotifySms = document.getElementById('config-notify-sms');
       const configNotifyPush = document.getElementById('config-notify-push');
       
@@ -1522,8 +1517,8 @@
             configAudioIntensity.value = 90;
             audioIntensityValue.textContent = '90%';
 
-            configSilentAlert.checked = false;
-            configNotifySms.checked = true;
+            configSpeakerSample.value = 'N_thu_du';
+            configNotifySms.checked = false;
             configNotifyPush.checked = true;
           } else if (preset === 'medium_danger') {
             configLedFlash.checked = true;
@@ -1536,7 +1531,7 @@
             configAudioIntensity.value = 50;
             audioIntensityValue.textContent = '50%';
 
-            configSilentAlert.checked = false;
+            configSpeakerSample.value = 'N_thu_du';
             configNotifySms.checked = false;
             configNotifyPush.checked = true;
           } else if (preset === 'critical_danger') {
@@ -1550,7 +1545,7 @@
             configAudioIntensity.value = 100;
             audioIntensityValue.textContent = '100%';
 
-            configSilentAlert.checked = false;
+            configSpeakerSample.value = 'N_voi_rung';
             configNotifySms.checked = true;
             configNotifyPush.checked = true;
           }
@@ -1610,17 +1605,6 @@
                 configAudioSample.appendChild(opt);
               });
             }
-
-            // Điền mẫu phát loa cảnh báo
-            configSpeakerSample.innerHTML = '<option value="">-- Không có --</option>';
-            if (audioData.speaker_samples && Array.isArray(audioData.speaker_samples)) {
-              audioData.speaker_samples.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s.id;
-                opt.textContent = `${s.name} (${s.id})`;
-                configSpeakerSample.appendChild(opt);
-              });
-            }
           }
 
           // Kích hoạt các nút thao tác
@@ -1644,7 +1628,6 @@
         configCameraId.innerHTML = '<option value="">-- Chọn Camera --</option>';
         configSpeciesId.innerHTML = '<option value="">-- Chọn Loài --</option>';
         configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
-        configSpeakerSample.innerHTML = '<option value="">-- Không có --</option>';
       }
 
       async function loadResponseConfig() {
@@ -1672,17 +1655,17 @@
             configAudioIntensity.value = data.audioIntensity || 80;
             audioIntensityValue.textContent = `${data.audioIntensity || 80}%`;
 
-            configSilentAlert.checked = !!data.silentAlert;
-            configNotifySms.checked = !data.silentAlert;
+            configSpeakerSample.value = data.speakerSampleId || 'N_voi_rung';
+            configNotifySms.checked = !!data.silentAlert;
             configNotifyPush.checked = true;
 
             // Xác định xem cấu hình này có thuộc Preset mặc định nào không
             let preset = 'custom';
-            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20 && data.ledFlashRate === 'random') {
+            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20 && data.ledFlashRate === 'random' && (data.speakerSampleId === null || data.speakerSampleId === 'N_voi_rung')) {
               preset = 'critical_danger';
-            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec') {
+            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'N_thu_du')) {
               preset = 'medium_danger';
-            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec') {
+            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'N_thu_du')) {
               preset = 'intruder';
             }
 
@@ -1720,10 +1703,11 @@
         const ledColor = configLedColor.value;
         const ledFlashRate = configLedFrequency.value;
         const ledIntensity = parseInt(configLedDuration.value) || 0;
-        const speakerWarn = !configSilentAlert.checked; 
+        const speakerWarn = !configNotifySms.checked; 
         const audioSampleId = configAudioSample.value || null;
         const audioIntensity = parseInt(configAudioIntensity.value) || 0;
-        const silentAlert = configSilentAlert.checked;
+        const speakerSampleId = configSpeakerSample.value || null;
+        const silentAlert = configNotifySms.checked;
 
         try {
           const res = await fetch(`${baseUrl}/response-configs/${speciesId}`, {
@@ -1740,6 +1724,7 @@
               speakerWarn,
               audioSampleId,
               audioIntensity,
+              speakerSampleId,
               silentAlert
             })
           });

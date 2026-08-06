@@ -259,7 +259,7 @@ Lưu cấu hình ứng phó tự chọn cho từng cặp Người dùng + Loài 
 | `led_flash_rate` | `VARCHAR(20)` | `NULL` | Tốc độ chớp led (`2_per_sec`, `4_per_sec`, `random`) |
 | `led_color` | `VARCHAR(20)` | `NULL` | Màu đèn led (`red`, `white`, `red_white_alt`) |
 | `led_duration_seconds`| `INTEGER` | `NULL` | Thời gian chớp led (giây) |
-| `speaker_sample_id`| `VARCHAR(50)` | `NULL` | ID mẫu phát loa cảnh báo người dân (`N_warning_voi`, ...) |
+| `speaker_sample_id`| `VARCHAR(50)` | `NULL` | ID mẫu phát loa cảnh báo người dân (`N_voi_rung`, `N_thu_du`, `N_di_tan`, ...). Được truyền nhận qua API dạng `speakerSampleId`. |
 | `silent_alert` | `BOOLEAN` | `NOT NULL` | `true` => Cảnh báo âm thầm (chỉ bắn SMS/FCM, không còi/đèn) |
 | `updated_at` | `TIMESTAMP` | `NOT NULL` | Thời điểm cập nhật cấu hình |
 

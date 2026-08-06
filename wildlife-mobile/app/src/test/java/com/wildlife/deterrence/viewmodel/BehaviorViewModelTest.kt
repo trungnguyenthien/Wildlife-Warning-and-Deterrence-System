@@ -148,7 +148,8 @@ class FakeConfigApi : ConfigApi {
             audioSampleId = body.audioSampleId,
             audioIntensity = body.audioIntensity,
             silentAlert = body.silentAlert,
-            ledFlashRate = body.ledFlashRate
+            ledFlashRate = body.ledFlashRate,
+            speakerSampleId = body.speakerSampleId
         )
     }
     override suspend fun resetConfig(token: String, speciesId: String): retrofit2.Response<Unit> {
