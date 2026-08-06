@@ -11,6 +11,7 @@ export interface DefenseConfig {
   audioSampleId: string | null;
   audioIntensity: number;
   silentAlert: boolean;
+  ledFlashRate?: string | null;
 }
 
 interface AnimalRecommendRaw {
@@ -27,7 +28,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: false,
     audioSampleId: null,
     audioIntensity: 0,
-    silentAlert: true
+    silentAlert: true,
+    ledFlashRate: null
   },
   [DangerLevel.MEDIUM]: {
     ledFlash: true,
@@ -36,7 +38,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: '2_per_sec'
   },
   [DangerLevel.HIGH]: {
     ledFlash: true,
@@ -45,7 +48,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: '4_per_sec'
   },
   [DangerLevel.CRITICAL]: {
     ledFlash: true,
@@ -54,7 +58,8 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: 'random'
   }
 };
 
@@ -66,7 +71,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: 'random'
   },
   medium_danger: {
     ledFlash: true,
@@ -75,7 +81,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: '2_per_sec'
   },
   intruder: {
     ledFlash: true,
@@ -84,7 +91,8 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,
-    silentAlert: false
+    silentAlert: false,
+    ledFlashRate: '4_per_sec'
   }
 };
 

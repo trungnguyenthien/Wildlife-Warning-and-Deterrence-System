@@ -444,12 +444,14 @@ export async function processDetection(req: Request, res: Response) {
     const defaultPreset = getRecommendedPresetForSpecies(mainSpecies.id, maxDangerLevel);
     let actionResponse = {
       ledFlash: defaultPreset.ledFlash,
+      ledFlashRate: defaultPreset.ledFlashRate || (defaultPreset.ledFlash ? 'FAST' : null),
       speakerWarn: defaultPreset.speakerWarn,
       silentAlert: defaultPreset.silentAlert
     };
     if (customConfig) {
       actionResponse = {
         ledFlash: customConfig.ledFlashRate ? true : false,
+        ledFlashRate: customConfig.ledFlashRate,
         speakerWarn: customConfig.speakerSampleId ? true : false,
         silentAlert: customConfig.silentAlert
       };

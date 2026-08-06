@@ -134,6 +134,20 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 }
 ```
 
+> **Lưu ý thực tế triển khai API:** Nhằm tối giản hóa cấu trúc dữ liệu truyền nhận, REST API truyền tải cấu hình này dưới dạng một đối tượng JSON phẳng (Flat Object) như sau:
+> ```json
+> {
+>   "ledFlash": true,                    // Bật/Tắt chớp LED (Boolean)
+>   "ledColor": "RED",                   // Màu sắc LED: RED / YELLOW / WHITE / STROBE
+>   "ledIntensity": 20,                  // Thời lượng chớp LED (giây, tương đương led_duration_seconds)
+>   "ledFlashRate": "4_per_sec",         // Tần suất nhấp nháy LED: 2_per_sec / 4_per_sec / random / null
+>   "speakerWarn": true,                 // Bật/Tắt loa cảnh báo (Boolean)
+>   "audioSampleId": "A_gunshot",        // ID âm thanh xua đuổi thú (String hoặc null)
+>   "audioIntensity": 100,               // Cường độ âm lượng loa (1 - 100)
+>   "silentAlert": false                 // Cảnh báo âm thầm (không còi/đèn tại chỗ)
+> }
+> ```
+
 ---
 
 ## 3. Nhóm 1 — Xác thực & Tài khoản (`[LOGIN_SCREEN]`, `[REGISTER_SCREEN]`)

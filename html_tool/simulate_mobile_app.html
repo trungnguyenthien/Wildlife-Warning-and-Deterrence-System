@@ -875,6 +875,14 @@
                 </select>
               </div>
               <div class="form-group">
+                <label for="config-led-frequency">Tần suất LED</label>
+                <select id="config-led-frequency">
+                  <option value="2_per_sec">2 lần/giây (2_per_sec)</option>
+                  <option value="4_per_sec">4 lần/giây (4_per_sec)</option>
+                  <option value="random">Nhấp nháy ngẫu nhiên (random)</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label for="config-led-duration">Thời lượng LED (giây)</label>
                 <input type="number" id="config-led-duration" min="0" max="120" value="15" />
               </div>
@@ -1445,6 +1453,7 @@
       
       const configLedFlash = document.getElementById('config-led-flash');
       const configLedColor = document.getElementById('config-led-color');
+      const configLedFrequency = document.getElementById('config-led-frequency');
       const configLedDuration = document.getElementById('config-led-duration');
       const ledSettingsRow = document.getElementById('led-settings-row');
       
@@ -1467,10 +1476,12 @@
         if (configLedFlash.checked) {
           ledSettingsRow.style.opacity = '1';
           configLedColor.disabled = false;
+          configLedFrequency.disabled = false;
           configLedDuration.disabled = false;
         } else {
           ledSettingsRow.style.opacity = '0.5';
           configLedColor.disabled = true;
+          configLedFrequency.disabled = true;
           configLedDuration.disabled = true;
         }
       });
@@ -1503,6 +1514,7 @@
           if (preset === 'intruder') {
             configLedFlash.checked = true;
             configLedColor.value = 'RED';
+            configLedFrequency.value = '4_per_sec';
             configLedDuration.value = 15;
             configLedFlash.dispatchEvent(new Event('change'));
 
@@ -1516,6 +1528,7 @@
           } else if (preset === 'medium_danger') {
             configLedFlash.checked = true;
             configLedColor.value = 'YELLOW';
+            configLedFrequency.value = '2_per_sec';
             configLedDuration.value = 10;
             configLedFlash.dispatchEvent(new Event('change'));
 
@@ -1529,6 +1542,7 @@
           } else if (preset === 'critical_danger') {
             configLedFlash.checked = true;
             configLedColor.value = 'STROBE';
+            configLedFrequency.value = 'random';
             configLedDuration.value = 20;
             configLedFlash.dispatchEvent(new Event('change'));
 
@@ -1650,6 +1664,7 @@
             // Điền dữ liệu vào form
             configLedFlash.checked = !!data.ledFlash;
             configLedColor.value = data.ledColor || 'RED';
+            configLedFrequency.value = data.ledFlashRate || '4_per_sec';
             configLedDuration.value = data.ledIntensity || 15;
             configLedFlash.dispatchEvent(new Event('change'));
 
@@ -1663,11 +1678,11 @@
 
             // Xác định xem cấu hình này có thuộc Preset mặc định nào không
             let preset = 'custom';
-            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20) {
+            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20 && data.ledFlashRate === 'random') {
               preset = 'critical_danger';
-            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10) {
+            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec') {
               preset = 'medium_danger';
-            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15) {
+            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec') {
               preset = 'intruder';
             }
 
@@ -1703,6 +1718,7 @@
 
         const ledFlash = configLedFlash.checked;
         const ledColor = configLedColor.value;
+        const ledFlashRate = configLedFrequency.value;
         const ledIntensity = parseInt(configLedDuration.value) || 0;
         const speakerWarn = !configSilentAlert.checked; 
         const audioSampleId = configAudioSample.value || null;
@@ -1720,6 +1736,7 @@
               ledFlash,
               ledColor,
               ledIntensity,
+              ledFlashRate,
               speakerWarn,
               audioSampleId,
               audioIntensity,

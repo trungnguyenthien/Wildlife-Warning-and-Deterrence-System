@@ -27,7 +27,22 @@ export async function listConfigs(req: AuthenticatedRequest, res: Response) {
       where: { userId }
     });
 
-    return res.status(200).json(configs);
+    const mapped = configs.map((c) => ({
+      id: c.id,
+      userId: c.userId,
+      speciesId: c.speciesId,
+      ledFlash: c.ledFlashRate ? true : false,
+      ledColor: c.ledColor,
+      ledIntensity: c.ledDurationSeconds,
+      ledFlashRate: c.ledFlashRate,
+      speakerWarn: c.audioSampleId ? true : false,
+      audioSampleId: c.audioSampleId,
+      audioIntensity: c.audioIntensity,
+      silentAlert: c.silentAlert,
+      updatedAt: c.updatedAt.toISOString()
+    }));
+
+    return res.status(200).json(mapped);
   } catch (error) {
     console.error('Lỗi khi tải cấu hình người dùng:', error);
     return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });
@@ -69,6 +84,7 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
         ledFlash: customConfig.ledFlashRate ? true : false,
         ledColor: customConfig.ledColor,
         ledIntensity: customConfig.ledDurationSeconds, // Ánh xạ trường
+        ledFlashRate: customConfig.ledFlashRate,
         speakerWarn: customConfig.speakerSampleId ? true : false,
         audioSampleId: customConfig.audioSampleId,
         audioIntensity: customConfig.audioIntensity,
@@ -98,6 +114,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     ledFlash,
     ledColor,
     ledIntensity,
+    ledFlashRate,
     speakerWarn,
     audioSampleId,
     audioIntensity,
@@ -121,6 +138,12 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     return res.status(400).json({ error: 'invalid_led_color', message: `Màu LED không hợp lệ. Phải thuộc: ${validColors.join(', ')}.` });
   }
 
+  // Validation: Sai cấu trúc Led Flash Rate Enum (2_per_sec, 4_per_sec, random)
+  const validRates = ['2_per_sec', '4_per_sec', 'random'];
+  if (ledFlashRate && !validRates.includes(ledFlashRate)) {
+    return res.status(400).json({ error: 'invalid_led_flash_rate', message: `Tần suất LED không hợp lệ. Phải thuộc: ${validRates.join(', ')}.` });
+  }
+
   // Validation: Sai khoảng giá trị (intensity: 0-100, duration >= 0)
   if (ledIntensity !== undefined && (ledIntensity < 0 || ledIntensity > 100)) {
     return res.status(400).json({ error: 'invalid_led_intensity', message: 'Cường độ LED (ledIntensity) phải nằm trong khoảng từ 0 đến 100.' });
@@ -139,7 +162,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     const configData = {
       audioSampleId: audioSampleId || null,
       audioIntensity: audioIntensity || 0,
-      ledFlashRate: ledFlash ? 'FAST' : null,
+      ledFlashRate: ledFlashRate !== undefined ? ledFlashRate : (ledFlash ? 'FAST' : null),
       ledColor: ledColor || null,
       ledDurationSeconds: ledIntensity || 0, // Ánh xạ trường
       silentAlert,
@@ -164,6 +187,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       ledFlash,
       ledColor: savedConfig.ledColor,
       ledIntensity: savedConfig.ledDurationSeconds,
+      ledFlashRate: savedConfig.ledFlashRate,
       speakerWarn,
       audioSampleId: savedConfig.audioSampleId,
       audioIntensity: savedConfig.audioIntensity,
