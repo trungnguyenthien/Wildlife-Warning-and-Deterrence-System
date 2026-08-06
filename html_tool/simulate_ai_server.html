@@ -1541,7 +1541,8 @@
         logToTerminal(`[COMMAND] Nhận lệnh cho camera [${cameraId || 'unknown'}]. Thiết bị: ${deviceKey}, Hành động: ${action}, CommandID: ${commandId}`, 'sys');
 
         // Trigger hardware mockup animations based on deviceKey
-        if (deviceKey === 'led_light' || deviceKey === 'ledFlash') {
+        // DeviceKey enum (03-mobile_api.md mục 2.3): led_flash là mã chuẩn của đèn LED
+        if (deviceKey === 'led_flash' || deviceKey === 'led' || deviceKey === 'led_light' || deviceKey === 'ledFlash') {
           triggerLedAnimation(params);
         } else if (deviceKey === 'speaker' || deviceKey === 'deterrent_audio') {
           triggerSpeakerAnimation(params);
@@ -1562,20 +1563,48 @@
         if (ledTimer) clearTimeout(ledTimer);
         ledIndicator.className = 'led-light';
 
-        const color = params.color || 'STROBE';
-        const duration = (params.durationSeconds || 10) * 1000;
-        
-        let colorClass = 'active-white';
-        if (color === 'RED') colorClass = 'active-red';
-        else if (color === 'YELLOW') colorClass = 'active-yellow';
-        else if (color === 'STROBE') colorClass = 'active-strobe';
-        else if (color === 'WHITE') colorClass = 'active-white';
+        // Chuẩn hóa màu: hỗ trợ cả enum chữ thường (red/white/red_white_alt) và chữ hoa (03/05)
+        const color = (params.color || params.ledColor || 'STROBE').toUpperCase();
+        const flashRate = params.ledFlashRate || params.flashRate || '';
+        // ledIntensity = thời lượng chớp (giây) theo 03; ưu tiên durationSeconds của lệnh test
+        const duration = (params.durationSeconds || params.ledIntensity || 10) * 1000;
 
-        ledIndicator.classList.add(colorClass);
-        ledIndicatorDesc.textContent = `Chế độ: ĐANG NHÁY (${color}) - ${params.intensity || 100}%`;
+        // Tốc độ nhấp nháy theo ledFlashRate: 2_per_sec / 4_per_sec / random
+        let blinkMs = null;
+        if (flashRate === '4_per_sec') blinkMs = 250;
+        else if (flashRate === '2_per_sec') blinkMs = 500;
+        else if (flashRate === 'random') blinkMs = 300 + Math.random() * 500;
+        else if (color === 'STROBE') blinkMs = 250;
+
+        const applyClass = (cls) => {
+          ledIndicator.className = 'led-light active-' + cls;
+        };
+
+        let colorLabel = color;
+        if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
+          applyClass(color.toLowerCase());
+          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + 'ms';
+        } else if (color === 'RED_WHITE_ALT' || color === 'RED_WHITE') {
+          // Đỏ xen kẽ Trắng: tự chớp đảo màu qua JS
+          colorLabel = 'RED_WHITE_ALT';
+          let toggle = false;
+          ledAnimationInterval = setInterval(() => {
+            toggle = !toggle;
+            applyClass(toggle ? 'red' : 'white');
+          }, blinkMs || 300);
+        } else {
+          // STROBE / mặc định: nhấp nháy cường độ cao màu trắng
+          applyClass('strobe');
+          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + 'ms';
+        }
+
+        ledIndicatorDesc.textContent = `Chế độ: ĐANG NHÁY (${colorLabel})${flashRate ? ' · ' + flashRate : ''} - ${params.intensity || params.ledIntensity || 100}%`;
 
         ledTimer = setTimeout(() => {
+          clearInterval(ledAnimationInterval);
+          ledAnimationInterval = null;
           ledIndicator.className = 'led-light';
+          ledIndicator.style.animationDuration = '';
           ledIndicatorDesc.textContent = 'Chế độ: ĐÃ TẮT';
         }, duration);
       }
