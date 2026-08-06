@@ -73,6 +73,64 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
     }
     ```
 
+#### 2.1.1. Sample code — AI Server gửi kết quả nhận diện (Python)
+
+> **Tham chiếu:** [03-mobile_api.md: POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraphonedetections) · [04-sequence-diagram.md: Action 1.1](./04-sequence-diagram.md#11-action-ai-server-sends-detection-snapshot-ai_server) · [upload-image-service.md](./upload-image-service.md) · bản đồ `@DefendAction` ở [mục 3](#3-bản-đồ-ánh-xạ-tham-số-phòng-vệ-defendaction).
+
+```python
+import os
+import json
+import requests
+
+# --- Cấu hình (khớp NOTE ở đầu mục 2) ---
+MOBILE_SERVER_BASE = "https://wildlife-warning-and-deterrence-sys.vercel.app/api/v1"
+CAMERA_ID = os.environ.get("CAMERA_ID", "cam-001")
+USER_ID = os.environ.get("USER_ID", "9f3a")          # mã hex 4 ký tự (03)
+CAPTURE_PATH = "/tmp/latest_snapshot.jpg"            # ảnh snapshot mới nhất
+
+def run_yolov8(image_path: str) -> list:
+    """Chạy mô hình YOLOv8: trả về danh sách loài + độ tin cậy.
+    (Placeholder — thay bằng lời gọi mô hình thật.)"""
+    # TODO: gọi YOLOv8 -> [{"speciesId": "elephant", "confidence": 0.92}]
+    return [{"speciesId": "elephant", "confidence": 0.92}]
+
+def send_detection(image_path: str, detections: list) -> dict:
+    """Uplink: POST /cameras/{cameraId}/detections (multipart/form-data)."""
+    url = f"{MOBILE_SERVER_BASE}/cameras/{CAMERA_ID}/detections"
+    with open(image_path, "rb") as img:
+        files = {"image": (os.path.basename(image_path), img, "image/jpeg")}
+        data = {
+            "userId": USER_ID,
+            "detections": json.dumps(detections),     # chuỗi JSON (03:13a.1)
+        }
+        resp = requests.post(url, files=files, data=data, timeout=30)
+        resp.raise_for_status()                       # kỳ vọng 201 Created
+        return resp.json()
+    # -> { eventId, cameraId, detections, imageUrl, detectedAt, responseAction }
+
+def execute_defend_action(action: dict) -> None:
+    """Ánh xạ @DefendAction (mục 3) sang lệnh phần cứng tại trạm."""
+    if action.get("silentAlert"):
+        # Silent Alert: KHÔNG kích hoạt thiết bị xua đuổi nào tại chỗ (03/04)
+        print("[Hardware] silentAlert=True -> tắt mọi thiết bị (SMS/Push do Mobile Server lo)")
+        return
+
+    if action.get("ledFlash"):
+        print(f"[Hardware] LED BẬT: color={action.get('ledColor')}, "
+              f"rate={action.get('ledFlashRate')}, "
+              f"duration={action.get('ledIntensity')}s")   # ledIntensity = giây (03)
+    if action.get("speakerWarn"):
+        print(f"[Hardware] LOA BẬT: audioSampleId={action.get('audioSampleId')}, "
+              f"speakerSampleId={action.get('speakerSampleId')}, "
+              f"audioIntensity={action.get('audioIntensity')}%")  # 0-100 (mục 3.2)
+
+if __name__ == "__main__":
+    detections = run_yolov8(CAPTURE_PATH)
+    result = send_detection(CAPTURE_PATH, detections)
+    print("eventId:", result["eventId"])
+    execute_defend_action(result["responseAction"])
+```
+
 ### 2.2. Kênh truyền tin thời gian thực qua Ably (Pub/Sub Channels)
 *   **Tham chiếu tài liệu hướng dẫn Ably:** [huong-dan-ably.md](./huong-dan-ably.md)
 *   **Cơ chế hoạt động:** 
@@ -113,6 +171,82 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
           }
         }
         ```
+
+#### 2.2.1. Sample code — AI Server lắng nghe lệnh thiết bị qua Ably (Python)
+
+> **Tham chiếu:** [huong-dan-ably.md: ClientPY](./huong-dan-ably.md) · [ai-server-ably.md: mục 5](./ai-server-ably.md#5-ví-dụ-mã-nguồn-python-hoàn-chỉnh-cho-ai-server-camera-client) · [04-sequence-diagram.md: Action 6.3](./04-sequence-diagram.md#63-action-test-speaker-sound-at-camera-station-ai_server)
+>
+> **Ghi chú chi phí (huong-dan-ably.md mục 6):** dùng **2 kênh riêng** — AI Server chỉ *subscribe* `user:control:{userId}` và chỉ *publish* lên `user:ack:{userId}` → tối ưu **4 message/vòng request-response** (1 publish + 1 deliver mỗi chiều).
+
+```python
+import os
+import asyncio
+from ably import AblyRealtime    # pip install ably  (ClientPY)
+
+ABLY_AI_SERVER_API_KEY = os.environ["ABLY_AI_SERVER_API_KEY"]
+USER_ID = os.environ.get("ABLY_USER_ID", "user_01")
+
+CONTROL_CHANNEL = f"user:control:{USER_ID}"   # Subscribe: nhận DEVICE_COMMAND
+ACK_CHANNEL     = f"user:ack:{USER_ID}"       # Publish:    gửi COMMAND_ACK
+
+async def execute_hardware_test(device_key: str, params: dict) -> None:
+    """Giả lập điều khiển phần cứng (GPIO) tại trạm."""
+    duration = params.get("durationSeconds", 3)
+    if device_key == "speaker":
+        print(f"[HW] LOA TEST: {params.get('audioSampleId')}, "
+              f"volume={params.get('intensity')}% trong {duration}s")
+    elif device_key == "led":
+        print(f"[HW] LED TEST: cường độ {params.get('intensity')}% trong {duration}s")
+    elif device_key == "fence":
+        print(f"[HW] HÀNG RÀO TEST: trong {duration}s")
+    await asyncio.sleep(duration)
+
+async def main() -> None:
+    # Pattern ClientPY (huong-dan-ably.md): async with tự quản lý vòng đời kết nối
+    async with AblyRealtime(ABLY_AI_SERVER_API_KEY, client_id=f"client-{USER_ID}") as realtime:
+        await realtime.connection.once_async("connected")
+        control_chan = realtime.channels.get(CONTROL_CHANNEL)
+        ack_chan     = realtime.channels.get(ACK_CHANNEL)
+
+        async def on_device_command(message):
+            payload = message.data.get("payload", {})
+            try:
+                if message.data.get("event") != "DEVICE_COMMAND":
+                    return
+                await execute_hardware_test(payload["deviceKey"], payload.get("params", {}))
+
+                # Gửi ACK SUCCESS lên kênh user:ack (04 Action 6.3)
+                await ack_chan.publish("message", {
+                    "event": "COMMAND_ACK",
+                    "payload": {
+                        "commandId": payload["commandId"],
+                        "cameraId": payload["cameraId"],
+                        "status": "SUCCESS",
+                        "error": None,
+                    },
+                })
+            except Exception as err:
+                # Gửi ACK FAILED thay vì để im (tránh Mobile Server timeout 5s)
+                await ack_chan.publish("message", {
+                    "event": "COMMAND_ACK",
+                    "payload": {
+                        "commandId": payload.get("commandId", "unknown"),
+                        "cameraId": payload.get("cameraId", "unknown"),
+                        "status": "FAILED",
+                        "error": str(err),
+                    },
+                })
+
+        await control_chan.subscribe("message", on_device_command)
+        print(f"Đang lắng nghe {CONTROL_CHANNEL} ...")
+        await asyncio.Event().wait()   # giữ tiến trình sống
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Đóng kết nối Ably...")
+```
 
 ---
 
