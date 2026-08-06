@@ -91,7 +91,8 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
         detections: activeEvent.eventDetections.map((d) => ({
           speciesId: d.speciesId,
           displayName: d.species.displayName,
-          confidence: d.confidence
+          confidence: d.confidence,
+          dangerLevel: d.species.dangerLevel
         }))
       };
     }

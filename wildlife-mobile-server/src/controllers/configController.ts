@@ -258,7 +258,7 @@ export async function applyPreset(req: AuthenticatedRequest, res: Response) {
 export async function listPresets(_req: AuthenticatedRequest, res: Response) {
   const list = Object.entries(PRESET_SCENARIOS).map(([id, val]) => ({
     id,
-    name: id === 'critical_danger' ? 'Xua đuổi khẩn cấp (Voi)' : id === 'medium_danger' ? 'Xua đuổi tầm trung' : 'Cảnh báo đột nhập',
+    name: id === 'critical_danger' ? 'Xua đuổi khẩn cấp' : id === 'medium_danger' ? 'Xua đuổi tầm trung' : 'Cảnh báo đột nhập',
     config: val
   }));
   return res.status(200).json(list);

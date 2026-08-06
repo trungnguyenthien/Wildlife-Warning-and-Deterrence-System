@@ -37,7 +37,8 @@ data class AlertResponse(
     val cameraName: String,
     val eventId: String,
     val createdAt: String,
-    val isRead: Boolean
+    val isRead: Boolean,
+    val speciesId: String? = null
 )
 
 data class RenameCameraRequest(
@@ -63,7 +64,8 @@ data class CurrentDetectionResponse(
 data class DetectionResponse(
     val speciesId: String,
     val displayName: String,
-    val confidence: Double
+    val confidence: Double,
+    val dangerLevel: String
 )
 
 data class DetectionHistoryItemResponse(

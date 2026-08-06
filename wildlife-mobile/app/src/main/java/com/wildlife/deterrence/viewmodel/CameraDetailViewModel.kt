@@ -88,14 +88,10 @@ class CameraDetailViewModel(
                 val analysis = detail.currentDetection?.let { current ->
                     val mainDet = current.detections.firstOrNull()
                     if (mainDet != null) {
-                        // Xác định danger level dựa trên species
-                        // Elephant/Tiger -> high, Monkey/Wildboar -> medium, others -> low
-                        val speciesId = mainDet.speciesId.lowercase()
-                        val danger = when {
-                            speciesId.contains("voi") || speciesId.contains("elephant") || 
-                            speciesId.contains("ho") || speciesId.contains("tiger") -> "high"
-                            speciesId.contains("khi") || speciesId.contains("monkey") || 
-                            speciesId.contains("heo") || speciesId.contains("boar") -> "medium"
+                        // Xác định danger level từ API
+                        val danger = when (mainDet.dangerLevel.uppercase()) {
+                            "CRITICAL", "HIGH" -> "high"
+                            "MEDIUM" -> "medium"
                             else -> "low"
                         }
 

@@ -213,4 +213,13 @@ private class FakeMainAuthApi : AuthApi {
             Response.error(errorCode, ResponseBody.create(null, ""))
         }
     }
+
+    override suspend fun getNotificationsInbox(
+        token: String,
+        page: Int,
+        size: Int,
+        unreadOnly: Boolean
+    ): Response<com.wildlife.deterrence.data.InboxResponse> {
+        return Response.error(400, ResponseBody.create(null, ""))
+    }
 }

@@ -36,14 +36,15 @@ fun EventLogListItem(
     speciesName: String,
     confidence: Float,
     timestamp: String,
+    dangerLevel: String,
     modifier: Modifier = Modifier
 ) {
     val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
-    // Determine resolved danger level color based on species name
-    val speciesUpper = speciesName.uppercase()
-    val isDangerous = speciesUpper in listOf("VOI", "HỔ", "BÁO", "TÊ GIÁC", "RẮN", "CÁ SẤU", "STRANGER", "NGƯỜI LẠ")
-    val isMedium = speciesUpper in listOf("NAI", "NAI LỚN", "KHỈ", "KHỈ ĐÀN", "HEO RỪNG", "HEO")
+    // Determine resolved danger level color based on dangerLevel
+    val dangerUpper = dangerLevel.uppercase()
+    val isDangerous = dangerUpper == "CRITICAL" || dangerUpper == "HIGH"
+    val isMedium = dangerUpper == "MEDIUM"
     
     val badgeBgColor = when {
         isDangerous -> if (isDark) Color(0xFFC62828).copy(alpha = 0.2f) else Color(0xFFFFEBEE)

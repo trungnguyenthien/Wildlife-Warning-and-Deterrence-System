@@ -212,4 +212,13 @@ open class FakeStatsCameraApi : CameraApi {
         if (!shouldSucceed) throw Exception("Network error")
         return statsSummary
     }
+
+    override suspend fun testDevice(
+        token: String,
+        cameraId: String,
+        deviceKey: String,
+        body: TestDeviceRequest
+    ): retrofit2.Response<Unit> {
+        return retrofit2.Response.success(Unit)
+    }
 }

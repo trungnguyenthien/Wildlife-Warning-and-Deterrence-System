@@ -6,6 +6,8 @@ import com.wildlife.deterrence.data.TokenManager
 import com.wildlife.deterrence.data.NetworkClient
 import com.wildlife.deterrence.data.ResponseConfigData
 import com.wildlife.deterrence.data.SaveResponseConfigRequest
+import com.wildlife.deterrence.data.CameraApi
+import com.wildlife.deterrence.data.ConfigApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +39,9 @@ data class BehaviorSpeciesListUiState(
 )
 
 class BehaviorViewModel(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val cameraApi: CameraApi = NetworkClient.cameraApi,
+    private val configApi: ConfigApi = NetworkClient.configApi
 ) : ViewModel() {
 
     private val _speciesListState = MutableStateFlow(BehaviorSpeciesListUiState())
@@ -65,7 +69,7 @@ class BehaviorViewModel(
         viewModelScope.launch {
             try {
                 // 1. Tải danh mục loài từ API
-                val responseList = NetworkClient.cameraApi.getSpecies("Bearer $token")
+                val responseList = cameraApi.getSpecies("Bearer $token")
                 val mappedList = responseList.map { s ->
                     SpeciesInfoUiModel(
                         id = s.id,
@@ -75,7 +79,7 @@ class BehaviorViewModel(
                 }
 
                 // 2. Tải danh sách cấu hình hiện tại của user từ API
-                val responseConfigs = NetworkClient.configApi.getConfigs("Bearer $token")
+                val responseConfigs = configApi.getConfigs("Bearer $token")
                 responseConfigs.forEach { config ->
                     _configsMap[config.speciesId] = mapBackendConfigToUi(config)
                 }
@@ -112,7 +116,7 @@ class BehaviorViewModel(
                     audioIntensity = config.audioVolume,
                     silentAlert = config.silentAlertSms
                 )
-                NetworkClient.configApi.saveConfig(
+                configApi.saveConfig(
                     token = "Bearer $token",
                     speciesId = speciesId,
                     body = req

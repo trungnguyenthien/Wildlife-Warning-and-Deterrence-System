@@ -85,21 +85,30 @@ export async function listAlertFeed(req: AuthenticatedRequest, res: Response) {
         camera: true,
         alertReads: {
           where: { userId: req.user.id }
+        },
+        event: {
+          include: {
+            eventDetections: true
+          }
         }
       }
     });
 
-    const result = alerts.map((alt) => ({
-      id: alt.id,
-      type: alt.type,
-      title: alt.title,
-      dangerLevel: alt.dangerLevel,
-      cameraId: alt.cameraId,
-      cameraName: alt.camera.name,
-      eventId: alt.eventId,
-      createdAt: alt.createdAt.toISOString(),
-      isRead: alt.alertReads.length > 0
-    }));
+    const result = alerts.map((alt) => {
+      const mainDetection = alt.event?.eventDetections?.[0];
+      return {
+        id: alt.id,
+        type: alt.type,
+        title: alt.title,
+        dangerLevel: alt.dangerLevel,
+        cameraId: alt.cameraId,
+        cameraName: alt.camera.name,
+        eventId: alt.eventId,
+        speciesId: mainDetection ? mainDetection.speciesId : null,
+        createdAt: alt.createdAt.toISOString(),
+        isRead: alt.alertReads.length > 0
+      };
+    });
 
     return res.status(200).json(result);
   } catch (error) {

@@ -49,7 +49,7 @@ class CameraDetailViewModelTest {
                         eventId = "evt-123",
                         detectedAt = "2026-07-28T10:00:00Z",
                         detections = listOf(
-                            DetectionResponse("voi_rung", "Voi Rừng", 0.95)
+                            DetectionResponse("voi_rung", "Voi Rừng", 0.95, "CRITICAL")
                         )
                     )
                 )

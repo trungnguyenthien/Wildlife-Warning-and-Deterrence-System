@@ -47,7 +47,8 @@ data class AlertFeedItem(
     val cameraCode: String,
     val locationName: String,
     val time: String,   // HH:mm
-    val date: String     // dd/MM
+    val date: String,     // dd/MM
+    val speciesId: String? = null
 )
 
 data class DailyFrequencyPoint(val dayLabel: String, val count: Int, val isPeak: Boolean)
@@ -261,7 +262,8 @@ class StatisticsViewModel(
                         cameraCode = alt.cameraId.uppercase(),
                         locationName = alt.cameraName,
                         time = formatTime(alt.createdAt),
-                        date = formatDate(alt.createdAt)
+                        date = formatDate(alt.createdAt),
+                        speciesId = alt.speciesId
                     )
                 }
 

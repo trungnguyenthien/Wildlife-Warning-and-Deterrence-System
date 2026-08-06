@@ -189,4 +189,13 @@ open class FakeCameraApi : CameraApi {
     ): com.wildlife.deterrence.data.StatsSummaryResponse {
         return com.wildlife.deterrence.data.StatsSummaryResponse(emptyList(), emptyList(), emptyList())
     }
+
+    override suspend fun testDevice(
+        token: String,
+        cameraId: String,
+        deviceKey: String,
+        body: com.wildlife.deterrence.data.TestDeviceRequest
+    ): retrofit2.Response<Unit> {
+        return retrofit2.Response.success(Unit)
+    }
 }

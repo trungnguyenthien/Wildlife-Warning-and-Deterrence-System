@@ -198,4 +198,13 @@ private class FakeRegisterAuthApi : AuthApi {
     override suspend fun getUserProfile(authHeader: String): Response<UserProfileResponse> {
         return Response.error(400, ResponseBody.create(null, ""))
     }
+
+    override suspend fun getNotificationsInbox(
+        token: String,
+        page: Int,
+        size: Int,
+        unreadOnly: Boolean
+    ): Response<com.wildlife.deterrence.data.InboxResponse> {
+        return Response.error(400, ResponseBody.create(null, ""))
+    }
 }

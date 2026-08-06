@@ -111,19 +111,7 @@ class AllDetectionsViewModel(
 
         // Lọc theo speciesId
         if (!speciesId.isNullOrEmpty() && speciesId != "all") {
-            // Mapping speciesId từ Statistics sang Vietnamese display name tương đương để khớp với parsed name
-            val speciesNameMap = mapOf(
-                "voi_rung" to "Voi",
-                "bo_tot" to "Bò Tót",
-                "ho_dong_nam_a" to "Hổ",
-                "lon_rung" to "Lợn Rừng",
-                "nguoi_la" to "Người Lạ",
-                "human_border_intruder" to "Người Xâm Nhập"
-            )
-            val targetName = speciesNameMap[speciesId]
-            if (targetName != null) {
-                result = result.filter { it.speciesName.contains(targetName, ignoreCase = true) }
-            }
+            result = result.filter { it.speciesId.equals(speciesId, ignoreCase = true) }
         }
 
         // Lọc theo timeRange
@@ -146,7 +134,8 @@ class AllDetectionsViewModel(
                 cameraCode = alt.cameraId.uppercase(),
                 locationName = alt.cameraName,
                 time = formatTime(alt.createdAt),
-                date = formatDate(alt.createdAt)
+                date = formatDate(alt.createdAt),
+                speciesId = alt.speciesId
             )
         }
     }
