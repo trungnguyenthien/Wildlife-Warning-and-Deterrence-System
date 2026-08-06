@@ -67,7 +67,7 @@ class BehaviorViewModelTest {
         // Cọp (Hổ) -> Hung dữ Cao -> Preset mặc định Critical
         val tigerConfig = viewModel.getConfigForSpecies("cop")
         assertEquals("critical", tigerConfig.presetType)
-        assertEquals("Tiếng nổ giả lập", tigerConfig.audioType)
+        assertEquals("Tiếng súng", tigerConfig.audioType)
         assertEquals(100, tigerConfig.audioVolume)
         assertEquals("Đỏ xen trắng", tigerConfig.ledColor)
 
@@ -75,8 +75,8 @@ class BehaviorViewModelTest {
         val deerConfig = viewModel.getConfigForSpecies("nai")
         assertEquals("medium_animal", deerConfig.presetType)
         assertEquals("Tiếng chó sủa lớn", deerConfig.audioType)
-        assertEquals(60, deerConfig.audioVolume)
-        assertEquals("Trắng", deerConfig.ledColor)
+        assertEquals(50, deerConfig.audioVolume)
+        assertEquals("Vàng", deerConfig.ledColor)
     }
 
     @Test
@@ -85,16 +85,16 @@ class BehaviorViewModelTest {
 
         val intruderPreset = viewModel.applyPreset("voi", "intruder")
         assertEquals("intruder", intruderPreset.presetType)
-        assertEquals("Tiếng súng", intruderPreset.audioType)
+        assertEquals("Tiếng nổ giả lập", intruderPreset.audioType)
         assertEquals(90, intruderPreset.audioVolume)
         assertEquals("Đỏ", intruderPreset.ledColor)
         assertEquals(15, intruderPreset.ledDuration)
-        assertTrue(intruderPreset.silentAlertSms)
+        assertFalse(intruderPreset.silentAlertSms)
 
         val mediumPreset = viewModel.applyPreset("khi", "medium_animal")
         assertEquals("medium_animal", mediumPreset.presetType)
         assertEquals("Tiếng chó sủa lớn", mediumPreset.audioType)
-        assertEquals(60, mediumPreset.audioVolume)
+        assertEquals(50, mediumPreset.audioVolume)
         assertFalse(mediumPreset.silentAlertSms)
     }
 

@@ -1503,7 +1503,7 @@
           if (preset === 'intruder') {
             configLedFlash.checked = true;
             configLedColor.value = 'RED';
-            configLedDuration.value = 30;
+            configLedDuration.value = 15;
             configLedFlash.dispatchEvent(new Event('change'));
 
             configAudioSample.value = 'A_alarm_siren';
@@ -1529,7 +1529,7 @@
           } else if (preset === 'critical_danger') {
             configLedFlash.checked = true;
             configLedColor.value = 'STROBE';
-            configLedDuration.value = 100;
+            configLedDuration.value = 20;
             configLedFlash.dispatchEvent(new Event('change'));
 
             configAudioSample.value = 'A_gunshot';
@@ -1663,14 +1663,12 @@
 
             // Xác định xem cấu hình này có thuộc Preset mặc định nào không
             let preset = 'custom';
-            if (!data.id) {
-              if (data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot') {
-                preset = 'critical_danger';
-              } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark') {
-                preset = 'medium_danger';
-              } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren') {
-                preset = 'intruder';
-              }
+            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20) {
+              preset = 'critical_danger';
+            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10) {
+              preset = 'medium_danger';
+            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15) {
+              preset = 'intruder';
             }
 
             // Đồng bộ trạng thái Radio

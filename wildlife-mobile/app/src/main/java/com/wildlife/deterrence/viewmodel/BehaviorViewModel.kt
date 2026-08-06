@@ -132,22 +132,22 @@ class BehaviorViewModel(
             "intruder" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "intruder",
-                audioType = "Tiếng súng",
+                audioType = "Tiếng nổ giả lập",
                 audioVolume = 90,
                 ledFrequency = "4 lần/giây",
                 ledColor = "Đỏ",
                 ledDuration = 15,
                 sirenSampleId = "Mẫu 1",
-                silentAlertSms = true,
+                silentAlertSms = false,
                 silentAlertPush = true
             )
             "medium_animal" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "medium_animal",
                 audioType = "Tiếng chó sủa lớn",
-                audioVolume = 60,
+                audioVolume = 50,
                 ledFrequency = "2 lần/giây",
-                ledColor = "Trắng",
+                ledColor = "Vàng",
                 ledDuration = 10,
                 sirenSampleId = "Mẫu 2",
                 silentAlertSms = false,
@@ -156,13 +156,13 @@ class BehaviorViewModel(
             "critical" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "critical",
-                audioType = "Tiếng nổ giả lập",
+                audioType = "Tiếng súng",
                 audioVolume = 100,
                 ledFrequency = "Nhấp nháy ngẫu nhiên",
                 ledColor = "Đỏ xen trắng",
                 ledDuration = 20,
                 sirenSampleId = "Mẫu 1",
-                silentAlertSms = true,
+                silentAlertSms = false,
                 silentAlertPush = true
             )
             else -> getConfigForSpecies(speciesId).copy(presetType = "custom")
@@ -236,11 +236,11 @@ class BehaviorViewModel(
         val presetType = if (data.id == null) {
             "critical"
         } else {
-            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 90) {
+            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20) {
                 "critical"
-            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark") {
+            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10) {
                 "medium_animal"
-            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren") {
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15) {
                 "intruder"
             } else {
                 "custom"

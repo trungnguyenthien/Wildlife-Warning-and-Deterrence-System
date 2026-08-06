@@ -32,7 +32,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
   [DangerLevel.MEDIUM]: {
     ledFlash: true,
     ledColor: 'YELLOW',
-    ledIntensity: 50,
+    ledIntensity: 10,
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
@@ -41,16 +41,16 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
   [DangerLevel.HIGH]: {
     ledFlash: true,
     ledColor: 'RED',
-    ledIntensity: 80,
+    ledIntensity: 15,
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
-    audioIntensity: 80,
+    audioIntensity: 90,
     silentAlert: false
   },
   [DangerLevel.CRITICAL]: {
     ledFlash: true,
     ledColor: 'STROBE',
-    ledIntensity: 100,
+    ledIntensity: 20,
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
@@ -62,7 +62,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
   critical_danger: {
     ledFlash: true,
     ledColor: 'STROBE',
-    ledIntensity: 100,
+    ledIntensity: 20,
     speakerWarn: true,
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
@@ -71,7 +71,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
   medium_danger: {
     ledFlash: true,
     ledColor: 'YELLOW',
-    ledIntensity: 50,
+    ledIntensity: 10,
     speakerWarn: true,
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
@@ -80,7 +80,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
   intruder: {
     ledFlash: true,
     ledColor: 'RED',
-    ledIntensity: 90,
+    ledIntensity: 15,
     speakerWarn: true,
     audioSampleId: 'A_alarm_siren',
     audioIntensity: 90,

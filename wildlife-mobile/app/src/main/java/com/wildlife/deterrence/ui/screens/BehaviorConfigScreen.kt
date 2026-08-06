@@ -42,12 +42,20 @@ fun BehaviorConfigScreen(
     modifier: Modifier = Modifier
 ) {
     val primaryGreen = Color(0xFF2C4C2C)
+    val uiState by viewModel.speciesListState.collectAsState()
     val context = LocalContext.current
 
-    // Load initial config from view model
-    val initialConfig = remember(speciesId) { viewModel.getConfigForSpecies(speciesId) }
+    // Load initial config from view model (might be default until API loading finishes)
+    var configState by remember { mutableStateOf(viewModel.getConfigForSpecies(speciesId)) }
+    var loadedConfig by remember { mutableStateOf(viewModel.getConfigForSpecies(speciesId)) }
 
-    var configState by remember { mutableStateOf(initialConfig) }
+    LaunchedEffect(uiState.isLoading, speciesId) {
+        if (!uiState.isLoading) {
+            val realConfig = viewModel.getConfigForSpecies(speciesId)
+            configState = realConfig
+            loadedConfig = realConfig
+        }
+    }
 
     // Accordion expand states
     var audioExpanded by remember { mutableStateOf(true) }
@@ -57,14 +65,14 @@ fun BehaviorConfigScreen(
     // Helper to update config and automatically switch to Custom preset if needed
     fun updateConfig(updated: BehaviorConfigUiModel) {
         configState = if (updated.presetType != "custom" && 
-            (updated.audioType != initialConfig.audioType ||
-             updated.audioVolume != initialConfig.audioVolume ||
-             updated.ledFrequency != initialConfig.ledFrequency ||
-             updated.ledColor != initialConfig.ledColor ||
-             updated.ledDuration != initialConfig.ledDuration ||
-             updated.sirenSampleId != initialConfig.sirenSampleId ||
-             updated.silentAlertSms != initialConfig.silentAlertSms ||
-             updated.silentAlertPush != initialConfig.silentAlertPush)
+            (updated.audioType != loadedConfig.audioType ||
+             updated.audioVolume != loadedConfig.audioVolume ||
+             updated.ledFrequency != loadedConfig.ledFrequency ||
+             updated.ledColor != loadedConfig.ledColor ||
+             updated.ledDuration != loadedConfig.ledDuration ||
+             updated.sirenSampleId != loadedConfig.sirenSampleId ||
+             updated.silentAlertSms != loadedConfig.silentAlertSms ||
+             updated.silentAlertPush != loadedConfig.silentAlertPush)
         ) {
             updated.copy(presetType = "custom")
         } else {
@@ -127,15 +135,25 @@ fun BehaviorConfigScreen(
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // 1. CẤU HÌNH NHANH
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = primaryGreen)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 1. CẤU HÌNH NHANH
             Text(
                 text = "CẤU HÌNH NHANH",
                 fontSize = 12.sp,
@@ -506,6 +524,7 @@ fun BehaviorConfigScreen(
             }
         }
     }
+}
 }
 
 @Composable

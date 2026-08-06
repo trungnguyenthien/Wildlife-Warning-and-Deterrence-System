@@ -43,7 +43,7 @@ preset_scenarios:
   critical_danger:
     ledFlash: true
     ledColor: "STROBE"
-    ledIntensity: 100
+    ledIntensity: 20
     speakerWarn: true
     audioSampleId: "A_gunshot"
     audioIntensity: 100
@@ -51,7 +51,7 @@ preset_scenarios:
   medium_danger:
     ledFlash: true
     ledColor: "YELLOW"
-    ledIntensity: 50
+    ledIntensity: 10
     speakerWarn: true
     audioSampleId: "A_dog_bark"
     audioIntensity: 50
@@ -59,7 +59,7 @@ preset_scenarios:
   intruder:
     ledFlash: true
     ledColor: "RED"
-    ledIntensity: 90
+    ledIntensity: 15
     speakerWarn: true
     audioSampleId: "A_alarm_siren"
     audioIntensity: 90
