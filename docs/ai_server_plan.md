@@ -42,7 +42,7 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
 
 ### 2.1. Đăng ký sự kiện phát hiện loài (`POST /cameras/{cameraId}/detections`)
 *   **Tham chiếu URL thực tế (Production API URL):** `POST https://wildlife-warning-and-deterrence-sys.vercel.app/api/v1/cameras/{cameraId}/detections`
-*   **Tham chiếu đặc tả:** [03-mobile_api.md: POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraphonedetections)
+*   **Tham chiếu đặc tả:** [03-mobile_api.md: POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
 *   **Phương thức:** `POST`
 *   **Content-Type:** `multipart/form-data`
 *   **Tham số gửi đi (Form-data):**
@@ -75,7 +75,7 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
 
 #### 2.1.1. Sample code — AI Server gửi kết quả nhận diện (Python)
 
-> **Tham chiếu:** [03-mobile_api.md: POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraphonedetections) · [04-sequence-diagram.md: Action 1.1](./04-sequence-diagram.md#11-action-ai-server-sends-detection-snapshot-ai_server) · [upload-image-service.md](./upload-image-service.md) · bản đồ `@DefendAction` ở [mục 3](#3-bản-đồ-ánh-xạ-tham-số-phòng-vệ-defendaction).
+> **Tham chiếu:** [03-mobile_api.md: POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections) · [04-sequence-diagram.md: Action 1.1](./04-sequence-diagram.md#11-action-ai-server-sends-detection-snapshot-ai_server) · [upload-image-service.md](./upload-image-service.md) · bản đồ `@DefendAction` ở [mục 3](#3-bản-đồ-ánh-xạ-tham-số-phòng-vệ-defendaction).
 
 ```python
 import os
