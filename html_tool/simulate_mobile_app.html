@@ -1597,12 +1597,23 @@
             
             // Điền âm thanh xua đuổi
             configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
-            if (audioData.audio_samples && Array.isArray(audioData.audio_samples)) {
-              audioData.audio_samples.forEach(a => {
+            if (audioData.animalDeterrentSounds && Array.isArray(audioData.animalDeterrentSounds)) {
+              audioData.animalDeterrentSounds.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a.id;
-                opt.textContent = `${a.name} (${a.id})`;
+                opt.textContent = `${a.displayName} (${a.id})`;
                 configAudioSample.appendChild(opt);
+              });
+            }
+
+            // Điền mẫu phát loa cảnh báo
+            configSpeakerSample.innerHTML = '';
+            if (audioData.citizenAlertSounds && Array.isArray(audioData.citizenAlertSounds)) {
+              audioData.citizenAlertSounds.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.displayName} (${s.id})`;
+                configSpeakerSample.appendChild(opt);
               });
             }
           }

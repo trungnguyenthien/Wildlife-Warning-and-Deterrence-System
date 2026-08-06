@@ -128,6 +128,23 @@ class BehaviorViewModelTest {
 }
 
 class FakeConfigApi : ConfigApi {
+    override suspend fun getAudioSamples(token: String): AudioSamplesResponse {
+        return AudioSamplesResponse(
+            animalDeterrentSounds = listOf(
+                AudioSampleItem("A_gunshot", "Tiếng súng"),
+                AudioSampleItem("A_growl", "Tiếng gầm"),
+                AudioSampleItem("A_dog_bark", "Tiếng chó sủa lớn"),
+                AudioSampleItem("A_alarm_siren", "Tiếng nổ giả lập"),
+                AudioSampleItem("A_explosion", "Tiếng nổ giả lập"),
+                AudioSampleItem("A_ultrasonic", "Tần số siêu âm")
+            ),
+            citizenAlertSounds = listOf(
+                AudioSampleItem("N_voi_rung", "Mẫu 1"),
+                AudioSampleItem("N_thu_du", "Mẫu 2"),
+                AudioSampleItem("N_di_tan", "Mẫu 3")
+            )
+        )
+    }
     override suspend fun getConfigs(token: String): List<ResponseConfigData> = emptyList()
     override suspend fun getConfigDetail(token: String, speciesId: String): ResponseConfigData {
         throw NotImplementedError()

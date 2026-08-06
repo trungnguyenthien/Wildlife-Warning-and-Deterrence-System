@@ -44,6 +44,8 @@ fun BehaviorConfigScreen(
     val primaryGreen = Color(0xFF2C4C2C)
     val uiState by viewModel.speciesListState.collectAsState()
     val context = LocalContext.current
+    val deterrentSounds by viewModel.deterrentSounds.collectAsState()
+    val citizenAlertSounds by viewModel.citizenAlertSounds.collectAsState()
 
     // Load initial config from view model (might be default until API loading finishes)
     var configState by remember { mutableStateOf(viewModel.getConfigForSpecies(speciesId)) }
@@ -241,7 +243,13 @@ fun BehaviorConfigScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Dropdown Loại âm thanh
                     var audioMenuOpen by remember { mutableStateOf(false) }
-                    val audioOptions = listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Tần số siêu âm")
+                    val audioOptions = remember(deterrentSounds) {
+                        if (deterrentSounds.isEmpty()) {
+                            listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Tần số siêu âm", "Không")
+                        } else {
+                            deterrentSounds.map { it.displayName } + "Không"
+                        }
+                    }
 
                     Column {
                         Text(text = "Loại âm thanh xua đuổi", fontSize = 12.sp, color = Color.Gray)
@@ -444,7 +452,13 @@ fun BehaviorConfigScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     // Dropdown Mẫu nội dung loa
                     var sampleMenuOpen by remember { mutableStateOf(false) }
-                    val sampleOptions = listOf("Mẫu 1", "Mẫu 2", "Mẫu 3")
+                    val sampleOptions = remember(citizenAlertSounds) {
+                        if (citizenAlertSounds.isEmpty()) {
+                            listOf("Mẫu 1", "Mẫu 2", "Mẫu 3")
+                        } else {
+                            citizenAlertSounds.map { it.displayName }
+                        }
+                    }
 
                     Column {
                         Text(text = "Mẫu nội dung loa", fontSize = 12.sp, color = Color.Gray)

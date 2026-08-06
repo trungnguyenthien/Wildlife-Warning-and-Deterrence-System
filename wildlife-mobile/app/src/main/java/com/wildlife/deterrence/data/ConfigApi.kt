@@ -35,7 +35,22 @@ data class SaveResponseConfigRequest(
     val speakerSampleId: String? = null
 )
 
+data class AudioSampleItem(
+    val id: String,
+    val displayName: String
+)
+
+data class AudioSamplesResponse(
+    val animalDeterrentSounds: List<AudioSampleItem>,
+    val citizenAlertSounds: List<AudioSampleItem>
+)
+
 interface ConfigApi {
+    @GET("audio-samples")
+    suspend fun getAudioSamples(
+        @Header("Authorization") token: String
+    ): AudioSamplesResponse
+
     @GET("response-configs")
     suspend fun getConfigs(
         @Header("Authorization") token: String

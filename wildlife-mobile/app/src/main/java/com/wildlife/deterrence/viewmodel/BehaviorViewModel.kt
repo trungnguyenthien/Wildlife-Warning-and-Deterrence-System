@@ -8,6 +8,8 @@ import com.wildlife.deterrence.data.ResponseConfigData
 import com.wildlife.deterrence.data.SaveResponseConfigRequest
 import com.wildlife.deterrence.data.CameraApi
 import com.wildlife.deterrence.data.ConfigApi
+import com.wildlife.deterrence.data.AudioSampleItem
+import com.wildlife.deterrence.data.AudioSamplesResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,6 +49,12 @@ class BehaviorViewModel(
     private val _speciesListState = MutableStateFlow(BehaviorSpeciesListUiState())
     val speciesListState: StateFlow<BehaviorSpeciesListUiState> = _speciesListState.asStateFlow()
 
+    private val _deterrentSounds = MutableStateFlow<List<AudioSampleItem>>(emptyList())
+    val deterrentSounds: StateFlow<List<AudioSampleItem>> = _deterrentSounds.asStateFlow()
+
+    private val _citizenAlertSounds = MutableStateFlow<List<AudioSampleItem>>(emptyList())
+    val citizenAlertSounds: StateFlow<List<AudioSampleItem>> = _citizenAlertSounds.asStateFlow()
+
     // Lưu trữ cấu hình trong bộ nhớ session để bảo toàn dữ liệu
     private val _configsMap = mutableMapOf<String, BehaviorConfigUiModel>()
 
@@ -68,6 +76,27 @@ class BehaviorViewModel(
 
         viewModelScope.launch {
             try {
+                // 0. Tải danh mục âm thanh mẫu từ API
+                try {
+                    val audioSamples = configApi.getAudioSamples("Bearer $token")
+                    _deterrentSounds.value = audioSamples.animalDeterrentSounds
+                    _citizenAlertSounds.value = audioSamples.citizenAlertSounds
+                } catch (e: Exception) {
+                    System.err.println("Lỗi tải danh mục âm thanh từ API: ${e.message}")
+                    _deterrentSounds.value = listOf(
+                        AudioSampleItem("A_gunshot", "Tiếng súng"),
+                        AudioSampleItem("A_growl", "Tiếng gầm"),
+                        AudioSampleItem("A_dog_bark", "Chó sủa lớn"),
+                        AudioSampleItem("A_explosion", "Tiếng nổ giả lập"),
+                        AudioSampleItem("A_ultrasonic", "Tần số siêu âm")
+                    )
+                    _citizenAlertSounds.value = listOf(
+                        AudioSampleItem("N_voi_rung", "Mẫu 1"),
+                        AudioSampleItem("N_thu_du", "Mẫu 2"),
+                        AudioSampleItem("N_di_tan", "Mẫu 3")
+                    )
+                }
+
                 // 1. Tải danh mục loài từ API
                 val responseList = cameraApi.getSpecies("Bearer $token")
                 val mappedList = responseList.map { s ->
@@ -122,12 +151,7 @@ class BehaviorViewModel(
                     audioIntensity = config.audioVolume,
                     silentAlert = config.silentAlertSms,
                     ledFlashRate = ledFlashRate,
-                    speakerSampleId = when (config.sirenSampleId) {
-                        "Mẫu 1" -> "N_voi_rung"
-                        "Mẫu 2" -> "N_thu_du"
-                        "Mẫu 3" -> "N_di_tan"
-                        else -> null
-                    }
+                    speakerSampleId = mapUiToSpeakerSampleId(config.sirenSampleId)
                 )
                 configApi.saveConfig(
                     token = "Bearer $token",
@@ -145,36 +169,36 @@ class BehaviorViewModel(
             "intruder" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "intruder",
-                audioType = "Tiếng nổ giả lập",
+                audioType = mapAudioIdToType("A_alarm_siren"),
                 audioVolume = 90,
                 ledFrequency = "4 lần/giây",
                 ledColor = "Đỏ",
                 ledDuration = 15,
-                sirenSampleId = "Mẫu 1",
+                sirenSampleId = mapSpeakerSampleIdToUi("N_thu_du"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
             "medium_animal" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "medium_animal",
-                audioType = "Tiếng chó sủa lớn",
+                audioType = mapAudioIdToType("A_dog_bark"),
                 audioVolume = 50,
                 ledFrequency = "2 lần/giây",
                 ledColor = "Vàng",
                 ledDuration = 10,
-                sirenSampleId = "Mẫu 2",
+                sirenSampleId = mapSpeakerSampleIdToUi("N_thu_du"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
             "critical" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "critical",
-                audioType = "Tiếng súng",
+                audioType = mapAudioIdToType("A_gunshot"),
                 audioVolume = 100,
                 ledFrequency = "Nhấp nháy ngẫu nhiên",
                 ledColor = "Đỏ xen trắng",
                 ledDuration = 20,
-                sirenSampleId = "Mẫu 1",
+                sirenSampleId = mapSpeakerSampleIdToUi("N_voi_rung"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -203,22 +227,53 @@ class BehaviorViewModel(
     }
 
     private fun mapAudioTypeToId(type: String): String? {
+        if (type == "Không" || type == "Không có") return null
+        val found = _deterrentSounds.value.find { it.displayName == type }
+        if (found != null) return found.id
         return when (type) {
             "Tiếng súng", "Tiếng súng nổ đe dọa" -> "A_gunshot"
-            "Tiếng chó sủa lớn", "Tiếng chó sủa dữ dội", "Tiếng gầm" -> "A_dog_bark"
-            "Tiếng nổ giả lập", "Tiếng còi hú khẩn cấp" -> "A_alarm_siren"
-            "Phát loa cảnh báo" -> "S_warn_citizen"
+            "Tiếng gầm", "Tiếng gầm đe dọa" -> "A_growl"
+            "Tiếng chó sủa lớn", "Tiếng chó sủa dữ dội", "Chó sủa lớn" -> "A_dog_bark"
+            "Tiếng nổ giả lập", "Tiếng còi hú khẩn cấp" -> "A_explosion"
+            "Tần số siêu âm" -> "A_ultrasonic"
             else -> null
         }
     }
 
     private fun mapAudioIdToType(id: String?): String {
+        if (id == null) return "Không"
+        val found = _deterrentSounds.value.find { it.id == id }
+        if (found != null) return found.displayName
         return when (id) {
             "A_gunshot" -> "Tiếng súng"
-            "A_dog_bark" -> "Tiếng chó sủa lớn"
-            "A_alarm_siren" -> "Tiếng nổ giả lập"
-            "S_warn_citizen" -> "Phát loa cảnh báo"
-            else -> "Không có"
+            "A_growl" -> "Tiếng gầm"
+            "A_dog_bark" -> "Chó sủa lớn"
+            "A_alarm_siren", "A_explosion" -> "Tiếng nổ giả lập"
+            "A_ultrasonic" -> "Tần số siêu âm"
+            else -> "Không"
+        }
+    }
+
+    private fun mapSpeakerSampleIdToUi(id: String?): String {
+        if (id == null) return "Không"
+        val found = _citizenAlertSounds.value.find { it.id == id }
+        if (found != null) return found.displayName
+        return when (id) {
+            "N_voi_rung" -> "Mẫu 1"
+            "N_thu_du" -> "Mẫu 2"
+            "N_di_tan" -> "Mẫu 3"
+            else -> "Mẫu 1"
+        }
+    }
+
+    private fun mapUiToSpeakerSampleId(uiName: String): String? {
+        val found = _citizenAlertSounds.value.find { it.displayName == uiName }
+        if (found != null) return found.id
+        return when (uiName) {
+            "Mẫu 1" -> "N_voi_rung"
+            "Mẫu 2" -> "N_thu_du"
+            "Mẫu 3" -> "N_di_tan"
+            else -> null
         }
     }
 
@@ -267,12 +322,7 @@ class BehaviorViewModel(
             else -> if (data.ledFlash) "4 lần/giây" else "Không"
         }
 
-        val sirenSampleId = when (data.speakerSampleId) {
-            "N_voi_rung" -> "Mẫu 1"
-            "N_thu_du" -> "Mẫu 2"
-            "N_di_tan" -> "Mẫu 3"
-            else -> "Mẫu 1"
-        }
+        val sirenSampleId = mapSpeakerSampleIdToUi(data.speakerSampleId)
 
         return BehaviorConfigUiModel(
             speciesId = data.speciesId,

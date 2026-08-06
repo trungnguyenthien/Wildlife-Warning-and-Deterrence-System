@@ -295,13 +295,17 @@ export async function listPresets(_req: AuthenticatedRequest, res: Response) {
 // 8. GET /audio-samples - Tải danh mục âm thanh mẫu
 export async function listAudioSamples(_req: AuthenticatedRequest, res: Response) {
   const result = {
-    audio_samples: [
-      { id: 'A_gunshot', name: 'Tiếng súng nổ đe dọa', durationSeconds: 3 },
-      { id: 'A_dog_bark', name: 'Tiếng chó sủa dữ dội', durationSeconds: 5 },
-      { id: 'A_alarm_siren', name: 'Tiếng còi hú khẩn cấp', durationSeconds: 6 }
+    animalDeterrentSounds: [
+      { id: 'A_gunshot', displayName: 'Tiếng súng nổ đe dọa' },
+      { id: 'A_growl', displayName: 'Tiếng gầm đe dọa' },
+      { id: 'A_dog_bark', displayName: 'Tiếng chó sủa dữ dội' },
+      { id: 'A_explosion', displayName: 'Tiếng nổ giả lập' },
+      { id: 'A_ultrasonic', displayName: 'Tần số siêu âm' }
     ],
-    speaker_samples: [
-      { id: 'S_warn_citizen', name: 'Phát loa cảnh báo người dân có thú dữ', durationSeconds: 8 }
+    citizenAlertSounds: [
+      { id: 'N_voi_rung', displayName: 'Mẫu 1 - Cảnh báo voi hoang dã' },
+      { id: 'N_thu_du', displayName: 'Mẫu 2 - Phát hiện thú dữ xâm lấn' },
+      { id: 'N_di_tan', displayName: 'Mẫu 3 - Chỉ dẫn di tản lánh nạn' }
     ]
   };
   return res.status(200).json(result);

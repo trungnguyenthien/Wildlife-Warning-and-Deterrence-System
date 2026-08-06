@@ -53,13 +53,12 @@ describe('REFERENCE DATA TESTING SUITE', () => {
       .set('Authorization', `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('audio_samples');
-    expect(res.body).toHaveProperty('speaker_samples');
-    expect(Array.isArray(res.body.audio_samples)).toBe(true);
-    expect(Array.isArray(res.body.speaker_samples)).toBe(true);
-    expect(res.body.audio_samples.length).toBeGreaterThan(0);
-    expect(res.body.audio_samples[0]).toHaveProperty('id');
-    expect(res.body.audio_samples[0]).toHaveProperty('name');
-    expect(res.body.audio_samples[0]).toHaveProperty('durationSeconds');
+    expect(res.body).toHaveProperty('animalDeterrentSounds');
+    expect(res.body).toHaveProperty('citizenAlertSounds');
+    expect(Array.isArray(res.body.animalDeterrentSounds)).toBe(true);
+    expect(Array.isArray(res.body.citizenAlertSounds)).toBe(true);
+    expect(res.body.animalDeterrentSounds.length).toBeGreaterThan(0);
+    expect(res.body.animalDeterrentSounds[0]).toHaveProperty('id');
+    expect(res.body.animalDeterrentSounds[0]).toHaveProperty('displayName');
   });
 });
