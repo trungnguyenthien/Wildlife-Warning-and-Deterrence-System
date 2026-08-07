@@ -566,6 +566,53 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
 
 ---
 
+### 7.3. `GET /alertSounds`
+
+Tải danh sách các file **âm thanh cảnh báo** được nạp sẵn trong phần cứng thiết bị. Nguồn dữ liệu là tệp cấu hình [hard-config/alert-sound.yaml](../wildlife-mobile-server/hard-config/alert-sound.yaml), tham khảo thư mục âm thanh gốc `wildlife-mobile-server/assets/alert/`. Dùng để hiển thị danh sách file âm thanh khi phát cảnh báo tại hiện trường.
+
+> **Không yêu cầu xác thực (public endpoint)** — không cần gửi `Authorization: Bearer <token>`.
+
+**Response 200** — Mảng phẳng (flat array), mỗi phần tử là một file `.mp3`:
+```json
+[
+  {
+    "id": "deer",
+    "name": "Tiếng Nai",
+    "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3"
+  },
+  {
+    "id": "elephant",
+    "name": "Tiếng Voi",
+    "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/elephant.mp3"
+  },
+  {
+    "id": "monkey",
+    "name": "Tiếng Khỉ",
+    "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/monkey.mp3"
+  },
+  {
+    "id": "tiger",
+    "name": "Tiếng Hổ",
+    "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/tiger.mp3"
+  },
+  {
+    "id": "wild_boar",
+    "name": "Tiếng Lợn rừng",
+    "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/wild_boar.mp3"
+  }
+]
+```
+
+| Trường | Kiểu | Mô tả |
+|---|---|---|
+| `id` | String | Mã định danh duy nhất của âm thanh (khớp với tên file `.mp3`) |
+| `name` | String | Tên hiển thị tiếng Việt của âm thanh |
+| `file` | String | URL công khai trỏ đến file âm thanh `.mp3` (static asset trên Vercel) |
+
+**Lỗi:** Trả về `500 {"error":"server_error"}` nếu file cấu hình YAML không đọc được; trả về `[]` (mảng rỗng) nếu file không tồn tại hoặc không phải array.
+
+---
+
 ## 8. Nhóm 6 — Cấu hình ứng phó theo loài (`[SPECIES_CONFIG_DETAIL_SCREEN]`)
 
 ### 8.1. `GET /species`
@@ -1156,6 +1203,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 | 13a.1 | POST | `/cameras/{cameraId}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
 | 13a.2 | WS | `/ws` | (ĐÃ LOẠI BỎ) Kết nối WebSocket song công |
 | 13a.3 | GET | `/auth/ably-token` | API tích hợp: Cấp Token Request tạm thời phục vụ kết nối an toàn với Ably Cloud |
+| 7.3 | GET | `/alertSounds` | Tải danh sách file âm thanh cảnh báo (công khai, không cần xác thực) |
 
 **Tổng cộng: 38 API di động + 2 API tích hợp thiết bị (gồm 1 Webhook nhận diện và 1 API cấp Token Ably; đã bỏ kết nối WebSocket trực tiếp, chức năng ngôn ngữ, đổi mật khẩu, khôi phục mật khẩu, stream nghe thử âm thanh, và ghi đè trạng thái thiết bị thủ công).**
 

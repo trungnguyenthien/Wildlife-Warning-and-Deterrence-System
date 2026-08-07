@@ -1,0 +1,35 @@
+# ==============================================================================
+# TỆP CẤU HÌNH ÂM THANH CẢNH BÁO (ALERT SOUND CONFIG)
+# ==============================================================================
+# Tài liệu tham khảo: Tổng hợp danh sách các file âm thanh cảnh báo được nạp sẵn
+# trong thư mục: wildlife-mobile-server/assets/alert
+#
+# Mỗi item trong danh sách gồm:
+#   - id   (String): Mã định danh duy nhất của âm thanh (khớp với tên file .mp3).
+#   - name (String): Tên hiển thị tiếng Việt của âm thanh.
+#   - file (String): URL công khai trỏ đến file âm thanh .mp3 đã được deploy
+#                    trên hạ tầng Vercel (static asset).
+#
+# Endpoint công khai: GET /alertSounds (không cần xác thực) sẽ trả về toàn bộ
+# danh sách này dưới dạng JSON array.
+# ==============================================================================
+
+- id: "deer"
+  name: "Tiếng Nai"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3"
+
+- id: "elephant"
+  name: "Tiếng Voi"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/elephant.mp3"
+
+- id: "monkey"
+  name: "Tiếng Khỉ"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/monkey.mp3"
+
+- id: "tiger"
+  name: "Tiếng Hổ"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/tiger.mp3"
+
+- id: "wild_boar"
+  name: "Tiếng Lợn rừng"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/wild_boar.mp3"

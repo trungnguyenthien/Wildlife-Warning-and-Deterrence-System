@@ -5,7 +5,7 @@ import { authenticateToken } from './middlewares/auth';
 // Import các controller phẳng
 import { register, login, logout, me, updateMe, getAblyToken } from './controllers/authController';
 import { listCameras, getCamera, renameCamera, streamCameras, testDevice, getCameraHistory } from './controllers/cameraController';
-import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples } from './controllers/configController';
+import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples, listAlertSounds } from './controllers/configController';
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
 import { listEvents, listAlertFeed, readAlert, processDetection, getAlertDetail, listNotificationsInbox } from './controllers/eventController';
 import { getSummary } from './controllers/statsController';
@@ -81,6 +81,7 @@ app.delete('/response-configs/:speciesId', authenticateToken, resetConfig);
 app.post('/response-configs/:speciesId/apply-preset/:presetId', authenticateToken, applyPreset);
 app.get('/control/presets', authenticateToken, listPresets);
 app.get('/audio-samples', authenticateToken, listAudioSamples);
+app.get('/alertSounds', listAlertSounds); // Công khai, không cần xác thực
 
 // ==========================================
 // 6. ENDPOINTS QUẢN LÝ SĐT SMS PHỤ
