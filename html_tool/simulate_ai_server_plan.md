@@ -6,17 +6,17 @@ Tài liệu này trình bày kế hoạch thiết kế và phát triển công c
 
 ## 1. Mục tiêu và Phạm vi
 
-Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo các tài liệu thiết kế hệ thống ([02-dac-ta-man-hinh-android-app.md](file:///Users/trungnguyen/GitHub/Wildlife-Warning-and-Deterrence-System/docs/02-dac-ta-man-hinh-android-app.md), [04-sequence-diagram.md](file:///Users/trungnguyen/GitHub/Wildlife-Warning-and-Deterrence-System/docs/04-sequence-diagram.md), và [ai_server_plan.md](file:///Users/trungnguyen/GitHub/Wildlife-Warning-and-Deterrence-System/docs/ai_server_plan.md)):
+Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo các tài liệu thiết kế hệ thống ([02-dac-ta-man-hinh-android-app.md](../docs/02-dac-ta-man-hinh-android-app.md), [04-sequence-diagram.md](../docs/04-sequence-diagram.md), [ai_server_plan.md](../docs/ai_server_plan.md), và [ai-server-ably.md](../docs/ai-server-ably.md)):
 
 1.  **Mô phỏng Webhook (Uplink):** 
     *   Đăng ký sự kiện phát hiện động vật hoang dã bằng cách gửi yêu cầu `POST /cameras/{cameraId}/detections` sử dụng định dạng `multipart/form-data`.
     *   Hỗ trợ tải lên hình ảnh local và tự động scale/resize về kích thước chuẩn `600x400` trước khi gửi.
     *   Gửi đầy đủ các trường dữ liệu bắt buộc: `userId`, `detections` (JSON), `detectedAt` (ISO Timestamp) và file `image`.
-2.  **Giả lập Kết nối WebSocket (Downlink & Hardware Mock):**
-    *   Duy trì một kết nối WebSocket trực tiếp đến `WS /ws?userId={userId}`.
+2.  **Giả lập Kết nối Ably Pub/Sub (Downlink & Hardware Mock):** ([ai-server-ably.md](../docs/ai-server-ably.md))
+    *   Sử dụng SDK Ably kết nối (qua WebSocket an toàn `wss://` do Ably Cloud quản lý) và Đăng ký lắng nghe trên kênh điều khiển `user:control:{userId}` với sự kiện `DEVICE_COMMAND`.
     *   Lắng nghe bản tin lệnh `DEVICE_COMMAND` từ Mobile Server khi người dùng/kiểm lâm thực hiện kiểm thử thiết bị (đèn LED chớp, Loa cảnh báo, Hàng rào điện sinh học).
     *   Hiển thị mô phỏng vật lý sống động của phần cứng ngay trên giao diện web (đèn LED nhấp nháy theo màu/tần số, loa phát sóng âm thanh, hàng rào điện phóng tia sét cùng bộ đếm ngược thời gian hoạt động).
-    *   Tự động gửi bản tin phản hồi `COMMAND_ACK` xác nhận trạng thái thực thi (`SUCCESS` hoặc `FAILED`) ngược lại Mobile Server qua WebSocket.
+    *   Tự động gửi bản tin phản hồi `COMMAND_ACK` xác nhận trạng thái thực thi (`SUCCESS` hoặc `FAILED`) ngược lại Mobile Server qua kênh `user:ack:{userId}`.
 3.  **Lưu trữ Trạng thái Tiện lợi:**
     *   Tự động ghi nhớ các trường cấu hình như `userId`, `cameraId` vào cookie trình duyệt để khôi phục nhanh khi reload trang.
 
@@ -50,11 +50,12 @@ Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo 
         *   **Mẫu cURL và Kết quả:**
             *   Khung hiển thị cURL sinh tự động (realtime).
             *   Khung kết quả hiển thị JSON Response phản hồi từ API Server.
-    *   *Cột phải: WebSocket & Hardware Simulator (Downlink) - Bộ giám sát Đẩy lệnh thời gian thực*
-        *   **Cấu hình WebSocket URL:**
-            *   *WS Server URL:* Input text cho địa chỉ kết nối WebSocket (mặc định: `wss://wildlife-warning-and-deterrence-sys.vercel.app`).
+    *   *Cột phải: Ably & Hardware Simulator (Downlink) - Bộ giám sát Đẩy lệnh thời gian thực*
+        *   **Cấu hình Ably Realtime:**
+            *   *Ably API Key:* Input text cho khóa API Ably cấp cho AI Server (mặc định: `abc123.DEF456:ghIjKlmNoPqrSTuv_ai`).
             *   *Nút bấm tương tác:* Nút "Kết nối" (Connect) và "Ngắt kết nối" (Disconnect).
             *   *Trạng thái:* Huy hiệu (Badge) nhấp nháy động thể hiện tình trạng kết nối (`DISCONNECTED` màu đỏ, `CONNECTING` màu vàng nhạt, `CONNECTED` màu xanh lá cây).
+            *   *Kênh truyền tin:* Kênh điều khiển `user:control:{userId}` (Subscribe lắng nghe `DEVICE_COMMAND`) và kênh phản hồi `user:ack:{userId}` (Publish `COMMAND_ACK`).
         *   **Bảng mô phỏng Thiết bị thực địa (Hardware Visual Mock):**
             *   *Đèn LED:* Vùng hiển thị vòng tròn neon phát sáng (glowing effect) chớp nháy tương ứng với màu sắc (`STROBE` - chớp trắng mạnh, `RED` - đỏ nguy hiểm, `YELLOW` - vàng cảnh báo, `WHITE` - sáng trắng xua đuổi) và tần số nháy nhận được.
             *   *Loa phát âm thanh:* Đồ họa sóng âm phát ra (pulsing audio waves) cùng thông tin hiển thị mẫu âm thanh (`A_gunshot`, `A_growl`, v.v.) và thanh đo cường độ âm lượng (Volume indicator bar).
@@ -63,7 +64,7 @@ Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo 
             *   *Trạng thái phản hồi:* Hộp chọn (Select) giữa `SUCCESS` (Thực thi thành công) và `FAILED` (Thất bại).
             *   *Lý do lỗi:* Ô nhập text mô tả lỗi (chỉ mở khóa và hiển thị khi chọn trạng thái `FAILED`).
             *   *Chế độ phản hồi:* Nút công tắc bật tắt (Toggle) "Tự động gửi ACK ngay lập tức" hoặc gửi thủ công bằng nút "Gửi ACK thủ công" để dễ dàng debug các trạng thái phản hồi.
-        *   **Console Log Terminal:** Bảng ghi lại chi tiết mọi luồng thông điệp JSON gửi và nhận qua WebSocket với màu sắc phân cấp.
+        *   **Console Log Terminal:** Bảng ghi lại chi tiết mọi luồng thông điệp JSON gửi (publish) và nhận (subscribe) qua Ably với màu sắc phân cấp.
 
 ---
 
@@ -73,6 +74,7 @@ Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo 
 sequenceDiagram
     autonumber
     participant Client as simulate_ai_server.html
+    participant Ably as Ably Cloud Broker
     participant MobServer as Mobile Server (Vercel)
 
     Note over Client, MobServer: LUỒNG 1: UPLINK (WEBHOOK POST)
@@ -82,32 +84,35 @@ sequenceDiagram
     MobServer-->>Client: Trả về 201 Created (eventId, responseAction)
     Client->>Client: Hiển thị Response JSON & Cập nhật trạng thái
 
-    Note over Client, MobServer: LUỒNG 2: DOWNLINK (WEBSOCKET)
-    Client->>MobServer: Kết nối wss://.../ws?userId={userId}
-    MobServer-->>Client: Chấp nhận kết nối (CONNECTED)
+    Note over Client, Ably: LUỒNG 2: DOWNLINK (ABLY PUB/SUB)
+    Client->>Ably: Kết nối Ably Realtime (wss://) bằng SDK & Subscribe user:control:{userId}
+    Ably-->>Client: Kết nối thành công (CONNECTED), sẵn sàng nhận lệnh
     Note over MobServer, Client: Lấy ví dụ Kiểm lâm nhấn "Test Loa" trên App Android
-    MobServer->>Client: Bản tin DOWNLINK: event = DEVICE_COMMAND (commandId, deviceKey, action, params)
+    MobServer->>Ably: PUBLISH REST: user:control:{userId} / event = DEVICE_COMMAND (commandId, deviceKey, action, params)
+    Ably->>Client: Phát tin: event = DEVICE_COMMAND (commandId, deviceKey, action, params)
     Client->>Client: Kích hoạt hiệu ứng visual Loa sóng âm & Đèn chớp sáng trên UI
     alt Tự động gửi ACK
-        Client->>MobServer: Bản tin UPLINK: event = COMMAND_ACK (commandId, status = SUCCESS)
+        Client->>Ably: PUBLISH: user:ack:{userId} / event = COMMAND_ACK (commandId, status = SUCCESS)
+        Ably-->>MobServer: Chuyển COMMAND_ACK hoàn tất request HTTP REST
     end
 ```
 
 ### 3.1. Các phần tử DOM & Sự kiện tương tác
 *   Hàm `resizeImage(file, width, height)` sử dụng HTML5 Canvas để scale ảnh về đúng tỉ lệ `600x400` pixel, nén dưới dạng JPEG để giữ dung lượng siêu nhỏ (~50-100KB), hạn chế tối đa độ trễ truyền dẫn.
-*   Cơ chế kết nối WebSocket sử dụng API `new WebSocket(wsUrl)`.
-    *   Tự động đăng ký sự kiện `onopen`, `onclose`, `onerror`, `onmessage`.
-    *   Hàm gửi bản tin `sendWsMessage(event, payload)` chuyển đổi object thành JSON và ghi nhận vào Log Terminal.
+*   Cơ chế kết nối sử dụng SDK Ably (`new Ably.Realtime({ key })`) do Ably Cloud quản lý kết nối WebSocket `wss://`.
+    *   Tự động đăng ký các sự kiện `connection.on('connected' | 'closed' | 'failed')`.
+    *   Đăng ký lắng nghe trên kênh `user:control:{userId}` qua `controlChannel.subscribe('message', ...)` và xử lý bản tin `DEVICE_COMMAND`.
+    *   Hàm gửi bản tin `sendWsMessage(payload)` publish `COMMAND_ACK` lên kênh `user:ack:{userId}` qua `ackChannel.publish('message', payload)` và ghi nhận vào Log Terminal.
 *   Hệ thống mô phỏng hiệu ứng phần cứng sử dụng CSS keyframes animation để chớp tắt LED, làm rung màng loa/sóng âm thanh, và phóng hiệu ứng tia chớp của hàng rào điện sinh học.
 
 ---
 
 ## 4. Kế hoạch Thay đổi Chi tiết
 
-### [NEW] [simulate_ai_server.html](file:///Users/trungnguyen/GitHub/Wildlife-Warning-and-Deterrence-System/html_tool/simulate_ai_server.html)
+### [NEW] [simulate_ai_server.html](./simulate_ai_server.html)
 *   Xây dựng mã nguồn hoàn chỉnh của trang HTML tĩnh chứa giao diện Forest Dark Mode, CSS hiệu ứng chuyển động và mã Javascript tương tác.
 
-### [MODIFY] [walkthrough.md](file:///Users/trungnguyen/.gemini/antigravity-ide/brain/d8661faf-34e6-4ef5-9adf-8292c66e70c7/walkthrough.md)
+### [MODIFY] [walkthrough.md](../../../.gemini/antigravity-ide/brain/d8661faf-34e6-4ef5-9adf-8292c66e70c7/walkthrough.md)
 *   Cập nhật nhật ký tiến trình phát triển để bao gồm công cụ giả lập AI Server mới.
 
 ---
@@ -120,9 +125,9 @@ sequenceDiagram
     *   Thêm nhận diện loài động vật nguy hiểm (ví dụ: `voi_rung`, confidence `0.85`).
     *   Bấm **"Kích hoạt Webhook (Post Detections)"**.
     *   Xác nhận phản hồi trả về mã `201 Created` kèm theo đối tượng `responseAction` đầy đủ.
-2.  **Kiểm tra WebSocket (Downlink):**
-    *   Nhập `userId` chính xác, bấm **"Kết nối WebSocket"**.
-    *   Xác nhận trạng thái hiển thị đổi sang `CONNECTED` màu xanh lá cây rực rỡ.
+2.  **Kiểm tra Ably Downlink:**
+    *   Nhập `Ably API Key` (cấp cho AI Server) và `userId` chính xác, bấm **"Kết nối"**.
+    *   Xác nhận trạng thái hiển thị đổi sang `CONNECTED` màu xanh lá cây rực rỡ và log Terminal báo đang lắng nghe kênh `user:control:{userId}`.
     *   Gửi một yêu cầu kiểm thử thiết bị bằng cách chạy lệnh cURL kiểm thử loa/đèn từ terminal (hoặc qua giao diện App Android nếu có):
         ```bash
         curl -X POST "https://wildlife-warning-and-deterrence-sys.vercel.app/api/v1/cameras/CAM_PROD_TEST/devices/speaker/test" \
@@ -131,7 +136,7 @@ sequenceDiagram
           -d '{"durationSeconds": 10, "intensity": 80}'
         ```
     *   Xác nhận trên giao diện `simulate_ai_server.html`:
-        *   Trong log terminal có ghi nhận bản tin `DEVICE_COMMAND` màu vàng.
+        *   Trong log terminal có ghi nhận bản tin `DEVICE_COMMAND` màu vàng nhận được qua kênh `user:control:{userId}`.
         *   Phần cứng giả lập loa hiển thị rung động sóng âm thanh và LED chớp đỏ nhấp nháy.
-        *   Một bản tin `COMMAND_ACK` với `status: "SUCCESS"` được tự động phản hồi ngược lại lên WebSocket của Mobile Server.
+        *   Một bản tin `COMMAND_ACK` với `status: "SUCCESS"` được tự động publish lên kênh `user:ack:{userId}` của Ably.
         *   Log terminal hiển thị bản tin `COMMAND_ACK` gửi đi màu xanh lá cây.
