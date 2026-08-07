@@ -211,7 +211,7 @@ export function notifySSE(message: { event: string; data: unknown }) {
 // 5. POST /cameras/{cameraId}/devices/{deviceKey}/test - Gửi lệnh kiểm tra thiết bị ngoại vi
 export async function testDevice(req: AuthenticatedRequest, res: Response) {
   const { cameraId, deviceKey } = req.params;
-  const { durationSeconds, intensity } = req.body;
+  const { durationSeconds, intensity, audioSampleId } = req.body;
 
   // Validation: Thiếu các trường bắt buộc
   if (durationSeconds === undefined) {
@@ -291,7 +291,7 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
         cameraId,
         deviceKey,
         'TEST',
-        { durationSeconds, intensity }
+        { durationSeconds, intensity, audioSampleId: audioSampleId ?? null }
       );
       
       return res.status(200).json({

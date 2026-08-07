@@ -1269,6 +1269,8 @@
       let controlChannel = null;
       let ackChannel = null;
       let lastReceivedCommand = null;
+      // Map id -> {name, file} của âm thanh cảnh báo lấy từ GET /alertSounds
+      let alertSoundsMap = {};
 
       // Active timers for hardware animation
       let ledAnimationInterval = null;
@@ -1920,17 +1922,50 @@
         if (speakerTimer) clearTimeout(speakerTimer);
         speakerIndicator.classList.remove("active");
 
-        const sampleId = params.sampleId || "A_gunshot";
+        const sampleId = params.audioSampleId || params.sampleId || "A_gunshot";
         const volume = params.intensity || params.volume || 80;
         const duration = (params.durationSeconds || 10) * 1000;
 
         speakerIndicator.classList.add("active");
-        speakerIndicatorDesc.textContent = `Tập tin: ${sampleId} (Vol: ${volume}%)`;
+
+        const sound = alertSoundsMap[sampleId];
+        if (sound) {
+          speakerIndicatorDesc.textContent = `Tập tin: ${sound.name} (${sampleId}) · file: ${sound.file} (Vol: ${volume}%)`;
+          // Phát thử âm thanh thực từ API /alertSounds
+          try {
+            const audio = new Audio(sound.file);
+            audio.volume = volume / 100;
+            audio.play().catch(() => {
+              speakerIndicatorDesc.textContent += " · ⚠️ KHÔNG phát được file này";
+            });
+          } catch (e) {
+            speakerIndicatorDesc.textContent += " · ⚠️ Lỗi phát âm thanh";
+          }
+        } else {
+          speakerIndicatorDesc.textContent = `Tập tin: ${sampleId} (Vol: ${volume}%) — không có trong /alertSounds (file: ${params.file || "N/A"})`;
+        }
 
         speakerTimer = setTimeout(() => {
           speakerIndicator.classList.remove("active");
           speakerIndicatorDesc.textContent = "Tập tin: None (Volume: 0)";
         }, duration);
+      }
+
+      // Load danh sách âm thanh cảnh báo từ GET /alertSounds (API công khai) để biết đường dẫn mp3.
+      function loadAlertSounds() {
+        const base = serverUrlInput.value.replace(/\/+$/, "");
+        fetch(`${base}/alertSounds`)
+          .then((res) => res.json())
+          .then((list) => {
+            const map = {};
+            list.forEach((s) => {
+              if (s && s.id) map[s.id] = { name: s.name || s.id, file: s.file || "" };
+            });
+            alertSoundsMap = map;
+          })
+          .catch((e) => {
+            console.warn("Không tải được /alertSounds:", e);
+          });
       }
 
       // Trigger Electric fence lightning surge
@@ -2064,6 +2099,7 @@
       renderDetections();
       updateCurlPreview();
       fetchSpeciesList();
+      loadAlertSounds();
     </script>
   </body>
 </html>
