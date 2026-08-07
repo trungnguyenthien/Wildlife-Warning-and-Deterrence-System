@@ -40,7 +40,13 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
         -webkit-font-smoothing: antialiased;
       }
 
@@ -91,7 +97,11 @@
       h1 {
         font-size: 1.15rem;
         font-weight: 700;
-        background: linear-gradient(90deg, var(--text-primary) 0%, var(--primary-hover) 100%);
+        background: linear-gradient(
+          90deg,
+          var(--text-primary) 0%,
+          var(--primary-hover) 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
@@ -174,7 +184,9 @@
         color: var(--text-secondary);
       }
 
-      input[type="text"], input[type="datetime-local"], select {
+      input[type="text"],
+      input[type="datetime-local"],
+      select {
         background: var(--input-bg);
         border: 1px solid var(--input-border);
         color: var(--text-primary);
@@ -185,7 +197,9 @@
         width: 100%;
       }
 
-      input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus {
+      input[type="text"]:focus,
+      input[type="datetime-local"]:focus,
+      select:focus {
         outline: none;
         border-color: var(--primary-accent);
         box-shadow: 0 0 0 2px rgba(212, 172, 13, 0.15);
@@ -433,10 +447,18 @@
         white-space: pre-wrap;
       }
 
-      .log-entry.in { color: #f4d03f; } /* Incoming: Amber */
-      .log-entry.out { color: #81c784; } /* Outgoing: Green */
-      .log-entry.err { color: #e57373; } /* Error: Red */
-      .log-entry.sys { color: #80deea; } /* System: Cyan */
+      .log-entry.in {
+        color: #f4d03f;
+      } /* Incoming: Amber */
+      .log-entry.out {
+        color: #81c784;
+      } /* Outgoing: Green */
+      .log-entry.err {
+        color: #e57373;
+      } /* Error: Red */
+      .log-entry.sys {
+        color: #80deea;
+      } /* System: Cyan */
 
       /* Custom list styling */
       .list-box-container {
@@ -523,10 +545,18 @@
         background-color: #9e9e9e;
       }
 
-      .det-item-status-dot.idle { background-color: #9e9e9e; }
-      .det-item-status-dot.sending { background-color: #fbc02d; }
-      .det-item-status-dot.success { background-color: #4caf50; }
-      .det-item-status-dot.error { background-color: #f44336; }
+      .det-item-status-dot.idle {
+        background-color: #9e9e9e;
+      }
+      .det-item-status-dot.sending {
+        background-color: #fbc02d;
+      }
+      .det-item-status-dot.success {
+        background-color: #4caf50;
+      }
+      .det-item-status-dot.error {
+        background-color: #f44336;
+      }
 
       .remove-btn {
         background: transparent;
@@ -595,14 +625,24 @@
       }
 
       @keyframes pulse {
-        0% { opacity: 0.6; }
-        50% { opacity: 1; }
-        100% { opacity: 0.6; }
+        0% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0.6;
+        }
       }
 
       @keyframes glow {
-        0% { box-shadow: 0 0 2px rgba(76, 175, 80, 0.2); }
-        100% { box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); }
+        0% {
+          box-shadow: 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        100% {
+          box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+        }
       }
 
       /* Hardware Mock Visuals */
@@ -685,13 +725,22 @@
       }
 
       @keyframes strobe-blink {
-        0%, 100% { opacity: 0.2; }
-        50% { opacity: 1; }
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 1;
+        }
       }
 
       @keyframes led-blink-normal {
-        0% { opacity: 0.4; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 0.4;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       .led-desc {
@@ -723,15 +772,30 @@
         animation: sound-bounce 0.8s infinite ease-in-out;
       }
 
-      .speaker-wave-container.active .speaker-bar:nth-child(1) { animation-delay: 0.1s; }
-      .speaker-wave-container.active .speaker-bar:nth-child(2) { animation-delay: 0.3s; }
-      .speaker-wave-container.active .speaker-bar:nth-child(3) { animation-delay: 0.5s; }
-      .speaker-wave-container.active .speaker-bar:nth-child(4) { animation-delay: 0.2s; }
-      .speaker-wave-container.active .speaker-bar:nth-child(5) { animation-delay: 0.4s; }
+      .speaker-wave-container.active .speaker-bar:nth-child(1) {
+        animation-delay: 0.1s;
+      }
+      .speaker-wave-container.active .speaker-bar:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+      .speaker-wave-container.active .speaker-bar:nth-child(3) {
+        animation-delay: 0.5s;
+      }
+      .speaker-wave-container.active .speaker-bar:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      .speaker-wave-container.active .speaker-bar:nth-child(5) {
+        animation-delay: 0.4s;
+      }
 
       @keyframes sound-bounce {
-        0%, 100% { height: 8px; }
-        50% { height: 35px; }
+        0%,
+        100% {
+          height: 8px;
+        }
+        50% {
+          height: 35px;
+        }
       }
 
       .speaker-desc {
@@ -787,13 +851,24 @@
       }
 
       @keyframes fence-crackle {
-        0% { opacity: 0.5; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       @keyframes lightning-strike {
-        0%, 100% { opacity: 0; transform: scale(0.6) rotate(15deg); }
-        50% { opacity: 1; transform: scale(1.1) rotate(-15deg); }
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(0.6) rotate(15deg);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.1) rotate(-15deg);
+        }
       }
 
       .fence-timer {
@@ -824,12 +899,16 @@
         <div class="header-logo-box">⚙️</div>
         <div>
           <h1>AI Server Simulator</h1>
-          <div class="header-subtitle">Bộ công cụ giả lập &amp; tích hợp trạm Camera hiện trường</div>
+          <div class="header-subtitle">
+            Bộ công cụ giả lập &amp; tích hợp trạm Camera hiện trường
+          </div>
         </div>
       </div>
       <div class="status-container">
         <span class="badge">API v1.0</span>
-        <span class="status-pill disconnected" id="connection-status">DISCONNECTED</span>
+        <span class="status-pill disconnected" id="connection-status"
+          >DISCONNECTED</span
+        >
       </div>
     </header>
 
@@ -850,18 +929,34 @@
           </div>
           <div class="form-group">
             <label for="server-url">REST Server URL</label>
-            <input type="text" id="server-url" value="https://wildlife-warning-and-deterrence-sys.vercel.app" placeholder="Địa chỉ máy chủ..." required />
+            <input
+              type="text"
+              id="server-url"
+              value="https://wildlife-warning-and-deterrence-sys.vercel.app"
+              placeholder="Địa chỉ máy chủ..."
+              required
+            />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="user-id">userID (Mã Hex)</label>
-            <input type="text" id="user-id" placeholder="Nhập userID..." required />
+            <input
+              type="text"
+              id="user-id"
+              placeholder="Nhập userID..."
+              required
+            />
           </div>
           <div class="form-group">
             <label for="camera-id">cameraID</label>
-            <input type="text" id="camera-id" placeholder="Nhập cameraID..." required />
+            <input
+              type="text"
+              id="camera-id"
+              placeholder="Nhập cameraID..."
+              required
+            />
           </div>
         </div>
 
@@ -869,7 +964,9 @@
           <label>Thời gian phát hiện (detectedAt)</label>
           <div class="datetime-container">
             <input type="datetime-local" id="detected-at" required />
-            <button type="button" class="small-btn" id="btn-use-now">Hiện tại</button>
+            <button type="button" class="small-btn" id="btn-use-now">
+              Hiện tại
+            </button>
           </div>
         </div>
 
@@ -879,23 +976,47 @@
             <div class="select-image-text" id="image-placeholder-text">
               <span>📸</span> Kéo thả hoặc Nhấp để chọn ảnh
             </div>
-            <div class="select-image-preview hidden" id="image-preview-container">
+            <div
+              class="select-image-preview hidden"
+              id="image-preview-container"
+            >
               <div class="select-image-thumb" id="image-preview-thumb"></div>
               <div class="select-image-info">
-                <span style="opacity: 0.85; font-size: 0.75rem; font-weight: 600;" id="image-file-size">(600x400)</span>
+                <span
+                  style="opacity: 0.85; font-size: 0.75rem; font-weight: 600"
+                  id="image-file-size"
+                  >(600x400)</span
+                >
               </div>
-              <button type="button" class="select-image-remove" id="btn-remove-image">✕</button>
+              <button
+                type="button"
+                class="select-image-remove"
+                id="btn-remove-image"
+              >
+                ✕
+              </button>
             </div>
-            <input type="file" id="file-input" accept="image/jpeg,image/png,image/jpg" style="display: none;" />
+            <input
+              type="file"
+              id="file-input"
+              accept="image/jpeg,image/png,image/jpg"
+              style="display: none"
+            />
           </div>
         </div>
 
         <div class="section-title">Thêm nhận diện mới</div>
 
         <div class="form-row">
-          <div class="form-group" style="grid-column: span 2;">
+          <div class="form-group" style="grid-column: span 2">
             <label for="species-id-input">Loài vật (speciesId)</label>
-            <input type="text" id="species-id-input" list="species-presets" placeholder="Nhập mã loài vật..." value="" />
+            <input
+              type="text"
+              id="species-id-input"
+              list="species-presets"
+              placeholder="Nhập mã loài vật..."
+              value=""
+            />
             <datalist id="species-presets">
               <!-- Được nạp động qua API -->
             </datalist>
@@ -905,15 +1026,32 @@
         <div class="form-group">
           <label for="confidence-slider">Độ tin cậy (Confidence)</label>
           <div class="slider-container">
-            <input type="range" id="confidence-slider" min="0.5" max="1.0" step="0.01" value="0.75" />
+            <input
+              type="range"
+              id="confidence-slider"
+              min="0.5"
+              max="1.0"
+              step="0.01"
+              value="0.75"
+            />
             <span class="slider-val" id="confidence-val">0.75</span>
           </div>
         </div>
 
-        <button type="button" class="btn" id="btn-add" style="margin-top: 0.25rem;">Thêm nhận diện</button>
+        <button
+          type="button"
+          class="btn"
+          id="btn-add"
+          style="margin-top: 0.25rem"
+        >
+          Thêm nhận diện
+        </button>
 
         <div class="form-group">
-          <label>Danh sách nhận diện trước khi gửi <span class="label-desc">(Có thể xóa bớt)</span></label>
+          <label
+            >Danh sách nhận diện trước khi gửi
+            <span class="label-desc">(Có thể xóa bớt)</span></label
+          >
           <div class="list-box-container" id="detections-list">
             <!-- Items populated via JS -->
           </div>
@@ -921,8 +1059,15 @@
 
         <div class="form-group">
           <label>Mẫu cURL trước khi gửi</label>
-          <div class="terminal-container" style="min-height: 80px; max-height: 100px;">
-            <div class="terminal-body" style="padding: 0.5rem; color: #80deea;" id="curl-preview">
+          <div
+            class="terminal-container"
+            style="min-height: 80px; max-height: 100px"
+          >
+            <div
+              class="terminal-body"
+              style="padding: 0.5rem; color: #80deea"
+              id="curl-preview"
+            >
               Chưa có nhận diện nào để hiển thị cURL.
             </div>
           </div>
@@ -934,14 +1079,18 @@
 
         <div class="form-group">
           <label>Phản hồi từ Server (Response JSON)</label>
-          <div class="response-card" id="response-preview">// Kết quả phản hồi sẽ hiển thị ở đây...</div>
+          <div class="response-card" id="response-preview">
+            // Kết quả phản hồi sẽ hiển thị ở đây...
+          </div>
         </div>
       </section>
 
       <!-- RIGHT COLUMN: Ably Realtime & Hardware Simulator (Downlink) -->
-      <section class="card" style="justify-content: flex-start;">
+      <section class="card" style="justify-content: flex-start">
         <div class="card-title-bar">
-          <div class="card-title">Ably Realtime &amp; Hardware Simulator (Downlink)</div>
+          <div class="card-title">
+            Ably Realtime &amp; Hardware Simulator (Downlink)
+          </div>
         </div>
 
         <div class="form-row">
@@ -953,23 +1102,50 @@
           </div>
           <div class="form-group">
             <label for="ws-url">Ably API Key (ABLY_AI_SERVER_API_KEY)</label>
-            <input type="text" id="ws-url" value="abc123.DEF456:ghIjKlmNoPqrSTuv_ai" placeholder="Nhập Ably API Key..." required />
+            <input
+              type="text"
+              id="ws-url"
+              value="abc123.DEF456:ghIjKlmNoPqrSTuv_ai"
+              placeholder="Nhập Ably API Key..."
+              required
+            />
           </div>
         </div>
 
-        <div class="form-row" style="margin-top: -0.25rem;">
-          <button type="button" class="btn" id="btn-connect-ws" style="background-color: var(--success-accent); box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);">🔗 Kết nối Ably</button>
-          <button type="button" class="btn btn-danger-outline" id="btn-disconnect-ws" disabled>🔌 Ngắt kết nối</button>
+        <div class="form-row" style="margin-top: -0.25rem">
+          <button
+            type="button"
+            class="btn"
+            id="btn-connect-ws"
+            style="
+              background-color: var(--success-accent);
+              box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
+            "
+          >
+            🔗 Kết nối Ably
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger-outline"
+            id="btn-disconnect-ws"
+            disabled
+          >
+            🔌 Ngắt kết nối
+          </button>
         </div>
 
-        <div class="section-title">Giả lập Phần cứng thực địa (Hardware Mock)</div>
+        <div class="section-title">
+          Giả lập Phần cứng thực địa (Hardware Mock)
+        </div>
 
         <div class="hardware-container">
           <!-- LED flash mock -->
           <div class="hw-box">
             <div class="hw-title">Đèn LED Chớp Sáng</div>
             <div class="led-light" id="led-indicator"></div>
-            <div class="led-desc" id="led-indicator-desc">Chế độ: BẬT / TẮT</div>
+            <div class="led-desc" id="led-indicator-desc">
+              Chế độ: BẬT / TẮT
+            </div>
           </div>
 
           <!-- Speaker mock -->
@@ -982,7 +1158,9 @@
               <div class="speaker-bar"></div>
               <div class="speaker-bar"></div>
             </div>
-            <div class="speaker-desc" id="speaker-indicator-desc">Tập tin: None (Volume: 0)</div>
+            <div class="speaker-desc" id="speaker-indicator-desc">
+              Tập tin: None (Volume: 0)
+            </div>
           </div>
 
           <!-- Electric fence mock -->
@@ -992,9 +1170,13 @@
               <div class="fence-wire"></div>
               <div class="fence-wire-glow"></div>
               <div class="fence-lightning">⚡</div>
-              <div class="fence-timer hidden" id="fence-indicator-timer">00s</div>
+              <div class="fence-timer hidden" id="fence-indicator-timer">
+                00s
+              </div>
             </div>
-            <div class="fence-desc" id="fence-indicator-desc">Trạng thái: Đã tắt xung điện</div>
+            <div class="fence-desc" id="fence-indicator-desc">
+              Trạng thái: Đã tắt xung điện
+            </div>
           </div>
         </div>
 
@@ -1010,16 +1192,50 @@
           </div>
           <div class="form-group">
             <label for="ack-error">Mô tả lỗi (nếu có)</label>
-            <input type="text" id="ack-error" placeholder="Lý do lỗi..." disabled />
+            <input
+              type="text"
+              id="ack-error"
+              placeholder="Lý do lỗi..."
+              disabled
+            />
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: -0.25rem;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <input type="checkbox" id="ack-auto-send" checked style="accent-color: var(--primary-accent); width: 16px; height: 16px; cursor: pointer;" />
-            <label for="ack-auto-send" style="cursor: pointer; user-select: none;">Tự động phản hồi ACK ngay lập tức</label>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: -0.25rem;
+          "
+        >
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <input
+              type="checkbox"
+              id="ack-auto-send"
+              checked
+              style="
+                accent-color: var(--primary-accent);
+                width: 16px;
+                height: 16px;
+                cursor: pointer;
+              "
+            />
+            <label
+              for="ack-auto-send"
+              style="cursor: pointer; user-select: none"
+              >Tự động phản hồi ACK ngay lập tức</label
+            >
           </div>
-          <button type="button" class="small-btn" id="btn-manual-ack" disabled style="padding: 0.4rem 0.8rem;">Gửi ACK thủ công</button>
+          <button
+            type="button"
+            class="small-btn"
+            id="btn-manual-ack"
+            disabled
+            style="padding: 0.4rem 0.8rem"
+          >
+            Gửi ACK thủ công
+          </button>
         </div>
 
         <div class="section-title">Nhật ký WebSocket (Traffic Terminal)</div>
@@ -1027,10 +1243,19 @@
         <div class="terminal-container">
           <div class="terminal-header">
             <div class="terminal-title">TERMINAL LOG</div>
-            <button type="button" class="small-btn" id="btn-clear-log" style="padding: 0.15rem 0.5rem; font-size: 0.65rem;">Xóa Log</button>
+            <button
+              type="button"
+              class="small-btn"
+              id="btn-clear-log"
+              style="padding: 0.15rem 0.5rem; font-size: 0.65rem"
+            >
+              Xóa Log
+            </button>
           </div>
           <div class="terminal-body" id="terminal-log">
-            <div class="log-entry sys">[SYSTEM] Chưa có kết nối WebSocket nào được khởi chạy.</div>
+            <div class="log-entry sys">
+              [SYSTEM] Chưa có kết nối WebSocket nào được khởi chạy.
+            </div>
           </div>
         </div>
       </section>
@@ -1052,72 +1277,90 @@
       let fenceTimerInterval = null;
 
       // DOM selectors
-      const serverEnvironment = document.getElementById('server-environment');
-      const serverUrlInput = document.getElementById('server-url');
-      const userIdInput = document.getElementById('user-id');
-      const cameraIdInput = document.getElementById('camera-id');
-      const detectedAtInput = document.getElementById('detected-at');
-      const btnUseNow = document.getElementById('btn-use-now');
+      const serverEnvironment = document.getElementById("server-environment");
+      const serverUrlInput = document.getElementById("server-url");
+      const userIdInput = document.getElementById("user-id");
+      const cameraIdInput = document.getElementById("camera-id");
+      const detectedAtInput = document.getElementById("detected-at");
+      const btnUseNow = document.getElementById("btn-use-now");
 
-      const imageDropzone = document.getElementById('image-dropzone');
-      const imagePlaceholderText = document.getElementById('image-placeholder-text');
-      const imagePreviewContainer = document.getElementById('image-preview-container');
-      const imagePreviewThumb = document.getElementById('image-preview-thumb');
-      const imageFileSize = document.getElementById('image-file-size');
-      const btnRemoveImage = document.getElementById('btn-remove-image');
-      const fileInput = document.getElementById('file-input');
+      const imageDropzone = document.getElementById("image-dropzone");
+      const imagePlaceholderText = document.getElementById(
+        "image-placeholder-text",
+      );
+      const imagePreviewContainer = document.getElementById(
+        "image-preview-container",
+      );
+      const imagePreviewThumb = document.getElementById("image-preview-thumb");
+      const imageFileSize = document.getElementById("image-file-size");
+      const btnRemoveImage = document.getElementById("btn-remove-image");
+      const fileInput = document.getElementById("file-input");
 
-      const speciesIdInput = document.getElementById('species-id-input');
-      const confidenceSlider = document.getElementById('confidence-slider');
-      const confidenceVal = document.getElementById('confidence-val');
-      const btnAdd = document.getElementById('btn-add');
-      const detectionsList = document.getElementById('detections-list');
+      const speciesIdInput = document.getElementById("species-id-input");
+      const confidenceSlider = document.getElementById("confidence-slider");
+      const confidenceVal = document.getElementById("confidence-val");
+      const btnAdd = document.getElementById("btn-add");
+      const detectionsList = document.getElementById("detections-list");
 
-      const curlPreview = document.getElementById('curl-preview');
-      const btnPost = document.getElementById('btn-post');
-      const responsePreview = document.getElementById('response-preview');
+      const curlPreview = document.getElementById("curl-preview");
+      const btnPost = document.getElementById("btn-post");
+      const responsePreview = document.getElementById("response-preview");
 
       // WS DOM selectors
-      const wsEnvironment = document.getElementById('ws-environment');
-      const wsUrlInput = document.getElementById('ws-url');
-      const btnConnectWs = document.getElementById('btn-connect-ws');
-      const btnDisconnectWs = document.getElementById('btn-disconnect-ws');
-      const connectionStatus = document.getElementById('connection-status');
+      const wsEnvironment = document.getElementById("ws-environment");
+      const wsUrlInput = document.getElementById("ws-url");
+      const btnConnectWs = document.getElementById("btn-connect-ws");
+      const btnDisconnectWs = document.getElementById("btn-disconnect-ws");
+      const connectionStatus = document.getElementById("connection-status");
 
-      const ledIndicator = document.getElementById('led-indicator');
-      const ledIndicatorDesc = document.getElementById('led-indicator-desc');
-      const speakerIndicator = document.getElementById('speaker-indicator');
-      const speakerIndicatorDesc = document.getElementById('speaker-indicator-desc');
-      const fenceIndicator = document.getElementById('fence-indicator');
-      const fenceIndicatorTimer = document.getElementById('fence-indicator-timer');
-      const fenceIndicatorDesc = document.getElementById('fence-indicator-desc');
+      const ledIndicator = document.getElementById("led-indicator");
+      const ledIndicatorDesc = document.getElementById("led-indicator-desc");
+      const speakerIndicator = document.getElementById("speaker-indicator");
+      const speakerIndicatorDesc = document.getElementById(
+        "speaker-indicator-desc",
+      );
+      const fenceIndicator = document.getElementById("fence-indicator");
+      const fenceIndicatorTimer = document.getElementById(
+        "fence-indicator-timer",
+      );
+      const fenceIndicatorDesc = document.getElementById(
+        "fence-indicator-desc",
+      );
 
-      const ackStatus = document.getElementById('ack-status');
-      const ackError = document.getElementById('ack-error');
-      const ackAutoSend = document.getElementById('ack-auto-send');
-      const btnManualAck = document.getElementById('btn-manual-ack');
-      const terminalLog = document.getElementById('terminal-log');
-      const btnClearLog = document.getElementById('btn-clear-log');
+      const ackStatus = document.getElementById("ack-status");
+      const ackError = document.getElementById("ack-error");
+      const ackAutoSend = document.getElementById("ack-auto-send");
+      const btnManualAck = document.getElementById("btn-manual-ack");
+      const terminalLog = document.getElementById("terminal-log");
+      const btnClearLog = document.getElementById("btn-clear-log");
 
       // Cookie utilities
       function setCookie(name, value, days = 30) {
         const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
         document.cookie = `${name}=${value};expires=${date.toUTCString()};path=/`;
       }
 
       function getCookie(name) {
-        const matches = document.cookie.match(new RegExp(
-          "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-        ));
+        const matches = document.cookie.match(
+          new RegExp(
+            "(?:^|; )" +
+              name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") +
+              "=([^;]*)",
+          ),
+        );
         return matches ? decodeURIComponent(matches[1]) : undefined;
       }
 
       // Initial settings load
-      const savedUserId = getCookie('userId') || 'u_rg';
-      const savedCameraId = getCookie('cameraId') || 'camera_01';
-      const savedRestUrl = getCookie('restUrl') || 'https://wildlife-warning-and-deterrence-sys.vercel.app';
-      const savedWsUrl = getCookie('wsUrl') || 'wss://wildlife-warning-and-deterrence-sys.vercel.app';
+      const savedUserId = getCookie("userId") || "u_rg";
+      const savedCameraId = getCookie("cameraId") || "camera_01";
+      const savedRestUrl =
+        getCookie("restUrl") ||
+        "https://wildlife-warning-and-deterrence-sys.vercel.app";
+      const savedWsUrl =
+        getCookie("wsUrl") ||
+        "wss://wildlife-warning-and-deterrence-sys.vercel.app";
 
       userIdInput.value = savedUserId;
       cameraIdInput.value = savedCameraId;
@@ -1125,11 +1368,17 @@
       wsUrlInput.value = savedWsUrl;
 
       // Sync environmental select inputs
-      if (savedRestUrl.includes('localhost') || savedRestUrl.includes('127.0.0.1')) {
-        serverEnvironment.value = 'local';
+      if (
+        savedRestUrl.includes("localhost") ||
+        savedRestUrl.includes("127.0.0.1")
+      ) {
+        serverEnvironment.value = "local";
       }
-      if (savedWsUrl.includes('localhost') || savedWsUrl.includes('127.0.0.1')) {
-        wsEnvironment.value = 'local';
+      if (
+        savedWsUrl.includes("localhost") ||
+        savedWsUrl.includes("127.0.0.1")
+      ) {
+        wsEnvironment.value = "local";
       }
 
       // Set default detectedAt input value to now
@@ -1141,52 +1390,54 @@
       setDateTimeInputToNow();
 
       // Listeners to persist inputs to cookies
-      userIdInput.addEventListener('input', () => {
-        setCookie('userId', userIdInput.value.trim());
+      userIdInput.addEventListener("input", () => {
+        setCookie("userId", userIdInput.value.trim());
         updateCurlPreview();
       });
-      cameraIdInput.addEventListener('input', () => {
-        setCookie('cameraId', cameraIdInput.value.trim());
+      cameraIdInput.addEventListener("input", () => {
+        setCookie("cameraId", cameraIdInput.value.trim());
         updateCurlPreview();
       });
-      serverUrlInput.addEventListener('input', () => {
-        setCookie('restUrl', serverUrlInput.value.trim());
+      serverUrlInput.addEventListener("input", () => {
+        setCookie("restUrl", serverUrlInput.value.trim());
         updateCurlPreview();
       });
-      wsUrlInput.addEventListener('input', () => {
-        setCookie('wsUrl', wsUrlInput.value.trim());
+      wsUrlInput.addEventListener("input", () => {
+        setCookie("wsUrl", wsUrlInput.value.trim());
       });
 
       // Synchronize REST dropdown and URL field
-      serverEnvironment.addEventListener('change', (e) => {
-        if (e.target.value === 'production') {
-          serverUrlInput.value = 'https://wildlife-warning-and-deterrence-sys.vercel.app';
+      serverEnvironment.addEventListener("change", (e) => {
+        if (e.target.value === "production") {
+          serverUrlInput.value =
+            "https://wildlife-warning-and-deterrence-sys.vercel.app";
         } else {
-          serverUrlInput.value = 'http://localhost:5001';
+          serverUrlInput.value = "http://localhost:5001";
         }
-        setCookie('restUrl', serverUrlInput.value);
+        setCookie("restUrl", serverUrlInput.value);
         updateCurlPreview();
       });
 
       // Synchronize WebSocket dropdown and URL field
-      wsEnvironment.addEventListener('change', (e) => {
-        if (e.target.value === 'production') {
-          wsUrlInput.value = 'wss://wildlife-warning-and-deterrence-sys.vercel.app';
+      wsEnvironment.addEventListener("change", (e) => {
+        if (e.target.value === "production") {
+          wsUrlInput.value =
+            "wss://wildlife-warning-and-deterrence-sys.vercel.app";
         } else {
-          wsUrlInput.value = 'ws://localhost:5001';
+          wsUrlInput.value = "ws://localhost:5001";
         }
-        setCookie('wsUrl', wsUrlInput.value);
+        setCookie("wsUrl", wsUrlInput.value);
       });
 
-      btnUseNow.addEventListener('click', setDateTimeInputToNow);
+      btnUseNow.addEventListener("click", setDateTimeInputToNow);
 
       // Helper to format bytes
       function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return "0 Bytes";
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB'];
+        const sizes = ["Bytes", "KB", "MB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
       }
 
       // Resize and Compress Image Client-Side (Returns base64 and Blob file)
@@ -1198,23 +1449,27 @@
             const img = new Image();
             img.src = event.target.result;
             img.onload = () => {
-              const canvas = document.createElement('canvas');
+              const canvas = document.createElement("canvas");
               canvas.width = width;
               canvas.height = height;
-              const ctx = canvas.getContext('2d');
+              const ctx = canvas.getContext("2d");
               ctx.drawImage(img, 0, 0, width, height);
 
               // Compress to JPEG with 0.85 quality
-              canvas.toBlob((blob) => {
-                const compressedFile = new File([blob], file.name, {
-                  type: 'image/jpeg',
-                  lastModified: Date.now()
-                });
-                resolve({
-                  file: compressedFile,
-                  previewUrl: canvas.toDataURL('image/jpeg', 0.85)
-                });
-              }, 'image/jpeg', 0.85);
+              canvas.toBlob(
+                (blob) => {
+                  const compressedFile = new File([blob], file.name, {
+                    type: "image/jpeg",
+                    lastModified: Date.now(),
+                  });
+                  resolve({
+                    file: compressedFile,
+                    previewUrl: canvas.toDataURL("image/jpeg", 0.85),
+                  });
+                },
+                "image/jpeg",
+                0.85,
+              );
             };
             img.onerror = (err) => reject(err);
           };
@@ -1223,30 +1478,30 @@
       }
 
       // Drag and Drop handlers
-      imageDropzone.addEventListener('dragover', (e) => {
+      imageDropzone.addEventListener("dragover", (e) => {
         e.preventDefault();
-        imageDropzone.style.borderColor = 'var(--primary-accent)';
+        imageDropzone.style.borderColor = "var(--primary-accent)";
       });
 
-      imageDropzone.addEventListener('dragleave', () => {
-        imageDropzone.style.borderColor = 'var(--panel-border)';
+      imageDropzone.addEventListener("dragleave", () => {
+        imageDropzone.style.borderColor = "var(--panel-border)";
       });
 
-      imageDropzone.addEventListener('drop', async (e) => {
+      imageDropzone.addEventListener("drop", async (e) => {
         e.preventDefault();
-        imageDropzone.style.borderColor = 'var(--panel-border)';
+        imageDropzone.style.borderColor = "var(--panel-border)";
         if (e.dataTransfer.files.length > 0) {
           await handleFileSelection(e.dataTransfer.files[0]);
         }
       });
 
-      imageDropzone.addEventListener('click', (e) => {
+      imageDropzone.addEventListener("click", (e) => {
         if (e.target !== btnRemoveImage && !btnRemoveImage.contains(e.target)) {
           fileInput.click();
         }
       });
 
-      fileInput.addEventListener('change', async (e) => {
+      fileInput.addEventListener("change", async (e) => {
         if (e.target.files.length > 0) {
           await handleFileSelection(e.target.files[0]);
         }
@@ -1257,34 +1512,34 @@
           const resized = await resizeImage(file, 600, 400);
           currentSelectedFile = {
             file: resized.file,
-            previewUrl: resized.previewUrl
+            previewUrl: resized.previewUrl,
           };
 
           imageFileSize.textContent = `(Resized: ${formatBytes(resized.file.size)})`;
           imagePreviewThumb.style.backgroundImage = `url('${resized.previewUrl}')`;
-          
-          imagePlaceholderText.classList.add('hidden');
-          imagePreviewContainer.classList.remove('hidden');
+
+          imagePlaceholderText.classList.add("hidden");
+          imagePreviewContainer.classList.remove("hidden");
         } catch (err) {
           alert("Không thể đọc và xử lý tệp ảnh: " + err.message);
         }
       }
 
-      btnRemoveImage.addEventListener('click', (e) => {
+      btnRemoveImage.addEventListener("click", (e) => {
         e.stopPropagation();
         currentSelectedFile = null;
-        fileInput.value = '';
-        imagePreviewContainer.classList.add('hidden');
-        imagePlaceholderText.classList.remove('hidden');
+        fileInput.value = "";
+        imagePreviewContainer.classList.add("hidden");
+        imagePlaceholderText.classList.remove("hidden");
       });
 
       // Confidence slider updates value next to it
-      confidenceSlider.addEventListener('input', (e) => {
+      confidenceSlider.addEventListener("input", (e) => {
         confidenceVal.textContent = parseFloat(e.target.value).toFixed(2);
       });
 
       // Add detection handler
-      btnAdd.addEventListener('click', () => {
+      btnAdd.addEventListener("click", () => {
         const speciesId = speciesIdInput.value.trim();
         if (!speciesId) {
           alert("Vui lòng điền mã loài vật (speciesId).");
@@ -1297,25 +1552,25 @@
         const confidence = parseFloat(confidenceSlider.value);
 
         activeDetections.push({
-          id: 'det-' + Math.random().toString(36).substring(7),
+          id: "det-" + Math.random().toString(36).substring(7),
           speciesId: speciesId,
           confidence: confidence,
           imageFile: currentSelectedFile.file,
           imagePreviewUrl: currentSelectedFile.previewUrl,
-          status: 'idle'
+          status: "idle",
         });
 
         renderDetections();
         updateCurlPreview();
 
         // Clear input for next entry
-        speciesIdInput.value = '';
-        confidenceSlider.value = '0.75';
-        confidenceVal.textContent = '0.75';
+        speciesIdInput.value = "";
+        confidenceSlider.value = "0.75";
+        confidenceVal.textContent = "0.75";
       });
 
       function renderDetections() {
-        detectionsList.innerHTML = '';
+        detectionsList.innerHTML = "";
         if (activeDetections.length === 0) {
           detectionsList.innerHTML = `
             <div class="list-box-placeholder">
@@ -1325,8 +1580,8 @@
         }
 
         activeDetections.forEach((det, index) => {
-          const row = document.createElement('div');
-          row.className = 'det-item-row';
+          const row = document.createElement("div");
+          row.className = "det-item-row";
           row.innerHTML = `
             <div class="det-item-left">
               <div class="det-item-thumb" style="background-image: url('${det.imagePreviewUrl}');"></div>
@@ -1340,7 +1595,7 @@
               <button type="button" class="remove-btn" title="Xóa nhận diện">✕</button>
             </div>`;
 
-          row.querySelector('.remove-btn').addEventListener('click', () => {
+          row.querySelector(".remove-btn").addEventListener("click", () => {
             activeDetections.splice(index, 1);
             renderDetections();
             updateCurlPreview();
@@ -1352,18 +1607,22 @@
 
       function updateCurlPreview() {
         if (activeDetections.length === 0) {
-          curlPreview.textContent = 'Chưa có nhận diện nào để hiển thị cURL.';
+          curlPreview.textContent = "Chưa có nhận diện nào để hiển thị cURL.";
           return;
         }
 
-        const cameraId = cameraIdInput.value.trim() || 'CAM_PROD_TEST';
-        const userId = userIdInput.value.trim() || 'u_rg';
+        const cameraId = cameraIdInput.value.trim() || "CAM_PROD_TEST";
+        const userId = userIdInput.value.trim() || "u_rg";
         const baseUrl = serverUrlInput.value.trim();
-        const fileRef = activeDetections[0].imageFile ? activeDetections[0].imageFile.name : 'image.jpg';
-        const detectionsStr = JSON.stringify(activeDetections.map(d => ({
-          speciesId: d.speciesId,
-          confidence: d.confidence
-        })));
+        const fileRef = activeDetections[0].imageFile
+          ? activeDetections[0].imageFile.name
+          : "image.jpg";
+        const detectionsStr = JSON.stringify(
+          activeDetections.map((d) => ({
+            speciesId: d.speciesId,
+            confidence: d.confidence,
+          })),
+        );
         const isoDate = new Date(detectedAtInput.value).toISOString();
 
         const cmd = `curl -X POST "${baseUrl}/api/v1/cameras/${cameraId}/detections" \\\n  -F "userId=${userId}" \\\n  -F "detections=${detectionsStr.replace(/"/g, '\\"')}" \\\n  -F "detectedAt=${isoDate}" \\\n  -F "image=@${fileRef}"`;
@@ -1371,40 +1630,48 @@
       }
 
       // Webhook POST execute handler
-      btnPost.addEventListener('click', async () => {
+      btnPost.addEventListener("click", async () => {
         if (activeDetections.length === 0) {
-          alert("Danh sách nhận diện trống. Vui lòng thêm nhận diện trước khi kích hoạt.");
+          alert(
+            "Danh sách nhận diện trống. Vui lòng thêm nhận diện trước khi kích hoạt.",
+          );
           return;
         }
 
         btnPost.disabled = true;
-        responsePreview.textContent = '// Đang gửi yêu cầu Webhook lên Mobile Server...';
+        responsePreview.textContent =
+          "// Đang gửi yêu cầu Webhook lên Mobile Server...";
 
-        const cameraId = cameraIdInput.value.trim() || 'CAM_PROD_TEST';
-        const userId = userIdInput.value.trim() || 'u_rg';
+        const cameraId = cameraIdInput.value.trim() || "CAM_PROD_TEST";
+        const userId = userIdInput.value.trim() || "u_rg";
         const baseUrl = serverUrlInput.value.trim();
         const url = `${baseUrl}/api/v1/cameras/${cameraId}/detections`;
 
-        activeDetections.forEach(d => d.status = 'sending');
+        activeDetections.forEach((d) => (d.status = "sending"));
         renderDetections();
 
         try {
           const formData = new FormData();
-          formData.append('userId', userId);
-          formData.append('detections', JSON.stringify(activeDetections.map(d => ({
-            speciesId: d.speciesId,
-            confidence: d.confidence
-          }))));
-          
+          formData.append("userId", userId);
+          formData.append(
+            "detections",
+            JSON.stringify(
+              activeDetections.map((d) => ({
+                speciesId: d.speciesId,
+                confidence: d.confidence,
+              })),
+            ),
+          );
+
           const isoDate = new Date(detectedAtInput.value).toISOString();
-          formData.append('detectedAt', isoDate);
+          formData.append("detectedAt", isoDate);
 
           const firstDet = activeDetections[0];
-          formData.append('image', firstDet.imageFile);
+          formData.append("image", firstDet.imageFile);
 
           const response = await fetch(url, {
-            method: 'POST',
-            body: formData
+            method: "POST",
+            body: formData,
           });
 
           let responseData;
@@ -1416,18 +1683,22 @@
           }
 
           if (response.ok) {
-            responsePreview.textContent = typeof responseData === 'object' 
-              ? JSON.stringify(responseData, null, 2) 
-              : responseData;
-            activeDetections.forEach(d => d.status = 'success');
+            responsePreview.textContent =
+              typeof responseData === "object"
+                ? JSON.stringify(responseData, null, 2)
+                : responseData;
+            activeDetections.forEach((d) => (d.status = "success"));
           } else {
-            responsePreview.textContent = `Error ${response.status} ${response.statusText}:\n` + 
-              (typeof responseData === 'object' ? JSON.stringify(responseData, null, 2) : responseData);
-            activeDetections.forEach(d => d.status = 'error');
+            responsePreview.textContent =
+              `Error ${response.status} ${response.statusText}:\n` +
+              (typeof responseData === "object"
+                ? JSON.stringify(responseData, null, 2)
+                : responseData);
+            activeDetections.forEach((d) => (d.status = "error"));
           }
         } catch (err) {
           responsePreview.textContent = `Lỗi mạng hoặc kết nối:\n${err.message}`;
-          activeDetections.forEach(d => d.status = 'error');
+          activeDetections.forEach((d) => (d.status = "error"));
         } finally {
           btnPost.disabled = false;
           renderDetections();
@@ -1439,82 +1710,104 @@
       // ==========================================
 
       // Log display in terminal
-      function logToTerminal(message, type = 'sys') {
+      function logToTerminal(message, type = "sys") {
         const time = new Date().toLocaleTimeString();
-        const entry = document.createElement('div');
+        const entry = document.createElement("div");
         entry.className = `log-entry ${type}`;
         entry.textContent = `[${time}] ${message}`;
         terminalLog.appendChild(entry);
         terminalLog.scrollTop = terminalLog.scrollHeight;
       }
 
-      btnClearLog.addEventListener('click', () => {
-        terminalLog.innerHTML = '';
+      btnClearLog.addEventListener("click", () => {
+        terminalLog.innerHTML = "";
       });
 
       // Enable/disable error string based on status selected
-      ackStatus.addEventListener('change', (e) => {
-        ackError.disabled = (e.target.value === 'SUCCESS');
-        if (ackError.disabled) ackError.value = '';
+      ackStatus.addEventListener("change", (e) => {
+        ackError.disabled = e.target.value === "SUCCESS";
+        if (ackError.disabled) ackError.value = "";
       });
 
       // Ably connection setup
-      btnConnectWs.addEventListener('click', () => {
+      btnConnectWs.addEventListener("click", () => {
         const ablyKey = wsUrlInput.value.trim();
-        const userId = userIdInput.value.trim() || 'user_01';
+        const userId = userIdInput.value.trim() || "user_01";
 
         if (!ablyKey) {
-          logToTerminal('[ERROR] Vui lòng nhập Ably API Key (AI Server Key).', 'err');
+          logToTerminal(
+            "[ERROR] Vui lòng nhập Ably API Key (AI Server Key).",
+            "err",
+          );
           return;
         }
 
-        logToTerminal(`[SYSTEM] Bắt đầu kết nối Ably Realtime cho User ID: ${userId}`, 'sys');
+        logToTerminal(
+          `[SYSTEM] Bắt đầu kết nối Ably Realtime cho User ID: ${userId}`,
+          "sys",
+        );
         btnConnectWs.disabled = true;
-        connectionStatus.className = 'status-pill connecting';
-        connectionStatus.textContent = 'CONNECTING';
+        connectionStatus.className = "status-pill connecting";
+        connectionStatus.textContent = "CONNECTING";
 
         try {
           ablyConnection = new Ably.Realtime({ key: ablyKey });
 
-          ablyConnection.connection.on('connected', () => {
-            logToTerminal('[SYSTEM] Đã thiết lập kết nối Ably thành công (CONNECTED).', 'sys');
+          ablyConnection.connection.on("connected", () => {
+            logToTerminal(
+              "[SYSTEM] Đã thiết lập kết nối Ably thành công (CONNECTED).",
+              "sys",
+            );
             btnDisconnectWs.disabled = false;
             btnConnectWs.disabled = true;
-            connectionStatus.className = 'status-pill connected';
-            connectionStatus.textContent = 'CONNECTED';
+            connectionStatus.className = "status-pill connected";
+            connectionStatus.textContent = "CONNECTED";
 
             // Đăng ký kênh truyền control và ack
-            controlChannel = ablyConnection.channels.get(`user:control:${userId}`);
+            controlChannel = ablyConnection.channels.get(
+              `user:control:${userId}`,
+            );
             ackChannel = ablyConnection.channels.get(`user:ack:${userId}`);
 
-            controlChannel.subscribe('message', (message) => {
-              const data = typeof message.data === 'string' ? JSON.parse(message.data) : message.data;
-              logToTerminal(`[RECEIVED] ${JSON.stringify(data)}`, 'in');
-              
-              if (data && data.event === 'DEVICE_COMMAND') {
+            controlChannel.subscribe("message", (message) => {
+              const data =
+                typeof message.data === "string"
+                  ? JSON.parse(message.data)
+                  : message.data;
+              logToTerminal(`[RECEIVED] ${JSON.stringify(data)}`, "in");
+
+              if (data && data.event === "DEVICE_COMMAND") {
                 handleDeviceCommand(data.payload);
               }
             });
-            logToTerminal(`[SYSTEM] Đang lắng nghe lệnh tại kênh: user:control:${userId}`, 'sys');
+            logToTerminal(
+              `[SYSTEM] Đang lắng nghe lệnh tại kênh: user:control:${userId}`,
+              "sys",
+            );
           });
 
-          ablyConnection.connection.on('closed', () => {
-            logToTerminal('[SYSTEM] Kết nối Ably đã đóng.', 'sys');
+          ablyConnection.connection.on("closed", () => {
+            logToTerminal("[SYSTEM] Kết nối Ably đã đóng.", "sys");
             resetAblyState();
           });
 
-          ablyConnection.connection.on('failed', (err) => {
-            logToTerminal(`[ERROR] Kết nối Ably thất bại: ${err.reason || err.message}`, 'err');
+          ablyConnection.connection.on("failed", (err) => {
+            logToTerminal(
+              `[ERROR] Kết nối Ably thất bại: ${err.reason || err.message}`,
+              "err",
+            );
             resetAblyState();
           });
-
         } catch (e) {
-          logToTerminal(`[ERROR] Khởi chạy kết nối Ably thất bại: ${e.message}`, 'err');
+          logToTerminal(
+            `[ERROR] Khởi chạy kết nối Ably thất bại: ${e.message}`,
+            "err",
+          );
           resetAblyState();
         }
       });
 
-      btnDisconnectWs.addEventListener('click', () => {
+      btnDisconnectWs.addEventListener("click", () => {
         if (ablyConnection) {
           ablyConnection.close();
         }
@@ -1527,8 +1820,8 @@
         btnConnectWs.disabled = false;
         btnDisconnectWs.disabled = true;
         btnManualAck.disabled = true;
-        connectionStatus.className = 'status-pill disconnected';
-        connectionStatus.textContent = 'DISCONNECTED';
+        connectionStatus.className = "status-pill disconnected";
+        connectionStatus.textContent = "DISCONNECTED";
         lastReceivedCommand = null;
       }
 
@@ -1538,15 +1831,23 @@
         btnManualAck.disabled = false;
 
         const { deviceKey, action, params, commandId, cameraId } = payload;
-        logToTerminal(`[COMMAND] Nhận lệnh cho camera [${cameraId || 'unknown'}]. Thiết bị: ${deviceKey}, Hành động: ${action}, CommandID: ${commandId}`, 'sys');
+        logToTerminal(
+          `[COMMAND] Nhận lệnh cho camera [${cameraId || "unknown"}]. Thiết bị: ${deviceKey}, Hành động: ${action}, CommandID: ${commandId}`,
+          "sys",
+        );
 
         // Trigger hardware mockup animations based on deviceKey
         // DeviceKey enum (03-mobile_api.md mục 2.3): led_flash là mã chuẩn của đèn LED
-        if (deviceKey === 'led_flash' || deviceKey === 'led' || deviceKey === 'led_light' || deviceKey === 'ledFlash') {
+        if (
+          deviceKey === "led_flash" ||
+          deviceKey === "led" ||
+          deviceKey === "led_light" ||
+          deviceKey === "ledFlash"
+        ) {
           triggerLedAnimation(params);
-        } else if (deviceKey === 'speaker' || deviceKey === 'deterrent_audio') {
+        } else if (deviceKey === "speaker" || deviceKey === "deterrent_audio") {
           triggerSpeakerAnimation(params);
-        } else if (deviceKey === 'fence' || deviceKey === 'electric_fence') {
+        } else if (deviceKey === "fence" || deviceKey === "electric_fence") {
           triggerFenceAnimation(params);
         }
 
@@ -1561,95 +1862,100 @@
         // Clear previous animations if active
         if (ledAnimationInterval) clearInterval(ledAnimationInterval);
         if (ledTimer) clearTimeout(ledTimer);
-        ledIndicator.className = 'led-light';
+        ledIndicator.className = "led-light";
 
         // Chuẩn hóa màu: hỗ trợ cả enum chữ thường (red/white/red_white_alt) và chữ hoa (03/05)
-        const color = (params.color || params.ledColor || 'STROBE').toUpperCase();
-        const flashRate = params.ledFlashRate || params.flashRate || '';
+        const color = (
+          params.color ||
+          params.ledColor ||
+          "STROBE"
+        ).toUpperCase();
+        const flashRate = params.ledFlashRate || params.flashRate || "";
         // ledIntensity = thời lượng chớp (giây) theo 03; ưu tiên durationSeconds của lệnh test
-        const duration = (params.durationSeconds || params.ledIntensity || 10) * 1000;
+        const duration =
+          (params.durationSeconds || params.ledIntensity || 10) * 1000;
 
         // Tốc độ nhấp nháy theo ledFlashRate: 2_per_sec / 4_per_sec / random
         let blinkMs = null;
-        if (flashRate === '4_per_sec') blinkMs = 250;
-        else if (flashRate === '2_per_sec') blinkMs = 500;
-        else if (flashRate === 'random') blinkMs = 300 + Math.random() * 500;
-        else if (color === 'STROBE') blinkMs = 250;
+        if (flashRate === "4_per_sec") blinkMs = 250;
+        else if (flashRate === "2_per_sec") blinkMs = 500;
+        else if (flashRate === "random") blinkMs = 300 + Math.random() * 500;
+        else if (color === "STROBE") blinkMs = 250;
 
         const applyClass = (cls) => {
-          ledIndicator.className = 'led-light active-' + cls;
+          ledIndicator.className = "led-light active-" + cls;
         };
 
         let colorLabel = color;
-        if (color === 'RED' || color === 'YELLOW' || color === 'WHITE') {
+        if (color === "RED" || color === "YELLOW" || color === "WHITE") {
           applyClass(color.toLowerCase());
-          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + 'ms';
-        } else if (color === 'RED_WHITE_ALT' || color === 'RED_WHITE') {
+          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + "ms";
+        } else if (color === "RED_WHITE_ALT" || color === "RED_WHITE") {
           // Đỏ xen kẽ Trắng: tự chớp đảo màu qua JS
-          colorLabel = 'RED_WHITE_ALT';
+          colorLabel = "RED_WHITE_ALT";
           let toggle = false;
           ledAnimationInterval = setInterval(() => {
             toggle = !toggle;
-            applyClass(toggle ? 'red' : 'white');
+            applyClass(toggle ? "red" : "white");
           }, blinkMs || 300);
         } else {
           // STROBE / mặc định: nhấp nháy cường độ cao màu trắng
-          applyClass('strobe');
-          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + 'ms';
+          applyClass("strobe");
+          if (blinkMs) ledIndicator.style.animationDuration = blinkMs + "ms";
         }
 
-        ledIndicatorDesc.textContent = `Chế độ: ĐANG NHÁY (${colorLabel})${flashRate ? ' · ' + flashRate : ''} - ${params.intensity || params.ledIntensity || 100}%`;
+        ledIndicatorDesc.textContent = `Chế độ: ĐANG NHÁY (${colorLabel})${flashRate ? " · " + flashRate : ""} - ${params.intensity || params.ledIntensity || 100}%`;
 
         ledTimer = setTimeout(() => {
           clearInterval(ledAnimationInterval);
           ledAnimationInterval = null;
-          ledIndicator.className = 'led-light';
-          ledIndicator.style.animationDuration = '';
-          ledIndicatorDesc.textContent = 'Chế độ: ĐÃ TẮT';
+          ledIndicator.className = "led-light";
+          ledIndicator.style.animationDuration = "";
+          ledIndicatorDesc.textContent = "Chế độ: ĐÃ TẮT";
         }, duration);
       }
 
       // Trigger Speaker sounding wave
       function triggerSpeakerAnimation(params = {}) {
         if (speakerTimer) clearTimeout(speakerTimer);
-        speakerIndicator.classList.remove('active');
+        speakerIndicator.classList.remove("active");
 
-        const sampleId = params.sampleId || 'A_gunshot';
+        const sampleId = params.sampleId || "A_gunshot";
         const volume = params.intensity || params.volume || 80;
         const duration = (params.durationSeconds || 10) * 1000;
 
-        speakerIndicator.classList.add('active');
+        speakerIndicator.classList.add("active");
         speakerIndicatorDesc.textContent = `Tập tin: ${sampleId} (Vol: ${volume}%)`;
 
         speakerTimer = setTimeout(() => {
-          speakerIndicator.classList.remove('active');
-          speakerIndicatorDesc.textContent = 'Tập tin: None (Volume: 0)';
+          speakerIndicator.classList.remove("active");
+          speakerIndicatorDesc.textContent = "Tập tin: None (Volume: 0)";
         }, duration);
       }
 
       // Trigger Electric fence lightning surge
       function triggerFenceAnimation(params = {}) {
         if (fenceTimerInterval) clearInterval(fenceTimerInterval);
-        fenceIndicator.classList.remove('active');
-        fenceIndicatorTimer.classList.add('hidden');
+        fenceIndicator.classList.remove("active");
+        fenceIndicatorTimer.classList.add("hidden");
 
         const duration = params.durationSeconds || 15;
         let secondsRemaining = duration;
 
-        fenceIndicator.classList.add('active');
-        fenceIndicatorTimer.classList.remove('hidden');
-        fenceIndicatorTimer.textContent = `${String(secondsRemaining).padStart(2, '0')}s`;
-        fenceIndicatorDesc.textContent = `Xung điện: ĐANG BẬT (${params.fenceLevel || 'high'})`;
+        fenceIndicator.classList.add("active");
+        fenceIndicatorTimer.classList.remove("hidden");
+        fenceIndicatorTimer.textContent = `${String(secondsRemaining).padStart(2, "0")}s`;
+        fenceIndicatorDesc.textContent = `Xung điện: ĐANG BẬT (${params.fenceLevel || "high"})`;
 
         fenceTimerInterval = setInterval(() => {
           secondsRemaining--;
           if (secondsRemaining <= 0) {
             clearInterval(fenceTimerInterval);
-            fenceIndicator.classList.remove('active');
-            fenceIndicatorTimer.classList.add('hidden');
-            fenceIndicatorDesc.textContent = 'Trạng thái: Đã tắt xung điện';
+            fenceIndicator.classList.remove("active");
+            fenceIndicatorTimer.classList.add("hidden");
+            fenceIndicatorDesc.textContent = "Trạng thái: Đã tắt xung điện";
           } else {
-            fenceIndicatorTimer.textContent = `${String(secondsRemaining).padStart(2, '0')}s`;
+            fenceIndicatorTimer.textContent = `${String(secondsRemaining).padStart(2, "0")}s`;
           }
         }, 1000);
       }
@@ -1657,72 +1963,91 @@
       // Send ACK back
       function sendAckResponse() {
         if (!ablyConnection || !ackChannel) {
-          logToTerminal('[ERROR] Không thể gửi ACK: Chưa kết nối Ably.', 'err');
+          logToTerminal("[ERROR] Không thể gửi ACK: Chưa kết nối Ably.", "err");
           return;
         }
         if (!lastReceivedCommand) {
-          logToTerminal('[ERROR] Không có lệnh nhận được trước đó để phản hồi ACK.', 'err');
+          logToTerminal(
+            "[ERROR] Không có lệnh nhận được trước đó để phản hồi ACK.",
+            "err",
+          );
           return;
         }
 
         const status = ackStatus.value;
-        const errorMsg = status === 'FAILED' ? (ackError.value.trim() || 'Lỗi kiểm thử thiết bị phần cứng') : null;
+        const errorMsg =
+          status === "FAILED"
+            ? ackError.value.trim() || "Lỗi kiểm thử thiết bị phần cứng"
+            : null;
 
         const ackMsg = {
-          event: 'COMMAND_ACK',
+          event: "COMMAND_ACK",
           payload: {
             commandId: lastReceivedCommand.commandId,
             cameraId: lastReceivedCommand.cameraId,
             status: status,
-            error: errorMsg
-          }
+            error: errorMsg,
+          },
         };
 
         const jsonStr = JSON.stringify(ackMsg);
         try {
-          const res = ackChannel.publish('message', ackMsg);
-          if (res && typeof res.then === 'function') {
-            res.then(() => {
-              logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
-            }).catch((err) => {
-              logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
-            });
+          const res = ackChannel.publish("message", ackMsg);
+          if (res && typeof res.then === "function") {
+            res
+              .then(() => {
+                logToTerminal(`[SENT ACK] ${jsonStr}`, "out");
+              })
+              .catch((err) => {
+                logToTerminal(
+                  `[ERROR] Không thể gửi ACK qua Ably: ${err.message}`,
+                  "err",
+                );
+              });
           } else {
             // Callback fallback
-            ackChannel.publish('message', ackMsg, (err) => {
+            ackChannel.publish("message", ackMsg, (err) => {
               if (err) {
-                logToTerminal(`[ERROR] Không thể gửi ACK qua Ably: ${err.message}`, 'err');
+                logToTerminal(
+                  `[ERROR] Không thể gửi ACK qua Ably: ${err.message}`,
+                  "err",
+                );
               } else {
-                logToTerminal(`[SENT ACK] ${jsonStr}`, 'out');
+                logToTerminal(`[SENT ACK] ${jsonStr}`, "out");
               }
             });
           }
         } catch (pubErr) {
-          logToTerminal(`[ERROR] Lỗi khi thực thi publish ACK: ${pubErr.message}`, 'err');
+          logToTerminal(
+            `[ERROR] Lỗi khi thực thi publish ACK: ${pubErr.message}`,
+            "err",
+          );
         }
 
         btnManualAck.disabled = true;
       }
 
-      btnManualAck.addEventListener('click', sendAckResponse);
+      btnManualAck.addEventListener("click", sendAckResponse);
 
       async function fetchSpeciesList() {
         const token = getCookie("appAccessToken");
         if (!token) {
-          console.warn("Không tìm thấy appAccessToken trong cookie. Sử dụng ô nhập tự do.");
+          console.warn(
+            "Không tìm thấy appAccessToken trong cookie. Sử dụng ô nhập tự do.",
+          );
           return;
         }
         const baseUrl = serverUrlInput.value.trim();
         try {
           const res = await fetch(`${baseUrl}/species`, {
-            headers: { "Authorization": `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
             const species = await res.json();
             const datalist = document.getElementById("species-presets");
             if (datalist) {
               datalist.innerHTML = "";
-              species.forEach(s => {
+              species.forEach((s) => {
                 const opt = document.createElement("option");
                 opt.value = s.id;
                 opt.textContent = `${s.displayName} (${s.id})`;
