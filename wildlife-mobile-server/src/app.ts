@@ -33,6 +33,7 @@ app.use((req, _res, next) => {
 });
 
 app.use('/tools', express.static(path.join(__dirname, '../../html_tool')));
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
 
 // ==========================================
 // 1. ENDPOINTS HỆ THỐNG & HEALTH CHECK
