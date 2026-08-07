@@ -239,7 +239,7 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
     - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi phát hiện động vật.
     - **Tự động ngắt hoạt động:** Còi hú và đèn chớp sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để tiết kiệm điện năng.
   - **Gửi cảnh báo bằng loa:**
-    - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.�n phòng vệ mẫu cho toàn hệ thống từ xa.
+    - Lựa chọn âm thanh cảnh báo AI phát qua loa: danh sách âm thanh động vật lấy từ API `GET /alertSounds` (ví dụ: _Tiếng Hổ, Tiếng Voi, Tiếng Khỉ, Tiếng Nai, Tiếng Lợn rừng_).�n phòng vệ mẫu cho toàn hệ thống từ xa.
   - **Nội dung:**
     - Các nút **Tự set hành vi nhanh (Presets)**: _Người lạ đột nhập, Thú vừa, Thú cực kỳ nguy hiểm_.
     - Lối vào màn hình **Thiết lập hành vi ứng phó mặc định [THIET_LAP_HANH_VI]** để tinh chỉnh chi tiết theo tài khoản kiểm lâm + loài động vật.
@@ -281,7 +281,7 @@ Màn hình này cho phép người dùng tùy biến và thiết lập trước 
     - **Cơ chế thông báo:** Tự động gửi thông báo đẩy và tin nhắn SMS cho người dân lân cận khi phát hiện động vật.
     - **Tự động ngắt hoạt động:** Còi hú và đèn chớp sẽ tự động ngừng hoạt động sau **2 phút** liên tục không ghi nhận sự xuất hiện của thú rừng để tiết kiệm điện năng.
   - **Gửi cảnh báo bằng loa:**
-    - Lựa chọn mẫu nội dung thông báo AI phát qua loa: _Mẫu 1 (Cảnh báo voi hoang dã xuất hiện), Mẫu 2 (Phát hiện thú dữ xâm lấn nguy cấp), Mẫu 3 (Thông báo di tản và chỉ dẫn lánh nạn)_.
+    - Lựa chọn âm thanh cảnh báo AI phát qua loa: danh sách âm thanh động vật lấy từ API `GET /alertSounds` (ví dụ: _Tiếng Hổ, Tiếng Voi, Tiếng Khỉ, Tiếng Nai, Tiếng Lợn rừng_).
 - **Tự thiết lập hành vi nhanh (Preset Scenarios):** Cung cấp 3 nút bấm thao tác nhanh để áp dụng kịch bản phòng vệ mẫu cho loài đang chọn:
   - Nút **Người lạ đột nhập**: Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (tiếng súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
   - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.

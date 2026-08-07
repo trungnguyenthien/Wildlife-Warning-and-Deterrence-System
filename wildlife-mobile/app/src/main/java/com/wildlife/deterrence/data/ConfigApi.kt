@@ -40,12 +40,24 @@ data class AudioSampleItem(
     val displayName: String
 )
 
+// Âm thanh cảnh báo qua loa (nguồn: GET /alertSounds / hard-config/alert-sound.yaml)
+data class AlertSoundItem(
+    val id: String,
+    val name: String,
+    val file: String? = null
+)
+
 data class AudioSamplesResponse(
     val animalDeterrentSounds: List<AudioSampleItem>,
-    val citizenAlertSounds: List<AudioSampleItem>
+    val citizenAlertSounds: List<AlertSoundItem>
 )
 
 interface ConfigApi {
+    @GET("alertSounds")
+    suspend fun getAlertSounds(
+        @Header("Authorization") token: String
+    ): List<AlertSoundItem>
+
     @GET("audio-samples")
     suspend fun getAudioSamples(
         @Header("Authorization") token: String

@@ -78,6 +78,52 @@ graph TD
 
 # I. Ứng dụng Android (Android Application)
 
+## 0. Kiến trúc & Luồng xử lý nội bộ Android (Android Application)
+
+Phần này mô tả **mô hình xử lý/threading bên trong** ứng dụng Android — khác với các sequence diagram bên dưới (mô tả tương tác giữa các thành phần hệ thống).
+
+### 0.1. Kiến trúc tổng quan
+
+- **Kiến trúc:** MVVM (Model-View-ViewModel) với UI bằng **Jetpack Compose + Material3**.
+- **Tầng dữ liệu:** Retrofit (`NetworkClient` singleton) khởi tạo các API interface (`AuthApi`, `CameraApi`, `ConfigApi`, `AlertApi`, `SmsApi`) — ViewModel gọi trực tiếp các service này bằng Retrofit `suspend fun`. (`DataRepository` hiện chỉ là stub placeholder, không dùng cho logic thật).
+- **Quản lý session:** `TokenManager` lưu/accesstoken; mỗi request đính kèm `Authorization: Bearer <token>`.
+- **Realtime:** `SseClient` giữ kết nối SSE (cập nhật realtime camera/alert); FCM push qua `WildlifeFirebaseMessagingService`.
+
+### 0.2. Mô hình xử lý đồng bộ & Threading
+
+- **Coroutines + StateFlow** là cơ chế bất đồng bộ chính (không dùng LiveData).
+- **ViewModel** khởi động tác vụ bằng `viewModelScope.launch { }` → chạy trên **`Dispatchers.Main`** mặc định.
+- **Retrofit `suspend fun`** thực hiện I/O mạng trên **OkHttp executor thread** rồi resume về Main — do đó **Main thread không bị block**, dù không cần `withContext(Dispatchers.IO)` cho các call mạng.
+- Trạng thái được lưu trong **`MutableStateFlow`** (`_xxx.value`), UI thu thập bằng `collectAsState()`; mọi cập nhật giao diện nằm trên Main thread.
+- **Ngoài ViewModel**, các tác vụ nền có đời sống/scope riêng tạo `CoroutineScope(Dispatchers.IO)`:
+  - `SseClient` — kết nối SSE long-lived.
+  - `WildlifeFirebaseMessagingService` & `DeterrenceActionReceiver` — xử lý FCM push / action notification.
+
+### 0.3. Luồng xử lý điển hình (Ví dụ: Màn hình Cấu hình phòng vệ theo loài)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as Compose UI (Screen)
+    participant VM as ViewModel
+    participant API as ConfigApi / CameraApi (Retrofit)
+
+    UI->>VM: Người dùng mở màn hình / chọn loài
+    activate VM
+    VM->>VM: viewModelScope.launch { } (Dispatcher.Main)
+    par Nạp danh mục âm thanh & loài & cấu hình
+        VM->>API: suspend getAudioSamples() / getAlertSounds() / getSpecies() / getConfigs()
+        Note right of API: I/O mạng chạy trên OkHttp thread, không block Main
+        API-->>VM: Response JSON
+    end
+    VM->>VM: Ghi _state.value (MutableStateFlow) trên Main
+    VM-->>UI: StateFlow cập nhật
+    deactivate VM
+    UI->>UI: collectAsState() -> recompose giao diện
+```
+
+---
+
 ## 1. Màn hình Đăng ký (`[REGISTER_SCREEN]`)
 
 _(Không có action load dữ liệu ban đầu)_
@@ -469,7 +515,7 @@ sequenceDiagram
 
 ### 6.1. Action: Load species configuration & sample lists
 
-- **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi và các mẫu nội dung phát loa) để phục vụ dropdown lựa chọn của người dùng.
+- **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi `animalDeterrentSounds` và âm thanh cảnh báo qua loa `citizenAlertSounds` — nguồn là `GET /alertSounds`) để phục vụ dropdown lựa chọn của người dùng. Các id âm thanh hoàn toàn lấy từ API, không hardcode trong app.
 
 ```mermaid
 sequenceDiagram
@@ -495,19 +541,21 @@ sequenceDiagram
         Mobile_Server-->>Mobile: Response 200 OK (items)
         deactivate Mobile_Server
     and Tải danh mục âm thanh & mẫu phát loa
-        Mobile->>Mobile_Server: GET /audio-samples
+        Mobile->>Mobile_Server: GET /audio-samples (chứa animalDeterrentSounds + citizenAlertSounds)
         activate Mobile_Server
         Mobile_Server->>Database: Lấy danh sách âm thanh & mẫu phát loa
         Database-->>Mobile_Server: Danh sách âm thanh mẫu (phần loại theo type)
         Mobile_Server-->>Mobile: Response 200 OK (items)
         deactivate Mobile_Server
     end
+    Note right of Mobile: citizenAlertSounds lấy từ GET /alertSounds (nguồn hard-config/alert-sound.yaml), app không hardcode id
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /response-configs?speciesId=](./03-mobile_api.md#83-get-response-configsspeciesid)
     *   [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
     *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
+    *   [GET /alertSounds](./03-mobile_api.md#73-get-alertsounds) — nguồn của `citizenAlertSounds` (public, không cần token)
 
 ### 6.2. Action: Update species configuration
 

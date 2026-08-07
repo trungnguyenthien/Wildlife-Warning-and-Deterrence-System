@@ -67,7 +67,7 @@ Mọi luồng giao tiếp giữa AI Server và các phân hệ khác tuân thủ
         "speakerWarn": true,
         "audioSampleId": "A_gunshot",
         "audioIntensity": 80,
-        "speakerSampleId": "N_warning_thu",
+        "speakerSampleId": "monkey",
         "silentAlert": false
       }
     }
@@ -297,10 +297,10 @@ Khi thực hiện cấu hình sâu cho Camera hoặc nhận thông điệp đi�
         *   `A_dog_bark`: Tiếng đàn chó săn sủa dữ dội.
         *   `A_explosion`: Tiếng nổ lớn phá hủy.
         *   `A_ultrasonic`: Phát sóng siêu âm tần số cao (khiến màng nhĩ thú khó chịu nhưng tai người không nghe thấy).
-    *   *Tùy chọn giá trị hợp lệ cho âm thanh cảnh báo cư dân (bắt đầu bằng tiền tố `N_`, khớp danh mục `/audio-samples` của 03):*
-        *   `N_warning_voi`: Loa phát thanh cảnh báo voi hoang dã xuất hiện (Mẫu 1).
-        *   `N_warning_thu`: Loa phát thanh giọng nói cảnh báo phát hiện động vật hoang dã xâm nhập (Mẫu 2).
-        *   `N_warning_tian`: Thông báo chỉ dẫn di tản, lánh nạn (Mẫu 3).
+    *   *Tùy chọn giá trị hợp lệ cho âm thanh cảnh báo cư dân (khớp danh mục `GET /alertSounds` / `citizenAlertSounds` của `/audio-samples`, nguồn `hard-config/alert-sound.yaml`):*
+        *   `tiger`: Tiếng Hổ (âm thanh cảnh báo qua loa).
+        *   `monkey`: Tiếng Khỉ (âm thanh cảnh báo qua loa).
+        *   `deer` / `elephant` / `wild_boar`: các âm thanh cảnh báo khác trong danh mục.
 *   `audioIntensity` (hoặc `volume`): Cường độ âm lượng phát ra loa.
     *   *Tùy chọn giá trị hợp lệ:* Số nguyên từ `0` đến `100` (đại diện cho tỷ lệ phần trăm % công suất tối đa của âm ly).
 

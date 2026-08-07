@@ -110,7 +110,7 @@ class BehaviorViewModelTest {
             ledFrequency = "2 lần/giây",
             ledColor = "Trắng",
             ledDuration = 30,
-            sirenSampleId = "Mẫu 3",
+            sirenSampleId = "Tiếng Voi",
             silentAlertSms = false,
             silentAlertPush = true
         )
@@ -139,12 +139,16 @@ class FakeConfigApi : ConfigApi {
                 AudioSampleItem("A_ultrasonic", "Tần số siêu âm")
             ),
             citizenAlertSounds = listOf(
-                AudioSampleItem("N_voi_rung", "Mẫu 1"),
-                AudioSampleItem("N_thu_du", "Mẫu 2"),
-                AudioSampleItem("N_di_tan", "Mẫu 3")
+                AlertSoundItem("deer", "Tiếng Nai", "https://.../deer.mp3"),
+                AlertSoundItem("elephant", "Tiếng Voi", "https://.../elephant.mp3"),
+                AlertSoundItem("monkey", "Tiếng Khỉ", "https://.../monkey.mp3"),
+                AlertSoundItem("tiger", "Tiếng Hổ", "https://.../tiger.mp3"),
+                AlertSoundItem("wild_boar", "Tiếng Lợn rừng", "https://.../wild_boar.mp3")
             )
         )
     }
+
+    override suspend fun getAlertSounds(token: String): List<AlertSoundItem> = listOf()
     override suspend fun getConfigs(token: String): List<ResponseConfigData> = emptyList()
     override suspend fun getConfigDetail(token: String, speciesId: String): ResponseConfigData {
         throw NotImplementedError()

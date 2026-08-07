@@ -172,7 +172,7 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: 'FAST',
         ledColor: 'RED',
         ledDurationSeconds: 20,
-        speakerSampleId: 'N_voi_rung',
+        speakerSampleId: 'tiger',
         silentAlert: false
       },
       {
@@ -196,7 +196,7 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: 'FAST',
         ledColor: 'STROBE',
         ledDurationSeconds: 30,
-        speakerSampleId: 'N_thu_du',
+        speakerSampleId: 'monkey',
         silentAlert: false
       },
       {

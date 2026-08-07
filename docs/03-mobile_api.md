@@ -128,7 +128,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
     "durationSeconds": 60                // Thời lượng LED chớp (giây)
   },
   "speaker": {
-    "sampleId": "N_warning_thu"          // ID âm thanh cảnh báo người dân (bắt đầu bằng prefix 'N_')
+    "sampleId": "tiger"                  // ID âm thanh cảnh báo (lấy từ GET /alertSounds, e.g. tiger/monkey/deer/...)
   },
   "silentAlert": false                   // true => Cảnh báo âm thầm (không còi/đèn tại chỗ)
 }
@@ -144,7 +144,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 >   "speakerWarn": true,                 // Bật/Tắt loa cảnh báo (Boolean)
 >   "audioSampleId": "A_gunshot",        // ID âm thanh xua đuổi thú (String hoặc null)
 >   "audioIntensity": 100,               // Cường độ âm lượng loa (1 - 100)
->   "speakerSampleId": "N_voi_rung",     // ID âm thanh loa cảnh báo người dân (String dạng N_... hoặc null)
+>   "speakerSampleId": "tiger",          // ID âm thanh loa cảnh báo (String, id từ GET /alertSounds, hoặc null)
 >   "silentAlert": false                 // Cảnh báo âm thầm (không còi/đèn tại chỗ)
 > }
 > ```
@@ -557,12 +557,16 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
     { "id": "A_ultrasonic",  "displayName": "Tần số siêu âm", "frequencyHz": 22000 }
   ],
   "citizenAlertSounds": [
-    { "id": "N_warning_voi",  "displayName": "Mẫu 1 - Cảnh báo voi hoang dã" },
-    { "id": "N_warning_thu",  "displayName": "Mẫu 2 - Phát hiện thú dữ xâm lấn" },
-    { "id": "N_warning_tian", "displayName": "Mẫu 3 - Chỉ dẫn di tản lánh nạn" }
+    { "id": "deer",       "name": "Tiếng Nai",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3" },
+    { "id": "elephant",   "name": "Tiếng Voi",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/elephant.mp3" },
+    { "id": "monkey",     "name": "Tiếng Khỉ",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/monkey.mp3" },
+    { "id": "tiger",      "name": "Tiếng Hổ",      "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/tiger.mp3" },
+    { "id": "wild_boar",  "name": "Tiếng Lợn rừng","file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/wild_boar.mp3" }
   ]
 }
 ```
+
+> **Nguồn dữ liệu:** `citizenAlertSounds` được lấy trực tiếp từ `GET /alertSounds` (đọc từ [hard-config/alert-sound.yaml](../wildlife-mobile-server/hard-config/alert-sound.yaml)), do đó cấu trúc trùng khớp — mỗi phần tử gồm `{id, name, file}`. Đây là nguồn duy nhất, không hardcode trong code.
 
 ---
 

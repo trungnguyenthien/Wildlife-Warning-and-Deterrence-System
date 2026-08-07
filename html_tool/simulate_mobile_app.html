@@ -872,8 +872,6 @@
             <option value="A_dog_bark">Tiếng đàn chó săn sủa (A_dog_bark)</option>
             <option value="A_explosion">Tiếng nổ lớn phá hủy (A_explosion)</option>
             <option value="A_ultrasonic">Sóng siêu âm tần số cao (A_ultrasonic)</option>
-            <option value="N_warning_thu">Thông báo đẩy lùi thú rừng xâm nhập (N_warning_thu)</option>
-            <option value="N_siren">Tiếng còi hú khẩn cấp (N_siren)</option>
           </select>
         </div>
 
@@ -1452,7 +1450,7 @@
             configAudioIntensity.value = 90;
             audioIntensityValue.textContent = '90%';
 
-            configSpeakerSample.value = 'N_thu_du';
+            configSpeakerSample.value = 'monkey';
             configNotifySms.checked = false;
             configNotifyPush.checked = true;
           } else if (preset === 'medium_danger') {
@@ -1466,7 +1464,7 @@
             configAudioIntensity.value = 50;
             audioIntensityValue.textContent = '50%';
 
-            configSpeakerSample.value = 'N_thu_du';
+            configSpeakerSample.value = 'monkey';
             configNotifySms.checked = false;
             configNotifyPush.checked = true;
           } else if (preset === 'critical_danger') {
@@ -1480,7 +1478,7 @@
             configAudioIntensity.value = 100;
             audioIntensityValue.textContent = '100%';
 
-            configSpeakerSample.value = 'N_voi_rung';
+            configSpeakerSample.value = 'tiger';
             configNotifySms.checked = true;
             configNotifyPush.checked = true;
           }
@@ -1541,13 +1539,13 @@
               });
             }
 
-            // Điền mẫu phát loa cảnh báo
+            // Điền mẫu phát loa cảnh báo (lấy từ GET /alertSounds qua /audio-samples)
             configSpeakerSample.innerHTML = '';
             if (audioData.citizenAlertSounds && Array.isArray(audioData.citizenAlertSounds)) {
               audioData.citizenAlertSounds.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s.id;
-                opt.textContent = `${s.displayName} (${s.id})`;
+                opt.textContent = `${s.name} (${s.id})`;
                 configSpeakerSample.appendChild(opt);
               });
             }
@@ -1601,17 +1599,17 @@
             configAudioIntensity.value = data.audioIntensity || 80;
             audioIntensityValue.textContent = `${data.audioIntensity || 80}%`;
 
-            configSpeakerSample.value = data.speakerSampleId || 'N_voi_rung';
+            configSpeakerSample.value = data.speakerSampleId || 'tiger';
             configNotifySms.checked = !!data.silentAlert;
             configNotifyPush.checked = true;
 
             // Xác định xem cấu hình này có thuộc Preset mặc định nào không
             let preset = 'custom';
-            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20 && data.ledFlashRate === 'random' && (data.speakerSampleId === null || data.speakerSampleId === 'N_voi_rung')) {
+            if (data.ledFlash && data.ledColor === 'STROBE' && data.audioSampleId === 'A_gunshot' && data.audioIntensity === 100 && data.ledIntensity === 20 && data.ledFlashRate === 'random' && (data.speakerSampleId === null || data.speakerSampleId === 'tiger')) {
               preset = 'critical_danger';
-            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'N_thu_du')) {
+            } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'monkey')) {
               preset = 'medium_danger';
-            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'N_thu_du')) {
+            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'monkey')) {
               preset = 'intruder';
             }
 

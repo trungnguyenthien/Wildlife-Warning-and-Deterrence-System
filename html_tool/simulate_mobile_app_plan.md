@@ -50,7 +50,7 @@ Giao diện sẽ tuân thủ phong cách thiết kế **Forest Dark Mode** đồ
             *   *deviceKey:* Hộp chọn (Select) loại thiết bị muốn test (`deterrent_audio` / `speaker` - Loa phát thanh, `led_light` - Đèn LED chớp sáng, `electric_fence` - Hàng rào điện sinh học).
             *   *durationSeconds:* Ô nhập số nguyên thiết lập thời gian chạy thử (mặc định: `10` giây, giới hạn từ 1 đến 120 giây).
             *   *intensity:* Ô nhập số nguyên thiết lập cường độ/âm lượng chạy thử (mặc định: `80`, giới hạn từ 1 đến 100).
-            *   *audioSampleId:* Ô gợi ý danh sách âm thanh local (chỉ hiển thị và cho nhập khi chọn loại thiết bị loa, e.g., `A_gunshot`, `A_growl`, `A_dog_bark`, `N_warning_thu`).
+            *   *audioSampleId:* Ô gợi ý danh sách âm thanh local (chỉ hiển thị và cho nhập khi chọn loại thiết bị loa, e.g., `A_gunshot`, `A_growl`, `A_dog_bark`). Âm thanh cảnh báo qua loa (`speakerSampleId`) lấy từ `GET /alertSounds` (e.g., `tiger`, `monkey`, `deer`).
             *   *Nút bấm:* Nút **"Kích hoạt Kiểm thử (Test Device)"** màu vàng sáng rực.
             *   *Mã cURL phản ánh:* Đoạn mã cURL sinh tự động hiển thị cấu trúc request kèm Token để dễ dàng copy/paste debug.
             *   *JSON Response:* Hộp hiển thị kết quả phản hồi của yêu cầu test thiết bị.

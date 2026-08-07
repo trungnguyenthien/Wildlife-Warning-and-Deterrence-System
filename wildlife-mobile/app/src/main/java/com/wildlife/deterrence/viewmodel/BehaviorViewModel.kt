@@ -23,7 +23,7 @@ data class BehaviorConfigUiModel(
     val ledFrequency: String, // "2 lần/giây" | "4 lần/giây" | "Nhấp nháy ngẫu nhiên"
     val ledColor: String, // "Đỏ" | "Trắng" | "Đỏ xen trắng"
     val ledDuration: Int, // 1-60 giây
-    val sirenSampleId: String, // "Mẫu 1" | "Mẫu 2" | "Mẫu 3"
+    val sirenSampleId: String, // Tên âm thanh cảnh báo (lấy từ GET /alertSounds qua name), e.g. "Tiếng Hổ"
     val silentAlertSms: Boolean,
     val silentAlertPush: Boolean
 )
@@ -52,8 +52,8 @@ class BehaviorViewModel(
     private val _deterrentSounds = MutableStateFlow<List<AudioSampleItem>>(emptyList())
     val deterrentSounds: StateFlow<List<AudioSampleItem>> = _deterrentSounds.asStateFlow()
 
-    private val _citizenAlertSounds = MutableStateFlow<List<AudioSampleItem>>(emptyList())
-    val citizenAlertSounds: StateFlow<List<AudioSampleItem>> = _citizenAlertSounds.asStateFlow()
+    private val _citizenAlertSounds = MutableStateFlow<List<AlertSoundItem>>(emptyList())
+    val citizenAlertSounds: StateFlow<List<AlertSoundItem>> = _citizenAlertSounds.asStateFlow()
 
     // Lưu trữ cấu hình trong bộ nhớ session để bảo toàn dữ liệu
     private val _configsMap = mutableMapOf<String, BehaviorConfigUiModel>()
@@ -82,19 +82,10 @@ class BehaviorViewModel(
                     _deterrentSounds.value = audioSamples.animalDeterrentSounds
                     _citizenAlertSounds.value = audioSamples.citizenAlertSounds
                 } catch (e: Exception) {
+                    // Không hardcode id âm thanh: khi API lỗi để danh sách trống, tránh nhét giá trị cứng
                     System.err.println("Lỗi tải danh mục âm thanh từ API: ${e.message}")
-                    _deterrentSounds.value = listOf(
-                        AudioSampleItem("A_gunshot", "Tiếng súng"),
-                        AudioSampleItem("A_growl", "Tiếng gầm"),
-                        AudioSampleItem("A_dog_bark", "Chó sủa lớn"),
-                        AudioSampleItem("A_explosion", "Tiếng nổ giả lập"),
-                        AudioSampleItem("A_ultrasonic", "Tần số siêu âm")
-                    )
-                    _citizenAlertSounds.value = listOf(
-                        AudioSampleItem("N_voi_rung", "Mẫu 1"),
-                        AudioSampleItem("N_thu_du", "Mẫu 2"),
-                        AudioSampleItem("N_di_tan", "Mẫu 3")
-                    )
+                    _deterrentSounds.value = emptyList()
+                    _citizenAlertSounds.value = emptyList()
                 }
 
                 // 1. Tải danh mục loài từ API
@@ -174,7 +165,7 @@ class BehaviorViewModel(
                 ledFrequency = "4 lần/giây",
                 ledColor = "Đỏ",
                 ledDuration = 15,
-                sirenSampleId = mapSpeakerSampleIdToUi("N_thu_du"),
+                sirenSampleId = mapSpeakerSampleIdToUi("monkey"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -186,7 +177,7 @@ class BehaviorViewModel(
                 ledFrequency = "2 lần/giây",
                 ledColor = "Vàng",
                 ledDuration = 10,
-                sirenSampleId = mapSpeakerSampleIdToUi("N_thu_du"),
+                sirenSampleId = mapSpeakerSampleIdToUi("monkey"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -198,7 +189,7 @@ class BehaviorViewModel(
                 ledFrequency = "Nhấp nháy ngẫu nhiên",
                 ledColor = "Đỏ xen trắng",
                 ledDuration = 20,
-                sirenSampleId = mapSpeakerSampleIdToUi("N_voi_rung"),
+                sirenSampleId = mapSpeakerSampleIdToUi("tiger"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -256,25 +247,14 @@ class BehaviorViewModel(
 
     private fun mapSpeakerSampleIdToUi(id: String?): String {
         if (id == null) return "Không"
-        val found = _citizenAlertSounds.value.find { it.id == id }
-        if (found != null) return found.displayName
-        return when (id) {
-            "N_voi_rung" -> "Mẫu 1"
-            "N_thu_du" -> "Mẫu 2"
-            "N_di_tan" -> "Mẫu 3"
-            else -> "Mẫu 1"
-        }
+        // Giải mã id → tên dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
+        return _citizenAlertSounds.value.find { it.id == id }?.name ?: "Không"
     }
 
     private fun mapUiToSpeakerSampleId(uiName: String): String? {
-        val found = _citizenAlertSounds.value.find { it.displayName == uiName }
-        if (found != null) return found.id
-        return when (uiName) {
-            "Mẫu 1" -> "N_voi_rung"
-            "Mẫu 2" -> "N_thu_du"
-            "Mẫu 3" -> "N_di_tan"
-            else -> null
-        }
+        if (uiName == "Không") return null
+        // Giải mã tên → id dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
+        return _citizenAlertSounds.value.find { it.name == uiName }?.id
     }
 
     private fun mapLedColorToBackend(color: String): String? {
@@ -304,11 +284,11 @@ class BehaviorViewModel(
         val presetType = if (data.id == null) {
             "critical"
         } else {
-            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random" && (data.speakerSampleId == null || data.speakerSampleId == "N_voi_rung")) {
+            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random" && (data.speakerSampleId == null || data.speakerSampleId == "tiger")) {
                 "critical"
-            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "N_thu_du")) {
+            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
                 "medium_animal"
-            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "N_thu_du")) {
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
                 "intruder"
             } else {
                 "custom"

@@ -42,7 +42,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioIntensity: 50,
     silentAlert: false,
     ledFlashRate: '2_per_sec',
-    speakerSampleId: 'N_thu_du'
+    speakerSampleId: 'monkey'
   },
   [DangerLevel.HIGH]: {
     ledFlash: true,
@@ -53,7 +53,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioIntensity: 90,
     silentAlert: false,
     ledFlashRate: '4_per_sec',
-    speakerSampleId: 'N_thu_du'
+    speakerSampleId: 'monkey'
   },
   [DangerLevel.CRITICAL]: {
     ledFlash: true,
@@ -64,7 +64,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioIntensity: 100,
     silentAlert: false,
     ledFlashRate: 'random',
-    speakerSampleId: 'N_voi_rung'
+    speakerSampleId: 'tiger'
   }
 };
 
@@ -78,7 +78,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioIntensity: 100,
     silentAlert: false,
     ledFlashRate: 'random',
-    speakerSampleId: 'N_voi_rung'
+    speakerSampleId: 'tiger'
   },
   medium_danger: {
     ledFlash: true,
@@ -89,7 +89,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioIntensity: 50,
     silentAlert: false,
     ledFlashRate: '2_per_sec',
-    speakerSampleId: 'N_thu_du'
+    speakerSampleId: 'monkey'
   },
   intruder: {
     ledFlash: true,
@@ -100,7 +100,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioIntensity: 90,
     silentAlert: false,
     ledFlashRate: '4_per_sec',
-    speakerSampleId: 'N_thu_du'
+    speakerSampleId: 'monkey'
   }
 };
 

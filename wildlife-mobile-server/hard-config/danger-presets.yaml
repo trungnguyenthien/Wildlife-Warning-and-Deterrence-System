@@ -48,7 +48,7 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_gunshot"
     audioIntensity: 100
-    speakerSampleId: "N_voi_rung"
+    speakerSampleId: "tiger"
     silentAlert: false
   medium_danger:
     ledFlash: true
@@ -58,7 +58,7 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_dog_bark"
     audioIntensity: 50
-    speakerSampleId: "N_thu_du"
+    speakerSampleId: "monkey"
     silentAlert: false
   intruder:
     ledFlash: true
@@ -68,5 +68,5 @@ preset_scenarios:
     speakerWarn: true
     audioSampleId: "A_alarm_siren"
     audioIntensity: 90
-    speakerSampleId: "N_thu_du"
+    speakerSampleId: "monkey"
     silentAlert: false

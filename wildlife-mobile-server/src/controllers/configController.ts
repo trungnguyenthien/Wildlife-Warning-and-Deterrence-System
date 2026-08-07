@@ -2,15 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { AuthenticatedRequest } from '../middlewares/auth';
 import { PRESET_SCENARIOS, getRecommendedPresetForSpecies } from '../config/presets';
-import fs from 'fs';
-import path from 'path';
-import yaml from 'js-yaml';
-
-interface AlertSound {
-  id: string;
-  name: string;
-  file: string;
-}
+import { loadAlertSounds } from '../config/alertSounds';
 
 const prisma = new PrismaClient();
 
@@ -311,11 +303,8 @@ export async function listAudioSamples(_req: AuthenticatedRequest, res: Response
       { id: 'A_explosion', displayName: 'Tiếng nổ giả lập' },
       { id: 'A_ultrasonic', displayName: 'Tần số siêu âm' }
     ],
-    citizenAlertSounds: [
-      { id: 'N_voi_rung', displayName: 'Mẫu 1 - Cảnh báo voi hoang dã' },
-      { id: 'N_thu_du', displayName: 'Mẫu 2 - Phát hiện thú dữ xâm lấn' },
-      { id: 'N_di_tan', displayName: 'Mẫu 3 - Chỉ dẫn di tản lánh nạn' }
-    ]
+    // Âm thanh cảnh báo qua loa lấy từ nguồn duy nhất hard-config/alert-sound.yaml (khớp GET /alertSounds)
+    citizenAlertSounds: loadAlertSounds()
   };
   return res.status(200).json(result);
 }
@@ -323,14 +312,8 @@ export async function listAudioSamples(_req: AuthenticatedRequest, res: Response
 // 9. GET /alertSounds - Tải danh sách file âm thanh cảnh báo (công khai, không cần xác thực)
 export async function listAlertSounds(_req: Request, res: Response) {
   try {
-    const yamlPath = path.join(__dirname, '../../hard-config/alert-sound.yaml');
-    if (!fs.existsSync(yamlPath)) {
-      console.warn('[AlertSound] Không tìm thấy file hard-config/alert-sound.yaml.');
-      return res.status(200).json([]);
-    }
-    const fileContent = fs.readFileSync(yamlPath, 'utf8');
-    const sounds = yaml.load(fileContent) as AlertSound[] | null;
-    return res.status(200).json(Array.isArray(sounds) ? sounds : []);
+    const sounds = loadAlertSounds();
+    return res.status(200).json(sounds);
   } catch (error) {
     console.error('[AlertSound] Lỗi khi load file alert-sound.yaml:', error);
     return res.status(500).json({ error: 'server_error', message: 'Lỗi máy chủ nội bộ.' });

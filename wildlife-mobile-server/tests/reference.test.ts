@@ -60,5 +60,22 @@ describe('REFERENCE DATA TESTING SUITE', () => {
     expect(res.body.animalDeterrentSounds.length).toBeGreaterThan(0);
     expect(res.body.animalDeterrentSounds[0]).toHaveProperty('id');
     expect(res.body.animalDeterrentSounds[0]).toHaveProperty('displayName');
+    // citizenAlertSounds lấy từ GET /alertSounds — cấu trúc {id, name, file}, không hardcode
+    expect(res.body.citizenAlertSounds.length).toBeGreaterThan(0);
+    expect(res.body.citizenAlertSounds[0]).toHaveProperty('id');
+    expect(res.body.citizenAlertSounds[0]).toHaveProperty('name');
+  });
+
+  // GET /alertSounds (public, không cần token)
+  it('TC_REF_ALERT_SUCCESS_01: Retrieve alert sounds publicly (no auth)', async () => {
+    const res = await request(app).get('/alertSounds');
+
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body[0]).toHaveProperty('id');
+    expect(res.body[0]).toHaveProperty('name');
+    expect(res.body[0]).toHaveProperty('file');
+    expect(res.body.map((s: { id: string }) => s.id)).not.toContain('N_');
   });
 });
