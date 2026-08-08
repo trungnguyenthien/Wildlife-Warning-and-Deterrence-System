@@ -128,7 +128,7 @@ class BehaviorViewModelTest {
 }
 
 class FakeConfigApi : ConfigApi {
-    override suspend fun getAudioSamples(token: String): AudioSamplesResponse {
+    override suspend fun getAudioSamples(): AudioSamplesResponse {
         return AudioSamplesResponse(
             animalDeterrentSounds = listOf(
                 AudioSampleItem("A_gunshot", "Tiếng súng"),

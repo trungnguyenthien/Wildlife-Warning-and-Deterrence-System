@@ -8,6 +8,7 @@ import com.wildlife.deterrence.data.ResponseConfigData
 import com.wildlife.deterrence.data.SaveResponseConfigRequest
 import com.wildlife.deterrence.data.CameraApi
 import com.wildlife.deterrence.data.ConfigApi
+import com.wildlife.deterrence.data.AlertSoundItem
 import com.wildlife.deterrence.data.AudioSampleItem
 import com.wildlife.deterrence.data.AudioSamplesResponse
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +79,7 @@ class BehaviorViewModel(
             try {
                 // 0. Tải danh mục âm thanh mẫu từ API
                 try {
-                    val audioSamples = configApi.getAudioSamples("Bearer $token")
+                    val audioSamples = configApi.getAudioSamples()
                     _deterrentSounds.value = audioSamples.animalDeterrentSounds
                     _citizenAlertSounds.value = audioSamples.citizenAlertSounds
                 } catch (e: Exception) {

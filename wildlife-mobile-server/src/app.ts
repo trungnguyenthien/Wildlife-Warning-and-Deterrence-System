@@ -81,7 +81,7 @@ app.put('/response-configs/:speciesId', authenticateToken, saveConfig);
 app.delete('/response-configs/:speciesId', authenticateToken, resetConfig);
 app.post('/response-configs/:speciesId/apply-preset/:presetId', authenticateToken, applyPreset);
 app.get('/control/presets', authenticateToken, listPresets);
-app.get('/audio-samples', authenticateToken, listAudioSamples);
+app.get('/audio-samples', listAudioSamples); // Công khai, không cần xác thực
 app.get('/alertSounds', listAlertSounds); // Công khai, không cần xác thực
 
 // ==========================================

@@ -45,12 +45,9 @@ describe('REFERENCE DATA TESTING SUITE', () => {
     expect(res.body[0]).toHaveProperty('config');
   });
 
-  // GET /audio-samples
-  it('TC_REF_AUD_SUCCESS_01: Retrieve audio sample directory successfully', async () => {
-    if (!token) return;
-    const res = await request(app)
-      .get('/audio-samples')
-      .set('Authorization', `Bearer ${token}`);
+  // GET /audio-samples (public, không cần token)
+  it('TC_REF_AUD_SUCCESS_01: Retrieve audio sample directory publicly (no auth)', async () => {
+    const res = await request(app).get('/audio-samples');
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('animalDeterrentSounds');

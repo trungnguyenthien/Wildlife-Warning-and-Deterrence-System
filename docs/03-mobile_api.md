@@ -546,6 +546,8 @@ Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (n
 
 Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông báo được nạp sẵn trong phần cứng thiết bị. Mapping: dropdown `sound_type_dropdown` và `speaker_message_dropdown` tại màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]`.
 
+> **Không yêu cầu xác thực (public endpoint)** — không cần gửi `Authorization: Bearer <token>`.
+
 **Response 200**
 ```json
 {
@@ -1180,7 +1182,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 |---|---|---|---|
 | 6.1 | POST | `/cameras/{cameraId}/devices/{deviceKey}/test` | Gửi lệnh test thiết bị còi/LED tại hiện trường (`sound_test_button`) |
 | 7.1 | GET | `/control/presets` | Lấy danh sách 3 kịch bản phòng vệ mẫu mặc định |
-| 7.2 | GET | `/audio-samples` | Tải danh sách file âm thanh xua đuổi & mẫu phát loa (dropdowns) |
+| 7.2 | GET | `/audio-samples` | Tải danh sách file âm thanh xua đuổi & mẫu phát loa (dropdowns) — **public, không cần token** |
 | 8.1 | GET | `/species` | Hiển thị thông tin tên loài và đặc tính đang cấu hình |
 | 8.2 | PUT | `/response-configs/{species}` | Lưu cấu hình ứng phó tự chọn (`save_config_button`) |
 | 8.3 | GET | `/response-configs?speciesId=` | Tải cấu hình hiện có của loài để đổ lên form |

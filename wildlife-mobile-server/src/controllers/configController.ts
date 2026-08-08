@@ -293,8 +293,8 @@ export async function listPresets(_req: AuthenticatedRequest, res: Response) {
   return res.status(200).json(list);
 }
 
-// 8. GET /audio-samples - Tải danh mục âm thanh mẫu
-export async function listAudioSamples(_req: AuthenticatedRequest, res: Response) {
+// 8. GET /audio-samples - Tải danh mục âm thanh mẫu (công khai, không cần xác thực)
+export async function listAudioSamples(_req: Request, res: Response) {
   const result = {
     animalDeterrentSounds: [
       { id: 'A_gunshot', displayName: 'Tiếng súng nổ đe dọa' },

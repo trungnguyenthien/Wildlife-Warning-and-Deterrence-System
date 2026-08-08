@@ -414,8 +414,8 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
 *   **TC_REF_PRE_SUCCESS_01: Retrieve system danger presets successfully**
     *   **Kết quả mong đợi (Expected Response):** `200 OK` trả về thông tin các preset.
 
-#### 21. `GET /audio-samples` (Lấy danh mục âm thanh mẫu)
-*   **TC_REF_AUD_SUCCESS_01: Retrieve catalog of animal sounds and speech alerts successfully**
+#### 21. `GET /audio-samples` (Lấy danh mục âm thanh mẫu — **public, không cần token**)
+*   **TC_REF_AUD_SUCCESS_01: Retrieve catalog of animal sounds and speech alerts successfully (không cần `Authorization` header)**
     *   **Kết quả mong đợi (Expected Response):** `200 OK` chứa mảng danh sách âm thanh.
 
 #### 22. `GET /health` (Kiểm tra sức khỏe hệ thống)

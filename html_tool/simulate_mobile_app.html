@@ -1579,10 +1579,8 @@
             });
           }
 
-          // 2. Tải danh mục âm thanh mẫu (audio-samples)
-          const audioRes = await fetch(`${baseUrl}/audio-samples`, {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-          });
+          // 2. Tải danh mục âm thanh mẫu (audio-samples) — API công khai, không cần token
+          const audioRes = await fetch(`${baseUrl}/audio-samples`);
           if (audioRes.ok) {
             const audioData = await audioRes.json();
             

@@ -59,9 +59,7 @@ interface ConfigApi {
     ): List<AlertSoundItem>
 
     @GET("audio-samples")
-    suspend fun getAudioSamples(
-        @Header("Authorization") token: String
-    ): AudioSamplesResponse
+    suspend fun getAudioSamples(): AudioSamplesResponse
 
     @GET("response-configs")
     suspend fun getConfigs(
