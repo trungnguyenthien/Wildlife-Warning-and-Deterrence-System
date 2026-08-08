@@ -381,7 +381,7 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 | `led_frequency_dropdown` | Dropdown | Label `Tần suất LED`. Lựa chọn: `Không` · `2 lần/giây` · `4 lần/giây` · `Nhấp nháy ngẫu nhiên`. |
 | `led_color_segmented` | SegmentedControl | Label `Màu sắc LED`. Lựa chọn: `Đỏ` · `Trắng` · `Đỏ xen kẽ Trắng`. |
 | `led_duration_input` | NumberInput | Label `Thời lượng LED (giây)`. |
-| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung`. Lấy danh sách ID mẫu phát loa từ mảng `citizenAlertSounds` của API `GET /audio-samples` (nguồn trùng với `GET /alertSounds`, ví dụ mặc định: `Tiếng Hổ` · `Tiếng Khỉ` · `Tiếng Voi` ...). Ánh xạ vào API qua trường `speakerSampleId`. |
+| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung loa`. Lấy danh sách ID mẫu phát loa từ mảng `citizenAlertSounds` của API `GET /audio-samples` (nguồn trùng với `GET /alertSounds`, ví dụ mặc định: `Tiếng Hổ` · `Tiếng Khỉ` · `Tiếng Voi` ...). Có thêm lựa chọn `Không thiết lập` (không phát loa cảnh báo) → ánh xạ `speakerSampleId = null`. Các lựa chọn âm báo ánh xạ vào API qua trường `speakerSampleId`. |
 | `notify_sms_toggle` | Toggle | Label `Gửi SMS`. Nhằm tối giản thiết kế API, nút gạt này tương tác trực tiếp với trường `silentAlert` trên API (bật SMS đồng nghĩa với việc kích hoạt chế độ báo động im lặng tại trạm: `silentAlert = true`). |
 | `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. (Sử dụng cấu hình cục bộ từ client). |
 

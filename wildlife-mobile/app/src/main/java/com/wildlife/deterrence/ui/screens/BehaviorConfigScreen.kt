@@ -453,8 +453,9 @@ fun BehaviorConfigScreen(
                     // Dropdown Mẫu nội dung loa
                     var sampleMenuOpen by remember { mutableStateOf(false) }
                     val sampleOptions = remember(citizenAlertSounds) {
-                        // Danh sách mẫu loa lấy từ API (GET /alertSounds qua audio-samples), không hardcode
-                        citizenAlertSounds.map { it.name }
+                        // Danh sách mẫu loa lấy từ API (GET /alertSounds qua audio-samples), không hardcode.
+                        // "Không thiết lập" = không phát loa cảnh báo (map sang speakerSampleId = null).
+                        citizenAlertSounds.map { it.name } + "Không thiết lập"
                     }
 
                     Column {

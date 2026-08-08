@@ -247,13 +247,13 @@ class BehaviorViewModel(
     }
 
     private fun mapSpeakerSampleIdToUi(id: String?): String {
-        if (id == null) return "Không"
+        if (id == null) return "Không thiết lập"
         // Giải mã id → tên dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
-        return _citizenAlertSounds.value.find { it.id == id }?.name ?: "Không"
+        return _citizenAlertSounds.value.find { it.id == id }?.name ?: "Không thiết lập"
     }
 
     private fun mapUiToSpeakerSampleId(uiName: String): String? {
-        if (uiName == "Không") return null
+        if (uiName == "Không thiết lập" || uiName == "Không") return null
         // Giải mã tên → id dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
         return _citizenAlertSounds.value.find { it.name == uiName }?.id
     }
