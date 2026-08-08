@@ -548,15 +548,15 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
 
 > **Không yêu cầu xác thực (public endpoint)** — không cần gửi `Authorization: Bearer <token>`.
 
-**Response 200**
+**Response 200** — Cả hai mảng đều có cấu trúc item thống nhất `{id, name, file}`:
 ```json
 {
   "animalDeterrentSounds": [
-    { "id": "A_gunshot",     "displayName": "Tiếng súng" },
-    { "id": "A_growl",       "displayName": "Tiếng gầm" },
-    { "id": "A_dog_bark",    "displayName": "Tiếng chó sủa lớn" },
-    { "id": "A_explosion",   "displayName": "Tiếng nổ giả lập" },
-    { "id": "A_ultrasonic",  "displayName": "Tần số siêu âm", "frequencyHz": 22000 }
+    { "id": "A_gunshot",    "name": "Tiếng súng nổ đe dọa",   "file": null },
+    { "id": "A_growl",      "name": "Tiếng gầm đe dọa",       "file": null },
+    { "id": "A_dog_bark",   "name": "Tiếng chó sủa dữ dội",   "file": null },
+    { "id": "A_explosion",  "name": "Tiếng nổ giả lập",       "file": null },
+    { "id": "A_ultrasonic", "name": "Tần số siêu âm",         "file": null }
   ],
   "citizenAlertSounds": [
     { "id": "deer",       "name": "Tiếng Nai",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3" },
@@ -567,6 +567,8 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
   ]
 }
 ```
+
+> **Ghi chú:** Cả hai mảng dùng chung cấu trúc item `{id, name, file}`. Âm thanh xua đuổi `animalDeterrentSounds` (prefix `A_`) được nạp sẵn trong thẻ nhớ local của camera nên có `file: null`; âm thanh cảnh báo qua loa `citizenAlertSounds` lấy từ `GET /alertSounds` (đọc [hard-config/alert-sound.yaml](../wildlife-mobile-server/hard-config/alert-sound.yaml)) nên có `file` là đường dẫn mp3.
 
 > **Nguồn dữ liệu:** `citizenAlertSounds` được lấy trực tiếp từ `GET /alertSounds` (đọc từ [hard-config/alert-sound.yaml](../wildlife-mobile-server/hard-config/alert-sound.yaml)), do đó cấu trúc trùng khớp — mỗi phần tử gồm `{id, name, file}`. Đây là nguồn duy nhất, không hardcode trong code.
 

@@ -35,9 +35,12 @@ data class SaveResponseConfigRequest(
     val speakerSampleId: String? = null
 )
 
+// Âm thanh xua đuổi. Cấu trúc thống nhất {id, name, file} với AlertSoundItem;
+// file = null vì các file A_* được nạp sẵn trong thẻ nhớ local của camera (không có mp3 công khai).
 data class AudioSampleItem(
     val id: String,
-    val displayName: String
+    val name: String,
+    val file: String? = null
 )
 
 // Âm thanh cảnh báo qua loa (nguồn: GET /alertSounds / hard-config/alert-sound.yaml)

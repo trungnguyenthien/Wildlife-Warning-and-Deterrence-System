@@ -56,7 +56,9 @@ describe('REFERENCE DATA TESTING SUITE', () => {
     expect(Array.isArray(res.body.citizenAlertSounds)).toBe(true);
     expect(res.body.animalDeterrentSounds.length).toBeGreaterThan(0);
     expect(res.body.animalDeterrentSounds[0]).toHaveProperty('id');
-    expect(res.body.animalDeterrentSounds[0]).toHaveProperty('displayName');
+    // Cấu trúc thống nhất với citizenAlertSounds: {id, name, file}
+    expect(res.body.animalDeterrentSounds[0]).toHaveProperty('name');
+    expect(res.body.animalDeterrentSounds[0]).toHaveProperty('file');
     // citizenAlertSounds lấy từ GET /alertSounds — cấu trúc {id, name, file}, không hardcode
     expect(res.body.citizenAlertSounds.length).toBeGreaterThan(0);
     expect(res.body.citizenAlertSounds[0]).toHaveProperty('id');

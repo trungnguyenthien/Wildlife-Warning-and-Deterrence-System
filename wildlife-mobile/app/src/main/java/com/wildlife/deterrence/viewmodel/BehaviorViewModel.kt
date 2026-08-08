@@ -220,7 +220,7 @@ class BehaviorViewModel(
 
     private fun mapAudioTypeToId(type: String): String? {
         if (type == "Không" || type == "Không có") return null
-        val found = _deterrentSounds.value.find { it.displayName == type }
+        val found = _deterrentSounds.value.find { it.name == type }
         if (found != null) return found.id
         return when (type) {
             "Tiếng súng", "Tiếng súng nổ đe dọa" -> "A_gunshot"
@@ -235,7 +235,7 @@ class BehaviorViewModel(
     private fun mapAudioIdToType(id: String?): String {
         if (id == null) return "Không"
         val found = _deterrentSounds.value.find { it.id == id }
-        if (found != null) return found.displayName
+        if (found != null) return found.name
         return when (id) {
             "A_gunshot" -> "Tiếng súng"
             "A_growl" -> "Tiếng gầm"

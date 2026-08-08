@@ -247,7 +247,7 @@ fun BehaviorConfigScreen(
                         if (deterrentSounds.isEmpty()) {
                             listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Tần số siêu âm", "Không")
                         } else {
-                            deterrentSounds.map { it.displayName } + "Không"
+                            deterrentSounds.map { it.name } + "Không"
                         }
                     }
 

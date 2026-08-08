@@ -296,12 +296,14 @@ export async function listPresets(_req: AuthenticatedRequest, res: Response) {
 // 8. GET /audio-samples - Tải danh mục âm thanh mẫu (công khai, không cần xác thực)
 export async function listAudioSamples(_req: Request, res: Response) {
   const result = {
+    // Âm thanh xua đuổi được nạp sẵn trong phần cứng (thẻ nhớ local của camera), không có file mp3 công khai -> file = null.
+    // Cấu trúc item thống nhất {id, name, file} giống citizenAlertSounds.
     animalDeterrentSounds: [
-      { id: 'A_gunshot', displayName: 'Tiếng súng nổ đe dọa' },
-      { id: 'A_growl', displayName: 'Tiếng gầm đe dọa' },
-      { id: 'A_dog_bark', displayName: 'Tiếng chó sủa dữ dội' },
-      { id: 'A_explosion', displayName: 'Tiếng nổ giả lập' },
-      { id: 'A_ultrasonic', displayName: 'Tần số siêu âm' }
+      { id: 'A_gunshot', name: 'Tiếng súng nổ đe dọa', file: null },
+      { id: 'A_growl', name: 'Tiếng gầm đe dọa', file: null },
+      { id: 'A_dog_bark', name: 'Tiếng chó sủa dữ dội', file: null },
+      { id: 'A_explosion', name: 'Tiếng nổ giả lập', file: null },
+      { id: 'A_ultrasonic', name: 'Tần số siêu âm', file: null }
     ],
     // Âm thanh cảnh báo qua loa lấy từ nguồn duy nhất hard-config/alert-sound.yaml (khớp GET /alertSounds)
     citizenAlertSounds: loadAlertSounds()

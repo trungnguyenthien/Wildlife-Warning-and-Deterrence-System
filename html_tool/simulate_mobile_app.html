@@ -1590,7 +1590,7 @@
               audioData.animalDeterrentSounds.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a.id;
-                opt.textContent = `${a.displayName} (${a.id})`;
+                opt.textContent = `${a.name} (${a.id})`;
                 configAudioSample.appendChild(opt);
               });
             }
