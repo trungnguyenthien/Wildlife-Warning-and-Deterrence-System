@@ -49,7 +49,7 @@ class CameraDetailViewModelTest {
                         eventId = "evt-123",
                         detectedAt = "2026-07-28T10:00:00Z",
                         detections = listOf(
-                            DetectionResponse("voi_rung", "Voi Rừng", 0.95, "CRITICAL")
+                            DetectionResponse("elephant", "Voi", 0.95, "CRITICAL")
                         )
                     )
                 )
@@ -66,8 +66,8 @@ class CameraDetailViewModelTest {
         assertNotNull(state.liveSnapshot)
         assertEquals("http://img/snap.jpg", state.liveSnapshot?.url)
         assertNotNull(state.currentAnalysis)
-        assertEquals("Voi Rừng", state.currentAnalysis?.speciesName)
-        assertEquals("voi_rung", state.currentAnalysis?.speciesNameEn)
+        assertEquals("Voi", state.currentAnalysis?.speciesName)
+        assertEquals("elephant", state.currentAnalysis?.speciesNameEn)
         assertEquals("high", state.currentAnalysis?.dangerLevel)
         assertEquals(95, state.currentAnalysis?.confidencePercent)
     }
@@ -81,8 +81,8 @@ class CameraDetailViewModelTest {
                         DetectionHistoryItemResponse(
                             id = "evt-1",
                             thumbnailUrl = "http://img/1.jpg",
-                            speciesName = "Voi Rừng",
-                            speciesNameEn = "voi_rung",
+                            speciesName = "Voi",
+                            speciesNameEn = "elephant",
                             estimatedCount = 1,
                             confidencePercent = 95,
                             recordedTime = "10:00:00",

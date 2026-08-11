@@ -43,7 +43,7 @@ Công cụ này tích hợp cả hai dòng xử lý chính của AI Server theo 
             *   *Select Image:* Vùng nhấn thả tệp hình ảnh (.jpg, .jpeg, .png). Khi chọn tệp tin, ảnh sẽ được tự động vẽ lên canvas ngầm để scale về đúng `600x400` pixel và nén.
             *   *Xem trước:* Khung hiển thị ảnh xem trước thumbnail kích thước lớn (đã ẩn tên file để chống vỡ layout) kèm nhãn hiển thị dung lượng nén thực tế.
         *   **Cấu hình nhận diện loài động vật (Detections):**
-            *   *input speciesId:* Ô nhập văn bản hỗ trợ Auto-suggest các mã loài vật phổ biến (`voi_rung`, `ho_dong_duong`, `lon_rung`, `khi`, `bo_tot`, `human_border_intruder`).
+            *   *input speciesId:* Ô nhập văn bản hỗ trợ Auto-suggest các mã loài vật phổ biến (`elephant`, `tiger`, `monkey`, `human`, `crocodile`, `deer`).
             *   *Thanh kéo confidence:* Thanh trượt điều chỉnh độ tin cậy từ `0.5` đến `1.0` (hiển thị số thực tương ứng bên cạnh).
             *   *Nút "Thêm mới":* Thêm thông tin vừa thiết lập vào danh sách đính kèm.
         *   **Danh sách nhận diện trước khi gửi:** Hiển thị danh sách các loài thú đã cấu hình thành hàng ngang gọn gàng kèm theo nút bấm xóa (`✕`) riêng từng phần tử.
@@ -122,7 +122,7 @@ sequenceDiagram
 ### Kiểm thử thủ công trên Giao diện mô phỏng
 1.  **Kiểm tra Webhook (Uplink):**
     *   Tải một file ảnh bất kỳ.
-    *   Thêm nhận diện loài động vật nguy hiểm (ví dụ: `voi_rung`, confidence `0.85`).
+    *   Thêm nhận diện loài động vật nguy hiểm (ví dụ: `elephant`, confidence `0.85`).
     *   Bấm **"Kích hoạt Webhook (Post Detections)"**.
     *   Xác nhận phản hồi trả về mã `201 Created` kèm theo đối tượng `responseAction` đầy đủ.
 2.  **Kiểm tra Ably Downlink:**

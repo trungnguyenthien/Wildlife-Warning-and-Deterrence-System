@@ -55,49 +55,94 @@ export async function runSeed(prisma: PrismaClient) {
   // 2. Tạo danh mục Loài động vật (Species)
   const speciesList = [
     {
-      id: 'voi_rung',
-      displayName: 'Voi Rừng Tây Nguyên',
+      id: 'elephant',
+      displayName: 'Voi',
       dangerLevel: DangerLevel.CRITICAL,
       isHuman: false,
-      htmlDescription: '<p>Voi châu Á (Elephas maximus) phân bố tại Tây Nguyên. Cực kỳ nguy hiểm khi xung đột khu dân cư.</p>',
+      htmlDescription: '<p>Voi châu Á (Elephas maximus) thường di chuyển gần các vùng canh tác hoa màu của dân cư Tây Nguyên.</p>',
       aggressionLevel: 90,
-      recommendAction: 'Không kích động voi, tắt đèn pha, di tản khỏi khu vực hàng rào điện và gọi ngay cho trạm kiểm lâm.'
+      recommendAction: 'Tránh kích động voi, tắt các nguồn ánh sáng mạnh trực diện, thông báo khẩn cấp cho ban chỉ huy lâm phận.'
     },
     {
-      id: 'ho_dong_duong',
-      displayName: 'Hổ Đông Dương',
+      id: 'tiger',
+      displayName: 'Hổ',
       dangerLevel: DangerLevel.CRITICAL,
       isHuman: false,
-      htmlDescription: '<p>Hổ Đông Dương (Panthera tigris corbetti). Loài thú ăn thịt đầu bảng nguy cấp cực kỳ cao.</p>',
+      htmlDescription: '<p>Hổ Đông Dương (Panthera tigris corbetti) săn mồi nguy hiểm.</p>',
       aggressionLevel: 95,
-      recommendAction: 'Đóng kín cửa chuồng trại gia súc, di tản trẻ nhỏ vào nhà kiên cố, tuyệt đối không săn đuổi.'
+      recommendAction: 'Đóng cửa chuồng trại, đưa trẻ nhỏ vào vùng an toàn, không săn bắt hổ trái phép.'
     },
     {
       id: 'monkey',
-      displayName: 'Khỉ Vàng',
+      displayName: 'Khỉ',
       dangerLevel: DangerLevel.LOW,
       isHuman: false,
-      htmlDescription: '<p>Khỉ vàng (Macaca mulatta) thường đi theo đàn phá hoại nông sản nhẹ.</p>',
+      htmlDescription: '<p>Khỉ vàng thường đi theo đàn lớn tàn phá cây trái ruộng rẫy.</p>',
       aggressionLevel: 30,
-      recommendAction: 'Sử dụng âm thanh chó sủa lớn hoặc chớp LED trắng để xua đuổi nhẹ nhàng khỏi ruộng rẫy.'
+      recommendAction: 'Sử dụng âm thanh chó sủa lớn hoặc còi hú nhẹ kèm LED sáng trắng để xua đuổi khỉ.'
     },
     {
-      id: 'nai_vang',
-      displayName: 'Nai Vàng Nam Bộ',
-      dangerLevel: DangerLevel.MEDIUM,
-      isHuman: false,
-      htmlDescription: '<p>Nai vàng (Rusa unicolor) ăn cỏ, có thể đi vào phá hoa màu vào ban đêm.</p>',
-      aggressionLevel: 10,
-      recommendAction: 'Kích hoạt hàng rào điện sinh học nhẹ và chớp LED vàng cảnh báo tại chỗ.'
-    },
-    {
-      id: 'human_border_intruder',
-      displayName: 'Người lạ xâm nhập biên giới',
+      id: 'human',
+      displayName: 'Người',
       dangerLevel: DangerLevel.HIGH,
       isHuman: true,
-      htmlDescription: '<p>Đối tượng xâm nhập vùng cấm biên giới hoặc lâm tặc phá hoại rừng.</p>',
+      htmlDescription: '<p>Người lạ xâm nhập khu vực bảo tồn nghiêm ngặt hoặc biên giới.</p>',
       aggressionLevel: 50,
-      recommendAction: 'Lực lượng Biên phòng và Kiểm lâm lập tức triển khai tuần tra hiện trường khẩn cấp.'
+      recommendAction: 'Lực lượng biên phòng phối hợp kiểm lâm lập tức tổ chức tuần tra xác minh thực địa.'
+    },
+    {
+      id: 'crocodile',
+      displayName: 'Cá sấu',
+      dangerLevel: DangerLevel.HIGH,
+      isHuman: false,
+      htmlDescription: '<p>Cá sấu thường xuất hiện ở sông ngòi ven rừng phòng hộ biên giới.</p>',
+      aggressionLevel: 80,
+      recommendAction: 'Không di chuyển đến gần mép nước, sử dụng thiết bị báo động tại chỗ cảnh báo người dân.'
+    },
+    {
+      id: 'giraffe',
+      displayName: 'Hươu cao cổ',
+      dangerLevel: DangerLevel.LOW,
+      isHuman: false,
+      htmlDescription: '<p>Hươu cao cổ ăn lá trên cao, hoàn toàn hiền lành và thân thiện.</p>',
+      aggressionLevel: 10,
+      recommendAction: 'Hệ thống chỉ cảnh báo nhẹ hoặc ghi nhận thông tin và bỏ qua chế độ xua đuổi mạnh.'
+    },
+    {
+      id: 'leopard',
+      displayName: 'Báo',
+      dangerLevel: DangerLevel.CRITICAL,
+      isHuman: false,
+      htmlDescription: '<p>Báo hoa mai hoặc báo gấm ăn thịt. Tốc độ di chuyển và săn mồi nhanh.</p>',
+      aggressionLevel: 85,
+      recommendAction: 'Kích hoạt ngay còi hú xua đuổi và cảnh báo người dân xung quanh khu vực.'
+    },
+    {
+      id: 'rhino',
+      displayName: 'Tê giác',
+      dangerLevel: DangerLevel.CRITICAL,
+      isHuman: false,
+      htmlDescription: '<p>Tê giác một sừng cực kỳ quý hiếm, có tập tính húc phá khi hoảng sợ.</p>',
+      aggressionLevel: 75,
+      recommendAction: 'Hạn chế tiếng ồn lớn, kích hoạt LED STROBE giữ khoảng cách an toàn cho tê giác.'
+    },
+    {
+      id: 'snake',
+      displayName: 'Rắn',
+      dangerLevel: DangerLevel.MEDIUM,
+      isHuman: false,
+      htmlDescription: '<p>Các loại rắn độc xuất hiện gần bờ cỏ hoặc khu dân cư ven rừng.</p>',
+      aggressionLevel: 40,
+      recommendAction: 'Quan sát kỹ lối đi, tránh cỏ rậm, sử dụng thiết bị rung giật nhẹ để xua đuổi bò sát.'
+    },
+    {
+      id: 'deer',
+      displayName: 'Nai',
+      dangerLevel: DangerLevel.MEDIUM,
+      isHuman: false,
+      htmlDescription: '<p>Nai vàng hoặc nai rừng tìm kiếm thức ăn vào ban đêm.</p>',
+      aggressionLevel: 15,
+      recommendAction: 'Sử dụng đèn LED chớp vàng và còi chó sủa cường độ vừa phải để điều hướng nai ra khỏi rẫy.'
     }
   ];
 
@@ -108,7 +153,7 @@ export async function runSeed(prisma: PrismaClient) {
       create: s
     });
   }
-  console.log(`[Species] Đã nạp danh mục 5 loài động vật chuẩn.`);
+  console.log(`[Species] Đã nạp danh mục 10 loài động vật chuẩn.`);
 
   // 3. Tạo 4 Trạm Camera (Camera)
   const cameras = [
@@ -165,7 +210,7 @@ export async function runSeed(prisma: PrismaClient) {
     data: [
       {
         userId: ranger.id,
-        speciesId: 'voi_rung',
+        speciesId: 'elephant',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_gunshot',
         audioIntensity: 90,
@@ -177,7 +222,7 @@ export async function runSeed(prisma: PrismaClient) {
       },
       {
         userId: ranger.id,
-        speciesId: 'ho_dong_duong',
+        speciesId: 'tiger',
         lastModifiedBy: ranger.id,
         audioSampleId: null,
         audioIntensity: 0,
@@ -189,7 +234,7 @@ export async function runSeed(prisma: PrismaClient) {
       },
       {
         userId: ranger.id,
-        speciesId: 'human_border_intruder',
+        speciesId: 'human',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_alarm_siren',
         audioIntensity: 100,
@@ -201,7 +246,7 @@ export async function runSeed(prisma: PrismaClient) {
       },
       {
         userId: ranger.id,
-        speciesId: 'nai_vang',
+        speciesId: 'deer',
         lastModifiedBy: ranger.id,
         audioSampleId: 'A_dog_bark',
         audioIntensity: 60,
@@ -303,7 +348,7 @@ export async function runSeed(prisma: PrismaClient) {
             actionAt: eventTime
           }
         });
-        if (species.id === 'voi_rung') {
+        if (species.id === 'elephant') {
           await prisma.deviceLog.create({
             data: {
               eventId,

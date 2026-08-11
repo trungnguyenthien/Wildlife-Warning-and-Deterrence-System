@@ -24,15 +24,15 @@
 #      * silentAlert (Boolean: true/false)
 # ==============================================================================
 
-- speciesId: "voi_rung"
-  displayName: "Voi rừng"
+- speciesId: "elephant"
+  displayName: "Voi"
   inheritPreset: "@critical_danger"
   override:
     ledIntensity: 100
     silentAlert: false
 
-- speciesId: "ho_dong_duong"
-  displayName: "Hổ Đông Dương"
+- speciesId: "tiger"
+  displayName: "Hổ"
   inheritPreset: "@critical_danger"
   override:
     ledColor: "RED"
@@ -45,10 +45,53 @@
     ledColor: "WHITE"
     silentAlert: false
 
-- speciesId: "human_border_intruder"
-  displayName: "Người xâm phạm biên giới"
+- speciesId: "human"
+  displayName: "Người"
   inheritPreset: "@intruder"
   override:
     ledColor: "RED"
     audioSampleId: "A_alarm_siren"
     silentAlert: false
+
+- speciesId: "crocodile"
+  displayName: "Cá sấu"
+  inheritPreset: "@critical_danger"
+  override:
+    audioSampleId: "A_alarm_siren"
+    silentAlert: false
+
+- speciesId: "giraffe"
+  displayName: "Hươu cao cổ"
+  inheritPreset: "@medium_danger"
+  override:
+    audioIntensity: 20
+    silentAlert: true
+
+- speciesId: "leopard"
+  displayName: "Báo"
+  inheritPreset: "@critical_danger"
+  override:
+    ledColor: "RED"
+    audioSampleId: "A_dog_bark"
+
+- speciesId: "rhino"
+  displayName: "Tê giác"
+  inheritPreset: "@critical_danger"
+  override:
+    ledColor: "STROBE"
+    audioSampleId: "A_gunshot"
+
+- speciesId: "snake"
+  displayName: "Rắn"
+  inheritPreset: "@medium_danger"
+  override:
+    ledColor: "YELLOW"
+    audioSampleId: "A_alarm_siren"
+    silentAlert: false
+
+- speciesId: "deer"
+  displayName: "Nai"
+  inheritPreset: "@medium_danger"
+  override:
+    ledColor: "YELLOW"
+    audioSampleId: "A_dog_bark"

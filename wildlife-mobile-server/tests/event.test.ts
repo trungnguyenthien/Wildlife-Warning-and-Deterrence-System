@@ -27,8 +27,8 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   let rangerToken = '';
   let citizenToken = '';
   const camId = 'CAM_EVT_01';
-  const speciesId = 'voi_rung';
-  const humanId = 'human_border_intruder';
+  const speciesId = 'elephant';
+  const humanId = 'human';
   let appsList: any[] = [];
 
   beforeEach(() => {
@@ -153,7 +153,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
   // 2. Webhook AI Server: POST /cameras/{cameraId}/detections
   const validAiPayload = {
     detections: [
-      { speciesId: 'voi_rung', confidence: 0.95 }
+      { speciesId: 'elephant', confidence: 0.95 }
     ],
     imageUrl: 'https://cdn.example.com/voi-1.jpg',
     detectedAt: '2026-07-22T10:00:00Z'
@@ -288,7 +288,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
-        detections: [{ speciesId: 'human_border_intruder', confidence: 0.99 }],
+        detections: [{ speciesId: humanId, confidence: 0.99 }],
         imageUrl: 'https://cdn.example.com/human-1.jpg',
         detectedAt: '2026-07-22T10:15:00Z'
       });
@@ -433,7 +433,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
-        detections: [{ speciesId: speciesId, confidence: 0.96 }], // voi_rung (danger: CRITICAL, isHuman: false)
+        detections: [{ speciesId: speciesId, confidence: 0.96 }], // elephant (danger: CRITICAL, isHuman: false)
         imageUrl: 'https://cdn.example.com/voi-push.jpg',
         detectedAt: '2026-07-22T11:00:00Z'
       });
@@ -450,7 +450,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
-        detections: [{ speciesId: humanId, confidence: 0.98 }], // human_border_intruder (isHuman: true)
+        detections: [{ speciesId: humanId, confidence: 0.98 }], // human (isHuman: true)
         imageUrl: 'https://cdn.example.com/human-push.jpg',
         detectedAt: '2026-07-22T11:15:00Z'
       });

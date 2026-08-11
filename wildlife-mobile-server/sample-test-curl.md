@@ -125,25 +125,25 @@ curl -s "$BASE/control/presets" -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 curl -s "$BASE/audio-samples" -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 
 # 4. PUT /response-configs/:cameraId/:speciesId - Lưu cấu hình tùy chỉnh
-# Lưu ý: Cần thêm loài 'voi_rung' vào DB để chạy thành công (đã có ở bản test local)
-curl -s -X PUT "$BASE/response-configs/CAM_PROD_TEST/voi_rung" \
+# Lưu ý: Cần thêm loài 'elephant' vào DB để chạy thành công (đã có ở bản test local)
+curl -s -X PUT "$BASE/response-configs/CAM_PROD_TEST/elephant" \
   -H "Authorization: Bearer $RANGER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"ledFlash":true,"speakerWarn":true,"silentAlert":false,"ledColor":"RED","ledFlashRate":"FAST","ledDurationSeconds":10,"speakerSampleId":"warning_voice_1","audioIntensity":90}' | jq .
 
 # 5. GET /response-configs - Lấy chi tiết cấu hình tùy chỉnh của cặp camera/loài
-curl -s "$BASE/response-configs?cameraId=CAM_PROD_TEST&speciesId=voi_rung" \
+curl -s "$BASE/response-configs?cameraId=CAM_PROD_TEST&speciesId=elephant" \
   -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 
 # 6. GET /response-configs/:cameraId - Lấy toàn bộ cấu hình tùy chỉnh tại camera
 curl -s "$BASE/response-configs/CAM_PROD_TEST" -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 
 # 7. POST /response-configs/:cameraId/:speciesId/apply-preset/:presetId - Áp dụng Preset kịch bản mẫu
-curl -s -X POST "$BASE/response-configs/CAM_PROD_TEST/voi_rung/apply-preset/CRITICAL" \
+curl -s -X POST "$BASE/response-configs/CAM_PROD_TEST/elephant/apply-preset/CRITICAL" \
   -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 
 # 8. DELETE /response-configs/:cameraId/:speciesId - Reset cấu hình tùy chỉnh về cấu hình mặc định
-curl -s -X DELETE "$BASE/response-configs/CAM_PROD_TEST/voi_rung" \
+curl -s -X DELETE "$BASE/response-configs/CAM_PROD_TEST/elephant" \
   -H "Authorization: Bearer $RANGER_TOKEN" | jq .
 ```
 
@@ -189,7 +189,7 @@ curl -s "$BASE/alerts/feed" -H "Authorization: Bearer $CITIZEN_TOKEN" | jq .
 # POST /cameras/:cameraId/detections - AI Server gửi nhận diện thú rừng (Không cần Auth token)
 curl -s -X POST "$BASE/cameras/CAM_PROD_TEST/detections" \
   -H "Content-Type: application/json" \
-  -d '{"detections":[{"speciesId":"voi_rung","confidence":0.95}],"imageUrl":"https://res.cloudinary.com/dhfkqbnnx/image/upload/v1784718531/manual_snapshots/hs756foqkx1t0kjauhxm.png","detectedAt":"2026-07-23T09:00:00Z"}' | jq .
+  -d '{"detections":[{"speciesId":"elephant","confidence":0.95}],"imageUrl":"https://res.cloudinary.com/dhfkqbnnx/image/upload/v1784718531/manual_snapshots/hs756foqkx1t0kjauhxm.png","detectedAt":"2026-07-23T09:00:00Z"}' | jq .
 ```
 
 ### 2.9. Thống kê & Báo cáo
