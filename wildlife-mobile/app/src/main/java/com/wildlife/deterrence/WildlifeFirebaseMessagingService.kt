@@ -181,10 +181,13 @@ object NotificationBuilder {
 
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(if (isCritical) android.R.drawable.ic_dialog_alert else android.R.drawable.ic_dialog_info)
+            .setContentTitle(if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT")
+            .setContentText(payload.body)
             .setCustomContentView(collapsedViews)
             .setCustomBigContentView(expandedViews)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
 
         if (isCritical) {
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -203,7 +206,7 @@ class WildlifeFirebaseMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         android.util.Log.d("FCM", "Message received: ${message.data}")
-        val payload = parsePayload(message.data)
+        val payload = parsePayload(message, message.data)
         NotificationState.increment() // Tăng badge count
         NotificationBuilder.showNotification(applicationContext, payload)
     }
@@ -239,12 +242,14 @@ class WildlifeFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-    private fun parsePayload(data: Map<String, String>): WildlifeNotificationPayload {
+    private fun parsePayload(message: RemoteMessage, data: Map<String, String>): WildlifeNotificationPayload {
         val eventId = data["eventId"] ?: data["alertId"]
+        val notificationTitle = message.notification?.title ?: data["title"] ?: ""
+        val notificationBody = message.notification?.body ?: data["body"] ?: ""
         return WildlifeNotificationPayload(
             type = data["type"] ?: "system.alert",
-            title = data["title"] ?: "",
-            body = data["body"] ?: "",
+            title = notificationTitle,
+            body = notificationBody,
             cameraId = data["cameraId"],
             eventId = eventId,
             speciesName = data["speciesName"],
