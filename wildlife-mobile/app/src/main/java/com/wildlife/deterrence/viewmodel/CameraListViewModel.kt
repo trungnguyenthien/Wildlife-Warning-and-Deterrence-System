@@ -64,7 +64,12 @@ class CameraListViewModel(
                     emptyList()
                 }
 
-                val uiModels = camerasResponse.map { cam ->
+                // Sắp xếp danh sách: trạm có snapshot mới nhất lên đầu
+                val sortedCameras = camerasResponse.sortedByDescending { cam ->
+                    cam.snapshot?.capturedAt?.let { parseIsoDateTime(it) } ?: 0L
+                }
+
+                val uiModels = sortedCameras.map { cam ->
                     // Lọc danh sách alerts chưa đọc của camera này
                     val unreadAlerts = alertsResponse.filter { it.cameraId == cam.id && !it.isRead }
                     val hasUnread = unreadAlerts.isNotEmpty()
