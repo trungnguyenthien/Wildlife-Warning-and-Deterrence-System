@@ -170,14 +170,14 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.detections.length).toBe(1);
   });
 
-  it('TC_AI_DET_SUCCESS_02: Append to active event if duration is under 5 minutes', async () => {
+  it('TC_AI_DET_SUCCESS_02: Append to active event if duration is under 30 seconds', async () => {
     if (!rangerToken) return;
-    // Gửi tiếp nhận diện lúc 10h02 (cách 2 phút)
+    // Gửi tiếp nhận diện lúc 10h00m15s (cách 15 giây)
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
         ...validAiPayload,
-        detectedAt: '2026-07-22T10:02:00Z',
+        detectedAt: '2026-07-22T10:00:15Z',
         imageUrl: 'https://cdn.example.com/voi-2.jpg'
       });
 
@@ -185,14 +185,14 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(res.body.detections.length).toBe(1);
   });
 
-  it('TC_AI_DET_SUCCESS_03: Split into new event if duration exceeds 5 minutes', async () => {
+  it('TC_AI_DET_SUCCESS_03: Split into new event if duration exceeds 30 seconds', async () => {
     if (!rangerToken) return;
-    // Gửi tiếp nhận diện lúc 10h10 (cách 8 phút)
+    // Gửi tiếp nhận diện lúc 10h01 (cách 1 phút)
     const res = await request(app)
       .post(`/cameras/${camId}/detections`)
       .send({
         ...validAiPayload,
-        detectedAt: '2026-07-22T10:10:00Z',
+        detectedAt: '2026-07-22T10:01:00Z',
         imageUrl: 'https://cdn.example.com/voi-3.jpg'
       });
 

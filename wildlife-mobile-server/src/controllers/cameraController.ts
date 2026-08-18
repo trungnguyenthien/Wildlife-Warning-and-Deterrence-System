@@ -68,12 +68,12 @@ export async function getCamera(req: AuthenticatedRequest, res: Response) {
       return res.status(404).json({ error: 'not_found_camera', message: 'Không tìm thấy trạm camera yêu cầu.' });
     }
 
-    // Tìm sự kiện hoạt động gần nhất trong vòng 5 phút trước
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    // Tìm sự kiện hoạt động gần nhất trong vòng 30 giây trước
+    const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
     const activeEvent = await prisma.event.findFirst({
       where: {
         cameraId: camera.id,
-        detectedAt: { gte: fiveMinutesAgo }
+        detectedAt: { gte: thirtySecondsAgo }
       },
       orderBy: { detectedAt: 'desc' },
       include: {
