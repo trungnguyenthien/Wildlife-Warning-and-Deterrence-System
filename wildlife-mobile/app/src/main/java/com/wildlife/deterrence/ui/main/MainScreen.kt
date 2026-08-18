@@ -50,6 +50,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.data.NetworkClient
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import com.wildlife.deterrence.ui.screens.CameraListTab
 import com.wildlife.deterrence.ui.screens.StatisticsTab
 import com.wildlife.deterrence.viewmodel.CameraListViewModel
@@ -515,6 +518,59 @@ private fun SettingsTabContent(
                         text = "Thiết lập hành vi ứng phó",
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+        }
+
+        // Card 3: Server Configuration
+        val tokenManager = remember { TokenManager(context) }
+        var serverUrlInput by remember { mutableStateOf(tokenManager.getServerUrl()) }
+
+        AppCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                AppSectionTitleText(
+                    text = "Cấu hình Máy chủ (Server URL)",
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                OutlinedTextField(
+                    value = serverUrlInput,
+                    onValueChange = { serverUrlInput = it },
+                    label = { Text("Địa chỉ máy chủ API") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = {
+                        val trimmed = serverUrlInput.trim()
+                        if (trimmed.isNotEmpty()) {
+                            val formatted = if (trimmed.endsWith("/")) trimmed else "$trimmed/"
+                            tokenManager.saveServerUrl(formatted)
+                            NetworkClient.customServerUrl = formatted
+                            android.widget.Toast.makeText(context, "Đã lưu địa chỉ máy chủ: $formatted", android.widget.Toast.LENGTH_SHORT).show()
+                        } else {
+                            android.widget.Toast.makeText(context, "Vui lòng nhập địa chỉ máy chủ hợp lệ", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Lưu địa chỉ", color = Color.White)
                 }
             }
         }

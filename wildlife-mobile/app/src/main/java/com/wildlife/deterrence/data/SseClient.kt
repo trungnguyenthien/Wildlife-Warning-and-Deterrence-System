@@ -13,6 +13,7 @@ import java.io.IOException
 class SseClient(private val okHttpClient: OkHttpClient) {
     private var job: Job? = null
     private var isRunning = false
+    private var activeCall: okhttp3.Call? = null
 
     fun startListening(
         url: String,
@@ -33,7 +34,10 @@ class SseClient(private val okHttpClient: OkHttpClient) {
                         .header("Cache-Control", "no-cache")
                         .build()
 
-                    okHttpClient.newCall(request).execute().use { response ->
+                    val call = okHttpClient.newCall(request)
+                    activeCall = call
+
+                    call.execute().use { response ->
                         if (!response.isSuccessful) {
                             throw IOException("SSE Connection failed: $response")
                         }
@@ -57,6 +61,11 @@ class SseClient(private val okHttpClient: OkHttpClient) {
                                 currentData = l.substring(5).trim()
                             }
                         }
+
+                        // Nếu kết nối kết thúc bình thường (EOF) khi vẫn đang chạy, ném lỗi để đi vào nhánh retry delay
+                        if (isRunning) {
+                            throw IOException("Connection closed by server (EOF)")
+                        }
                     }
                 } catch (e: Exception) {
                     if (isRunning) {
@@ -64,6 +73,8 @@ class SseClient(private val okHttpClient: OkHttpClient) {
                         delay(retryDelay)
                         retryDelay = (retryDelay * 2).coerceAtMost(30000L) // Backoff
                     }
+                } finally {
+                    activeCall = null
                 }
             }
         }
@@ -71,6 +82,8 @@ class SseClient(private val okHttpClient: OkHttpClient) {
 
     fun stopListening() {
         isRunning = false
+        activeCall?.cancel()
+        activeCall = null
         job?.cancel()
         job = null
     }

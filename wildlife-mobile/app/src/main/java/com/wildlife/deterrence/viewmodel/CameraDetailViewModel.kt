@@ -212,7 +212,7 @@ class CameraDetailViewModel(
 
     fun startSseListening(context: android.content.Context) {
         val token = tokenManager.getToken() ?: return
-        val url = "${NetworkClient.BASE_URL}cameras/stream"
+        val url = "${NetworkClient.getServerUrl()}cameras/stream"
         NetworkClient.sseClient.startListening(
             url = url,
             token = "Bearer $token",

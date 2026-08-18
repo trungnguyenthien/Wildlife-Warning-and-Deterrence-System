@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.wildlife.deterrence.data.TokenManager
+import com.wildlife.deterrence.data.NetworkClient
 import com.wildlife.deterrence.ui.main.MainScreen
 import com.wildlife.deterrence.ui.screens.LoginScreen
 import com.wildlife.deterrence.ui.screens.RegisterScreen
@@ -41,6 +42,12 @@ import com.wildlife.deterrence.viewmodel.BehaviorViewModel
 fun MainNavigation() {
   val context = LocalContext.current
   val tokenManager = remember { TokenManager(context) }
+
+  // Khởi tạo customServerUrl cho NetworkClient từ SharedPreferences
+  LaunchedEffect(tokenManager) {
+      NetworkClient.customServerUrl = tokenManager.getServerUrl()
+  }
+
   val backStack = rememberNavBackStack(Splash)
   var registeredUsername by remember { mutableStateOf<String?>(null) }
 

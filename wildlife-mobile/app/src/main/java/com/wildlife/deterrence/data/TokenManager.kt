@@ -74,4 +74,23 @@ open class TokenManager(context: Context?) {
       testProfile = null
     }
   }
+
+  private var testServerUrl: String? = null
+
+  open fun getServerUrl(): String {
+    return if (sharedPreferences != null) {
+      sharedPreferences.getString("server_url", "https://wildlife-warning-and-deterrence-sys.vercel.app/") ?: "https://wildlife-warning-and-deterrence-sys.vercel.app/"
+    } else {
+      testServerUrl ?: "https://wildlife-warning-and-deterrence-sys.vercel.app/"
+    }
+  }
+
+  open fun saveServerUrl(url: String) {
+    val formattedUrl = if (url.endsWith("/")) url else "$url/"
+    if (sharedPreferences != null) {
+      sharedPreferences.edit().putString("server_url", formattedUrl).apply()
+    } else {
+      testServerUrl = formattedUrl
+    }
+  }
 }

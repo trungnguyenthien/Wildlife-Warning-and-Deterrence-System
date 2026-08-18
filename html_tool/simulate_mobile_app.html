@@ -1272,9 +1272,15 @@
       function handleSseChunk(chunk) {
         logToSseTerminal(chunk, 'in');
 
-        // Automatically trigger reload cameras list if updates push
-        if (chunk.includes('camera-update') || chunk.includes('alert-update')) {
-          logToSseTerminal('[SYSTEM] Nhận tín hiệu camera-update. Tự động tải lại danh sách...', 'sys');
+        // Automatically trigger reload cameras list if updates push (case-insensitive)
+        const lowerChunk = chunk.toLowerCase();
+        if (
+          lowerChunk.includes('camera-update') ||
+          lowerChunk.includes('camera_update') ||
+          lowerChunk.includes('detection_alert') ||
+          lowerChunk.includes('alert-update')
+        ) {
+          logToSseTerminal('[SYSTEM] Nhận tín hiệu cập nhật thời gian thực. Tự động tải lại danh sách...', 'sys');
           btnLoadCameras.click();
         }
       }
