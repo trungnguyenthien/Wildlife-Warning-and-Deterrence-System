@@ -45,8 +45,10 @@ object NetworkClient {
         .build()
 
     val sseOkHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS) // Giữ kết nối SSE vô hạn không bị client tự ngắt
+        .connectTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .readTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .writeTimeout(0, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .addInterceptor(DynamicBaseUrlInterceptor())
         .build()
 
     val retrofit: Retrofit = Retrofit.Builder()
