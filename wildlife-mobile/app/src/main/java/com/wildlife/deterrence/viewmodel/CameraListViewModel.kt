@@ -5,9 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.wildlife.deterrence.data.CameraApi
 import com.wildlife.deterrence.data.NetworkClient
 import com.wildlife.deterrence.data.TokenManager
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -41,6 +44,9 @@ class CameraListViewModel(
 
     private val _uiState = MutableStateFlow(CameraListUiState())
     val uiState: StateFlow<CameraListUiState> = _uiState.asStateFlow()
+
+    private var pollingJob: Job? = null
+    private var lastKnownUpdatedAt: Long = 0L
 
     fun loadCameras(isSilent: Boolean = false) {
         val token = tokenManager.getToken()
@@ -169,67 +175,44 @@ class CameraListViewModel(
         loadCameras(isSilent = true)
     }
 
-    fun startSseListening(context: android.content.Context) {
-        val token = tokenManager.getToken() ?: return
-        val url = "${NetworkClient.getServerUrl()}cameras/stream"
-        NetworkClient.sseClient.startListening(
-            url = url,
-            token = "Bearer $token",
-            onEventReceived = { event, data ->
-                android.util.Log.d("SSE_Notification", "Received event: $event, data: $data")
-                // Khi nhận được sự kiện (ví dụ: DETECTION_ALERT), reload danh sách chạy ngầm
-                loadCameras(isSilent = true)
-
-                // Phát notification native lên thiết bị khi nhận được cảnh báo thời gian thực từ SSE
-                if (event == "DETECTION_ALERT") {
-                    try {
-                        val json = org.json.JSONObject(data)
-                        val eventId = json.optString("eventId")
-                        val cameraId = json.optString("cameraId")
-                        val cameraName = json.optString("cameraName")
-                        val detectionsArray = json.optJSONArray("detections")
-
-                        if (detectionsArray != null && detectionsArray.length() > 0) {
-                            val firstDet = detectionsArray.getJSONObject(0)
-                            val speciesId = firstDet.optString("speciesId")
-                            val displayName = firstDet.optString("displayName")
-                            val confidence = firstDet.optDouble("confidence", 0.0)
-                            val riskScore = (confidence * 10).toInt()
-
-                            if (speciesId.isNotEmpty()) {
-                                val payload = com.wildlife.deterrence.WildlifeNotificationPayload(
-                                    type = "danger_alert",
-                                    title = "CẢNH BÁO NGUY HIỂM",
-                                    body = "Phát hiện $displayName (Chỉ số $riskScore/10) tại $cameraName. Chạm để kích hoạt kịch bản xua đuổi.",
-                                    cameraId = cameraId,
-                                    eventId = eventId,
-                                    speciesName = displayName,
-                                    riskScore = riskScore,
-                                    dangerLevel = "CRITICAL",
-                                    alertId = eventId,
-                                    timestamp = System.currentTimeMillis()
-                                )
-                                com.wildlife.deterrence.NotificationBuilder.showNotification(context, payload)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.e("SSE_Notification", "Error parsing SSE data", e)
-                    }
-                }
-            },
-            onError = { error ->
-                android.util.Log.e("SSE_Notification", "SSE connection error", error)
+    fun startPolling(intervalMs: Long = 5000L) {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while (isActive) {
+                smartPoll()
+                delay(intervalMs)
             }
-        )
+        }
+        android.util.Log.d("Polling", "Smart polling started (interval=${intervalMs}ms)")
     }
 
-    fun stopSseListening() {
-        NetworkClient.sseClient.stopListening()
+    private suspend fun smartPoll() {
+        val token = tokenManager.getToken() ?: return
+        val authHeader = "Bearer $token"
+        try {
+            val heartbeat = cameraApi.getCamerasHeartbeat(authHeader)
+            val serverUpdatedAt = parseIsoDateTime(heartbeat.lastUpdatedAt)
+            if (serverUpdatedAt > lastKnownUpdatedAt) {
+                android.util.Log.d("Polling", "New update detected (server=$serverUpdatedAt > local=$lastKnownUpdatedAt), fetching cameras...")
+                lastKnownUpdatedAt = serverUpdatedAt
+                loadCameras(isSilent = true)
+            } else {
+                android.util.Log.d("Polling", "No new update, skipping GET /cameras")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("Polling", "Heartbeat check failed", e)
+        }
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
+        android.util.Log.d("Polling", "Camera list polling stopped")
     }
 
     override fun onCleared() {
         super.onCleared()
-        stopSseListening()
+        stopPolling()
     }
 
     private fun parseIsoDateTime(isoString: String): Long {

@@ -45,6 +45,10 @@ data class RenameCameraRequest(
     val name: String
 )
 
+data class CamerasHeartbeatResponse(
+    val lastUpdatedAt: String
+)
+
 data class CameraDetailResponse(
     val id: String,
     val name: String,
@@ -104,6 +108,11 @@ interface CameraApi {
         @Path("cameraId") cameraId: String,
         @Body body: RenameCameraRequest
     ): CameraResponse
+
+    @GET("cameras/heartbeat")
+    suspend fun getCamerasHeartbeat(
+        @Header("Authorization") token: String
+    ): CamerasHeartbeatResponse
 
     @GET("alerts/feed")
     suspend fun getAlertsFeed(

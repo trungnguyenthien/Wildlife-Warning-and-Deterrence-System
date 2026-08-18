@@ -87,7 +87,7 @@ Phần này mô tả **mô hình xử lý/threading bên trong** ứng dụng An
 - **Kiến trúc:** MVVM (Model-View-ViewModel) với UI bằng **Jetpack Compose + Material3**.
 - **Tầng dữ liệu:** Retrofit (`NetworkClient` singleton) khởi tạo các API interface (`AuthApi`, `CameraApi`, `ConfigApi`, `AlertApi`, `SmsApi`) — ViewModel gọi trực tiếp các service này bằng Retrofit `suspend fun`. (`DataRepository` hiện chỉ là stub placeholder, không dùng cho logic thật).
 - **Quản lý session:** `TokenManager` lưu/accesstoken; mỗi request đính kèm `Authorization: Bearer <token>`.
-- **Realtime:** `SseClient` giữ kết nối SSE (cập nhật realtime camera/alert); FCM push qua `WildlifeFirebaseMessagingService`.
+- **Realtime:** `PollingManager` (coroutine loop 5s) cập nhật danh sách camera định kỳ; FCM push qua `WildlifeFirebaseMessagingService`.
 
 ### 0.2. Mô hình xử lý đồng bộ & Threading
 
@@ -96,7 +96,7 @@ Phần này mô tả **mô hình xử lý/threading bên trong** ứng dụng An
 - **Retrofit `suspend fun`** thực hiện I/O mạng trên **OkHttp executor thread** rồi resume về Main — do đó **Main thread không bị block**, dù không cần `withContext(Dispatchers.IO)` cho các call mạng.
 - Trạng thái được lưu trong **`MutableStateFlow`** (`_xxx.value`), UI thu thập bằng `collectAsState()`; mọi cập nhật giao diện nằm trên Main thread.
 - **Ngoài ViewModel**, các tác vụ nền có đời sống/scope riêng tạo `CoroutineScope(Dispatchers.IO)`:
-  - `SseClient` — kết nối SSE long-lived.
+  - `pollingJob` (trong ViewModel) — vòng lặp Auto-Polling 5 giây.
   - `WildlifeFirebaseMessagingService` & `DeterrenceActionReceiver` — xử lý FCM push / action notification.
 
 ### 0.3. Luồng xử lý điển hình (Ví dụ: Màn hình Cấu hình phòng vệ theo loài)
@@ -236,9 +236,11 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
-### 3.1.2. Action: Register & Listen for updates via SSE
+### 3.1.2. Action: Auto-Polling cập nhật danh sách camera
 
-- **Mô tả:** Song song với việc tải danh sách, ứng dụng tự động mở kết nối Server-Sent Events (SSE) để duy trì kênh lắng nghe sự kiện từ xa. Khi có cập nhật mới (ảnh chụp mới, thay đổi trạng thái hoạt động), server đẩy tin nhắn `camera-update` báo cho client tự động fetch lại thông tin mới.
+- **Mô tả:** Song song với việc tải danh sách lần đầu, ứng dụng khởi động một vòng lặp coroutine (polling) chạy ngầm trong `viewModelScope`. Sau mỗi **5 giây**, vòng lặp tự động gọi `GET /cameras` để lấy dữ liệu mới nhất, cập nhật ảnh và sắp xếp lại thứ tự camera. Polling dừng khi người dùng rời khỏi màn hình (`onDispose`).
+
+> **Lý do thay thế SSE:** Endpoint SSE (`GET /cameras/stream`) không tương thích với Vercel Serverless — trả về `Cannot GET`. Auto-Polling đạt hiệu quả tương đương mà không cần long-lived connection.
 
 ```mermaid
 sequenceDiagram
@@ -247,20 +249,14 @@ sequenceDiagram
     participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Mobile_Server: Người dùng ở màn hình Camera (Danh sách / Chi tiết) ở chế độ Foreground
-    Mobile->>Mobile_Server: GET /cameras/stream (Accept: text/event-stream)
-    activate Mobile_Server
-    Mobile_Server-->>Mobile: Thiết lập kết nối EventStream thành công (HTTP 200 OK)
-    
-    Note over Mobile, Mobile_Server: Duy trì kết nối sống (Keep-Alive)
-    
-    Note over Mobile_Server: Có sự kiện mới (AI phát hiện động vật hoặc camera đổi trạng thái)
-    Mobile_Server-->>Mobile: Đẩy sự kiện: event: camera-update (data: {"cameraId", "updateType"})
-    
-    Note over Mobile: Nhận sự kiện -> Tự động kích hoạt gọi REST API để reload lại UI
-    deactivate Mobile_Server
+    loop Mỗi 5 giây (isActive)
+        Mobile->>Mobile_Server: GET /cameras (Authorization: Bearer token)
+        Mobile_Server-->>Mobile: Danh sách camera mới nhất (thumbnail, status, capturedAt)
+        Mobile->>Mobile: Cập nhật UI: sắp xếp lại thứ tự, ảnh snapshot mới
+    end
 ```
 *   **Chi tiết đặc tả API:**
-    *   [GET /cameras/stream](./03-mobile_api.md#54-get-camerasstream)
+    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
 

@@ -431,38 +431,50 @@ Cập nhật thông tin chi tiết của camera (ví dụ: đổi tên hiển th
 
 ---
 
-### 5.4. `GET /cameras/stream`
+### 5.4. ~~`GET /cameras/stream`~~ `[DEPRECATED]`
 
-Kết nối Server-Sent Events (SSE) để nhận các thông báo cập nhật thời gian thực từ phía server về tình trạng các trạm camera. Khi có thông báo này, client Android sẽ tự động gọi lại các API REST tương ứng để tải lại dữ liệu mới nhất (Mô hình **Ping-to-Fetch**).
+> **[DEPRECATED — Không còn được sử dụng bởi ứng dụng Android]**
+> Endpoint SSE này không tương thích với nền tảng Vercel Serverless (trả về `Cannot GET`). Ứng dụng đã chuyển sang cơ chế **Auto-Polling** (gọi `GET /cameras` mỗi 5 giây) để đạt hiệu quả tương đương mà không cần long-lived connection.
+>
+> Xem chi tiết: [giai-thich-ket-noi-sse.md](./giai-thich-ket-noi-sse.md)
+
+~~Kết nối Server-Sent Events (SSE) để nhận các thông báo cập nhật thời gian thực từ phía server về tình trạng các trạm camera.~~
+
+---
+
+### 5.5. `GET /cameras/heartbeat`
+
+Kiểm tra timestamp của sự kiện gần nhất trong toàn hệ thống camera. Được sử dụng bởi cơ chế **Smart Polling** trên Android: client gọi endpoint này trước mỗi chu kỳ 5 giây, chỉ gọi `GET /cameras` (endpoint nặng hơn) khi `lastUpdatedAt` trả về lớn hơn timestamp đã lưu cục bộ.
 
 **Headers**
-- `Accept: text/event-stream`
 - `Authorization: Bearer <accessToken>`
 
-**Event Stream Structure**
-
-*   **Tên sự kiện (event name):** `camera-update`
-*   **Dữ liệu (data):** Chuỗi JSON chứa mã camera và loại cập nhật.
-
-**Ví dụ dữ liệu nhận được:**
-
+**Response 200**
 ```json
 {
-  "cameraId": "cam-001",
-  "updateType": "DETECTION",
-  "timestamp": "2026-07-19T04:55:00+07:00"
+  "lastUpdatedAt": "2026-08-18T05:12:33.000Z"
 }
 ```
 
 *Trong đó:*
-- `updateType` có các giá trị:
-  - `STATUS`: Có sự thay đổi về trạng thái ONLINE/OFFLINE của trạm.
-  - `DETECTION`: Phát hiện loài động vật mới (có cảnh báo).
-  - `SNAPSHOT`: Ảnh chụp snapshot vừa được cập nhật mới.
+- `lastUpdatedAt`: ISO 8601 UTC — thời điểm phát hiện động vật gần nhất trong toàn bộ hệ thống. Trả về `"1970-01-01T00:00:00.000Z"` nếu chưa có sự kiện nào.
+
+**Logic tối ưu trên client (Smart Polling):**
+
+```
+// Mỗi 5 giây:
+GET /cameras/heartbeat  →  { lastUpdatedAt: "T" }
+if (T > lastKnownUpdatedAt):
+    GET /cameras  →  cập nhật UI
+    lastKnownUpdatedAt = T
+else:
+    // bỏ qua, không gọi thêm
+```
+
+> [!TIP]
+> Endpoint này chỉ query 1 dòng từ DB (không join, không serialize dữ liệu lớn) nên chi phí cực thấp so với `GET /cameras`.
 
 ---
-
-
 
 
 ## 6. Nhóm 4 — Kiểm thử thiết bị ngoại vi
@@ -1194,7 +1206,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 | # | Method | Endpoint | Mô tả chức năng |
 |---|---|---|---|
 | 5.1 | GET | `/cameras` | Lấy danh sách trạm camera |
-| 5.4 | GET | `/cameras/stream` | Nhận thông báo cập nhật thời gian thực qua kết nối SSE để tự động reload |
+| ~~5.4~~ | ~~GET~~ | ~~`/cameras/stream`~~ | ~~[DEPRECATED]~~ Thay bằng Auto-Polling `GET /cameras` mỗi 5 giây |
 
 ### 14.4. Tab thống kê (`[STATISTICS_TAB]`)
 
@@ -1218,7 +1230,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 |---|---|---|---|
 | 5.2 | GET | `/cameras/{cameraId}` | Lấy chi tiết camera, ảnh snapshot gần nhất và phán đoán nhận dạng AI |
 | 5.3 | PATCH | `/cameras/{cameraId}` | Đổi tên hiển thị camera (`rename_camera_dialog`) |
-| 5.4 | GET | `/cameras/stream` | Nhận thông báo cập nhật thời gian thực qua kết nối SSE để tự động reload |
+| ~~5.4~~ | ~~GET~~ | ~~`/cameras/stream`~~ | ~~[DEPRECATED]~~ Thay bằng Auto-Polling `GET /cameras` mỗi 5 giây |
 | 10.1 | GET | `/events` | Lấy nhật ký sự kiện lịch sử ghi nhận của camera (`camera_log_list`) |
 
 ### 14.7. Màn hình danh sách cấu hình loài (`[SPECIES_CONFIG_LIST_SCREEN]`)

@@ -88,12 +88,12 @@ fun CameraListTab(
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    // Lắng nghe kết nối SSE cập nhật thời gian thực khi Tab ở Foreground
+    // Auto-polling cập nhật danh sách camera mỗi 5 giây khi Tab ở Foreground
     DisposableEffect(Unit) {
         viewModel.loadCameras()
-        viewModel.startSseListening(context)
+        viewModel.startPolling()
         onDispose {
-            viewModel.stopSseListening()
+            viewModel.stopPolling()
         }
     }
 

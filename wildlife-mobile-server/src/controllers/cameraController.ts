@@ -51,6 +51,22 @@ export async function listCameras(_req: AuthenticatedRequest, res: Response) {
   }
 }
 
+// 1.5. GET /cameras/heartbeat - Lấy timestamp cập nhật mới nhất (Smart Polling)
+export async function getCamerasHeartbeat(_req: AuthenticatedRequest, res: Response) {
+  try {
+    const latest = await prisma.event.findFirst({
+      orderBy: { detectedAt: 'desc' },
+      select: { detectedAt: true }
+    });
+    return res.status(200).json({
+      lastUpdatedAt: latest?.detectedAt.toISOString() ?? new Date(0).toISOString()
+    });
+  } catch (error) {
+    console.error('Lỗi khi lấy heartbeat camera:', error);
+    return res.status(500).json({ error: 'Lỗi máy chủ nội bộ.' });
+  }
+}
+
 // 2. GET /cameras/{cameraId} - Lấy chi tiết camera
 export async function getCamera(req: AuthenticatedRequest, res: Response) {
   const { cameraId } = req.params;

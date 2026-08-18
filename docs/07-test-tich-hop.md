@@ -91,7 +91,7 @@ Tài liệu này định nghĩa chi tiết các kịch bản kiểm thử tích 
 *   **Các bước thực hiện:**
     1.  Mở màn hình danh sách camera trên Mobile App. Xác nhận camera `cam-01` đang hiển thị trạng thái `🟢 Online`.
     2.  Ngắt kết nối mạng của Trạm Camera `cam-01` (hoặc tắt tệp giả lập AI Server).
-    3.  Đợi khoảng **30 giây** (chu kỳ kiểm tra heartbeat) và quan sát giao diện.
+    3.  Đợi khoảng **≤5 giây** (chu kỳ Auto-Polling) và quan sát giao diện.
     4.  Bật lại mạng hoặc khởi động lại trạm camera.
 *   **Kết quả trực quan mong đợi:**
     *   **Khi mất kết nối:** Trạng thái trên card đổi sang màu xám `⚪ Offline`, ảnh thumbnail của camera bị làm mờ kèm biểu tượng mất kết nối.
@@ -143,4 +143,4 @@ Tài liệu này định nghĩa chi tiết các kịch bản kiểm thử tích 
 *   **Kết quả trực quan mong đợi:**
     *   Thiết bị 2 lập tức tự cập nhật màn hình cấu hình của Khỉ sang màu LED **Trắng** mà không cần người dùng thao tác quay ra ngoài hoặc reload thủ công.
 *   **Liên kết thiết kế:**
-    *   Cơ chế cập nhật qua SSE: [02-dac-ta-man-hinh-android-app.md](./02-dac-ta-man-hinh-android-app.md#hanh-vi-hoat-dong-thoi-gian-thuc-sse)
+    *   Cơ chế cập nhật Auto-Polling: [giai-thich-ket-noi-sse.md](./giai-thich-ket-noi-sse.md)

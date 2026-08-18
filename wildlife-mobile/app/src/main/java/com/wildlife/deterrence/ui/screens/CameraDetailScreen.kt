@@ -41,9 +41,9 @@ fun CameraDetailScreen(
 
     val context = androidx.compose.ui.platform.LocalContext.current
     DisposableEffect(Unit) {
-        viewModel.startSseListening(context)
+        viewModel.startPolling()
         onDispose {
-            viewModel.stopSseListening()
+            viewModel.stopPolling()
         }
     }
 

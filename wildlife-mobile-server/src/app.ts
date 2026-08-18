@@ -4,7 +4,7 @@ import { authenticateToken } from './middlewares/auth';
 
 // Import các controller phẳng
 import { register, login, logout, me, updateMe, getAblyToken } from './controllers/authController';
-import { listCameras, getCamera, renameCamera, streamCameras, testDevice, getCameraHistory } from './controllers/cameraController';
+import { listCameras, getCamera, renameCamera, streamCameras, testDevice, getCameraHistory, getCamerasHeartbeat } from './controllers/cameraController';
 import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, applyPreset, listPresets, listAudioSamples, listAlertSounds } from './controllers/configController';
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
 import { listEvents, listAlertFeed, readAlert, processDetection, getAlertDetail, listNotificationsInbox } from './controllers/eventController';
@@ -60,6 +60,7 @@ app.patch('/users/me', authenticateToken, updateMe); // Chỉ dùng để test
 // 4. ENDPOINTS TRẠM CAMERA
 // ==========================================
 app.get('/cameras', authenticateToken, listCameras);
+app.get('/cameras/heartbeat', authenticateToken, getCamerasHeartbeat); // Smart Polling — phải đăng ký TRƯỜC /:cameraId
 app.get('/cameras/stream', authenticateToken, streamCameras);
 app.get('/cameras/:cameraId', authenticateToken, getCamera);
 app.get('/cameras/:cameraId/history', authenticateToken, getCameraHistory);
