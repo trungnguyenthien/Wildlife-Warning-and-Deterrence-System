@@ -197,6 +197,7 @@ object NotificationBuilder {
                 .setColor(0xFF2E7D32.toInt())
         }
 
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val notificationId = UUID.randomUUID().hashCode()
         manager.notify(notificationId, builder.build())
     }
