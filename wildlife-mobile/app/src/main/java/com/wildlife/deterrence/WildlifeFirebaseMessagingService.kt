@@ -46,8 +46,8 @@ object NotificationState {
 }
 
 object NotificationChannels {
-    const val CHANNEL_CRITICAL = "channel_critical_v2"
-    const val CHANNEL_DEFAULT = "channel_default_v2"
+    const val CHANNEL_CRITICAL = "channel_critical_v3"
+    const val CHANNEL_DEFAULT = "channel_default_v3"
 
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -76,6 +76,12 @@ object NotificationChannels {
             ).apply {
                 description = "Thông báo hệ thống, cập nhật thiết bị"
                 enableVibration(true)
+                val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val audioAttributes = AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build()
+                setSound(soundUri, audioAttributes)
             }
 
             manager.createNotificationChannel(criticalChannel)
@@ -179,21 +185,25 @@ object NotificationBuilder {
             expandedViews.setViewVisibility(R.id.notification_action_button, android.view.View.GONE)
         }
 
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(if (isCritical) android.R.drawable.ic_dialog_alert else android.R.drawable.ic_dialog_info)
             .setContentTitle(if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT")
             .setContentText(payload.body)
             .setCustomContentView(collapsedViews)
             .setCustomBigContentView(expandedViews)
+            .setCustomHeadsUpContentView(collapsedViews)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setSound(defaultSoundUri)
+            .setVibrate(longArrayOf(0, 500, 250, 500))
 
         if (isCritical) {
-            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
+            builder.setPriority(NotificationCompat.PRIORITY_MAX)
                 .setColor(0xFFC62828.toInt())
         } else {
-            builder.setPriority(NotificationCompat.PRIORITY_HIGH)
+            builder.setPriority(NotificationCompat.PRIORITY_MAX)
                 .setColor(0xFF2E7D32.toInt())
         }
 
