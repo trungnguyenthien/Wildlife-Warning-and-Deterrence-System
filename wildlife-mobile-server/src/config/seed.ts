@@ -155,11 +155,12 @@ export async function runSeed(prisma: PrismaClient) {
   }
   console.log(`[Species] Đã nạp danh mục 10 loài động vật chuẩn.`);
 
-  // 3. Tạo 4 Trạm Camera (Camera)
+  // 3. Tạo 2 Trạm Camera (Camera)
+  await prisma.camera.deleteMany({});
   const cameras = [
     {
       id: 'camera_01',
-      name: 'Trạm Bờ Sông Đăk Bla',
+      name: 'trạm 01',
       latitude: 14.3496,
       longitude: 108.0062,
       address: 'Xã Đăk Rơ Wa, Thành phố Kon Tum, Kon Tum',
@@ -168,28 +169,10 @@ export async function runSeed(prisma: PrismaClient) {
     },
     {
       id: 'camera_02',
-      name: 'Cửa Rừng Quốc Gia Yok Don',
+      name: 'trạm 02',
       latitude: 12.8764,
       longitude: 107.7289,
       address: 'Huyện Buôn Đôn, Đắk Lắk',
-      status: CameraStatus.ONLINE,
-      liveFeedUrl: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 'camera_03',
-      name: 'Vành Đai Biên Giới Đức Cơ',
-      latitude: 13.8052,
-      longitude: 107.4583,
-      address: 'Cửa khẩu Quốc tế Lệ Thanh, Đức Cơ, Gia Lai',
-      status: CameraStatus.ONLINE,
-      liveFeedUrl: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-      id: 'camera_04',
-      name: 'Trạm Kiểm Soát Đèo Mang Yang',
-      latitude: 13.9931,
-      longitude: 108.2614,
-      address: 'Quốc lộ 19, Mang Yang, Gia Lai',
       status: CameraStatus.ONLINE,
       liveFeedUrl: 'https://www.w3schools.com/html/mov_bbb.mp4'
     }
@@ -202,7 +185,7 @@ export async function runSeed(prisma: PrismaClient) {
       create: c
     });
   }
-  console.log(`[Camera] Đã nạp 4 trạm camera giám sát biên phòng và lâm phận.`);
+  console.log(`[Camera] Đã nạp 2 trạm camera giám sát biên phòng và lâm phận.`);
 
   // 4. Nạp sẵn cấu hình phòng vệ tùy chỉnh (ResponseConfig) cho nhiều loài
   await prisma.responseConfig.deleteMany({});
