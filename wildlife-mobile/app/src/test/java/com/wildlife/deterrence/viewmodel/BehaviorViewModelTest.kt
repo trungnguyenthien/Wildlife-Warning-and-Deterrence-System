@@ -33,6 +33,23 @@ class BehaviorViewModelTest {
                 SpeciesResponse("nguoi", "Người", "LOW", true, "", 5, "", "2026-07-28T00:00:00Z")
             )
         }
+
+        override suspend fun getCameras(token: String): List<CameraResponse> {
+            return listOf(
+                CameraResponse(
+                    id = "cam-1",
+                    name = "Camera Trạm Đông",
+                    location = LocationResponse(10.0, 106.0, "Cửa Rừng"),
+                    status = "ONLINE",
+                    liveFeedUrl = "http://...",
+                    snapshot = null
+                )
+            )
+        }
+
+        override suspend fun testDevice(token: String, cameraId: String, deviceKey: String, body: TestDeviceRequest): retrofit2.Response<Unit> {
+            return retrofit2.Response.success(Unit)
+        }
     }
 
     private val fakeConfigApi = FakeConfigApi()
@@ -105,7 +122,7 @@ class BehaviorViewModelTest {
         val customConfig = BehaviorConfigUiModel(
             speciesId = "voi",
             presetType = "custom",
-            audioType = "Tần số siêu âm",
+            audioType = "Tiếng gầm",
             audioVolume = 45,
             ledFrequency = "2 lần/giây",
             ledColor = "Trắng",
@@ -119,11 +136,32 @@ class BehaviorViewModelTest {
 
         val loadedConfig = viewModel.getConfigForSpecies("voi")
         assertEquals("custom", loadedConfig.presetType)
-        assertEquals("Tần số siêu âm", loadedConfig.audioType)
+        assertEquals("Tiếng gầm", loadedConfig.audioType)
         assertEquals(45, loadedConfig.audioVolume)
         assertEquals(30, loadedConfig.ledDuration)
         assertFalse(loadedConfig.silentAlertSms)
         assertTrue(loadedConfig.silentAlertPush)
+    }
+
+    @Test
+    fun TC_BEHAVIOR_TEST_AUDIO_AT_STATION() {
+        val viewModel = BehaviorViewModel(tokenManager, fakeCameraApi, fakeConfigApi)
+        
+        // Đợi init load cameras xong, kiểm tra selected camera
+        assertNotNull(viewModel.selectedCameraForTest.value)
+        assertEquals("cam-1", viewModel.selectedCameraForTest.value?.id)
+
+        var successCalled = false
+        var errorCalled = false
+
+        viewModel.testAudioAtStation(
+            speciesId = "voi",
+            onSuccess = { successCalled = true },
+            onError = { errorCalled = true }
+        )
+
+        assertTrue(successCalled)
+        assertFalse(errorCalled)
     }
 }
 
@@ -134,9 +172,7 @@ class FakeConfigApi : ConfigApi {
                 AudioSampleItem("A_gunshot", "Tiếng súng"),
                 AudioSampleItem("A_growl", "Tiếng gầm"),
                 AudioSampleItem("A_dog_bark", "Tiếng chó sủa lớn"),
-                AudioSampleItem("A_alarm_siren", "Tiếng nổ giả lập"),
-                AudioSampleItem("A_explosion", "Tiếng nổ giả lập"),
-                AudioSampleItem("A_ultrasonic", "Tần số siêu âm")
+                AudioSampleItem("A_explosion", "Tiếng nổ giả lập")
             ),
             citizenAlertSounds = listOf(
                 AlertSoundItem("deer", "Tiếng Nai", "https://.../deer.mp3"),

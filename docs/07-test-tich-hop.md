@@ -68,7 +68,7 @@ Tài liệu này định nghĩa chi tiết các kịch bản kiểm thử tích 
     2.  Bấm vào biểu tượng điều khiển thiết bị ngoại vi (hoặc màn hình cấu hình chi tiết loài, phần thông số tùy chỉnh nâng cao).
     3.  Tại phần cài đặt thử nghiệm, cấu hình:
         *   Thiết bị: **speaker** (Loa)
-        *   Âm thanh nghe thử: **A_alarm_siren** (Còi hú khẩn cấp)
+        *   Âm thanh nghe thử: **A_explosion** (Tiếng nổ giả lập)
         *   Cường độ (Cường độ âm lượng): **90%**
         *   Thời gian chạy thử: **5 giây**
     4.  Nhấn nút **Nghe thử (Test Audio)**.

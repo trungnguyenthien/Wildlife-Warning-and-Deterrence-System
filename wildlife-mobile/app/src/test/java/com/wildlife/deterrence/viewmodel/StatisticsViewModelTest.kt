@@ -221,4 +221,8 @@ open class FakeStatsCameraApi : CameraApi {
     ): retrofit2.Response<Unit> {
         return retrofit2.Response.success(Unit)
     }
+
+    override suspend fun getCamerasHeartbeat(token: String): CamerasHeartbeatResponse {
+        return CamerasHeartbeatResponse("")
+    }
 }

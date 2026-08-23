@@ -11,6 +11,8 @@ import com.wildlife.deterrence.data.ConfigApi
 import com.wildlife.deterrence.data.AlertSoundItem
 import com.wildlife.deterrence.data.AudioSampleItem
 import com.wildlife.deterrence.data.AudioSamplesResponse
+import com.wildlife.deterrence.data.CameraResponse
+import com.wildlife.deterrence.data.TestDeviceRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -56,11 +58,62 @@ class BehaviorViewModel(
     private val _citizenAlertSounds = MutableStateFlow<List<AlertSoundItem>>(emptyList())
     val citizenAlertSounds: StateFlow<List<AlertSoundItem>> = _citizenAlertSounds.asStateFlow()
 
+    private val _cameras = MutableStateFlow<List<CameraResponse>>(emptyList())
+    val cameras: StateFlow<List<CameraResponse>> = _cameras.asStateFlow()
+
+    private val _selectedCameraForTest = MutableStateFlow<CameraResponse?>(null)
+    val selectedCameraForTest: StateFlow<CameraResponse?> = _selectedCameraForTest.asStateFlow()
+
     // Lưu trữ cấu hình trong bộ nhớ session để bảo toàn dữ liệu
     private val _configsMap = mutableMapOf<String, BehaviorConfigUiModel>()
 
     init {
         loadSpeciesList()
+    }
+
+    fun setSelectedCameraForTest(camera: CameraResponse) {
+        _selectedCameraForTest.value = camera
+    }
+
+    fun testAudioAtStation(
+        speciesId: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val camera = _selectedCameraForTest.value
+        if (camera == null) {
+            onError("Vui lòng chọn trạm camera để nghe thử.")
+            return
+        }
+        val token = tokenManager.getToken() ?: return
+        val authHeader = "Bearer $token"
+        val config = getConfigForSpecies(speciesId)
+
+        // Ánh xạ audioType -> audioSampleId
+        val audioSampleId = mapAudioTypeToId(config.audioType)
+
+        viewModelScope.launch {
+            try {
+                // Gửi lệnh test loa tại trạm camera đã chọn
+                val response = cameraApi.testDevice(
+                    token = authHeader,
+                    cameraId = camera.id,
+                    deviceKey = "speaker",
+                    body = TestDeviceRequest(
+                        durationSeconds = 5, // Phát thử 5 giây
+                        intensity = config.audioVolume,
+                        audioSampleId = audioSampleId
+                    )
+                )
+                if (response.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onError("Lỗi ${response.code()}: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                onError(e.message ?: "Lỗi kết nối")
+            }
+        }
     }
 
     fun loadSpeciesList() {
@@ -87,6 +140,17 @@ class BehaviorViewModel(
                     System.err.println("Lỗi tải danh mục âm thanh từ API: ${e.message}")
                     _deterrentSounds.value = emptyList()
                     _citizenAlertSounds.value = emptyList()
+                }
+
+                // Tải danh sách camera để phục vụ tính năng nghe thử tại trạm
+                try {
+                    val cameraList = cameraApi.getCameras("Bearer $token")
+                    _cameras.value = cameraList
+                    if (cameraList.isNotEmpty() && _selectedCameraForTest.value == null) {
+                        _selectedCameraForTest.value = cameraList.first()
+                    }
+                } catch (e: Exception) {
+                    System.err.println("Lỗi tải danh sách camera: ${e.message}")
                 }
 
                 // 1. Tải danh mục loài từ API
@@ -161,7 +225,7 @@ class BehaviorViewModel(
             "intruder" -> BehaviorConfigUiModel(
                 speciesId = speciesId,
                 presetType = "intruder",
-                audioType = mapAudioIdToType("A_alarm_siren"),
+                audioType = mapAudioIdToType("A_explosion"),
                 audioVolume = 90,
                 ledFrequency = "4 lần/giây",
                 ledColor = "Đỏ",
@@ -227,7 +291,6 @@ class BehaviorViewModel(
             "Tiếng gầm", "Tiếng gầm đe dọa" -> "A_growl"
             "Tiếng chó sủa lớn", "Tiếng chó sủa dữ dội", "Chó sủa lớn" -> "A_dog_bark"
             "Tiếng nổ giả lập", "Tiếng còi hú khẩn cấp" -> "A_explosion"
-            "Tần số siêu âm" -> "A_ultrasonic"
             else -> null
         }
     }
@@ -240,8 +303,7 @@ class BehaviorViewModel(
             "A_gunshot" -> "Tiếng súng"
             "A_growl" -> "Tiếng gầm"
             "A_dog_bark" -> "Chó sủa lớn"
-            "A_alarm_siren", "A_explosion" -> "Tiếng nổ giả lập"
-            "A_ultrasonic" -> "Tần số siêu âm"
+            "A_explosion" -> "Tiếng nổ giả lập"
             else -> "Không"
         }
     }
@@ -289,7 +351,7 @@ class BehaviorViewModel(
                 "critical"
             } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
                 "medium_animal"
-            } else if (data.ledColor == "RED" && data.audioSampleId == "A_alarm_siren" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_explosion" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
                 "intruder"
             } else {
                 "custom"

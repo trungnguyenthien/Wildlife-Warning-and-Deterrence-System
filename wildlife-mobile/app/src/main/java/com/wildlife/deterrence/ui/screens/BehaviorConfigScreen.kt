@@ -46,6 +46,8 @@ fun BehaviorConfigScreen(
     val context = LocalContext.current
     val deterrentSounds by viewModel.deterrentSounds.collectAsState()
     val citizenAlertSounds by viewModel.citizenAlertSounds.collectAsState()
+    val cameras by viewModel.cameras.collectAsState()
+    val selectedCameraForTest by viewModel.selectedCameraForTest.collectAsState()
 
     // Load initial config from view model (might be default until API loading finishes)
     var configState by remember { mutableStateOf(viewModel.getConfigForSpecies(speciesId)) }
@@ -245,7 +247,7 @@ fun BehaviorConfigScreen(
                     var audioMenuOpen by remember { mutableStateOf(false) }
                     val audioOptions = remember(deterrentSounds) {
                         if (deterrentSounds.isEmpty()) {
-                            listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Tần số siêu âm", "Không")
+                            listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Không")
                         } else {
                             deterrentSounds.map { it.name } + "Không"
                         }
@@ -311,10 +313,73 @@ fun BehaviorConfigScreen(
                         )
                     }
 
+                    // Dropdown chọn Camera trạm để nghe thử
+                    if (cameras.isNotEmpty()) {
+                        var camMenuOpen by remember { mutableStateOf(false) }
+                        Text(
+                            text = "Trạm camera phát thử",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { camMenuOpen = true }
+                                .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp))
+                                .padding(12.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = selectedCameraForTest?.name ?: "Chọn camera...",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 14.sp
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = null,
+                                    tint = primaryGreen
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = camMenuOpen,
+                                onDismissRequest = { camMenuOpen = false }
+                            ) {
+                                cameras.forEach { cam ->
+                                    DropdownMenuItem(
+                                        text = { Text(cam.name) },
+                                        onClick = {
+                                            viewModel.setSelectedCameraForTest(cam)
+                                            camMenuOpen = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
                     // Nút Nghe thử
                     OutlinedButton(
                         onClick = {
-                            Toast.makeText(context, "🔊 Đang phát thử: ${configState.audioType} ở cường độ ${configState.audioVolume}%", Toast.LENGTH_SHORT).show()
+                            if (selectedCameraForTest == null) {
+                                Toast.makeText(context, "Vui lòng chọn trạm camera để nghe thử", Toast.LENGTH_SHORT).show()
+                                return@OutlinedButton
+                            }
+                            Toast.makeText(context, "🔊 Đang gửi yêu cầu phát thử tại ${selectedCameraForTest?.name}...", Toast.LENGTH_SHORT).show()
+                            viewModel.testAudioAtStation(
+                                speciesId = speciesId,
+                                onSuccess = {
+                                    Toast.makeText(context, "✅ Đã kích hoạt phát thử tại trạm ${selectedCameraForTest?.name} thành công", Toast.LENGTH_SHORT).show()
+                                },
+                                onError = { err ->
+                                    Toast.makeText(context, "❌ Thất bại: $err", Toast.LENGTH_SHORT).show()
+                                }
+                            )
                         },
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, primaryGreen),
@@ -323,7 +388,7 @@ fun BehaviorConfigScreen(
                     ) {
                         Icon(imageVector = Icons.Default.VolumeUp, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = "Nghe thử", fontWeight = FontWeight.Bold)
+                        Text(text = "Nghe thử tại trạm", fontWeight = FontWeight.Bold)
                     }
                 }
             }

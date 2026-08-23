@@ -153,7 +153,8 @@ interface CameraApi {
 
 data class TestDeviceRequest(
     val durationSeconds: Int,
-    val intensity: Int
+    val intensity: Int,
+    val audioSampleId: String? = null
 )
 
 data class SpeciesResponse(

@@ -230,7 +230,7 @@ export async function runSeed(prisma: PrismaClient) {
         userId: ranger.id,
         speciesId: 'human',
         lastModifiedBy: ranger.id,
-        audioSampleId: 'A_alarm_siren',
+        audioSampleId: 'A_explosion',
         audioIntensity: 100,
         ledFlashRate: 'FAST',
         ledColor: 'STROBE',

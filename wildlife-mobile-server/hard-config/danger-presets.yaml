@@ -26,7 +26,7 @@
 #      * Kiểu dữ liệu: Boolean (true hoặc false).
 #    - audioSampleId: Mã định danh âm thanh cảnh báo được lưu trên thiết bị.
 #      * Kiểu dữ liệu: String (hoặc null nếu không dùng).
-#      * Giá trị cho phép: A_gunshot (Tiếng súng nổ), A_dog_bark (Tiếng chó sủa), A_alarm_siren (Tiếng còi hú khẩn cấp).
+#      * Giá trị cho phép: A_gunshot (Tiếng súng nổ), A_dog_bark (Tiếng chó sủa), A_explosion (Tiếng nổ giả lập).
 #    - audioIntensity: Cường độ âm lượng của loa phát tại chỗ.
 #      * Kiểu dữ liệu: Integer (Số nguyên từ 0 đến 100).
 #    - silentAlert: Chế độ cảnh báo âm thầm (Không kích hoạt còi/đèn tại trạm camera, chỉ âm thầm gửi Push/SMS).
@@ -66,7 +66,7 @@ preset_scenarios:
     ledIntensity: 15
     ledFlashRate: "4_per_sec"
     speakerWarn: true
-    audioSampleId: "A_alarm_siren"
+    audioSampleId: "A_explosion"
     audioIntensity: 90
     speakerSampleId: "monkey"
     silentAlert: false

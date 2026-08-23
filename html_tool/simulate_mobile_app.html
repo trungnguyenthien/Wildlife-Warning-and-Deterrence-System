@@ -873,7 +873,6 @@
                 <option value="A_growl">Tiếng gầm rú thú dữ (A_growl)</option>
                 <option value="A_dog_bark">Tiếng đàn chó săn sủa (A_dog_bark)</option>
                 <option value="A_explosion">Tiếng nổ lớn phá hủy (A_explosion)</option>
-                <option value="A_ultrasonic">Sóng siêu âm tần số cao (A_ultrasonic)</option>
               </optgroup>
               <optgroup label="Âm thanh cảnh báo (/alertSounds)" id="alert-sound-group"></optgroup>
             </select>
@@ -1329,6 +1328,7 @@
       // ALERT SOUNDS — nạp từ GET /alertSounds (public, không cần token)
       // ==========================================
       let alertSoundsList = [];
+      let animalDeterrentSoundsList = [];
 
       async function loadAlertSounds() {
         const baseUrl = BASE_URL;
@@ -1358,10 +1358,10 @@
       if (btnPreviewSound) {
         btnPreviewSound.addEventListener('click', () => {
           const sel = testAudioSampleInput.value;
-          const sound = alertSoundsList.find(s => s.id === sel);
+          const sound = alertSoundsList.find(s => s.id === sel) || animalDeterrentSoundsList.find(s => s.id === sel);
           const statusEl = document.getElementById('sound-preview-status');
           if (!sound || !sound.file) {
-            if (statusEl) statusEl.textContent = 'Âm thanh này không có file phát thử (chỉ âm thanh /alertSounds có file .mp3).';
+            if (statusEl) statusEl.textContent = 'Âm thanh này không có file phát thử.';
             return;
           }
           try {
@@ -1517,7 +1517,7 @@
             configLedDuration.value = 15;
             configLedFlash.dispatchEvent(new Event('change'));
 
-            configAudioSample.value = 'A_alarm_siren';
+            configAudioSample.value = 'A_explosion';
             configAudioIntensity.value = 90;
             audioIntensityValue.textContent = '90%';
 
@@ -1598,6 +1598,7 @@
             // Điền âm thanh xua đuổi
             configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
             if (audioData.animalDeterrentSounds && Array.isArray(audioData.animalDeterrentSounds)) {
+              animalDeterrentSoundsList = audioData.animalDeterrentSounds;
               audioData.animalDeterrentSounds.forEach(a => {
                 const opt = document.createElement('option');
                 opt.value = a.id;
@@ -1676,7 +1677,7 @@
               preset = 'critical_danger';
             } else if (data.ledColor === 'YELLOW' && data.audioSampleId === 'A_dog_bark' && data.audioIntensity === 50 && data.ledIntensity === 10 && data.ledFlashRate === '2_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'monkey')) {
               preset = 'medium_danger';
-            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_alarm_siren' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'monkey')) {
+            } else if (data.ledColor === 'RED' && data.audioSampleId === 'A_explosion' && data.audioIntensity === 90 && data.ledIntensity === 15 && data.ledFlashRate === '4_per_sec' && (data.speakerSampleId === null || data.speakerSampleId === 'monkey')) {
               preset = 'intruder';
             }
 

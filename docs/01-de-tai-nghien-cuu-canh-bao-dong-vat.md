@@ -224,12 +224,12 @@ Giao diện ứng dụng di động được thiết kế chuyên biệt cho h�
   - Mật khẩu bảo- **Luồng thiết lập:** Người dùng chọn Camera -> Chọn loài động vật -> Chọn kịch bản thiết lập nhanh -> Cấu hình chi tiết (nếu chọn kịch bản Tùy chỉnh).
 - **Tự thiết lập hành vi nhanh (Preset Scenarios Dropdown):** Cung cấp danh sách thả xuống (Dropdown list) chứa các kịch bản phòng vệ mẫu ứng phó nhanh cho loài đang chọn:
   - **Người lạ đột nhập:** Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
-  - **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
+  - **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
   - **Thú cực kỳ nguy hiểm**: Kích hoạt kịch bản **cảnh báo âm thầm (Silent Alert)**; không kích hoạt loa hay đèn báo tại chỗ để tránh làm kích động thú dữ hoảng loạn tấn công, đồng thời gửi thông báo đẩy khẩn cấp cho người dân di tản và cơ quan quản lý.
   - **Tùy chỉnh**: Khi tùy chọn này được chọn, phần **Các nhóm cài đặt chi tiết** bên dưới mới xuất hiện để người dùng tự do điều chỉnh các thông số.
 - **Các nhóm cài đặt chi tiết (Defense Parameter Configurations - Chỉ hiển thị khi chọn kịch bản "Tùy chỉnh"):**
   - **Âm thanh xua đuổi:**
-    - Lựa chọn loại âm thanh: _Tiếng súng, Tiếng gầm, Tiếng chó sủa lớn, Tiếng nổ giả lập, Tần số siêu âm_.
+    - Lựa chọn loại âm thanh: _Tiếng súng, Tiếng gầm, Tiếng chó sủa lớn, Tiếng nổ giả lập_.
     - Nút nghe thử (Test Audio) để kiểm tra âm thanh trước khi lưu.
   - **Đèn LED nhấp nháy:**
     - Cài đặt thời lượng nhấp nháy (Giây).
@@ -268,7 +268,7 @@ Màn hình này cho phép người dùng tùy biến và thiết lập trước 
 - **Luồng thiết lập:** Người dùng chọn loài động vật -> Cấu hình các nhóm cài đặt chi tiết bên dưới.
 - **Các nhóm cài đặt chi tiết (Defense Parameter Configurations):**
   - **Âm thanh xua đuổi:**
-    - Lựa chọn loại âm thanh: _Tiếng súng, Tiếng gầm, Tiếng chó sủa lớn, Tiếng nổ giả lập, Tần số siêu âm_.
+    - Lựa chọn loại âm thanh: _Tiếng súng, Tiếng gầm, Tiếng chó sủa lớn, Tiếng nổ giả lập_.
     - Thanh trượt (Slider) điều chỉnh cường độ âm thanh (Cấp độ từ 1 đến 100).
     - Nút nghe thử (Test Audio) để kiểm tra âm thanh trước khi lưu.
   - **Đèn LED nhấp nháy:**
@@ -284,7 +284,7 @@ Màn hình này cho phép người dùng tùy biến và thiết lập trước 
     - Lựa chọn âm thanh cảnh báo AI phát qua loa: danh sách âm thanh động vật lấy từ API `GET /alertSounds` (ví dụ: _Tiếng Hổ, Tiếng Voi, Tiếng Khỉ, Tiếng Nai, Tiếng Lợn rừng_).
 - **Tự thiết lập hành vi nhanh (Preset Scenarios):** Cung cấp 3 nút bấm thao tác nhanh để áp dụng kịch bản phòng vệ mẫu cho loài đang chọn:
   - Nút **Người lạ đột nhập**: Bật đèn LED nhấp nháy đỏ-trắng, phát âm thanh báo động (tiếng súng/nổ giả lập) tại chỗ để cảnh cáo đối tượng và tự động nhắn tin/gửi cảnh báo khẩn cấp về trạm trực của cơ quan chức năng (Kiểm lâm/Biên phòng).
-  - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi tần số siêu âm/chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
+  - Nút **Thú vừa**: Kích hoạt đèn LED chớp nhấp nháy, âm thanh xua đuổi chó sủa, nhằm ngăn chặn động vật ít nguy hại (Nai, Khỉ, Hươu cao cổ) phá hoại hoa màu.
   - Nút **Thú cực kỳ nguy hiểm**: Kích hoạt kịch bản **cảnh báo âm thầm (Silent Alert)**; không kích hoạt loa hay đèn báo tại chỗ để tránh làm kích động thú dữ hoảng loạn tấn công, đồng thời gửi thông báo đẩy khẩn cấp cho người dân di tản và cơ quan quản lý.
 
 ### 7.5. Cơ chế phân cấp thông báo và ứng phó (Notification & Response Hierarchy)

@@ -118,7 +118,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 ```json
 {
   "audio": {
-    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion / A_ultrasonic
+    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion
     "intensity": 75,                     // Cường độ âm thanh (1 - 100)
     "sampleId": "A_gunshot"              // ID âm thanh xua đuổi thú (bắt đầu bằng prefix 'A_')
   },
@@ -581,8 +581,7 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
     { "id": "A_gunshot",    "name": "Tiếng súng nổ đe dọa",   "file": null },
     { "id": "A_growl",      "name": "Tiếng gầm đe dọa",       "file": null },
     { "id": "A_dog_bark",   "name": "Tiếng chó sủa dữ dội",   "file": null },
-    { "id": "A_explosion",  "name": "Tiếng nổ giả lập",       "file": null },
-    { "id": "A_ultrasonic", "name": "Tần số siêu âm",         "file": null }
+    { "id": "A_explosion",  "name": "Tiếng nổ giả lập",       "file": null }
   ],
   "citizenAlertSounds": [
     { "id": "deer",       "name": "Tiếng Nai",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3" },

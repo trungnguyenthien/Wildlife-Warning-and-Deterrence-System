@@ -296,7 +296,6 @@ Khi thực hiện cấu hình sâu cho Camera hoặc nhận thông điệp đi�
         *   `A_growl`: Tiếng gầm rú của mãnh thú (hổ, báo).
         *   `A_dog_bark`: Tiếng đàn chó săn sủa dữ dội.
         *   `A_explosion`: Tiếng nổ lớn phá hủy.
-        *   `A_ultrasonic`: Phát sóng siêu âm tần số cao (khiến màng nhĩ thú khó chịu nhưng tai người không nghe thấy).
     *   *Tùy chọn giá trị hợp lệ cho âm thanh cảnh báo cư dân (khớp danh mục `GET /alertSounds` / `citizenAlertSounds` của `/audio-samples`, nguồn `hard-config/alert-sound.yaml`):*
         *   `tiger`: Tiếng Hổ (âm thanh cảnh báo qua loa).
         *   `monkey`: Tiếng Khỉ (âm thanh cảnh báo qua loa).

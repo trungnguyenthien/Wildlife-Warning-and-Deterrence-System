@@ -19,7 +19,7 @@
 #      * ledColor (String: RED, YELLOW, WHITE, STROBE, null)
 #      * ledIntensity (Integer: 0-100)
 #      * speakerWarn (Boolean: true/false)
-#      * audioSampleId (String: A_gunshot, A_dog_bark, A_alarm_siren, null)
+#      * audioSampleId (String: A_gunshot, A_dog_bark, A_explosion, null)
 #      * audioIntensity (Integer: 0-100)
 #      * silentAlert (Boolean: true/false)
 # ==============================================================================
@@ -50,14 +50,14 @@
   inheritPreset: "@intruder"
   override:
     ledColor: "RED"
-    audioSampleId: "A_alarm_siren"
+    audioSampleId: "A_explosion"
     silentAlert: false
 
 - speciesId: "crocodile"
   displayName: "Cá sấu"
   inheritPreset: "@critical_danger"
   override:
-    audioSampleId: "A_alarm_siren"
+    audioSampleId: "A_explosion"
     silentAlert: false
 
 - speciesId: "giraffe"
@@ -86,7 +86,7 @@
   inheritPreset: "@medium_danger"
   override:
     ledColor: "YELLOW"
-    audioSampleId: "A_alarm_siren"
+    audioSampleId: "A_explosion"
     silentAlert: false
 
 - speciesId: "deer"

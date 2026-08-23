@@ -294,27 +294,46 @@ export async function listPresets(_req: AuthenticatedRequest, res: Response) {
 }
 
 // 8. GET /audio-samples - Tải danh mục âm thanh mẫu (công khai, không cần xác thực)
-export async function listAudioSamples(_req: Request, res: Response) {
-  const result = {
-    // Âm thanh xua đuổi được nạp sẵn trong phần cứng (thẻ nhớ local của camera), không có file mp3 công khai -> file = null.
-    // Cấu trúc item thống nhất {id, name, file} giống citizenAlertSounds.
-    animalDeterrentSounds: [
-      { id: 'A_gunshot', name: 'Tiếng súng nổ đe dọa', file: null },
-      { id: 'A_growl', name: 'Tiếng gầm đe dọa', file: null },
-      { id: 'A_dog_bark', name: 'Tiếng chó sủa dữ dội', file: null },
-      { id: 'A_explosion', name: 'Tiếng nổ giả lập', file: null },
-      { id: 'A_ultrasonic', name: 'Tần số siêu âm', file: null }
-    ],
-    // Âm thanh cảnh báo qua loa lấy từ nguồn duy nhất hard-config/alert-sound.yaml (khớp GET /alertSounds)
-    citizenAlertSounds: loadAlertSounds()
-  };
-  return res.status(200).json(result);
+export async function listAudioSamples(req: Request, res: Response) {
+  const protocol = req.protocol;
+  const host = req.get('host');
+  const baseUrl = `${protocol}://${host}`;
+
+  const animalDeterrentSounds = [
+    { id: 'A_gunshot', name: 'Tiếng súng nổ đe dọa', file: `${baseUrl}/assets/alert/A_gunshot.mp3` },
+    { id: 'A_growl', name: 'Tiếng gầm đe dọa', file: `${baseUrl}/assets/alert/A_growl.mp3` },
+    { id: 'A_dog_bark', name: 'Tiếng chó sủa dữ dội', file: `${baseUrl}/assets/alert/A_dog_bark.mp3` },
+    { id: 'A_explosion', name: 'Tiếng nổ giả lập', file: `${baseUrl}/assets/alert/A_explosion.mp3` }
+  ];
+
+  const citizenAlertSounds = loadAlertSounds().map(sound => {
+    const filename = sound.file.substring(sound.file.lastIndexOf('/') + 1);
+    return {
+      ...sound,
+      file: `${baseUrl}/assets/alert/${filename}`
+    };
+  });
+
+  return res.status(200).json({
+    animalDeterrentSounds,
+    citizenAlertSounds
+  });
 }
 
 // 9. GET /alertSounds - Tải danh sách file âm thanh cảnh báo (công khai, không cần xác thực)
-export async function listAlertSounds(_req: Request, res: Response) {
+export async function listAlertSounds(req: Request, res: Response) {
   try {
-    const sounds = loadAlertSounds();
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
+    
+    const sounds = loadAlertSounds().map(sound => {
+      const filename = sound.file.substring(sound.file.lastIndexOf('/') + 1);
+      return {
+        ...sound,
+        file: `${baseUrl}/assets/alert/${filename}`
+      };
+    });
     return res.status(200).json(sounds);
   } catch (error) {
     console.error('[AlertSound] Lỗi khi load file alert-sound.yaml:', error);
