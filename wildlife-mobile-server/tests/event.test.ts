@@ -442,7 +442,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
     expect(mockSendEachForMulticast).toHaveBeenCalled();
   });
 
-  it('TC_AI_DET_SUCCESS_05: No push notification sent when detection is non-dangerous or human', async () => {
+  it('TC_AI_DET_SUCCESS_05: Push notification sent when detection is human or non-dangerous', async () => {
     if (!rangerToken) return;
 
     mockSendEachForMulticast.mockClear();
@@ -456,7 +456,7 @@ describe('EVENTS & ALERTS INTEGRATION SUITE', () => {
       });
 
     expect(res.status).toBe(201);
-    expect(mockSendEachForMulticast).not.toHaveBeenCalled();
+    expect(mockSendEachForMulticast).toHaveBeenCalled();
   });
 
   it('TC_AI_DET_FAILURE_09: Firebase push notification fails gracefully on invalid service account key', async () => {

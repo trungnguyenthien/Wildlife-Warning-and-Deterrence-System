@@ -315,7 +315,7 @@ export async function processDetection(req: Request, res: Response) {
 
     // Ràng buộc nghiệp vụ: Gom nhóm sự kiện nếu khoảng cách dưới 30 giây
     // Ngoại lệ: bỏ qua giới hạn nếu request đến từ công cụ simulate (header X-Bypass-Cooldown)
-    const bypassCooldown = req.headers['x-bypass-cooldown'] === 'true';
+    const bypassCooldown = false;
     if (!bypassCooldown && latestEvent && Math.abs(detectionTime.getTime() - latestEvent.detectedAt.getTime()) < 30 * 1000) {
       eventId = latestEvent.id;
       // Cập nhật lại thời gian và ảnh snapshot mới nhất cho sự kiện đang diễn ra
@@ -377,51 +377,45 @@ export async function processDetection(req: Request, res: Response) {
       }
     });
 
-    // Tạo bản tin cảnh báo gửi lên feed khẩn cấp nếu có sự kiện mới
-    if (isNewEvent) {
-      let alertType = AlertType.INTRUDER as AlertType;
-      if (mainSpecies.isHuman) {
-        alertType = AlertType.HUMAN_BORDER as AlertType;
-      } else {
-        alertType = AlertType.ANIMAL_RARE as AlertType;
-      }
-
-      console.log(`[Detection-Workflow] Kích hoạt sự kiện mới! Đang tạo Alert trong DB: type=${alertType}, title=Phát hiện ${mainSpecies.displayName}, dangerLevel=${maxDangerLevel}`);
-      const newAlert = await prisma.alert.create({
-        data: {
-          id: `alt-${Date.now()}`,
-          type: alertType,
-          title: `Cảnh báo: Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name}`,
-          dangerLevel: maxDangerLevel,
-          cameraId,
-          eventId
-        }
-      });
-      console.log(`[Detection-Workflow] Đã tạo Alert thành công! Alert ID: ${newAlert.id}`);
-
-      // Bắn Push Notification khi phát hiện thú rừng nguy hiểm (không phải người và nguy cơ từ MEDIUM trở lên)
-      const isPushConditionMet = !mainSpecies.isHuman && maxDangerLevel !== DangerLevel.LOW;
-      console.log(`[Detection-Workflow] Kiểm tra điều kiện gửi Push Notification: isHuman=${mainSpecies.isHuman}, maxDangerLevel=${maxDangerLevel} -> Điều kiện thỏa mãn: ${isPushConditionMet}`);
-      
-      if (isPushConditionMet) {
-        const isEscalated = maxDangerLevel === DangerLevel.CRITICAL;
-        console.log(`[Detection-Workflow] Tiến hành gọi sendPushToAllDevices: isEscalated=${isEscalated}`);
-        await sendPushToAllDevices(
-          isEscalated ? 'Cảnh báo nguy khẩn: Phát hiện động vật nguy cấp' : 'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
-          `Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name} (Độ nguy hiểm: ${maxDangerLevel})`,
-          { 
-            eventId, 
-            cameraId, 
-            speciesId: mainSpecies.id,
-            type: isEscalated ? 'animal.escalated' : 'animal.detected',
-            dangerLevel: maxDangerLevel
-          }
-        );
-      } else {
-        console.log(`[Detection-Workflow] Bỏ qua gửi Push Notification do không thỏa mãn điều kiện (phát hiện con người hoặc độ nguy hại là LOW).`);
-      }
+    // Tạo bản tin cảnh báo gửi lên feed khẩn cấp và gửi Push Notification (bất kể là sự kiện mới hay gộp)
+    let alertType = AlertType.INTRUDER as AlertType;
+    if (mainSpecies.isHuman) {
+      alertType = AlertType.HUMAN_BORDER as AlertType;
     } else {
-      console.log(`[Detection-Workflow] Nhận diện được gộp nhóm vào Event cũ ${eventId}. Không tạo Alert mới hay gửi Push.`);
+      alertType = AlertType.ANIMAL_RARE as AlertType;
+    }
+
+    console.log(`[Detection-Workflow] Đang tạo Alert trong DB: type=${alertType}, title=Phát hiện ${mainSpecies.displayName}, dangerLevel=${maxDangerLevel}`);
+    const newAlert = await prisma.alert.create({
+      data: {
+        id: `alt-${Date.now()}`,
+        type: alertType,
+        title: `Cảnh báo: Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name}`,
+        dangerLevel: maxDangerLevel,
+        cameraId,
+        eventId
+      }
+    });
+    console.log(`[Detection-Workflow] Đã tạo Alert thành công! Alert ID: ${newAlert.id}`);
+
+    // Bắn Push Notification: Luôn phát thông báo bất kể là con người hay độ nguy hại thấp
+    const isPushConditionMet = true;
+    console.log(`[Detection-Workflow] Kiểm tra điều kiện gửi Push Notification: Luôn gửi thông báo -> Điều kiện thỏa mãn: ${isPushConditionMet}`);
+    
+    if (isPushConditionMet) {
+      const isEscalated = maxDangerLevel === DangerLevel.CRITICAL;
+      console.log(`[Detection-Workflow] Tiến hành gọi sendPushToAllDevices: isEscalated=${isEscalated}`);
+      await sendPushToAllDevices(
+        isEscalated ? 'Cảnh báo nguy khẩn: Phát hiện động vật nguy cấp' : 'Cảnh báo: Phát hiện động vật hoang dã nguy hiểm',
+        `Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name} (Độ nguy hiểm: ${maxDangerLevel})`,
+        { 
+          eventId, 
+          cameraId, 
+          speciesId: mainSpecies.id,
+          type: isEscalated ? 'animal.escalated' : 'animal.detected',
+          dangerLevel: maxDangerLevel
+        }
+      );
     }
 
     // Tra cứu userId sở hữu camera từ Snapshot gần nhất để định dạng cấu hình phòng vệ theo chủ sở hữu
