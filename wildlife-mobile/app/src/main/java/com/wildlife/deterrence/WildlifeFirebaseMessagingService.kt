@@ -21,6 +21,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -31,6 +33,13 @@ object DeepLinkHandler {
 object NotificationState {
     private val _unreadCount = MutableStateFlow(0)
     val unreadCount: StateFlow<Int> = _unreadCount.asStateFlow()
+
+    private val _realtimeAlertEvent = MutableSharedFlow<WildlifeNotificationPayload>(extraBufferCapacity = 1)
+    val realtimeAlertEvent = _realtimeAlertEvent.asSharedFlow()
+
+    fun triggerRealtimeUpdate(payload: WildlifeNotificationPayload) {
+        _realtimeAlertEvent.tryEmit(payload)
+    }
 
     fun setUnreadCount(count: Int) {
         _unreadCount.value = count
@@ -219,6 +228,7 @@ class WildlifeFirebaseMessagingService : FirebaseMessagingService() {
         android.util.Log.d("FCM", "Message received: ${message.data}")
         val payload = parsePayload(message, message.data)
         NotificationState.increment() // Tăng badge count
+        NotificationState.triggerRealtimeUpdate(payload)
         NotificationBuilder.showNotification(applicationContext, payload)
     }
 

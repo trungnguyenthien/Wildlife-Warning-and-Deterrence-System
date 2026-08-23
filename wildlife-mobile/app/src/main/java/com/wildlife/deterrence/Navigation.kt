@@ -37,6 +37,20 @@ import com.wildlife.deterrence.viewmodel.SmsSetupViewModel
 import com.wildlife.deterrence.ui.screens.BehaviorSpeciesListScreen
 import com.wildlife.deterrence.ui.screens.BehaviorConfigScreen
 import com.wildlife.deterrence.viewmodel.BehaviorViewModel
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 
 @Composable
 fun MainNavigation() {
@@ -55,9 +69,20 @@ fun MainNavigation() {
   // Việc xử lý deep link thực tế được thực hiện bên trong entry<Main> khi Main đã composed xong
 
 
-  NavDisplay(
-    backStack = backStack,
-    onBack = { backStack.removeLastOrNull() },
+  var inAppAlertToShow by remember { mutableStateOf<WildlifeNotificationPayload?>(null) }
+
+  LaunchedEffect(Unit) {
+      NotificationState.realtimeAlertEvent.collect { payload ->
+          if (payload.type.startsWith("animal.") || payload.type == "danger_alert") {
+              inAppAlertToShow = payload
+          }
+      }
+  }
+
+  Box(modifier = Modifier.fillMaxSize()) {
+    NavDisplay(
+      backStack = backStack,
+      onBack = { backStack.removeLastOrNull() },
     entryProvider =
       entryProvider {
         entry<Splash> {
@@ -252,5 +277,70 @@ fun MainNavigation() {
           )
         }
       },
-  )
+    )
+
+    // Render Popup Cảnh báo in-app trên tất cả màn hình
+    inAppAlertToShow?.let { payload ->
+        val isCritical = payload.dangerLevel == "CRITICAL" || payload.type == "animal.escalated" || payload.type == "danger_alert"
+        val titleText = if (isCritical) "⚠️ CẢNH BÁO NGUY KHẨN" else "🔔 CẢNH BÁO PHÁT HIỆN"
+        val accentColor = if (isCritical) Color(0xFFBA1A1A) else Color(0xFFD97706)
+
+        AlertDialog(
+            onDismissRequest = { inAppAlertToShow = null },
+            title = {
+                Text(
+                    text = titleText,
+                    color = accentColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            text = {
+                Column {
+                    Text(
+                        text = payload.body,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    payload.riskScore?.let { score ->
+                        Text(
+                            text = "Độ tin cậy: $score%",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } ?: payload.dangerLevel?.let { level ->
+                        Text(
+                            text = "Mức độ: $level",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val eventId = payload.eventId
+                        val speciesName = payload.speciesName
+                        inAppAlertToShow = null
+                        if (eventId != null) {
+                            backStack.add(AlertDetail(eventId, speciesName))
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = accentColor)
+                ) {
+                    Text("Xem Chi Tiết", color = Color.White)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { inAppAlertToShow = null }) {
+                    Text("Đóng", color = MaterialTheme.colorScheme.outline)
+                }
+            }
+        )
+    }
+  }
 }

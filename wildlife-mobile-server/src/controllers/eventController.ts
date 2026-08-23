@@ -88,14 +88,22 @@ export async function listAlertFeed(req: AuthenticatedRequest, res: Response) {
         },
         event: {
           include: {
-            eventDetections: true
+            eventDetections: {
+              include: {
+                species: true
+              }
+            }
           }
         }
       }
     });
 
     const result = alerts.map((alt) => {
-      const mainDetection = alt.event?.eventDetections?.[0];
+      // Tìm detection tương ứng với tên loài xuất hiện trong tiêu đề Alert
+      const mainDetection = alt.event?.eventDetections?.find((det) => 
+        alt.title.includes(det.species.displayName)
+      ) || alt.event?.eventDetections?.[0];
+
       return {
         id: alt.id,
         type: alt.type,

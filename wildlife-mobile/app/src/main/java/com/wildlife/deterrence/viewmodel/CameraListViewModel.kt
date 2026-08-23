@@ -46,6 +46,7 @@ class CameraListViewModel(
     val uiState: StateFlow<CameraListUiState> = _uiState.asStateFlow()
 
     private var pollingJob: Job? = null
+    private var realtimeJob: Job? = null
     private var lastKnownUpdatedAt: Long = 0L
 
     fun loadCameras(isSilent: Boolean = false) {
@@ -181,6 +182,14 @@ class CameraListViewModel(
             }
         }
         android.util.Log.d("Polling", "Smart polling started (interval=${intervalMs}ms)")
+
+        realtimeJob?.cancel()
+        realtimeJob = viewModelScope.launch {
+            com.wildlife.deterrence.NotificationState.realtimeAlertEvent.collect {
+                android.util.Log.d("Polling", "Realtime alert event received, reloading cameras...")
+                loadCameras(isSilent = true)
+            }
+        }
     }
 
     private suspend fun smartPoll() {
@@ -204,6 +213,8 @@ class CameraListViewModel(
     fun stopPolling() {
         pollingJob?.cancel()
         pollingJob = null
+        realtimeJob?.cancel()
+        realtimeJob = null
         android.util.Log.d("Polling", "Camera list polling stopped")
     }
 

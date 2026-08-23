@@ -77,7 +77,7 @@ export async function sendPushToAllDevices(
     const isCritical = payload?.dangerLevel === 'CRITICAL' || 
                        payload?.type === 'animal.escalated' || 
                        payload?.type === 'danger_alert';
-    const channelId = isCritical ? 'channel_critical_v2' : 'channel_default_v2';
+    const channelId = isCritical ? 'channel_critical_v3' : 'channel_default_v3';
 
     const message: MulticastMessage = {
       notification: { title, body },
