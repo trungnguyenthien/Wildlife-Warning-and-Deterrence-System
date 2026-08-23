@@ -2064,15 +2064,58 @@
 
       btnManualAck.addEventListener("click", sendAckResponse);
 
+      function setLocalToken(value) {
+        try {
+          localStorage.setItem("appAccessToken", value);
+        } catch (e) {}
+        setCookie("appAccessToken", value, 1);
+      }
+
+      function getLocalToken() {
+        let t = getCookie("appAccessToken");
+        if (!t) {
+          try {
+            t = localStorage.getItem("appAccessToken");
+          } catch (e) {}
+        }
+        return t;
+      }
+
       async function fetchSpeciesList() {
-        const token = getCookie("appAccessToken");
+        const baseUrl = serverUrlInput.value.trim();
+        let token = getLocalToken();
+
         if (!token) {
-          console.warn(
-            "Không tìm thấy appAccessToken trong cookie. Sử dụng ô nhập tự do.",
-          );
+          console.log("Không tìm thấy appAccessToken. Đang tự động đăng nhập nhanh bằng tài khoản ranger_demo...");
+          try {
+            const loginRes = await fetch(`${baseUrl}/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                username: 'ranger_demo',
+                password: 'DemoPassword123!'
+              })
+            });
+            if (loginRes.ok) {
+              const loginData = await loginRes.json();
+              token = loginData.token;
+              if (token) {
+                setLocalToken(token);
+                console.log("Tự động đăng nhập nhanh thành công. Đã lấy được token.");
+              }
+            } else {
+              console.warn("Không thể tự động đăng nhập. Trạng thái phản hồi:", loginRes.status);
+            }
+          } catch (loginErr) {
+            console.error("Lỗi khi tự động đăng nhập:", loginErr);
+          }
+        }
+
+        if (!token) {
+          console.warn("Không có appAccessToken hợp lệ. Sử dụng ô nhập tự do.");
           return;
         }
-        const baseUrl = serverUrlInput.value.trim();
+
         try {
           const res = await fetch(`${baseUrl}/species`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -2089,6 +2132,11 @@
                 datalist.appendChild(opt);
               });
             }
+          } else if (res.status === 401) {
+            console.log("Token hết hạn hoặc không hợp lệ (401). Đang làm mới...");
+            try { localStorage.removeItem("appAccessToken"); } catch(e) {}
+            document.cookie = "appAccessToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+            setTimeout(fetchSpeciesList, 500);
           }
         } catch (e) {
           console.error("Không thể tải danh sách loài từ API:", e);

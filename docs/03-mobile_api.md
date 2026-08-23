@@ -155,6 +155,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 
 ### 3.1. `POST /auth/register`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Đăng ký tài khoản mới. Mapping: màn hình `[REGISTER_SCREEN]` (mục 7.4.2 của [01-de-tai-nghien-cuu-canh-bao-dong-vat.md](./01-de-tai-nghien-cuu-canh-bao-dong-vat.md)).
 
 **Request body**
@@ -210,6 +211,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 
 ### 3.2. `POST /auth/login`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [01-de-tai-nghien-cuu-canh-bao-dong-vat.md](./01-de-tai-nghien-cuu-canh-bao-dong-vat.md)).
 
 **Request body**
@@ -249,6 +251,7 @@ Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [01-de-tai-nghien-cuu-ca
 
 ### 3.3. `POST /auth/logout`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Thu hồi session hiện tại. Mapping: từ tab `[SETTING_TAB]` → Đăng xuất.
 
 **Request header**: chỉ Authorization.
@@ -264,6 +267,7 @@ Thu hồi session hiện tại. Mapping: từ tab `[SETTING_TAB]` → Đăng xu�
 
 ### 4.1. `POST /devices/push-token`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Đăng ký FCM token. Mapping: tự động chạy ngầm sau khi đăng nhập (`[LOGIN_SCREEN]`) hoặc đăng ký (`[REGISTER_SCREEN]`) thành công.
 
 **Request body**
@@ -288,6 +292,7 @@ Thu hồi session hiện tại. Mapping: từ tab `[SETTING_TAB]` → Đăng xu�
 
 ### 4.2. `DELETE /devices/push-token`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Hủy đăng ký khi logout / user tắt thông báo.
 
 **Response 204**.
@@ -296,6 +301,7 @@ Hủy đăng ký khi logout / user tắt thông báo.
 
 ### 4.3. `GET /notifications/inbox`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 > ⚠️ **GHI CHÚ:** ĐÂY LÀ API DÙNG ĐỂ TEST (DEVELOP)
 
 Lấy danh sách thông báo trong app (phân trang).
@@ -335,6 +341,7 @@ Enum `type`: `animal.detected`, `animal.escalated`, `fence.activated`, `fence.de
 
 ### 5.1. `GET /cameras`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Danh sách camera user được phép xem. Mapping: tab `[CAMERA_LIST_TAB]` (phần hiển thị danh sách thẻ camera).
 
 **Query params**
@@ -370,6 +377,7 @@ Danh sách camera user được phép xem. Mapping: tab `[CAMERA_LIST_TAB]` (ph�
 
 ### 5.2. `GET /cameras/{cameraId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Chi tiết 1 camera bao gồm thông tin camera, ảnh snapshot gần nhất và phán đoán hình ảnh hiện tại. Mapping: màn hình `[CAMERA_VIEW_SCREEN]` (màn hình chi tiết camera).
 
 **Response 200**
@@ -403,6 +411,7 @@ Chi tiết 1 camera bao gồm thông tin camera, ảnh snapshot gần nhất và
 
 ### 5.3.  `PATCH /cameras/{cameraId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Cập nhật thông tin chi tiết của camera (ví dụ: đổi tên hiển thị). Mapping: màn hình `[CAMERA_VIEW_SCREEN]` (nút `rename_camera_button` và hộp thoại `rename_camera_dialog`).
 
 **Request body**
@@ -433,6 +442,7 @@ Cập nhật thông tin chi tiết của camera (ví dụ: đổi tên hiển th
 
 ### 5.4. ~~`GET /cameras/stream`~~ `[DEPRECATED]`
 
+- **Trạng thái:** Đã loại bỏ (Deprecated)
 > **[DEPRECATED — Không còn được sử dụng bởi ứng dụng Android]**
 > Endpoint SSE này không tương thích với nền tảng Vercel Serverless (trả về `Cannot GET`). Ứng dụng đã chuyển sang cơ chế **Auto-Polling** (gọi `GET /cameras` mỗi 5 giây) để đạt hiệu quả tương đương mà không cần long-lived connection.
 >
@@ -444,6 +454,7 @@ Cập nhật thông tin chi tiết của camera (ví dụ: đổi tên hiển th
 
 ### 5.5. `GET /cameras/heartbeat`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Kiểm tra timestamp của sự kiện gần nhất trong toàn hệ thống camera. Được sử dụng bởi cơ chế **Smart Polling** trên Android: client gọi endpoint này trước mỗi chu kỳ 5 giây, chỉ gọi `GET /cameras` (endpoint nặng hơn) khi `lastUpdatedAt` trả về lớn hơn timestamp đã lưu cục bộ.
 
 **Headers**
@@ -481,6 +492,7 @@ else:
 
 ### 6.1. `POST /cameras/{cameraId}/devices/{deviceKey}/test`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Kích hoạt lệnh kiểm thử thiết bị ngoại vi tại hiện trường (LED/Loa/Rào điện). 
 
 **Luồng xử lý nội bộ (Ably-based):**
@@ -524,6 +536,7 @@ POST /cameras/cam-001/devices/led/test
 
 ### 7.1. `GET /control/presets`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (nhóm nút chọn kịch bản phòng vệ mẫu).
 
 **Response 200**
@@ -556,6 +569,7 @@ Danh sách preset mẫu. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (n
 
 ### 7.2. `GET /audio-samples`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông báo được nạp sẵn trong phần cứng thiết bị. Mapping: dropdown `sound_type_dropdown` và `speaker_message_dropdown` tại màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]`.
 
 > **Không yêu cầu xác thực (public endpoint)** — không cần gửi `Authorization: Bearer <token>`.
@@ -588,6 +602,7 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
 
 ### 7.3. `GET /alertSounds`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Tải danh sách các file **âm thanh cảnh báo** được nạp sẵn trong phần cứng thiết bị. Nguồn dữ liệu là tệp cấu hình [hard-config/alert-sound.yaml](../wildlife-mobile-server/hard-config/alert-sound.yaml), tham khảo thư mục âm thanh gốc `wildlife-mobile-server/assets/alert/`. Dùng để hiển thị danh sách file âm thanh khi phát cảnh báo tại hiện trường.
 
 > **Không yêu cầu xác thực (public endpoint)** — không cần gửi `Authorization: Bearer <token>`.
@@ -637,6 +652,7 @@ Tải danh sách các file **âm thanh cảnh báo** được nạp sẵn trong 
 
 ### 8.1. `GET /species`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CONFIG_LIST_SCREEN]`.
 
 > **Nguồn dữ liệu duy nhất:** Tên loài (`displayName`) phải lấy từ API này. Tuyệt đối không hardcode tên loài trong bất kỳ module nào.
@@ -765,6 +781,7 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
 
 ### 8.2. `PUT /response-configs/{speciesId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Tạo / cập nhật cấu hình ứng phó cho cặp **(người dùng × loài)**. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (bấm nút Lưu `save_config_button`).
 
 **URL params**
@@ -803,6 +820,7 @@ Tạo / cập nhật cấu hình ứng phó cho cặp **(người dùng × loài
 
 ### 8.3. `GET /response-configs?speciesId=`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Lấy config của 1 loài động vật. Mapping: màn hình `[SPECIES_CONFIG_DETAIL_SCREEN]` (khi load cấu hình hiện tại của loài).
 
 **Response 200** (hoặc 404 nếu chưa config)
@@ -825,6 +843,7 @@ Lấy config của 1 loài động vật. Mapping: màn hình `[SPECIES_CONFIG_D
 
 ### 8.4. `DELETE /response-configs/{speciesId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerLevel`).
 
 **Response 204**.
@@ -833,6 +852,7 @@ Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerL
 
 ### 8.5. `POST /response-configs/{speciesId}/apply-preset/{presetId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Áp dụng preset vào loài — UI có nút Preset gần chip loài.
 
 **Request body** (optional override)
@@ -853,6 +873,7 @@ Xoá config — server quay về `fallbackPresetId` (mặc định theo `dangerL
 
 ### 8.6. `GET /response-configs` *(helper)*
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Lấy tất cả cấu hình của người dùng hiện tại (cho các loài). Mapping: màn hình `[SPECIES_CONFIG_LIST_SCREEN]` (hiển thị danh sách các cấu hình của từng loài).
 
 **Response 200**
@@ -872,6 +893,7 @@ Lấy tất cả cấu hình của người dùng hiện tại (cho các loài).
 
 ### 9.1. `GET /users/me`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 **Response 200**
 ```json
 {
@@ -886,6 +908,7 @@ Lấy tất cả cấu hình của người dùng hiện tại (cho các loài).
 
 ### 9.2. `PATCH /users/me`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 > ⚠️ **GHI CHÚ:** ĐÂY LÀ API DÙNG ĐỂ TEST (DEVELOP)
 
 Cập nhật thông tin tài khoản.
@@ -906,6 +929,7 @@ Cập nhật thông tin tài khoản.
 
 ### 10.1. `GET /events`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Phân trang + lọc.
 
 **Query params**
@@ -941,6 +965,7 @@ Phân trang + lọc.
 
 ### 10.2. `GET /stats/summary`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 **Query params**
 - `from`, `to`: ISO datetime.
 
@@ -965,6 +990,7 @@ Phân trang + lọc.
 
 ### 11.1. `GET /alerts/feed`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Cảnh báo đã phân luồng theo vai trò (mapping hiển thị tại tab `[STATISTICS_TAB]` và thông báo đẩy).
 
 **Query params**
@@ -992,6 +1018,7 @@ Enum `type`: `ANIMAL_RARE` (Kiểm lâm), `HIGHWAY_NEARBY` (Ban QL cao tốc), `
 
 ### 11.2. `GET /alerts/{alertId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 **Response 200**
@@ -1019,6 +1046,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 12.1. `GET /users/me/sms-recipients`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 **Response 200**
 ```json
 {
@@ -1033,6 +1061,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 12.2. `POST /users/me/sms-recipients`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 **Request body**
 ```json
 { "fullName":"Nguyễn Thị C", "phoneNumber":"0987654322", "relation":"neighbor" }
@@ -1057,6 +1086,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 12.3. `DELETE /users/me/sms-recipients/{recipientId}`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 **Response 204**.
 
 **Side effects**
@@ -1068,6 +1098,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 13.1. `GET /health`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 > ⚠️ **GHI CHÚ:** ĐÂY LÀ API DÙNG ĐỂ TEST (DEVELOP)
 
 **Response 200**
@@ -1077,6 +1108,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 13.2. `GET /reference-data/danger-levels`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 **Response 200**
 ```json
 {
@@ -1099,6 +1131,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 
 ### 13a.1. `POST /cameras/{cameraId}/detections`
 
+- **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Gửi dữ liệu hình ảnh chụp được, thông tin người dùng và kết quả phán đoán từ AI Server / thiết bị Camera lên Mobile Server. Server sẽ lưu trữ hình ảnh và phản hồi cấu hình hành vi ứng phó tương ứng cho loài động vật được phát hiện để thiết bị thực thi tại hiện trường.
 
 **Content-Type:** `multipart/form-data`
@@ -1144,6 +1177,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 
 ### 13a.2. `WS /ws` (ĐÃ LOẠI BỎ / DEPRECATED)
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 > [!WARNING]
 > Kết nối WebSocket trực tiếp (`WS /ws`) đã được gỡ bỏ khỏi kiến trúc hệ thống để hỗ trợ hoàn toàn cơ chế Serverless (Vercel) và tối ưu hóa hạ tầng mạng. Tất cả các luồng Downlink/Test thiết bị được chuyển đổi sang nền tảng **Ably Pub/Sub Cloud Broker**.
 
@@ -1151,6 +1185,7 @@ Trả về cấu hình phòng vệ cụ thể cần được thực hiện tại
 
 ### 13a.3. `GET /auth/ably-token`
 
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
 Cấp quyền kết nối Ably dưới dạng mã Token tạm thời (Token Authentication). Client (Android App hoặc AI Server Camera) sẽ dùng mã Token này để kết nối an toàn với máy chủ Ably mà không cần biết và không làm lộ API Key gốc.
 
 **Headers**

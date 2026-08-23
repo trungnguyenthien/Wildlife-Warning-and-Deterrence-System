@@ -71,7 +71,7 @@ app.post('/cameras/:cameraId/snapshots', authenticateToken, upload.single('image
 // ==========================================
 // 5. ENDPOINTS CẤU HÌNH PHÒNG VỆ & LOÀI
 // ==========================================
-app.get('/species', authenticateToken, listSpecies);
+app.get('/species', listSpecies);
 app.get('/response-configs', authenticateToken, (req, res) => {
   if (Object.prototype.hasOwnProperty.call(req.query, 'speciesId')) {
     return getConfigDetail(req, res);
