@@ -146,6 +146,17 @@ export async function runSeed(prisma: PrismaClient) {
     }
   ];
 
+  // Xóa các loài không nằm trong danh sách chuẩn để dọn dẹp dữ liệu cũ dư thừa
+  const validSpeciesIds = speciesList.map(s => s.id);
+  const deletedSpecies = await prisma.species.deleteMany({
+    where: {
+      id: {
+        notIn: validSpeciesIds
+      }
+    }
+  });
+  console.log(`[Species] Đã dọn dẹp ${deletedSpecies.count} loài cũ dư thừa khỏi database.`);
+
   for (const s of speciesList) {
     await prisma.species.upsert({
       where: { id: s.id },
