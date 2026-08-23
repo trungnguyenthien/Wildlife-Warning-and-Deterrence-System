@@ -108,11 +108,8 @@ class CameraListViewModel(
                                     }
                                 }
 
-                                // Trích xuất confidence từ title (ví dụ: "92%")
-                                val match = Regex("(\\d+)%").find(title)
-                                if (match != null) {
-                                    alertConf = match.groupValues[1].toIntOrNull()
-                                }
+                                // Lấy confidence trực tiếp từ trường confidence của alert
+                                alertConf = latestUnreadAlert.confidence?.let { (it * 100).toInt() }
                             }
                         } catch (e: Exception) {
                             hasUnreadAlertValue = true

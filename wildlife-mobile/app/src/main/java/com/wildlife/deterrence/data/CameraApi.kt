@@ -38,7 +38,8 @@ data class AlertResponse(
     val eventId: String,
     val createdAt: String,
     val isRead: Boolean,
-    val speciesId: String? = null
+    val speciesId: String? = null,
+    val confidence: Double? = null
 )
 
 data class RenameCameraRequest(

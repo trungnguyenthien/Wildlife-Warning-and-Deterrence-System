@@ -99,14 +99,7 @@ fun CameraListTab(
 
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // 1. emergency_banner_container (Hiển thị sticky trên cùng khi có loài nguy hiểm chưa xem)
-            val activeEmergencyStation = uiState.stations.firstOrNull { it.hasUnreadAlert }
-            if (activeEmergencyStation != null) {
-                EmergencyBanner(
-                    station = activeEmergencyStation,
-                    onClick = { onCameraClick(activeEmergencyStation.id) }
-                )
-            }
+
 
             // 2. PullToRefresh & Grid List
             PullToRefreshBox(
@@ -298,7 +291,7 @@ fun StationCard(
                         append(station.alertSpecies?.uppercase() ?: "ĐỘNG VẬT")
                         station.alertConfidence?.let {
                             append(" · $it%")
-                        } ?: append(" · 90%")
+                        }
                     }
                     Box(
                         modifier = Modifier

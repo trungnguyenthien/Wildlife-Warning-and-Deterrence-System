@@ -105,6 +105,7 @@ export async function listAlertFeed(req: AuthenticatedRequest, res: Response) {
         cameraName: alt.camera.name,
         eventId: alt.eventId,
         speciesId: mainDetection ? mainDetection.speciesId : null,
+        confidence: mainDetection ? mainDetection.confidence : null,
         createdAt: alt.createdAt.toISOString(),
         isRead: alt.alertReads.length > 0
       };
