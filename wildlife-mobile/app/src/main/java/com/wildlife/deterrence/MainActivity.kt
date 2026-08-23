@@ -52,13 +52,12 @@ class MainActivity : ComponentActivity() {
 
     android.util.Log.d("MainActivity", "handleIntent: type=$type, eventId=$eventId, cameraId=$cameraId, speciesName=$speciesName")
 
-    if (cameraId != null) {
-      android.util.Log.d("MainActivity", "DeepLink to CameraDetail: $cameraId")
-      DeepLinkHandler.pendingDestination = CameraDetail(cameraId)
-    } else if (type != null) {
+    if (type != null) {
       val navKey = when (type) {
         "animal.detected", "animal.escalated", "danger_alert" -> {
-          if (eventId != null) AlertDetail(eventId, speciesName) else null
+          if (cameraId != null) CameraDetail(cameraId)
+          else if (eventId != null) AlertDetail(eventId, speciesName)
+          else null
         }
         "fence.activated", "fence.deactivated", "device.offline" -> {
           if (cameraId != null) CameraDetail(cameraId) else null
@@ -68,6 +67,9 @@ class MainActivity : ComponentActivity() {
       if (navKey != null) {
         DeepLinkHandler.pendingDestination = navKey
       }
+    } else if (cameraId != null) {
+      android.util.Log.d("MainActivity", "DeepLink to CameraDetail: $cameraId")
+      DeepLinkHandler.pendingDestination = CameraDetail(cameraId)
     } else if (eventId != null) {
       DeepLinkHandler.pendingDestination = AlertDetail(eventId, speciesName)
     }

@@ -323,11 +323,22 @@ fun MainNavigation() {
             confirmButton = {
                 Button(
                     onClick = {
-                        val eventId = payload.eventId
-                        val speciesName = payload.speciesName
+                        val cameraId = payload.cameraId
                         inAppAlertToShow = null
-                        if (eventId != null) {
-                            backStack.add(AlertDetail(eventId, speciesName))
+                        if (cameraId != null) {
+                            val currentScreen = backStack.lastOrNull()
+                            if (currentScreen is CameraDetail) {
+                                if (currentScreen.cameraId == cameraId) {
+                                    // Đang ở đúng camera này: chỉ đóng popup
+                                } else {
+                                    // Đang ở camera khác: remove màn cũ và add màn mới để reload
+                                    backStack.removeLastOrNull()
+                                    backStack.add(CameraDetail(cameraId))
+                                }
+                            } else {
+                                // Đang ở màn khác: mở mới
+                                backStack.add(CameraDetail(cameraId))
+                            }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = accentColor)
