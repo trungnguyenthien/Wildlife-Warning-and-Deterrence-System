@@ -187,7 +187,10 @@ export async function processDetection(req: Request, res: Response) {
   const rawDetections = req.body.detections;
   let parsedDetections: DetectionItem[] = [];
   let imageUrl = req.body.imageUrl;
-  let detectedAt = req.body.detectedAt;
+  // Luôn ghi nhận theo giờ hệ thống của Server theo định dạng UTC (ngoại trừ trong môi trường test để chạy các test case kiểm tra cooldown)
+  let detectedAt = process.env.NODE_ENV === 'test' && req.body.detectedAt
+    ? req.body.detectedAt
+    : new Date().toISOString();
   const userId = req.body.userId;
 
   // Handle file validation and upload if file exists

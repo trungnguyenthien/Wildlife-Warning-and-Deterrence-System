@@ -1133,6 +1133,8 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
 - **Yêu cầu chứng thực:** 🟢 Không (API Công khai)
 Gửi dữ liệu hình ảnh chụp được, thông tin người dùng và kết quả phán đoán từ AI Server / thiết bị Camera lên Mobile Server. Server sẽ lưu trữ hình ảnh và phản hồi cấu hình hành vi ứng phó tương ứng cho loài động vật được phát hiện để thiết bị thực thi tại hiện trường.
 
+> 📝 **LƯU Ý:** Thời gian xảy ra sự kiện `detectedAt` sẽ được Mobile Server tự động ghi nhận theo giờ hệ thống của Server (định dạng UTC) tại thời điểm nhận request. Các tham số thời gian gửi lên từ phía Trạm Camera hoặc AI Server sẽ được bỏ qua nhằm đảm bảo tính đồng bộ thời gian trên toàn hệ thống.
+
 **Content-Type:** `multipart/form-data`
 
 **Request Body (Form data)**

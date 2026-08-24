@@ -1,4 +1,4 @@
-import { PrismaClient, Role, CameraStatus, DangerLevel, AlertType, SmsRelation } from '@prisma/client';
+import { PrismaClient, Role, CameraStatus, DangerLevel, SmsRelation } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 export async function runSeed(prisma: PrismaClient) {

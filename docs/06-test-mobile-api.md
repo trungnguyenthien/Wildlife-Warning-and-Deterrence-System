@@ -455,10 +455,10 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Mô tả:** Thiếu đường dẫn ảnh chụp hiện trường.
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "detectedAt": "2026-07-22T10:00:00+07:00" }`
     *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
-*   **TC_AI_DET_FAILURE_03: Fail to process detection due to missing detectedAt**
-    *   **Mô tả:** Thiếu trường thời điểm phát hiện.
+*   **TC_AI_DET_SUCCESS_DEFAULT_DATE: AI Webhook missing detectedAt should succeed and use current time**
+    *   **Mô tả:** Thiếu trường thời điểm phát hiện. Hệ thống sẽ tự động gán bằng thời gian hiện tại của Server (UTC).
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [ { "speciesId": "elephant", "confidence": 0.92 } ], "imageUrl": "https://cdn.example.com/snap/cam001.jpg" }`
-    *   **Kết quả mong đợi (Expected Response):** `400 Bad Request`.
+    *   **Kết quả mong đợi (Expected Response):** `201 Created` chứa eventId.
 *   **TC_AI_DET_FAILURE_04: Fail to process detection with empty detections list**
     *   **Mô tả:** Mảng nhận dạng gửi lên trống rỗng không có phần tử.
     *   **Dữ liệu gửi đi (Request Body):** `{ "detections": [], "imageUrl": "https://cdn.example.com/snap/cam001.jpg", "detectedAt": "2026-07-22T10:00:00+07:00" }`
