@@ -13,6 +13,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -83,7 +87,15 @@ fun MainNavigation() {
     NavDisplay(
       backStack = backStack,
       onBack = { backStack.removeLastOrNull() },
-    entryProvider =
+      transitionSpec = {
+          slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(350)) togetherWith
+          slideOutHorizontally(targetOffsetX = { -it / 4 }, animationSpec = tween(350))
+      },
+      popTransitionSpec = {
+          slideInHorizontally(initialOffsetX = { -it / 4 }, animationSpec = tween(350)) togetherWith
+          slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(350))
+      },
+      entryProvider =
       entryProvider {
         entry<Splash> {
           val splashViewModel: SplashViewModel = viewModel {
@@ -225,7 +237,7 @@ fun MainNavigation() {
         }
 
         entry<BehaviorConfig> { key ->
-          val behaviorViewModel: BehaviorViewModel = viewModel {
+          val behaviorViewModel: BehaviorViewModel = viewModel(key = key.speciesId) {
             BehaviorViewModel(tokenManager)
           }
           BehaviorConfigScreen(
@@ -239,7 +251,7 @@ fun MainNavigation() {
         }
 
         entry<CameraDetail> { key ->
-          val cameraDetailViewModel: CameraDetailViewModel = viewModel {
+          val cameraDetailViewModel: CameraDetailViewModel = viewModel(key = key.cameraId) {
             CameraDetailViewModel(key.cameraId, tokenManager)
           }
           CameraDetailScreen(
@@ -251,7 +263,7 @@ fun MainNavigation() {
         }
 
         entry<AlertDetail> { key ->
-          val alertDetailViewModel: AlertDetailViewModel = viewModel {
+          val alertDetailViewModel: AlertDetailViewModel = viewModel(key = key.alertId) {
             AlertDetailViewModel(key.alertId, key.speciesName, tokenManager)
           }
           AlertDetailScreen(
@@ -263,7 +275,7 @@ fun MainNavigation() {
         }
 
         entry<AllDetections> { key ->
-          val allDetectionsViewModel: AllDetectionsViewModel = viewModel {
+          val allDetectionsViewModel: AllDetectionsViewModel = viewModel(key = "${key.timeRange}_${key.speciesId}_${key.cameraId}") {
             AllDetectionsViewModel(key.timeRange, key.speciesId, key.cameraId, tokenManager)
           }
           AllDetectionsScreen(
