@@ -421,6 +421,7 @@ export async function processDetection(req: Request, res: Response) {
           eventId, 
           cameraId, 
           speciesId: mainSpecies.id,
+          speciesName: mainSpecies.displayName,
           type: isEscalated ? 'animal.escalated' : 'animal.detected',
           dangerLevel: maxDangerLevel
         }
