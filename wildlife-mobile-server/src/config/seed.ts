@@ -254,110 +254,15 @@ export async function runSeed(prisma: PrismaClient) {
   });
   console.log(`[ResponseConfig] Đã nạp sẵn cấu hình phòng vệ tùy chỉnh (Custom Config) cho Ranger.`);
 
-  // 5. Tạo lịch sử Sự kiện & Cảnh báo (Event, Detection, Alert) phong phú trong 30 ngày qua
-  console.log('[Event] Bắt đầu sinh ngẫu nhiên nhật ký sự kiện 30 ngày qua...');
+  // 5. Dọn dẹp sạch toàn bộ lịch sử Sự kiện & Cảnh báo cũ
+  console.log('[Event] Bắt đầu dọn dẹp sạch lịch sử sự kiện, cảnh báo, snapshot cũ...');
   await prisma.alertRead.deleteMany({});
   await prisma.alert.deleteMany({});
   await prisma.deviceLog.deleteMany({});
   await prisma.eventDetection.deleteMany({});
+  await prisma.snapshot.deleteMany({});
   await prisma.event.deleteMany({});
 
-  const now = new Date();
-  let eventCounter = 1;
-
-  // Lặp qua 30 ngày
-  for (let offsetDays = 30; offsetDays >= 0; offsetDays--) {
-    const dayDate = new Date(now.getTime() - offsetDays * 24 * 60 * 60 * 1000);
-    
-    // Mỗi ngày sinh từ 1 đến 3 sự kiện
-    const numEventsOfDay = Math.floor(Math.random() * 3) + 1;
-
-    for (let e = 0; e < numEventsOfDay; e++) {
-      // Thiết lập giờ ngẫu nhiên trong ngày
-      const eventTime = new Date(dayDate);
-      eventTime.setHours(Math.floor(Math.random() * 24), Math.floor(Math.random() * 60));
-
-      const eventId = `evt_prod_seed_${eventCounter}`;
-      const alertId = `alt_prod_seed_${eventCounter}`;
-      
-      // Chọn ngẫu nhiên camera
-      const camera = cameras[Math.floor(Math.random() * cameras.length)];
-      
-      // Chọn ngẫu nhiên loài
-      const species = speciesList[Math.floor(Math.random() * speciesList.length)];
-      
-      // Ảnh ngẫu nhiên từ Picsum
-      const snapshotUrl = `https://picsum.photos/seed/${eventId}/800/600`;
-
-      // Xác định loại Alert
-      let alertType = AlertType.ANIMAL_RARE as AlertType;
-      let alertTitle = `Phát hiện ${species.displayName}`;
-      if (species.isHuman) {
-        alertType = AlertType.HUMAN_BORDER as AlertType;
-        alertTitle = `Xâm nhập: ${species.displayName}`;
-      } else if (species.dangerLevel === DangerLevel.LOW) {
-        alertType = AlertType.INTRUDER as AlertType;
-      }
-
-      // A. Lưu Event
-      await prisma.event.create({
-        data: {
-          id: eventId,
-          cameraId: camera.id,
-          detectedAt: eventTime,
-          snapshotUrl
-        }
-      });
-
-      // B. Lưu EventDetection
-      await prisma.eventDetection.create({
-        data: {
-          eventId,
-          speciesId: species.id,
-          confidence: parseFloat((0.85 + Math.random() * 0.14).toFixed(2)),
-          detectedAt: eventTime
-        }
-      });
-
-      // C. Lưu Alert
-      await prisma.alert.create({
-        data: {
-          id: alertId,
-          type: alertType,
-          title: alertTitle,
-          dangerLevel: species.dangerLevel,
-          cameraId: camera.id,
-          eventId,
-          createdAt: eventTime
-        }
-      });
-
-      // D. Lưu DeviceLog giả lập phản ứng cho các loài nguy hiểm
-      if (species.dangerLevel === DangerLevel.CRITICAL || species.dangerLevel === DangerLevel.HIGH) {
-        await prisma.deviceLog.create({
-          data: {
-            eventId,
-            deviceKey: 'speaker',
-            action: 'ON',
-            actionAt: eventTime
-          }
-        });
-        if (species.id === 'elephant') {
-          await prisma.deviceLog.create({
-            data: {
-              eventId,
-              deviceKey: 'fence',
-              action: 'ON',
-              actionAt: eventTime
-            }
-          });
-        }
-      }
-
-      eventCounter++;
-    }
-  }
-
-  console.log(`[Event/Alert] Đã sinh và nạp thành công ${eventCounter - 1} sự kiện & cảnh báo.`);
-  console.log('=== HOÀN TẤT SEED DỮ LIỆU THỬ NGHIỆM PHONG PHÚ TRÊN PRODUCTION ===');
+  console.log('[Event/Alert] Đã dọn dẹp sạch toàn bộ lịch sử sự kiện, cảnh báo & snapshot.');
+  console.log('=== HOÀN TẤT SEED DỮ LIỆU SẠCH (CÁC TRẠM CAMERA KHÔNG CÓ LỊCH SỬ CŨ) ===');
 }
