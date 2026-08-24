@@ -63,63 +63,36 @@ class CameraListViewModel(
 
         viewModelScope.launch {
             try {
-                // Tải song song danh sách camera và alerts feed để kiểm tra tin chưa đọc
+                // Chỉ tải danh sách camera — không cần gọi thêm getAlertsFeed
+                // Trạng thái báo động tính từ currentDetection.detectedAt (cooldown 30 giây, phía client)
                 val camerasResponse = cameraApi.getCameras(authHeader)
-                val alertsResponse = try {
-                    cameraApi.getAlertsFeed(authHeader, page = 1, size = 50)
-                } catch (e: Exception) {
-                    emptyList()
-                }
 
                 // Sắp xếp danh sách: trạm có snapshot mới nhất lên đầu
                 val sortedCameras = camerasResponse.sortedByDescending { cam ->
                     cam.snapshot?.capturedAt?.let { parseIsoDateTime(it) } ?: 0L
                 }
 
+                val now = System.currentTimeMillis()
+                val ALERT_COOLDOWN_MS = 30_000L // 30 giây
+
                 val uiModels = sortedCameras.map { cam ->
-                    // Lọc danh sách alerts chưa đọc của camera này
-                    val unreadAlerts = alertsResponse.filter { it.cameraId == cam.id && !it.isRead }
-                    val hasUnread = unreadAlerts.isNotEmpty()
-                    val latestUnreadAlert = unreadAlerts.firstOrNull()
+                    val detection = cam.currentDetection
+                    val mainDet = detection?.detections?.firstOrNull()
 
-                    // Logic cảnh báo: nhấp nháy đỏ khi có sự kiện nguy hiểm chưa xem trong vòng 30 phút
-                    var hasUnreadAlertValue = false
-                    var alertSpec: String? = null
-                    var alertConf: Int? = null
-
-                    if (latestUnreadAlert != null) {
-                        try {
-                            val alertTime = parseIsoDateTime(latestUnreadAlert.createdAt)
-                            val diffMinutes = (System.currentTimeMillis() - alertTime) / 60000
-                            if (diffMinutes < 30) {
-                                hasUnreadAlertValue = true
-                                
-                                // Trích xuất tên động vật từ title (vd: "Cảnh báo: Phát hiện Voi Châu Á tại...")
-                                val title = latestUnreadAlert.title
-                                val prefix = "Phát hiện "
-                                val suffix = " tại"
-                                val startIndex = title.indexOf(prefix)
-                                if (startIndex != -1) {
-                                    val start = startIndex + prefix.length
-                                    val end = title.indexOf(suffix, start)
-                                    alertSpec = if (end != -1) {
-                                        title.substring(start, end).trim()
-                                    } else {
-                                        title.substring(start).trim()
-                                    }
-                                }
-
-                                // Lấy confidence trực tiếp từ trường confidence của alert
-                                alertConf = latestUnreadAlert.confidence?.let { (it * 100).toInt() }
-                            }
-                        } catch (e: Exception) {
-                            hasUnreadAlertValue = true
-                        }
+                    // isAlertActive: có detection và detectedAt cách hiện tại ≤ 30 giây
+                    val isAlertActive = if (detection != null) {
+                        val detectedAtMs = parseIsoDateTime(detection.detectedAt)
+                        (now - detectedAtMs) < ALERT_COOLDOWN_MS
+                    } else {
+                        false
                     }
+
+                    val alertSpec = if (isAlertActive) mainDet?.speciesName else null
+                    val alertConf = if (isAlertActive) mainDet?.confidence?.let { (it * 100).toInt() } else null
 
                     val timeText = cam.snapshot?.capturedAt?.let { formatTimestamp(it) } ?: ""
                     val isOnlineVal = cam.status.uppercase() == "ONLINE"
-                    
+
                     // Tính thời gian ngoại tuyến
                     val offlineDur: String? = if (!isOnlineVal) {
                         val capturedAt = cam.snapshot?.capturedAt
@@ -144,7 +117,7 @@ class CameraListViewModel(
                         address = cam.location.address,
                         isOnline = isOnlineVal,
                         thumbnailUrl = cam.snapshot?.url,
-                        hasUnreadAlert = hasUnreadAlertValue,
+                        hasUnreadAlert = isAlertActive,
                         alertSpecies = alertSpec,
                         alertConfidence = alertConf,
                         timestampText = timeText,

@@ -702,12 +702,13 @@ sequenceDiagram
 ### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
 - **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/còi hú tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
-- **Cơ chế gửi Push Notification:**
-  - `Mobile_Server` phân tích danh sách loài phát hiện (`detections`).
-  - Nếu phát hiện loài thú rừng nguy hiểm (có `isHuman` = false và `dangerLevel` từ `MEDIUM` trở lên như `MEDIUM`, `HIGH`, `CRITICAL`):
-    * `Mobile_Server` sẽ đọc biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
-    * `Mobile_Server` truy vấn danh sách `fcmToken` từ bảng `device_tokens` cho những người dùng lân cận.
-    * Thực hiện gửi Push Notification thông qua Firebase Cloud Messaging.
+- **Cơ chế gửi Push Notification với Cooldown 30 giây:**
+  - AI Server có thể gửi detection liên tục về Mobile Server. Để tránh spam thông báo, `Mobile_Server` áp dụng logic cooldown:
+    * **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
+    * Nếu **`isNewEvent = true`** (lần phát hiện đầu tiên / đã quá 30s kể từ event trước): Tạo `Alert` mới trong DB **và** gửi Push Notification qua FCM đến người dùng.
+    * Nếu **`isNewEvent = false`** (phát hiện liên tiếp trong cùng chuỗi ≤ 30s): **Bỏ qua** việc tạo `Alert` và gửi Push, nhưng **vẫn lưu `Snapshot`** để mobile app có thể cập nhật ảnh mới nhất qua cơ chế polling.
+  - Khi `isNewEvent = true`, `Mobile_Server` sẽ đọc biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
+  - `Mobile_Server` truy vấn danh sách `fcmToken` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
 sequenceDiagram
@@ -732,21 +733,24 @@ sequenceDiagram
     Mobile_Server->>Database: Truy vấn cấu hình phòng vệ cho loài nguy hiểm nhất trong danh sách
     Database-->>Mobile_Server: Trả về cấu hình phòng vệ (response_configs: "@DefendAction")
 
-    Note over Mobile_Server: Kiểm tra phát hiện: Nếu có thú rừng nguy hiểm (isHuman = false, DangerLevel >= MEDIUM)
-    Mobile_Server->>Mobile_Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trực tiếp trong RAM để khởi tạo Firebase
-
-    Mobile_Server->>Database: Truy vấn danh sách Push Token và SĐT đăng ký nhận SMS lân cận (device_tokens & sms_recipients)
-    Database-->>Mobile_Server: Trả về danh sách Push Tokens và Số điện thoại nhận SMS
-
-    par Đẩy thông báo khẩn cấp qua Firebase
-        Mobile_Server->>FCM: Gửi push alert (Sử dụng serviceAccountKey khởi tạo trực tiếp trong RAM)
-        FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
-    and Gửi tin nhắn SMS cho hộ dân
-        Mobile_Server->>SMS: Yêu cầu gửi SMS cảnh báo đến danh sách SĐT đăng ký lân cận
-        SMS-->>Mobile: Người dân nhận tin nhắn SMS cảnh báo khẩn cấp
-    and Gửi tín hiệu cập nhật qua SSE (Foreground)
-        Mobile_Server-->>Mobile: Đẩy camera-update qua kết nối SSE đang hoạt động
+    Note over Mobile_Server: Kiểm tra cooldown 30s: Có Event nào từ cameraId này trong 30s vừa qua không?
+    alt isNewEvent = true (Lần đầu / Đã quá 30s)
+        Mobile_Server->>Mobile_Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
+        Mobile_Server->>Database: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
+        Database-->>Mobile_Server: Alert đã tạo thành công
+        Mobile_Server->>Database: Truy vấn danh sách Push Token & SĐT nhận SMS (device_tokens & sms_recipients)
+        Database-->>Mobile_Server: Danh sách Push Tokens và SĐT
+        par Đẩy thông báo khẩn cấp qua Firebase
+            Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
+            FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
+        and Gửi tin nhắn SMS cho hộ dân
+            Mobile_Server->>SMS: Yêu cầu gửi SMS cảnh báo đến danh sách SĐT đăng ký lân cận
+            SMS-->>Mobile: Người dân nhận tin nhắn SMS cảnh báo khẩn cấp
+        end
+    else isNewEvent = false (Phát hiện liên tiếp ≤ 30s)
+        Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push/SMS để tránh spam. Snapshot đã được lưu để polling cập nhật ảnh.
     end
+    Mobile_Server-->>Mobile: Đẩy camera-update qua cơ chế polling (Snapshot mới nhất)
 
     Mobile_Server->>Database: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vật lý (device_logs)
     Database-->>Mobile_Server: Lưu thành công

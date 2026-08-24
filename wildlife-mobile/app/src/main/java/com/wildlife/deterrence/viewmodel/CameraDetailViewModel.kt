@@ -20,6 +20,7 @@ data class CameraDetailUiState(
     val isOnline: Boolean,
     val liveSnapshot: SnapshotUiModel?,
     val currentAnalysis: AnalysisUiModel?,
+    val isAlertActive: Boolean = false, // true nếu detection gần nhất ≤ 30 giây trước
     val historyItems: List<DetectionHistoryItem> = emptyList(),
     val selectedDateFilter: String = "today", // "today" | "custom"
     val customDate: Long? = null,
@@ -132,11 +133,19 @@ class CameraDetailViewModel(
                     )
                 }
 
+                // Tính trạng thái báo động: detection có detectedAt cách hiện tại ≤ 30 giây
+                val ALERT_COOLDOWN_MS = 30_000L
+                val isAlertActive = detail.currentDetection?.let { curr ->
+                    val detectedAtMs = parseIsoDateTime(curr.detectedAt)
+                    (System.currentTimeMillis() - detectedAtMs) < ALERT_COOLDOWN_MS
+                } ?: false
+
                 _uiState.value = _uiState.value.copy(
                     name = detail.name,
                     isOnline = detail.status.uppercase() == "ONLINE",
                     liveSnapshot = snapshotModel,
                     currentAnalysis = analysis,
+                    isAlertActive = isAlertActive,
                     isLoading = false
                 )
             } catch (e: Exception) {

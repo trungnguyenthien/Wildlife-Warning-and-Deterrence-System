@@ -386,7 +386,8 @@ export async function processDetection(req: Request, res: Response) {
       }
     });
 
-    // Tạo bản tin cảnh báo gửi lên feed khẩn cấp và gửi Push Notification (bất kể là sự kiện mới hay gộp)
+    // Tạo bản tin cảnh báo và gửi Push Notification: Chỉ thực hiện khi bắt đầu chuỗi sự kiện mới
+    // Các lần nhận dạng liên tiếp (dưới 30s) sẽ bỏ qua để tránh spam thông báo về thiết bị di động
     let alertType = AlertType.INTRUDER as AlertType;
     if (mainSpecies.isHuman) {
       alertType = AlertType.HUMAN_BORDER as AlertType;
@@ -394,24 +395,21 @@ export async function processDetection(req: Request, res: Response) {
       alertType = AlertType.ANIMAL_RARE as AlertType;
     }
 
-    console.log(`[Detection-Workflow] Đang tạo Alert trong DB: type=${alertType}, title=Phát hiện ${mainSpecies.displayName}, dangerLevel=${maxDangerLevel}`);
-    const newAlert = await prisma.alert.create({
-      data: {
-        id: `alt-${Date.now()}`,
-        type: alertType,
-        title: `Cảnh báo: Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name}`,
-        dangerLevel: maxDangerLevel,
-        cameraId,
-        eventId
-      }
-    });
-    console.log(`[Detection-Workflow] Đã tạo Alert thành công! Alert ID: ${newAlert.id}`);
+    if (isNewEvent) {
+      console.log(`[Detection-Workflow] Đang tạo Alert trong DB: type=${alertType}, title=Phát hiện ${mainSpecies.displayName}, dangerLevel=${maxDangerLevel}`);
+      const newAlert = await prisma.alert.create({
+        data: {
+          id: `alt-${Date.now()}`,
+          type: alertType,
+          title: `Cảnh báo: Phát hiện ${mainSpecies.displayName} tại khu vực ${camera.name}`,
+          dangerLevel: maxDangerLevel,
+          cameraId,
+          eventId
+        }
+      });
+      console.log(`[Detection-Workflow] Đã tạo Alert thành công! Alert ID: ${newAlert.id}`);
 
-    // Bắn Push Notification: Luôn phát thông báo bất kể là con người hay độ nguy hại thấp
-    const isPushConditionMet = true;
-    console.log(`[Detection-Workflow] Kiểm tra điều kiện gửi Push Notification: Luôn gửi thông báo -> Điều kiện thỏa mãn: ${isPushConditionMet}`);
-    
-    if (isPushConditionMet) {
+      // Bắn Push Notification: Chỉ gửi ở lần đầu tiên của chuỗi sự kiện mới
       const isEscalated = maxDangerLevel === DangerLevel.CRITICAL;
       console.log(`[Detection-Workflow] Tiến hành gọi sendPushToAllDevices: isEscalated=${isEscalated}`);
       await sendPushToAllDevices(
@@ -426,6 +424,8 @@ export async function processDetection(req: Request, res: Response) {
           dangerLevel: maxDangerLevel
         }
       );
+    } else {
+      console.log('[Detection-Workflow] Nhận dạng liên tiếp dưới 30s. Bỏ qua tạo Alert và gửi Push Notification để tránh spam.');
     }
 
     // Tra cứu userId sở hữu camera từ Snapshot gần nhất để định dạng cấu hình phòng vệ theo chủ sở hữu

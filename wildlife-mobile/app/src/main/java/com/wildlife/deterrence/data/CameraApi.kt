@@ -14,7 +14,8 @@ data class CameraResponse(
     val location: LocationResponse,
     val status: String,
     val liveFeedUrl: String,
-    val snapshot: SnapshotResponse?
+    val snapshot: SnapshotResponse?,
+    val currentDetection: CurrentDetectionListResponse? = null
 )
 
 data class LocationResponse(
@@ -40,6 +41,20 @@ data class AlertResponse(
     val isRead: Boolean,
     val speciesId: String? = null,
     val confidence: Double? = null
+)
+
+// Response model cho currentDetection trong GET /cameras (list) — dùng speciesName thay vì displayName
+data class CurrentDetectionListResponse(
+    val eventId: String,
+    val detectedAt: String,
+    val detections: List<ListDetectionResponse>
+)
+
+data class ListDetectionResponse(
+    val speciesId: String,
+    val speciesName: String,
+    val confidence: Double,
+    val dangerLevel: String
 )
 
 data class RenameCameraRequest(

@@ -2,6 +2,7 @@ package com.wildlife.deterrence.ui.screens
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -138,7 +139,10 @@ fun CameraDetailScreen(
                         LiveSnapshotContainer(
                             snapshot = snapshot,
                             isOnline = uiState.isOnline,
-                            hasAnimal = uiState.currentAnalysis != null
+                            hasAnimal = uiState.currentAnalysis != null,
+                            isAlertActive = uiState.isAlertActive,
+                            alertSpeciesName = uiState.currentAnalysis?.speciesName,
+                            alertConfidencePercent = if (uiState.isAlertActive) uiState.currentAnalysis?.confidencePercent else null
                         )
                     } else {
                         Box(
@@ -311,6 +315,9 @@ fun LiveSnapshotContainer(
     snapshot: SnapshotUiModel,
     isOnline: Boolean,
     hasAnimal: Boolean,
+    isAlertActive: Boolean = false,
+    alertSpeciesName: String? = null,
+    alertConfidencePercent: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "rec_blink")
@@ -324,12 +331,32 @@ fun LiveSnapshotContainer(
         label = "rec_alpha"
     )
 
+    // Border đỏ nhấp nháy khi đang báo động
+    val borderAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "border_alpha"
+    )
+    val borderColor = if (isAlertActive) Color(0xFFC62828).copy(alpha = borderAlpha) else Color.Transparent
+    val borderWidth = if (isAlertActive) 3.dp else 0.dp
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(16f / 10f)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.Black)
+            .then(
+                if (isAlertActive) androidx.compose.ui.Modifier.border(
+                    width = borderWidth,
+                    color = borderColor,
+                    shape = RoundedCornerShape(16.dp)
+                ) else androidx.compose.ui.Modifier
+            )
     ) {
         // Ảnh Snapshot
         AsyncImage(
@@ -371,8 +398,28 @@ fun LiveSnapshotContainer(
             )
         }
 
-        // Overlay: Badge PHÁT HIỆN màu đỏ (Góc trên-phải)
-        if (hasAnimal) {
+        // Overlay: Badge PHÁT HIỆN màu đỏ (Góc trên-phải) — hiển thị tên loài + % khi isAlertActive
+        if (isAlertActive) {
+            val badgeText = buildString {
+                append("⚠ PHÁT HIỆN ")
+                append(alertSpeciesName?.uppercase() ?: "HOÀNG DÃ")
+                alertConfidencePercent?.let { append(" · $it%") }
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .background(Color(0xFFC62828).copy(alpha = borderAlpha), shape = RoundedCornerShape(4.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = badgeText,
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        } else if (hasAnimal) {
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
