@@ -245,10 +245,7 @@ fun StationCard(
                         model = station.thumbnailUrl,
                         contentDescription = "Snapshot",
                         modifier = Modifier
-                            .fillMaxSize()
-                            .then(
-                                if (!station.isOnline) Modifier.alpha(0.4f) else Modifier
-                            ),
+                            .fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -260,26 +257,6 @@ fun StationCard(
                             text = "Không có ảnh",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.outline
-                        )
-                    }
-                }
-
-                // offline_placeholder_state: hiển thị icon camera gạch chéo ở giữa khi offline
-                if (!station.isOnline) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.VideocamOff,
-                            contentDescription = "Ngoại tuyến",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .background(Color.Black.copy(alpha = 0.4f), shape = CircleShape)
-                                .padding(8.dp)
                         )
                     }
                 }
@@ -307,25 +284,6 @@ fun StationCard(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                }
-
-                // station_status_badge (🟢 Online / 🔴 Offline) đè lên góc trên-phải ảnh thumbnail
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .background(
-                            color = if (station.isOnline) Color(0xFFE8F5E9).copy(alpha = 0.9f) else Color(0xFFFFEBEE).copy(alpha = 0.9f),
-                            shape = RoundedCornerShape(4.dp)
-                        )
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                ) {
-                    Text(
-                        text = if (station.isOnline) "🟢 Online" else "🔴 Offline",
-                        color = if (station.isOnline) Color(0xFF2E7D32) else Color(0xFFC62828),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold
-                    )
                 }
             }
 
@@ -371,11 +329,7 @@ fun StationCard(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     // station_timestamp_text (🕐 Thời gian bên dưới tên trạm)
-                    val timeText = if (station.isOnline) {
-                        if (station.timestampText.isNotEmpty()) "🕐 ${station.timestampText}" else "🕐 Không có dữ liệu"
-                    } else {
-                        station.offlineDurationText ?: "Mất kết nối"
-                    }
+                    val timeText = if (station.timestampText.isNotEmpty()) "🕐 ${station.timestampText}" else "🕐 Không có dữ liệu"
                     Text(
                         text = timeText,
                         fontSize = 12.sp,
@@ -394,25 +348,23 @@ fun StationCard(
                     )
                 }
 
-                // station_action_button (Nút hành động tròn ở góc phải card, chỉ hiển thị khi isOnline = true)
-                if (station.isOnline) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = CircleShape
-                            )
-                            .clickable { /* Hành động báo động */ },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Notifications,
-                            contentDescription = "Hành động báo động",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.size(20.dp)
+                // station_action_button (Nút hành động tròn ở góc phải card, luôn hiển thị)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape
                         )
-                    }
+                        .clickable { /* Hành động báo động */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Hành động báo động",
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }

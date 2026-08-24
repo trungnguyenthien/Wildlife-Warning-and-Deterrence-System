@@ -86,12 +86,7 @@ fun CameraDetailScreen(
                             modifier = Modifier.fillMaxWidth(0.85f)
                         )
                         // Trạng thái Trực tuyến/Ngoại tuyến ngay dưới tên
-                        Text(
-                            text = if (uiState.isOnline) "🟢 Trực tuyến" else "⚪ Ngoại tuyến",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.Medium
-                        )
+
                     }
                 },
                 navigationIcon = {
@@ -341,8 +336,7 @@ fun LiveSnapshotContainer(
             model = snapshot.url,
             contentDescription = "Live Snapshot",
             modifier = Modifier
-                .fillMaxSize()
-                .then(if (!isOnline) Modifier.alpha(0.4f) else Modifier),
+                .fillMaxSize(),
             contentScale = ContentScale.Crop
         )
 
