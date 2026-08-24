@@ -3,6 +3,7 @@ package com.wildlife.deterrence
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
@@ -138,71 +139,13 @@ object NotificationBuilder {
         val isCritical = payload.dangerLevel == "CRITICAL" || payload.type == "animal.escalated" || payload.type == "danger_alert"
         val channelId = if (isCritical) NotificationChannels.CHANNEL_CRITICAL else NotificationChannels.CHANNEL_DEFAULT
 
-        val packageName = context.packageName
-        val collapsedViews = android.widget.RemoteViews(packageName, R.layout.custom_notification_collapsed)
-        val expandedViews = android.widget.RemoteViews(packageName, R.layout.custom_notification_expanded)
-
-        // Thiết lập text & màu sắc tiêu đề theo mockup
-        collapsedViews.setTextViewText(R.id.notification_title, if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT")
-        collapsedViews.setTextViewText(R.id.notification_body, payload.body)
-        collapsedViews.setTextColor(R.id.notification_title, if (isCritical) 0xFFBA1A1A.toInt() else 0xFF059669.toInt())
-
-        expandedViews.setTextViewText(R.id.notification_title, if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT")
-        expandedViews.setTextViewText(R.id.notification_body, payload.body)
-        expandedViews.setTextColor(R.id.notification_title, if (isCritical) 0xFFBA1A1A.toInt() else 0xFF059669.toInt())
-
-        if (isCritical) {
-            // Tông đỏ cam nguy hiểm
-            collapsedViews.setInt(R.id.notification_indicator, "setBackgroundColor", 0xFFBA1A1A.toInt())
-            collapsedViews.setInt(R.id.notification_icon_container, "setBackgroundResource", R.drawable.bg_notification_icon_red)
-            collapsedViews.setImageViewResource(R.id.notification_icon, android.R.drawable.ic_dialog_alert)
-            collapsedViews.setInt(R.id.notification_icon, "setColorFilter", 0xFFBA1A1A.toInt())
-
-            expandedViews.setInt(R.id.notification_indicator, "setBackgroundColor", 0xFFBA1A1A.toInt())
-            expandedViews.setInt(R.id.notification_icon_container, "setBackgroundResource", R.drawable.bg_notification_icon_red)
-            expandedViews.setImageViewResource(R.id.notification_icon, android.R.drawable.ic_dialog_alert)
-            expandedViews.setInt(R.id.notification_icon, "setColorFilter", 0xFFBA1A1A.toInt())
-            expandedViews.setViewVisibility(R.id.notification_action_button, android.view.View.VISIBLE)
-
-            // Kích hoạt nút hành động xua đuổi ngay
-            val actionIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("type", payload.type)
-                putExtra("eventId", payload.eventId)
-                putExtra("alertId", payload.eventId)
-                putExtra("cameraId", payload.cameraId)
-                putExtra("action_trigger", "deter")
-            }
-            val actionPendingIntent = PendingIntent.getActivity(
-                context,
-                (payload.eventId?.hashCode() ?: 0) + 1,
-                actionIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            expandedViews.setOnClickPendingIntent(R.id.notification_action_button, actionPendingIntent)
-        } else {
-            // Tông xanh lục an toàn/cập nhật
-            collapsedViews.setInt(R.id.notification_indicator, "setBackgroundColor", 0xFF059669.toInt())
-            collapsedViews.setInt(R.id.notification_icon_container, "setBackgroundResource", R.drawable.bg_notification_icon_green)
-            collapsedViews.setImageViewResource(R.id.notification_icon, android.R.drawable.ic_dialog_info)
-            collapsedViews.setInt(R.id.notification_icon, "setColorFilter", 0xFF059669.toInt())
-
-            expandedViews.setInt(R.id.notification_indicator, "setBackgroundColor", 0xFF059669.toInt())
-            expandedViews.setInt(R.id.notification_icon_container, "setBackgroundResource", R.drawable.bg_notification_icon_green)
-            expandedViews.setImageViewResource(R.id.notification_icon, android.R.drawable.ic_dialog_info)
-            expandedViews.setInt(R.id.notification_icon, "setColorFilter", 0xFF059669.toInt())
-            expandedViews.setViewVisibility(R.id.notification_action_button, android.view.View.GONE)
-        }
-
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        
+        // Sử dụng notification mặc định của hệ thống Android (không dùng Custom RemoteViews)
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(if (isCritical) android.R.drawable.ic_dialog_alert else android.R.drawable.ic_dialog_info)
-            .setContentTitle(if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT")
+            .setContentTitle(payload.title.ifEmpty { if (isCritical) "CẢNH BÁO NGUY HIỂM" else "HỆ THỐNG CẬP NHẬT" })
             .setContentText(payload.body)
-            .setCustomContentView(collapsedViews)
-            .setCustomBigContentView(expandedViews)
-            .setCustomHeadsUpContentView(collapsedViews)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
@@ -224,12 +167,29 @@ object NotificationBuilder {
 
 class WildlifeFirebaseMessagingService : FirebaseMessagingService() {
 
+    private fun isAppInForeground(context: Context): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val appProcesses = activityManager.runningAppProcesses ?: return false
+        val packageName = context.packageName
+        for (appProcess in appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
+                appProcess.processName == packageName) {
+                return true
+            }
+        }
+        return false
+    }
+
     override fun onMessageReceived(message: RemoteMessage) {
         android.util.Log.d("FCM", "Message received: ${message.data}")
         val payload = parsePayload(message, message.data)
         NotificationState.increment() // Tăng badge count
         NotificationState.triggerRealtimeUpdate(payload)
-        NotificationBuilder.showNotification(applicationContext, payload)
+        
+        // Chỉ gửi popup thông báo hệ thống khi ứng dụng đang ở background
+        if (!isAppInForeground(applicationContext)) {
+            NotificationBuilder.showNotification(applicationContext, payload)
+        }
     }
 
     override fun onNewToken(token: String) {
