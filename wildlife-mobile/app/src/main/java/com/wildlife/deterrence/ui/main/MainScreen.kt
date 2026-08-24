@@ -125,11 +125,8 @@ fun MainScreen(
     val unreadCount by com.wildlife.deterrence.NotificationState.unreadCount.collectAsState()
 
     LaunchedEffect(selectedTab) {
-        if (selectedTab == 3) {
-            viewModel.fetchUserProfile()
-        }
         if (selectedTab == 2) {
-            com.wildlife.deterrence.NotificationState.clear()
+            viewModel.fetchUserProfile()
         }
     }
 
@@ -143,22 +140,13 @@ fun MainScreen(
                 val items = listOf(
                     Triple("Camera", Icons.Default.Videocam, 0),
                     Triple("Thống kê", Icons.Default.BarChart, 1),
-                    Triple("Cảnh báo", Icons.Default.Notifications, 2),
-                    Triple("Cài đặt", Icons.Default.Settings, 3)
+                    Triple("Cài đặt", Icons.Default.Settings, 2)
                 )
 
                 items.forEach { (label, icon, index) ->
                     NavigationBarItem(
                         icon = {
-                            if (index == 2 && unreadCount > 0) {
-                                BadgedBox(
-                                    badge = { Badge { Text(unreadCount.toString()) } }
-                                ) {
-                                    Icon(icon, contentDescription = label)
-                                }
-                            } else {
-                                Icon(icon, contentDescription = label)
-                            }
+                            Icon(icon, contentDescription = label)
                         },
                         label = { Text(label) },
                         selected = selectedTab == index,
@@ -213,10 +201,7 @@ fun MainScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                2 -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    BlankTabScreen(title = "Nhật Ký Cảnh Báo", subtitle = "Thông tin phát hiện động vật thời gian thực")
-                }
-                3 -> SettingsTabContent(
+                2 -> SettingsTabContent(
                     viewModel = viewModel,
                     onLogout = onLogout,
                     onNavigateToSmsSetup = onNavigateToSmsSetup,
@@ -522,58 +507,7 @@ private fun SettingsTabContent(
             }
         }
 
-        // Card 3: Server Configuration
-        val tokenManager = remember { TokenManager(context) }
-        var serverUrlInput by remember { mutableStateOf(tokenManager.getServerUrl()) }
 
-        AppCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                AppSectionTitleText(
-                    text = "Cấu hình Máy chủ (Server URL)",
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-
-                OutlinedTextField(
-                    value = serverUrlInput,
-                    onValueChange = { serverUrlInput = it },
-                    label = { Text("Địa chỉ máy chủ API") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        val trimmed = serverUrlInput.trim()
-                        if (trimmed.isNotEmpty()) {
-                            val formatted = if (trimmed.endsWith("/")) trimmed else "$trimmed/"
-                            tokenManager.saveServerUrl(formatted)
-                            NetworkClient.customServerUrl = formatted
-                            android.widget.Toast.makeText(context, "Đã lưu địa chỉ máy chủ: $formatted", android.widget.Toast.LENGTH_SHORT).show()
-                        } else {
-                            android.widget.Toast.makeText(context, "Vui lòng nhập địa chỉ máy chủ hợp lệ", android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Lưu địa chỉ", color = Color.White)
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.weight(1f))
 
