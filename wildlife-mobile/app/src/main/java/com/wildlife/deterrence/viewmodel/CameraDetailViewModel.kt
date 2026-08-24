@@ -133,8 +133,7 @@ class CameraDetailViewModel(
                     )
                 }
 
-                // isAlertActive: server đã query DB chỉ lấy event trong 30 giây gần nhất
-                // Nếu currentDetection != null → camera đang trong trạng thái báo động
+                // isAlertActive: Tin tưởng hoàn toàn vào server (server tự động trả về null sau 30s)
                 val isAlertActive = detail.currentDetection != null
 
                 _uiState.value = _uiState.value.copy(

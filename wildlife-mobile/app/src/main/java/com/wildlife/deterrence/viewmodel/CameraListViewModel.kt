@@ -79,7 +79,8 @@ class CameraListViewModel(
                 val uiModels = sortedCameras.map { cam ->
                     val snapshotTimeMs = cam.snapshot?.capturedAt?.let { parseIsoDateTime(it) } ?: 0L
 
-                    // isAlertActive: server trả về currentDetection != null khi event xảy ra trong 30s gần nhất
+                    // isAlertActive: Tin tưởng hoàn toàn vào server (server tự động trả về null sau 30s)
+                    // Cách này tránh hoàn toàn lỗi lệch giờ hệ thống giữa client và server
                     val isAlertActive = cam.currentDetection != null
 
                     // Trích xuất thông tin loài từ currentDetection nếu có
@@ -168,9 +169,13 @@ class CameraListViewModel(
         try {
             val heartbeat = cameraApi.getCamerasHeartbeat(authHeader)
             val serverUpdatedAt = parseIsoDateTime(heartbeat.lastUpdatedAt)
-            if (serverUpdatedAt > lastKnownUpdatedAt) {
-                android.util.Log.d("Polling", "New update detected (server=$serverUpdatedAt > local=$lastKnownUpdatedAt), fetching cameras...")
-                lastKnownUpdatedAt = serverUpdatedAt
+            
+            // Nếu bất kỳ trạm nào đang báo động, chúng ta phải load tiếp tục để cập nhật trạng thái hết báo động
+            val hasActiveAlert = _uiState.value.stations.any { it.hasUnreadAlert }
+            
+            if (serverUpdatedAt > lastKnownUpdatedAt || hasActiveAlert) {
+                android.util.Log.d("Polling", "New update detected or alert active (server=$serverUpdatedAt > local=$lastKnownUpdatedAt, active=$hasActiveAlert), fetching cameras...")
+                lastKnownUpdatedAt = maxOf(lastKnownUpdatedAt, serverUpdatedAt)
                 loadCameras(isSilent = true)
             } else {
                 android.util.Log.d("Polling", "No new update, skipping GET /cameras")
