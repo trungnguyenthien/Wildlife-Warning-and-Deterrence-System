@@ -15,7 +15,9 @@ export async function listCameras(_req: AuthenticatedRequest, res: Response) {
       orderBy: { createdAt: 'desc' }
     });
 
-    // Gom dữ liệu trả về kèm theo snapshot gần nhất
+    const thirtySecondsAgo = new Date(Date.now() - 30 * 1000);
+
+    // Gom dữ liệu trả về kèm theo snapshot gần nhất và currentDetection (nếu có)
     const result = await Promise.all(
       cameras.map(async (cam) => {
         // Tìm event gần nhất của camera này
@@ -23,6 +25,33 @@ export async function listCameras(_req: AuthenticatedRequest, res: Response) {
           where: { cameraId: cam.id },
           orderBy: { detectedAt: 'desc' }
         });
+
+        // Tìm event đang hoạt động trong 30 giây gần nhất (để xác định trạng thái báo động)
+        const activeEvent = await prisma.event.findFirst({
+          where: {
+            cameraId: cam.id,
+            detectedAt: { gte: thirtySecondsAgo }
+          },
+          orderBy: { detectedAt: 'desc' },
+          include: {
+            eventDetections: {
+              include: { species: true }
+            }
+          }
+        });
+
+        const currentDetection = activeEvent
+          ? {
+              eventId: activeEvent.id,
+              detectedAt: activeEvent.detectedAt.toISOString(),
+              detections: activeEvent.eventDetections.map((d) => ({
+                speciesId: d.speciesId,
+                speciesName: d.species.displayName,
+                confidence: d.confidence,
+                dangerLevel: d.species.dangerLevel
+              }))
+            }
+          : null;
 
         return {
           id: cam.id,
@@ -39,7 +68,8 @@ export async function listCameras(_req: AuthenticatedRequest, res: Response) {
                 url: latestEvent.snapshotUrl,
                 capturedAt: latestEvent.detectedAt.toISOString()
               }
-            : null
+            : null,
+          currentDetection
         };
       })
     );

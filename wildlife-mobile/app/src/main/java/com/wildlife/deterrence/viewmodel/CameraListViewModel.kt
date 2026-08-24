@@ -63,8 +63,9 @@ class CameraListViewModel(
 
         viewModelScope.launch {
             try {
-                // Chỉ tải danh sách camera — không cần gọi thêm getAlertsFeed
-                // Trạng thái báo động tính từ currentDetection.detectedAt (cooldown 30 giây, phía client)
+                // Tải danh sách camera
+                // Lưu ý: GET /cameras không trả về currentDetection,
+                // nên dùng snapshot.capturedAt ≤ 30s để xác định trạng thái báo động (cách đơn giản nhất)
                 val camerasResponse = cameraApi.getCameras(authHeader)
 
                 // Sắp xếp danh sách: trạm có snapshot mới nhất lên đầu
@@ -76,17 +77,13 @@ class CameraListViewModel(
                 val ALERT_COOLDOWN_MS = 30_000L // 30 giây
 
                 val uiModels = sortedCameras.map { cam ->
-                    val detection = cam.currentDetection
-                    val mainDet = detection?.detections?.firstOrNull()
+                    val snapshotTimeMs = cam.snapshot?.capturedAt?.let { parseIsoDateTime(it) } ?: 0L
 
-                    // isAlertActive: có detection và detectedAt cách hiện tại ≤ 30 giây
-                    val isAlertActive = if (detection != null) {
-                        val detectedAtMs = parseIsoDateTime(detection.detectedAt)
-                        (now - detectedAtMs) < ALERT_COOLDOWN_MS
-                    } else {
-                        false
-                    }
+                    // isAlertActive: server trả về currentDetection != null khi event xảy ra trong 30s gần nhất
+                    val isAlertActive = cam.currentDetection != null
 
+                    // Trích xuất thông tin loài từ currentDetection nếu có
+                    val mainDet = cam.currentDetection?.detections?.firstOrNull()
                     val alertSpec = if (isAlertActive) mainDet?.speciesName else null
                     val alertConf = if (isAlertActive) mainDet?.confidence?.let { (it * 100).toInt() } else null
 

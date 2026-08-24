@@ -133,12 +133,9 @@ class CameraDetailViewModel(
                     )
                 }
 
-                // Tính trạng thái báo động: detection có detectedAt cách hiện tại ≤ 30 giây
-                val ALERT_COOLDOWN_MS = 30_000L
-                val isAlertActive = detail.currentDetection?.let { curr ->
-                    val detectedAtMs = parseIsoDateTime(curr.detectedAt)
-                    (System.currentTimeMillis() - detectedAtMs) < ALERT_COOLDOWN_MS
-                } ?: false
+                // isAlertActive: server đã query DB chỉ lấy event trong 30 giây gần nhất
+                // Nếu currentDetection != null → camera đang trong trạng thái báo động
+                val isAlertActive = detail.currentDetection != null
 
                 _uiState.value = _uiState.value.copy(
                     name = detail.name,
