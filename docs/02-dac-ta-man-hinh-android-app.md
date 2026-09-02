@@ -377,11 +377,10 @@ User **chỉ được chọn 1 preset tại 1 thời điểm** (radio group — 
 | `defense_params_expandable_container` | Container (expandable) | Body collapsible — chứa toàn bộ control cài đặt chi tiết dưới đây. Trạng thái **bị ép** bởi `preset_radio_group` (xem mục 6.2). |
 | `sound_type_dropdown` | Dropdown | Label `Loại âm thanh xua đuổi`. Lấy danh sách ID âm thanh nạp sẵn trong phần cứng từ mảng `animalDeterrentSounds` của API `GET /audio-samples` (ID bắt đầu bằng prefix `A_`, ví dụ mặc định: `Tiếng súng` · `Tiếng gầm` · `Tiếng chó sủa lớn` · `Tiếng nổ giả lập`). |
 | `sound_intensity_slider` | Slider | Label `Cường độ âm thanh`. Range `1`–`100`. |
-| `sound_test_button` | Button (Secondary) | Label `Nghe thử (Test Audio)`. Gửi lệnh kích hoạt qua API để phát thử đồng thời âm thanh xua đuổi đã chọn (`audioSampleId`) và âm thanh cảnh báo qua loa (`speakerSampleId`, id lấy từ `GET /alertSounds`) tại trạm camera thực địa. |
+| `sound_test_button` | Button (Secondary) | Label `Nghe thử (Test Audio)`. Gửi lệnh kích hoạt qua API để phát thử âm thanh xua đuổi đã chọn (`audioSampleId`) tại trạm camera thực địa. |
 | `led_frequency_dropdown` | Dropdown | Label `Tần suất LED`. Lựa chọn: `Không` · `2 lần/giây` · `4 lần/giây` · `Nhấp nháy ngẫu nhiên`. |
 | `led_color_segmented` | SegmentedControl | Label `Màu sắc LED`. Lựa chọn: `Đỏ` · `Trắng` · `Đỏ xen kẽ Trắng`. |
 | `led_duration_input` | NumberInput | Label `Thời lượng LED (giây)`. |
-| `speaker_message_dropdown` | Dropdown | Label `Mẫu nội dung loa`. Lấy danh sách ID mẫu phát loa từ mảng `citizenAlertSounds` của API `GET /audio-samples` (nguồn trùng với `GET /alertSounds`, ví dụ mặc định: `Tiếng Hổ` · `Tiếng Khỉ` · `Tiếng Voi` ...). Có thêm lựa chọn `Không thiết lập` (không phát loa cảnh báo) → ánh xạ `speakerSampleId = null`. Các lựa chọn âm báo ánh xạ vào API qua trường `speakerSampleId`. |
 | `notify_sms_toggle` | Toggle | Label `Gửi SMS`. Nhằm tối giản thiết kế API, nút gạt này tương tác trực tiếp với trường `silentAlert` trên API (bật SMS đồng nghĩa với việc kích hoạt chế độ báo động im lặng tại trạm: `silentAlert = true`). |
 | `notify_push_toggle` | Toggle | Label `Gửi Push Notification`. (Sử dụng cấu hình cục bộ từ client). |
 

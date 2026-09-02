@@ -43,14 +43,13 @@ Tài liệu này định nghĩa chi tiết các kịch bản kiểm thử tích 
     3.  Chọn kịch bản **Tùy chỉnh (Custom)** và thiết lập các thông số:
         *   Màu sắc LED: **YELLOW** (Vàng)
         *   Loại âm thanh xua đuổi: **A_dog_bark** (Tiếng chó sủa)
-        *   Mẫu nội dung loa: *Mẫu 2 - Phát hiện thú dữ* (speakerSampleId: `tiger`)
         *   Gửi SMS: **Bật** (`silentAlert = true`)
     4.  Bấm **Lưu** cấu hình.
     5.  Tại Trạm Camera, thực hiện gửi gói tin phát hiện loài **deer** (Nai) với độ tin cậy **85%**.
 *   **Kết quả trực quan mong đợi:**
     *   **Tại Trạm Camera:**
         *   Đèn LED tại chỗ chớp nháy màu **Vàng**.
-        *   Loa phát thanh phát đồng thời tiếng **chó sủa dữ dội** và **mẫu loa cảnh báo** tương ứng.
+        *   Loa phát thanh phát tiếng **chó sủa dữ dội**.
         *   Không kích hoạt xung điện hàng rào.
     *   **Trên thiết bị di động:**
         *   Điện thoại của kiểm lâm và người dân đã đăng ký nhận được tin nhắn SMS cảnh báo có Nai xâm hại rẫy.

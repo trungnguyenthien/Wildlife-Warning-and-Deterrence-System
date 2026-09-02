@@ -36,10 +36,9 @@ export async function listConfigs(req: AuthenticatedRequest, res: Response) {
       ledColor: c.ledColor,
       ledIntensity: c.ledDurationSeconds,
       ledFlashRate: c.ledFlashRate,
-      speakerWarn: c.audioSampleId ? true : false,
+      speakerWarn: Boolean(c.audioSampleId || (c.audioIntensity ?? 0) > 0 || c.speakerSampleId),
       audioSampleId: c.audioSampleId,
       audioIntensity: c.audioIntensity,
-      speakerSampleId: c.speakerSampleId,
       silentAlert: c.silentAlert,
       updatedAt: c.updatedAt.toISOString()
     }));
@@ -87,10 +86,9 @@ export async function getConfigDetail(req: AuthenticatedRequest, res: Response) 
         ledColor: customConfig.ledColor,
         ledIntensity: customConfig.ledDurationSeconds, // Ánh xạ trường
         ledFlashRate: customConfig.ledFlashRate,
-        speakerWarn: customConfig.speakerSampleId ? true : false,
+        speakerWarn: Boolean(customConfig.audioSampleId || (customConfig.audioIntensity ?? 0) > 0 || customConfig.speakerSampleId),
         audioSampleId: customConfig.audioSampleId,
         audioIntensity: customConfig.audioIntensity,
-        speakerSampleId: customConfig.speakerSampleId,
         silentAlert: customConfig.silentAlert
       });
     }
@@ -120,7 +118,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
     speakerWarn,
     audioSampleId,
     audioIntensity,
-    speakerSampleId,
     silentAlert
   } = req.body;
 
@@ -168,7 +165,7 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       ledFlashRate: ledFlashRate !== undefined ? ledFlashRate : (ledFlash ? 'FAST' : null),
       ledColor: ledColor || null,
       ledDurationSeconds: ledIntensity || 0, // Ánh xạ trường
-      speakerSampleId: speakerSampleId || null,
+      speakerSampleId: null,
       silentAlert,
       lastModifiedBy: userId
     };
@@ -195,7 +192,6 @@ export async function saveConfig(req: AuthenticatedRequest, res: Response) {
       speakerWarn,
       audioSampleId: savedConfig.audioSampleId,
       audioIntensity: savedConfig.audioIntensity,
-      speakerSampleId: savedConfig.speakerSampleId,
       silentAlert: savedConfig.silentAlert
     });
   } catch (error) {

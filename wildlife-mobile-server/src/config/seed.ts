@@ -220,7 +220,6 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: 'FAST',
         ledColor: 'RED',
         ledDurationSeconds: 20,
-        speakerSampleId: 'tiger',
         silentAlert: false
       },
       {
@@ -232,7 +231,6 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: null,
         ledColor: null,
         ledDurationSeconds: 0,
-        speakerSampleId: null,
         silentAlert: true // Cảnh báo âm thầm đối với Hổ tại Cửa Rừng
       },
       {
@@ -244,7 +242,6 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: 'FAST',
         ledColor: 'STROBE',
         ledDurationSeconds: 30,
-        speakerSampleId: 'monkey',
         silentAlert: false
       },
       {
@@ -256,7 +253,6 @@ export async function runSeed(prisma: PrismaClient) {
         ledFlashRate: 'SLOW',
         ledColor: 'YELLOW',
         ledDurationSeconds: 10,
-        speakerSampleId: null,
         silentAlert: false
       }
     ]

@@ -19,8 +19,7 @@ data class ResponseConfigData(
     val audioSampleId: String?,
     val audioIntensity: Int,
     val silentAlert: Boolean,
-    val ledFlashRate: String? = null,
-    val speakerSampleId: String? = null
+    val ledFlashRate: String? = null
 )
 
 data class SaveResponseConfigRequest(
@@ -31,8 +30,7 @@ data class SaveResponseConfigRequest(
     val audioSampleId: String?,
     val audioIntensity: Int,
     val silentAlert: Boolean,
-    val ledFlashRate: String? = null,
-    val speakerSampleId: String? = null
+    val ledFlashRate: String? = null
 )
 
 // Âm thanh xua đuổi. Cấu trúc thống nhất {id, name, file} với AlertSoundItem;

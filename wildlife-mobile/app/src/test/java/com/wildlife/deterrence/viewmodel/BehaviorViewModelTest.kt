@@ -127,7 +127,6 @@ class BehaviorViewModelTest {
             ledFrequency = "2 lần/giây",
             ledColor = "Trắng",
             ledDuration = 30,
-            sirenSampleId = "Tiếng Voi",
             silentAlertSms = false,
             silentAlertPush = true
         )
@@ -205,8 +204,7 @@ class FakeConfigApi : ConfigApi {
             audioSampleId = body.audioSampleId,
             audioIntensity = body.audioIntensity,
             silentAlert = body.silentAlert,
-            ledFlashRate = body.ledFlashRate,
-            speakerSampleId = body.speakerSampleId
+            ledFlashRate = body.ledFlashRate
         )
     }
     override suspend fun resetConfig(token: String, speciesId: String): retrofit2.Response<Unit> {

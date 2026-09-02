@@ -144,7 +144,6 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 >   "speakerWarn": true,                 // Bật/Tắt loa cảnh báo (Boolean)
 >   "audioSampleId": "A_gunshot",        // ID âm thanh xua đuổi thú (String hoặc null)
 >   "audioIntensity": 100,               // Cường độ âm lượng loa (1 - 100)
->   "speakerSampleId": "tiger",          // ID âm thanh loa cảnh báo (String, id từ GET /alertSounds, hoặc null)
 >   "silentAlert": false                 // Cảnh báo âm thầm (không còi/đèn tại chỗ)
 > }
 > ```

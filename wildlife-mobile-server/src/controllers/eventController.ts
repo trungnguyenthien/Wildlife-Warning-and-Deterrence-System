@@ -459,7 +459,7 @@ export async function processDetection(req: Request, res: Response) {
       actionResponse = {
         ledFlash: customConfig.ledFlashRate ? true : false,
         ledFlashRate: customConfig.ledFlashRate,
-        speakerWarn: customConfig.speakerSampleId ? true : false,
+        speakerWarn: Boolean(customConfig.audioSampleId || (customConfig.audioIntensity ?? 0) > 0 || customConfig.speakerSampleId),
         silentAlert: customConfig.silentAlert
       };
     }

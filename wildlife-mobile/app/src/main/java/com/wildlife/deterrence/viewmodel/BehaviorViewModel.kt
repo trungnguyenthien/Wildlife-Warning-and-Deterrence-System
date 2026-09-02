@@ -26,7 +26,6 @@ data class BehaviorConfigUiModel(
     val ledFrequency: String, // "2 lần/giây" | "4 lần/giây" | "Nhấp nháy ngẫu nhiên"
     val ledColor: String, // "Đỏ" | "Trắng" | "Đỏ xen trắng"
     val ledDuration: Int, // 1-60 giây
-    val sirenSampleId: String, // Tên âm thanh cảnh báo (lấy từ GET /alertSounds qua name), e.g. "Tiếng Hổ"
     val silentAlertSms: Boolean,
     val silentAlertPush: Boolean
 )
@@ -206,8 +205,7 @@ class BehaviorViewModel(
                     audioSampleId = mapAudioTypeToId(config.audioType),
                     audioIntensity = config.audioVolume,
                     silentAlert = config.silentAlertSms,
-                    ledFlashRate = ledFlashRate,
-                    speakerSampleId = mapUiToSpeakerSampleId(config.sirenSampleId)
+                    ledFlashRate = ledFlashRate
                 )
                 configApi.saveConfig(
                     token = "Bearer $token",
@@ -230,7 +228,6 @@ class BehaviorViewModel(
                 ledFrequency = "4 lần/giây",
                 ledColor = "Đỏ",
                 ledDuration = 15,
-                sirenSampleId = mapSpeakerSampleIdToUi("monkey"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -242,7 +239,6 @@ class BehaviorViewModel(
                 ledFrequency = "2 lần/giây",
                 ledColor = "Vàng",
                 ledDuration = 10,
-                sirenSampleId = mapSpeakerSampleIdToUi("monkey"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -254,7 +250,6 @@ class BehaviorViewModel(
                 ledFrequency = "Nhấp nháy ngẫu nhiên",
                 ledColor = "Đỏ xen trắng",
                 ledDuration = 20,
-                sirenSampleId = mapSpeakerSampleIdToUi("tiger"),
                 silentAlertSms = false,
                 silentAlertPush = true
             )
@@ -308,18 +303,6 @@ class BehaviorViewModel(
         }
     }
 
-    private fun mapSpeakerSampleIdToUi(id: String?): String {
-        if (id == null) return "Không thiết lập"
-        // Giải mã id → tên dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
-        return _citizenAlertSounds.value.find { it.id == id }?.name ?: "Không thiết lập"
-    }
-
-    private fun mapUiToSpeakerSampleId(uiName: String): String? {
-        if (uiName == "Không thiết lập" || uiName == "Không") return null
-        // Giải mã tên → id dựa hoàn toàn trên danh sách lấy từ API (không hardcode)
-        return _citizenAlertSounds.value.find { it.name == uiName }?.id
-    }
-
     private fun mapLedColorToBackend(color: String): String? {
         return when (color) {
             "Đỏ" -> "RED"
@@ -327,7 +310,7 @@ class BehaviorViewModel(
             "Đỏ xen trắng" -> "STROBE"
             "Vàng" -> "YELLOW"
             else -> null
-      }
+        }
     }
 
     private fun mapBackendToLedColor(color: String?): String {
@@ -347,11 +330,11 @@ class BehaviorViewModel(
         val presetType = if (data.id == null) {
             "critical"
         } else {
-            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random" && (data.speakerSampleId == null || data.speakerSampleId == "tiger")) {
+            if (data.ledFlash && data.ledColor == "STROBE" && data.audioSampleId == "A_gunshot" && data.audioIntensity == 100 && data.ledIntensity == 20 && data.ledFlashRate == "random") {
                 "critical"
-            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
+            } else if (data.ledColor == "YELLOW" && data.audioSampleId == "A_dog_bark" && data.audioIntensity == 50 && data.ledIntensity == 10 && data.ledFlashRate == "2_per_sec") {
                 "medium_animal"
-            } else if (data.ledColor == "RED" && data.audioSampleId == "A_explosion" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec" && (data.speakerSampleId == null || data.speakerSampleId == "monkey")) {
+            } else if (data.ledColor == "RED" && data.audioSampleId == "A_explosion" && data.audioIntensity == 90 && data.ledIntensity == 15 && data.ledFlashRate == "4_per_sec") {
                 "intruder"
             } else {
                 "custom"
@@ -365,8 +348,6 @@ class BehaviorViewModel(
             else -> if (data.ledFlash) "4 lần/giây" else "Không"
         }
 
-        val sirenSampleId = mapSpeakerSampleIdToUi(data.speakerSampleId)
-
         return BehaviorConfigUiModel(
             speciesId = data.speciesId,
             presetType = presetType,
@@ -375,7 +356,6 @@ class BehaviorViewModel(
             ledFrequency = ledFrequency,
             ledColor = ledColor,
             ledDuration = data.ledIntensity,
-            sirenSampleId = sirenSampleId,
             silentAlertSms = data.silentAlert,
             silentAlertPush = true
         )

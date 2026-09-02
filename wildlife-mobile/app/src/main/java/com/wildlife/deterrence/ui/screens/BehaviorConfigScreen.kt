@@ -74,7 +74,6 @@ fun BehaviorConfigScreen(
              updated.ledFrequency != loadedConfig.ledFrequency ||
              updated.ledColor != loadedConfig.ledColor ||
              updated.ledDuration != loadedConfig.ledDuration ||
-             updated.sirenSampleId != loadedConfig.sirenSampleId ||
              updated.silentAlertSms != loadedConfig.silentAlertSms ||
              updated.silentAlertPush != loadedConfig.silentAlertPush)
         ) {
@@ -438,51 +437,6 @@ fun BehaviorConfigScreen(
                 primaryGreen = primaryGreen
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    // Dropdown Mẫu nội dung loa
-                    var sampleMenuOpen by remember { mutableStateOf(false) }
-                    val sampleOptions = remember(citizenAlertSounds) {
-                        // Danh sách mẫu loa lấy từ API (GET /alertSounds qua audio-samples), không hardcode.
-                        // "Không thiết lập" = không phát loa cảnh báo (map sang speakerSampleId = null).
-                        citizenAlertSounds.map { it.name } + "Không thiết lập"
-                    }
-
-                    Column {
-                        Text(text = "Mẫu nội dung loa", fontSize = 12.sp, color = Color.Gray)
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFF5F5F5))
-                                .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                                .clickable { sampleMenuOpen = true }
-                                .padding(horizontal = 12.dp, vertical = 12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(text = configState.sirenSampleId, fontSize = 14.sp, color = Color.Black)
-                                Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null, tint = Color.Gray)
-                            }
-                            DropdownMenu(
-                                expanded = sampleMenuOpen,
-                                onDismissRequest = { sampleMenuOpen = false }
-                            ) {
-                                sampleOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = option) },
-                                        onClick = {
-                                            sampleMenuOpen = false
-                                            updateConfig(configState.copy(sirenSampleId = option, presetType = "custom"))
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
                     // Toggle Gửi SMS
                     Row(
                         modifier = Modifier.fillMaxWidth(),

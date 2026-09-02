@@ -12,7 +12,6 @@ export interface DefenseConfig {
   audioIntensity: number;
   silentAlert: boolean;
   ledFlashRate?: string | null;
-  speakerSampleId?: string | null;
 }
 
 interface AnimalRecommendRaw {
@@ -30,8 +29,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: null,
     audioIntensity: 0,
     silentAlert: true,
-    ledFlashRate: null,
-    speakerSampleId: null
+    ledFlashRate: null
   },
   [DangerLevel.MEDIUM]: {
     ledFlash: true,
@@ -41,8 +39,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
     silentAlert: false,
-    ledFlashRate: '2_per_sec',
-    speakerSampleId: 'monkey'
+    ledFlashRate: '2_per_sec'
   },
   [DangerLevel.HIGH]: {
     ledFlash: true,
@@ -52,8 +49,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_explosion',
     audioIntensity: 90,
     silentAlert: false,
-    ledFlashRate: '4_per_sec',
-    speakerSampleId: 'monkey'
+    ledFlashRate: '4_per_sec'
   },
   [DangerLevel.CRITICAL]: {
     ledFlash: true,
@@ -63,8 +59,7 @@ const FALLBACK_DANGER_PRESETS: Record<DangerLevel, DefenseConfig> = {
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
     silentAlert: false,
-    ledFlashRate: 'random',
-    speakerSampleId: 'tiger'
+    ledFlashRate: 'random'
   }
 };
 
@@ -77,8 +72,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_gunshot',
     audioIntensity: 100,
     silentAlert: false,
-    ledFlashRate: 'random',
-    speakerSampleId: 'tiger'
+    ledFlashRate: 'random'
   },
   medium_danger: {
     ledFlash: true,
@@ -88,8 +82,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_dog_bark',
     audioIntensity: 50,
     silentAlert: false,
-    ledFlashRate: '2_per_sec',
-    speakerSampleId: 'monkey'
+    ledFlashRate: '2_per_sec'
   },
   intruder: {
     ledFlash: true,
@@ -99,8 +92,7 @@ const FALLBACK_PRESET_SCENARIOS: Record<string, DefenseConfig> = {
     audioSampleId: 'A_explosion',
     audioIntensity: 90,
     silentAlert: false,
-    ledFlashRate: '4_per_sec',
-    speakerSampleId: 'monkey'
+    ledFlashRate: '4_per_sec'
   }
 };
 
