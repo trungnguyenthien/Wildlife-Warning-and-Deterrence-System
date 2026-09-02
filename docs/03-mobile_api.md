@@ -170,41 +170,24 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 }
 ```
 
-**Response 201**
+**Response 201 (Created)**
 ```json
 {
-  "user": {
-    "id": "9f3a",
-    "username": "nguyenvana",
-    "fullName": "Nguyễn Văn A",
-    "phoneNumber": "+84901234567",
-    "email": "nguyenvana@example.com", // null nếu không nhập
-    "role": "CITIZEN",
-    "createdAt": "2026-07-16T08:30:00+07:00"
-  },
-  "accessToken": "eyJhbGciOi...",
-  "refreshToken": "rt_8s7d6f...",
-  "expiresIn": 3600
+  "id": "9f3a",
+  "username": "nguyenvana",
+  "fullName": "Nguyễn Văn A",
+  "phoneNumber": "+84901234567",
+  "role": "CITIZEN",
+  "createdAt": "2026-07-16T08:30:00.000Z"
 }
 ```
 
 **Validation format (client-side, fail → 400)**
-- `username`: Bắt buộc, 4-20 ký tự, gồm chữ cái, số và dấu gạch dưới, không bắt đầu bằng số.
-- `phoneNumber`: regex `^0[0-9]{9}$` (SĐT Việt Nam 10 số).
-- `email`: Không bắt buộc. Nếu có nhập, phải đúng định dạng email tiêu chuẩn (`local@domain.tld`).
-- `password`: ≥ 8 ký tự, có chữ hoa, chữ thường, số, ký tự đặc biệt.
-- `role`: 1 trong 4 enum trên — UI là Dropdown.
+- `username`: Bắt buộc, 4-20 ký tự, gồm chữ cái, số và dấu gạch dưới.
+- `phoneNumber`: Đúng chuẩn E.164 (ví dụ: `+84901234567`).
+- `password`: Tối thiểu 6 ký tự.
+- `role`: 1 trong các vai trò thuộc enum `Role` (`RANGER`, `CITIZEN`, ...).
 - `id` / `userId`: **Nghiêm cấm Client truyền ID từ phía ứng dụng.** ID người dùng phải được tạo hoàn toàn ở phía Backend. Nếu Request chứa các trường này, hệ thống sẽ trả về lỗi `400 Bad Request` (mã lỗi: `id_not_allowed_from_client`).
-
-**Side effects**
-- Hash mật khẩu (bcrypt/argon2).
-- Tạo JWT access (1h) + refresh (30 ngày).
-- Tự động thực hiện đăng nhập → chuyển sang `MAIN`.
-
-**Lỗi hay gặp**
-- `409 ERR_USERNAME_ALREADY_USED` → hiện lỗi inline tại field Username.
-- `409 ERR_PHONE_ALREADY_USED` → hiện lỗi inline tại field SĐT.
-- `409 ERR_EMAIL_ALREADY_USED` → hiện lỗi inline tại field Email (nếu email được gửi).
 
 ---
 
@@ -224,17 +207,8 @@ Mapping: màn hình `[LOGIN_SCREEN]` (mục 7.4.2 của [01-de-tai-nghien-cuu-ca
 **Response 200**
 ```json
 {
-  "user": { 
-    "id": "9f3a", 
-    "username": "nguyenvana", 
-    "fullName": "Nguyễn Văn A", 
-    "phoneNumber": "+84901234567", 
-    "email": "nguyenvana@example.com",
-    "role": "CITIZEN" 
-  },
-  "accessToken": "...",
-  "refreshToken": "...",
-  "expiresIn": 3600
+  "token": "4f5e6a7b8c9d0e1f2a3b4c5d6e7f8a9b",
+  "role": "RANGER"
 }
 ```
 
@@ -301,67 +275,79 @@ Hủy đăng ký khi logout / user tắt thông báo.
 ### 4.3. `GET /notifications/inbox`
 
 - **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
-> ⚠️ **GHI CHÚ:** ĐÂY LÀ API DÙNG ĐỂ TEST (DEVELOP)
-
-Lấy danh sách thông báo trong app (phân trang).
-
-**Query params**
-
-| Param | Kiểu | Mặc định |
-|---|---|---|
-| `page` | int | 0 |
-| `size` | int | 20 |
-| `unreadOnly` | bool | false |
-
-**Response 200**
+> **Response 200**
 ```json
-{
-  "items": [
-    {
-      "id": "n-987",
-      "type": "animal.detected",
-      "title": "Phát hiện VOI tại Cam 1",
-      "body": "Độ tin cậy 92% · 9:04",
-      "cameraId": "cam-001",
+[
+  {
+    "id": "cam-001",
+    "name": "Cam 1 · Rìa Rừng Cổng Bắc",
+    "location": {
+      "lat": 11.4523,
+      "lng": 107.4231,
+      "address": "Vườn Quốc gia Cát Tiên, Đồng Nai"
+    },
+    "status": "ONLINE",
+    "liveFeedUrl": "rtsp://192.168.1.101/live",
+    "snapshot": {
+      "url": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
+      "capturedAt": "2026-07-16T09:04:12.000Z"
+    },
+    "currentDetection": {
       "eventId": "evt-456",
-      "isRead": false,
-      "createdAt": "2026-07-16T09:04:30+07:00"
+      "detectedAt": "2026-07-16T09:04:12.000Z",
+      "detections": [
+        { 
+          "speciesId": "elephant", 
+          "displayName": "Voi", 
+          "confidence": 0.92, 
+          "dangerLevel": "CRITICAL" 
+        }
+      ]
     }
-  ],
-  "pagination": { "page": 0, "size": 20, "total": 145 }
-}
+  }
+]
 ```
 
-Enum `type`: `animal.detected`, `animal.escalated`, `fence.activated`, `fence.deactivated`, `system.alert`, `device.offline`.
+**Side effects**
+- Khi có sự kiện mới, App nhận thông báo qua FCM và tự động làm mới danh sách.
 
 ---
 
-## 5. Nhóm 3 — Camera & Live feed
-
-### 5.1. `GET /cameras`
+### 5.2. `GET /cameras/{cameraId}`
 
 - **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
-Danh sách camera user được phép xem. Mapping: tab `[CAMERA_LIST_TAB]` (phần hiển thị danh sách thẻ camera).
-
-**Query params**
-- `hasDetection` (bool, optional): lọc camera đang có phát hiện.
-- `status` (optional): `ONLINE`/`OFFLINE`.
+Chi tiết 1 camera bao gồm thông tin camera, ảnh snapshot gần nhất và phán đoán hình ảnh hiện tại. Mapping: màn hình `[CAMERA_VIEW_SCREEN]` (màn hình chi tiết camera).
 
 **Response 200**
 ```json
 {
-  "items": [
-    {
-      "id": "cam-001",
-      "name": "Cam 1 · Rìa Rừng Cổng Bắc",
-      "status": "ONLINE",
-      "hasCurrentDetection": true,
-      "currentDetection": {
-        "eventId": "evt-456",
-        "detections": [
-          { "speciesId": "elephant", "speciesName": "Voi", "confidence": 0.92, "dangerLevel": "CRITICAL" }
-        ],
-        "detectedAt": "2026-07-16T09:04:12+07:00"
+  "id": "cam-001",
+  "name": "Cam 1 · Rìa Rừng Cổng Bắc",
+  "location": {
+    "lat": 11.4523,
+    "lng": 107.4231,
+    "address": "Vườn Quốc gia Cát Tiên, Đồng Nai"
+  },
+  "status": "ONLINE",
+  "liveFeedUrl": "rtsp://192.168.1.101/live",
+  "snapshot": {
+    "url": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg",
+    "capturedAt": "2026-07-16T09:04:12.000Z"
+  },
+  "currentDetection": {
+    "eventId": "evt-456",
+    "detectedAt": "2026-07-16T09:04:12.000Z",
+    "detections": [
+      { 
+        "speciesId": "elephant", 
+        "displayName": "Voi", 
+        "confidence": 0.92, 
+        "dangerLevel": "CRITICAL" 
+      }
+    ]
+  }
+}
+```:12+07:00"
       },
       "snapshotUrl": "https://cdn.example.com/snap/cam001_2026-07-16T09-04-12.jpg"
     }
