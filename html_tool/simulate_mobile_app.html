@@ -807,6 +807,9 @@
             🔄 Đặt lại mặc định
           </button>
         </div>
+        <div id="config-validation-hint" style="color: #ffb74d; font-size: 0.78rem; margin-top: 0.6rem; text-align: center; background: rgba(255, 183, 77, 0.08); padding: 0.45rem 0.6rem; border-radius: 6px; border: 1px dashed rgba(255, 183, 77, 0.3);">
+          ⚠️ Vui lòng đăng nhập và chọn <b>Loài động vật</b> để thao tác Lưu / Đặt lại cấu hình.
+        </div>
       </section>
 
       <!-- RIGHT COLUMN: SSE Event Stream & Device Testing -->
@@ -1616,10 +1619,8 @@
             }
           }
 
-          // Kích hoạt các nút thao tác
-          btnLoadConfig.disabled = false;
-          btnSaveConfig.disabled = false;
-          btnResetConfig.disabled = false;
+          // Kích hoạt các nút thao tác theo điều kiện validation
+          updateConfigButtonsState();
 
           // Nếu có selectedCameraId thì đồng bộ sang và chọn
           if (selectedCameraId) {
@@ -1630,13 +1631,47 @@
         }
       }
 
+      function updateConfigButtonsState() {
+        const hint = document.getElementById('config-validation-hint');
+        const speciesId = configSpeciesId.value;
+
+        if (!accessToken) {
+          btnSaveConfig.disabled = true;
+          btnResetConfig.disabled = true;
+          btnLoadConfig.disabled = true;
+          if (hint) {
+            hint.style.display = 'block';
+            hint.style.color = '#ef5350';
+            hint.style.borderColor = 'rgba(239, 83, 80, 0.4)';
+            hint.style.backgroundColor = 'rgba(239, 83, 80, 0.08)';
+            hint.innerHTML = '⚠️ <b>Chưa đăng nhập:</b> Vui lòng đăng nhập tài khoản ở bảng bên trái trước.';
+          }
+        } else if (!speciesId) {
+          btnSaveConfig.disabled = true;
+          btnResetConfig.disabled = true;
+          btnLoadConfig.disabled = true;
+          if (hint) {
+            hint.style.display = 'block';
+            hint.style.color = '#ffb74d';
+            hint.style.borderColor = 'rgba(255, 183, 77, 0.3)';
+            hint.style.backgroundColor = 'rgba(255, 183, 77, 0.08)';
+            hint.innerHTML = '⚠️ <b>Chưa chọn loài:</b> Vui lòng chọn <b>Loài động vật</b> ở phía trên để kích hoạt nút.';
+          }
+        } else {
+          btnSaveConfig.disabled = false;
+          btnResetConfig.disabled = false;
+          btnLoadConfig.disabled = false;
+          if (hint) {
+            hint.style.display = 'none';
+            hint.innerHTML = '';
+          }
+        }
+      }
+
       function disableResponseConfigForm() {
-        btnLoadConfig.disabled = true;
-        btnSaveConfig.disabled = true;
-        btnResetConfig.disabled = true;
-        // Camera filter removed; use selectedCameraId state variable directly
         configSpeciesId.innerHTML = '<option value="">-- Chọn Loài --</option>';
         configAudioSample.innerHTML = '<option value="">-- Không có --</option>';
+        updateConfigButtonsState();
       }
 
       async function loadResponseConfig() {
@@ -1688,12 +1723,15 @@
         } catch (e) {
           console.error("Lỗi khi tải cấu hình:", e);
         } finally {
-          btnLoadConfig.disabled = false;
+          updateConfigButtonsState();
         }
       }
 
       // Đăng ký bộ lắng nghe sự kiện
-      configSpeciesId.addEventListener('change', loadResponseConfig);
+      configSpeciesId.addEventListener('change', () => {
+        updateConfigButtonsState();
+        loadResponseConfig();
+      });
       btnLoadConfig.addEventListener('click', loadResponseConfig);
 
       btnSaveConfig.addEventListener('click', async () => {
@@ -1840,6 +1878,7 @@
       // Initial loading
       updateCurlPreview();
       loadResponseConfigMetadata();
+      updateConfigButtonsState();
     </script>
   </body>
 </html>
