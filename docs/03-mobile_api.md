@@ -1118,7 +1118,7 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
     { "level":"CRITICAL", "displayName":"CỰC KỲ nguy hiểm","colorHex":"#D32F2F" }
   ],
   "speciesByLevel": {
-    "LOW":      ["deer","giraffe","monkey"],
+    "LOW":      ["deer","giraffe","monkey","fish"],
     "CRITICAL": ["elephant","tiger","leopard","rhino"]
   }
 }

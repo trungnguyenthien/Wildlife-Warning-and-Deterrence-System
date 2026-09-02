@@ -95,3 +95,11 @@
   override:
     ledColor: "YELLOW"
     audioSampleId: "A_dog_bark"
+
+- speciesId: "fish"
+  displayName: "Cá"
+  inheritPreset: "@medium_danger"
+  override:
+    audioIntensity: 0
+    silentAlert: true
+

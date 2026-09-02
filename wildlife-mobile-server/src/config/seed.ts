@@ -143,6 +143,15 @@ export async function runSeed(prisma: PrismaClient) {
       htmlDescription: '<p>Nai vàng hoặc nai rừng tìm kiếm thức ăn vào ban đêm.</p>',
       aggressionLevel: 15,
       recommendAction: 'Sử dụng đèn LED chớp vàng và còi chó sủa cường độ vừa phải để điều hướng nai ra khỏi rẫy.'
+    },
+    {
+      id: 'fish',
+      displayName: 'Cá',
+      dangerLevel: DangerLevel.LOW,
+      isHuman: false,
+      htmlDescription: '<p>Các loài cá di chuyển theo đàn gần khu vực lòng hồ thủy điện hoặc sông ngòi biên giới.</p>',
+      aggressionLevel: 5,
+      recommendAction: 'Hệ thống chỉ ghi nhận thông tin theo dõi hệ sinh thái thủy sản và không bật các chế độ xua đuổi.'
     }
   ];
 
