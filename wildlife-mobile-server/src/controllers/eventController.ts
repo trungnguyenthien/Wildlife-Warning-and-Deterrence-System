@@ -449,17 +449,25 @@ export async function processDetection(req: Request, res: Response) {
     });
 
     const defaultPreset = getRecommendedPresetForSpecies(mainSpecies.id, maxDangerLevel);
-    let actionResponse = {
+    let actionResponse: any = {
       ledFlash: defaultPreset.ledFlash,
+      ledColor: defaultPreset.ledColor,
+      ledIntensity: defaultPreset.ledIntensity,
       ledFlashRate: defaultPreset.ledFlashRate || (defaultPreset.ledFlash ? 'FAST' : null),
       speakerWarn: defaultPreset.speakerWarn,
+      audioSampleId: defaultPreset.audioSampleId,
+      audioIntensity: defaultPreset.audioIntensity,
       silentAlert: defaultPreset.silentAlert
     };
     if (customConfig) {
       actionResponse = {
         ledFlash: customConfig.ledFlashRate ? true : false,
+        ledColor: customConfig.ledColor,
+        ledIntensity: customConfig.ledDurationSeconds ?? 0,
         ledFlashRate: customConfig.ledFlashRate,
-        speakerWarn: Boolean(customConfig.audioSampleId || (customConfig.audioIntensity ?? 0) > 0 || customConfig.speakerSampleId),
+        speakerWarn: Boolean(customConfig.audioSampleId || (customConfig.audioIntensity ?? 0) > 0),
+        audioSampleId: customConfig.audioSampleId,
+        audioIntensity: customConfig.audioIntensity ?? 0,
         silentAlert: customConfig.silentAlert
       };
     }
