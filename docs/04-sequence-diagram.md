@@ -236,11 +236,11 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
-### 3.1.2. Action: Auto-Polling cập nhật danh sách camera
+### 3.1.2. Action: Auto-Polling (Smart Polling) cập nhật danh sách camera
 
-- **Mô tả:** Song song với việc tải danh sách lần đầu, ứng dụng khởi động một vòng lặp coroutine (polling) chạy ngầm trong `viewModelScope`. Sau mỗi **5 giây**, vòng lặp tự động gọi `GET /cameras` để lấy dữ liệu mới nhất, cập nhật ảnh và sắp xếp lại thứ tự camera. Polling dừng khi người dùng rời khỏi màn hình (`onDispose`).
+- **Mô tả:** Song song với việc tải danh sách lần đầu, ứng dụng khởi động một vòng lặp coroutine (Smart Polling) chạy ngầm. Sau mỗi **5 giây**, vòng lặp tự động gọi nhẹ `GET /cameras/heartbeat` để kiểm tra `lastUpdatedAt` trong toàn hệ thống. Nếu `lastUpdatedAt` lớn hơn thời điểm cập nhật gần nhất của client, ứng dụng mới gọi `GET /cameras` để lấy toàn bộ dữ liệu danh sách camera và ảnh snapshot mới nhất.
 
-> **Lý do thay thế SSE:** Endpoint SSE (`GET /cameras/stream`) không tương thích với Vercel Serverless — trả về `Cannot GET`. Auto-Polling đạt hiệu quả tương đương mà không cần long-lived connection.
+> **Cơ chế Smart Polling tối ưu:** Giúp giảm thiểu tối đa băng thông và tải serverless của Vercel mà vẫn đảm bảo cập nhật trạng thái báo động thời gian thực.
 
 ```mermaid
 sequenceDiagram
@@ -249,13 +249,20 @@ sequenceDiagram
     participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Mobile_Server: Người dùng ở màn hình Camera (Danh sách / Chi tiết) ở chế độ Foreground
-    loop Mỗi 5 giây (isActive)
-        Mobile->>Mobile_Server: GET /cameras (Authorization: Bearer token)
-        Mobile_Server-->>Mobile: Danh sách camera mới nhất (thumbnail, status, capturedAt)
-        Mobile->>Mobile: Cập nhật UI: sắp xếp lại thứ tự, ảnh snapshot mới
+    loop Mỗi 5 giây (Smart Polling)
+        Mobile->>Mobile_Server: GET /cameras/heartbeat (Authorization: Bearer token)
+        Mobile_Server-->>Mobile: { lastUpdatedAt: "T" }
+        alt T > lastKnownUpdatedAt (Có sự kiện mới hoặc thay đổi)
+            Mobile->>Mobile_Server: GET /cameras (Authorization: Bearer token)
+            Mobile_Server-->>Mobile: Danh sách camera mới nhất (thumbnail, status, currentDetection)
+            Mobile->>Mobile: Cập nhật UI, làm mới ảnh snapshot và cập nhật lastKnownUpdatedAt = T
+        else T <= lastKnownUpdatedAt (Không có thay đổi)
+            Note over Mobile: Không gọi GET /cameras, giữ nguyên trạng thái UI hiện tại
+        end
     end
 ```
 *   **Chi tiết đặc tả API:**
+    *   [GET /cameras/heartbeat](./03-mobile_api.md#55-get-camerasheartbeat)
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
@@ -701,7 +708,7 @@ sequenceDiagram
 
 ### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
-- **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server, nhận cấu hình phòng vệ "@DefendAction" phản hồi để thực thi loa/LED/còi hú tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
+- **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server qua API `POST /cameras/{cameraId}/detections`, nhận cấu hình phòng vệ `@DefendAction` phẳng 8 trường (`ledFlash`, `ledColor`, `ledIntensity`, `ledFlashRate`, `speakerWarn`, `audioSampleId`, `audioIntensity`, `silentAlert`) phản hồi để thực thi phát âm thanh xua đuổi/chớp LED tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 - **Cơ chế gửi Push Notification với Cooldown 30 giây:**
   - AI Server có thể gửi detection liên tục về Mobile Server. Để tránh spam thông báo, `Mobile_Server` áp dụng logic cooldown:
     * **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
@@ -755,13 +762,13 @@ sequenceDiagram
     Mobile_Server->>Database: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vật lý (device_logs)
     Database-->>Mobile_Server: Lưu thành công
 
-    Mobile_Server-->>AI_Server: Response 201 Created (eventId, detections, "@DefendAction")
+    Mobile_Server-->>AI_Server: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
     deactivate Mobile_Server
 
-    AI_Server->>Camera: Truyền lệnh điều khiển thiết bị vật lý ("@DefendAction")
+    AI_Server->>Camera: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
     deactivate AI_Server
 
-    Note over Camera: Thực thi phòng vệ tại chỗ (Phát loa xua đuổi, nháy LED, bật còi hú báo động)
+    Note over Camera: Thực thi phòng vệ tại chỗ (Phát tệp âm thanh xua đuổi chọn lọc, chớp nháy LED)
 ```
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
