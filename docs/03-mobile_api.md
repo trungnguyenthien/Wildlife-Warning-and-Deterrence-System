@@ -118,7 +118,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 ```json
 {
   "audio": {
-    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion
+    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion / A_human
     "intensity": 75,                     // Cường độ âm thanh (1 - 100)
     "sampleId": "A_gunshot"              // ID âm thanh xua đuổi thú (bắt đầu bằng prefix 'A_')
   },
