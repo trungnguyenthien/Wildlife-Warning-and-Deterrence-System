@@ -95,9 +95,9 @@ curl -s -X PATCH "$BASE/cameras/CAM_PROD_TEST" \
   -H "Content-Type: application/json" \
   -d '{"name":"Trạm Cát Tiên Số 1"}' | jq .
 
-# 4. POST /cameras/:cameraId/snapshots - Tải lên ảnh snapshot thủ công (Cloudinary)
+# 4. POST /cameras/:cameraId/image-upload - Tải lên ảnh snapshot thủ công (Cloudinary)
 # Đảm bảo có tệp f4.png tại thư mục chạy lệnh
-curl -s -X POST "$BASE/cameras/CAM_PROD_TEST/snapshots" \
+curl -s -X POST "$BASE/cameras/CAM_PROD_TEST/image-upload" \
   -H "Authorization: Bearer $RANGER_TOKEN" \
   -F "image=@f4.png" \
   -F "userId=$RANGER_ID" | jq .

@@ -862,9 +862,9 @@ sequenceDiagram
 
 > [!IMPORTANT]
 > **Lưu ý về Thực trạng Triển khai:**
-> API `POST /cameras/{cameraId}/snapshots` hiện tại **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL, tích hợp công cụ giả lập). Ứng dụng di động Android hiện tại **KHÔNG có giao diện hay nút bấm tải ảnh snapshot thủ công**. Trên ứng dụng mobile, kiểm lâm và người dân chỉ xem (`GET`) ảnh snapshot do hệ thống cập nhật tự động từ AI Server.
+> API `POST /cameras/{cameraId}/image-upload` hiện tại **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL, tích hợp công cụ giả lập). Ứng dụng di động Android hiện tại **KHÔNG có giao diện hay nút bấm tải ảnh snapshot thủ công**. Trên ứng dụng mobile, kiểm lâm và người dân chỉ xem (`GET`) ảnh snapshot do hệ thống cập nhật tự động từ AI Server.
 
-- **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/snapshots` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
+- **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/image-upload` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
 
 ```mermaid
 sequenceDiagram
@@ -875,7 +875,7 @@ sequenceDiagram
     participant Database as Database
 
     Note over Client_Test, Mobile_Server: Gửi tệp ảnh snapshot qua công cụ kiểm thử / cURL
-    Client_Test->>Mobile_Server: POST /cameras/{cameraId}/snapshots (form-data: image, userId)
+    Client_Test->>Mobile_Server: POST /cameras/{cameraId}/image-upload (form-data: image, userId)
     activate Mobile_Server
     Mobile_Server->>Mobile_Server: Validation định dạng (JPG/PNG, size ≤ 5MB) & kiểm tra cameraId, userId
     Mobile_Server->>Cloudinary: Upload tệp ảnh snapshot thực địa
@@ -886,4 +886,4 @@ sequenceDiagram
     deactivate Mobile_Server
 ```
 *   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/snapshots](./03-mobile_api.md#13a2-post-camerascameraidsnapshots)
+    *   [POST /cameras/{cameraId}/image-upload](./03-mobile_api.md#13a4-post-camerascameraidimage-upload)

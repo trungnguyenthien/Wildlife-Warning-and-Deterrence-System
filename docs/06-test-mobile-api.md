@@ -174,7 +174,7 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
     *   **Header:** Trống hoặc token sai.
     *   **Kết quả mong đợi (Expected Response):** `401 Unauthorized` hoặc `403 Forbidden`.
 
-#### 7b. `POST /cameras/{cameraId}/snapshots` (Tải lên hình ảnh snapshot thủ công)
+#### 7b. `POST /cameras/{cameraId}/image-upload` (Tải lên hình ảnh snapshot thủ công)
 *   **TC_SNAP_UPL_SUCCESS_01: Upload manual camera snapshot successfully to Cloudinary**
     *   **Mô tả:** Tải lên hình ảnh snapshot chụp thủ công lên Cloudinary thành công và tạo bản ghi lưu trữ trong DB.
     *   **Dữ liệu gửi đi (Multipart/form-data):** `image` (tệp tin f4.png), `userId` (mã uuid người dùng hợp lệ).
@@ -191,7 +191,7 @@ Tài liệu này định nghĩa chi tiết danh sách các ca kiểm thử (test
 *   **TC_SNAP_UPL_FAILURE_03: Fail to upload manual camera snapshot for non-existent cameraId**
     *   **Mô tả:** Tải ảnh lên với mã cameraId của camera không tồn tại trong hệ thống.
     *   **Dữ liệu gửi đi (Multipart/form-data):** `image` (tệp tin f4.png), `userId` (uuid người dùng hợp lệ).
-    *   **Đường dẫn gọi:** `/cameras/CAM_NON_EXIST_9999/snapshots`
+    *   **Đường dẫn gọi:** `/cameras/CAM_NON_EXIST_9999/image-upload`
     *   **Kết quả mong đợi (Expected Response):** `404 Not Found` kèm mã lỗi `not_found_camera`.
 
 ---

@@ -9,7 +9,7 @@ import { listSpecies, listConfigs, getConfigDetail, saveConfig, resetConfig, app
 import { listSmsRecipients, addSmsRecipient, deleteSmsRecipient } from './controllers/smsController';
 import { listEvents, listAlertFeed, readAlert, processDetection, getAlertDetail, listNotificationsInbox } from './controllers/eventController';
 import { getSummary } from './controllers/statsController';
-import { uploadSnapshot } from './controllers/snapshotController';
+import { uploadCameraImage } from './controllers/imageUploadController';
 import { registerPushToken, deletePushToken } from './controllers/deviceController';
 import multer from 'multer';
 
@@ -66,7 +66,7 @@ app.get('/cameras/:cameraId', authenticateToken, getCamera);
 app.get('/cameras/:cameraId/history', authenticateToken, getCameraHistory);
 app.patch('/cameras/:cameraId', authenticateToken, renameCamera);
 app.post('/cameras/:cameraId/devices/:deviceKey/test', authenticateToken, testDevice);
-app.post('/cameras/:cameraId/snapshots', authenticateToken, upload.single('image'), uploadSnapshot);
+app.post('/cameras/:cameraId/image-upload', authenticateToken, upload.single('image'), uploadCameraImage);
 
 // ==========================================
 // 5. ENDPOINTS CẤU HÌNH PHÒNG VỆ & LOÀI

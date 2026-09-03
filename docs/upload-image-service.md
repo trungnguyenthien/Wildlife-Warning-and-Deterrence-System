@@ -94,7 +94,7 @@ const { uploadImage } = require('./uploadCloudinary');
 (async () => {
   try {
     // Tải ảnh từ thư mục cục bộ lên thư mục 'events_test'
-    const result = await uploadImage('./snapshots/test-image.jpg', { folder: 'events_test' });
+    const result = await uploadImage('./camera-images/test-image.jpg', { folder: 'events_test' });
     console.log('Upload thành công! URL ảnh:', result.url);
   } catch (error) {
     console.error('Lỗi thực thi:', error);

@@ -1245,7 +1245,42 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 
 **Lỗi thường gặp**
 - `401 ERR_UNAUTHORIZED` -> JWT Token không hợp lệ hoặc đã hết hạn.
-- `500 ERR_ABLY_SDK_ERROR` -> Lỗi gọi SDK Ably từ máy chủ khi sinh Token Request.
+---
+
+### 13a.4. `POST /cameras/{cameraId}/image-upload` (API Hỗ trợ / Kiểm thử backend)
+
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
+
+> [!IMPORTANT]
+> **Thực trạng Triển khai:**
+> API này **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL và công cụ giả lập). Ứng dụng di động Android **KHÔNG tích hợp nút bấm tải ảnh snapshot thủ công**.
+
+Kiểm lâm hoặc công cụ thử nghiệm gửi tệp ảnh snapshot thực địa lên trạm camera. Máy chủ tải ảnh lên Cloud Storage/Cloudinary và ghi nhận vào cơ sở dữ liệu.
+
+**Content-Type:** `multipart/form-data`
+
+**Request Body (Form data)**
+
+| Field | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `image` | File (Binary) | Có | Tệp ảnh thực địa (JPEG/PNG, dung lượng ≤ 5MB) |
+| `userId` | string | Có | Mã UUID của người dùng tải ảnh |
+
+**Response Payload (`201 Created`)**
+
+```json
+{
+  "id": "snap-uuid-1234",
+  "url": "https://res.cloudinary.com/dhfkqbnnx/image/upload/v1784718531/manual_snapshots/sample.png",
+  "deviceId": "CAM_001",
+  "userId": "user-uuid-5678",
+  "uploadedAt": "2026-07-23T09:00:00.000Z"
+}
+```
+
+**Lỗi thường gặp**
+- `400 ERR_VALIDATION_FAILED` -> Đính kèm thiếu tệp ảnh (`missed_image`).
+- `404 ERR_NOT_FOUND` -> `cameraId` không tồn tại (`not_found_camera`) hoặc `userId` không tồn tại (`not_found_user`).
 
 ---
 
@@ -1335,6 +1370,7 @@ Trả về định dạng đối tượng JSON Ably Token Request tiêu chuẩn 
 | 13a.1 | POST | `/cameras/{cameraId}/detections` | API tích hợp: Thiết bị hiện trường / AI Server gửi snapshot và phán đoán nhận dạng |
 | 13a.2 | WS | `/ws` | (ĐÃ LOẠI BỎ) Kết nối WebSocket song công |
 | 13a.3 | GET | `/auth/ably-token` | API tích hợp: Cấp Token Request tạm thời phục vụ kết nối an toàn với Ably Cloud |
+| 13a.4 | POST | `/cameras/{cameraId}/image-upload` | API tích hợp / Kiểm thử: Tải tệp ảnh snapshot thực địa thủ công lên trạm camera (CHỈ TRÊN BACKEND) |
 | 7.3 | GET | `/alertSounds` | Tải danh sách file âm thanh cảnh báo (công khai, không cần xác thực) |
 
 **Tổng cộng: 38 API di động + 2 API tích hợp thiết bị (gồm 1 Webhook nhận diện và 1 API cấp Token Ably; đã bỏ kết nối WebSocket trực tiếp, chức năng ngôn ngữ, đổi mật khẩu, khôi phục mật khẩu, stream nghe thử âm thanh, và ghi đè trạng thái thiết bị thủ công).**

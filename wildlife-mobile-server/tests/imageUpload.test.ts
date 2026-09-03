@@ -53,11 +53,11 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
     await disconnectPrisma();
   });
 
-  // POST /cameras/{cameraId}/snapshots
+  // POST /cameras/{cameraId}/image-upload
   it('TC_SNAP_UPL_SUCCESS_01: Upload manual camera snapshot successfully to Cloudinary', async () => {
     if (!token) return;
     const res = await request(app)
-      .post(`/cameras/${camId}/snapshots`)
+      .post(`/cameras/${camId}/image-upload`)
       .set('Authorization', `Bearer ${token}`)
       .attach('image', sampleImagePath)
       .field('userId', userId);
@@ -80,7 +80,7 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
   it('TC_SNAP_UPL_FAILURE_01: Fail to upload manual camera snapshot due to missing image file', async () => {
     if (!token) return;
     const res = await request(app)
-      .post(`/cameras/${camId}/snapshots`)
+      .post(`/cameras/${camId}/image-upload`)
       .set('Authorization', `Bearer ${token}`)
       .field('userId', userId);
 
@@ -91,7 +91,7 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
   it('TC_SNAP_UPL_FAILURE_02: Fail to upload manual camera snapshot with non-existent userId', async () => {
     if (!token) return;
     const res = await request(app)
-      .post(`/cameras/${camId}/snapshots`)
+      .post(`/cameras/${camId}/image-upload`)
       .set('Authorization', `Bearer ${token}`)
       .attach('image', sampleImagePath)
       .field('userId', 'non-existent-user-uuid');
@@ -103,7 +103,7 @@ describe('MANUAL SNAPSHOT UPLOAD TESTING SUITE', () => {
   it('TC_SNAP_UPL_FAILURE_03: Fail to upload manual camera snapshot for non-existent cameraId', async () => {
     if (!token) return;
     const res = await request(app)
-      .post('/cameras/CAM_NON_EXIST_9999/snapshots')
+      .post('/cameras/CAM_NON_EXIST_9999/image-upload')
       .set('Authorization', `Bearer ${token}`)
       .attach('image', sampleImagePath)
       .field('userId', userId);

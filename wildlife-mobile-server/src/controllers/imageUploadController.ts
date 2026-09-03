@@ -5,8 +5,8 @@ import { uploadImage } from '../config/cloudinary';
 
 const prisma = new PrismaClient();
 
-// POST /cameras/:cameraId/snapshots
-export async function uploadSnapshot(req: Request, res: Response) {
+// POST /cameras/:cameraId/image-upload
+export async function uploadCameraImage(req: Request, res: Response) {
   const { cameraId } = req.params;
   const { userId } = req.body;
 
@@ -75,7 +75,7 @@ export async function uploadSnapshot(req: Request, res: Response) {
     }
 
     // 5. Upload lên Cloudinary
-    const secureUrl = await uploadImage(file.path, 'manual_snapshots');
+    const secureUrl = await uploadImage(file.path, 'camera_image_uploads');
 
     // 6. Dọn dẹp tệp tạm trên local storage
     if (fs.existsSync(file.path)) {
