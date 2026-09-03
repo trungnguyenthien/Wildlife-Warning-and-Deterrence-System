@@ -35,7 +35,8 @@ Khi được yêu cầu viết phần tổng quan cho một tính năng bất k�
 | HTTP Status (`200 OK`, `201 Created`, `400 Bad Request`) | Kết quả xử lý (Thành công, Thêm mới hoàn tất, Cảnh báo nhập sai dữ liệu) |
 | Database / Query / SQL / Prisma | Cơ sở dữ liệu lưu trữ trung tâm |
 | Payload / Body / JSON Object | Nội dung bản tin / Thông tin yêu cầu |
-| `fcmToken` | Mã định danh thiết bị di động duy nhất do Google Firebase cấp |
+| `fcmToken` | Mã địa chỉ nhận tin nhắn duy nhất của chiếc điện thoại (Địa chỉ bưu điện số) |
+| Google Firebase (FCM) | Hạ tầng bưu điện tin nhắn trung gian chuyển tải Push Notification tức thì 24/7 |
 | `cameraId` | Mã định danh riêng biệt của từng trạm camera tại hiện trường |
 | `ownerId` / `userId` | Tài khoản người quản lý / chủ sở hữu thiết bị |
 | Cooldown / Logic 30s | Bộ lọc thông báo thông minh (tránh gửi thông báo lặp lại gây phiền) |

@@ -170,7 +170,23 @@ _(Không có action load dữ liệu ban đầu)_
 
 ### 2.1. Action: Login & Register Push Token
 
-- **Mô tả:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
+> [!NOTE]
+> ### 💡 Diễn giải Luồng vận hành (Dành cho Giám khảo / Người đọc tổng quan)
+> Quy trình xác thực bảo mật và liên kết thiết bị nhận thông báo tự động khi người dùng đăng nhập diễn ra qua **3 bước chính** như sau:
+> 
+> 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**  
+>    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ. Khi thông tin chính xác, máy chủ cấp chìa khóa phiên làm việc bảo mật cho ứng dụng.
+> 
+> 2. **Bước 2: Tự động Định danh Thiết bị Nhận Cảnh báo (Đăng ký FCM Token)**  
+>    * Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** (dịch vụ bưu điện tin nhắn toàn cầu) để xin cấp một **`fcmToken`** (chuỗi mã định danh địa chỉ duy nhất của chiếc điện thoại đó).
+>    * **Vai trò của Google Firebase & `fcmToken` trong việc phát thông báo khẩn cấp:**
+>      - **`fcmToken` (Mã địa chỉ nhận tin):** Đóng vai trò như *"Địa chỉ hòm thư duy nhất"* của chiếc điện thoại. Máy chủ lưu trữ `fcmToken` này đính kèm với tài khoản người dùng (`userId`), giúp hệ thống biết chính xác cần gửi thông báo đến chiếc điện thoại nào mà không bị nhầm lẫn.
+>      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò *"Bưu điện Trung gian Khẩn cấp"*, tiếp nhận yêu cầu từ máy chủ và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị trực tiếp lên màn hình điện thoại người dùng tức thì 24/7, kể cả khi ứng dụng đang đóng hay điện thoại đang tắt màn hình.
+> 
+> 3. **Bước 3: Hoàn tất & Chuyển vào Màn hình Điều khiển Chính**  
+>    * Khi thiết bị được ghi nhận thành công, ứng dụng lưu chìa khóa bảo mật và tự động chuyển người dùng vào màn hình chính để theo dõi danh sách trạm camera và tin tức cảnh báo theo thời gian thực.
+
+- **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
 
 ```mermaid
 sequenceDiagram
