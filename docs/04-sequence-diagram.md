@@ -176,11 +176,12 @@ _(Không có action load dữ liệu ban đầu)_
 > 
 > 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**  
 >    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ.
->    * **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã ngẫu nhiên cố định trước khi so sánh với dữ liệu trong hệ thống.
->      - 💡 **Ví dụ minh họa nguyên lý "Một chiều":** Hãy tưởng tượng thuật toán băm giống như một *"Chiếc máy xay sinh tố toán học"*:
->        + **Chiều đi (Dễ dàng):** Đưa quả cam (Mật khẩu `MatKhau123`) vào máy xay, ta lập tức có một ly nước cam ép (Chuỗi mã băm `$2b$12$eImi...`).
->        + **Chiều ngược lại (Bất khả thi):** Cho dù kẻ xấu có đánh cắp được ly nước cam ép (chuỗi mã băm trong CSDL), họ **không bao giờ có thể làm ngược lại để khôi phục ly nước ép trở về quả cam ban đầu**.
->        + **Cách xác nhận:** Mỗi lần người dùng đăng nhập, máy chủ chỉ việc bỏ mật khẩu vừa nhập vào "máy xay", nếu cho ra ly nước ép giống hệt ly đã lưu trong CSDL thì xác nhận đăng nhập thành công.
+>    * **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã cố định độc đáo trước khi so sánh với dữ liệu trong hệ thống.
+>      - 💡 **Ví dụ minh họa nguyên lý "Trộn màu sơn một chiều":**
+>        + **Chiều đi (Rất dễ):** Khi hòa trộn các màu sơn theo tỉ lệ nhất định (Mật khẩu `MatKhau123`), ta thu được một màu sơn Xanh Ngọc duy nhất (Mã băm `$2b$12$eImi...`).
+>        + **Chiều ngược lại (Bất khả thi):** Cho một hũ màu Xanh Ngọc đã trộn sẵn, không ai có thể dùng công cụ nào để "tách ngược" nó trở lại chính xác từng giọt màu ban đầu. Dù kẻ xấu có đánh cắp được chuỗi mã băm trong Cơ sở dữ liệu, họ cũng không thể giải mã ngược để biết mật khẩu gốc là gì.
+>        + **Cách xác nhận:** Mỗi lần đăng nhập, máy chủ chỉ việc đem mật khẩu vừa nhập đi "trộn màu", nếu ra đúng màu Xanh Ngọc đã lưu thì xác nhận đúng mật khẩu.
+>      - 🛡️ **Độ tin cậy & Tỷ lệ trùng mã băm (Hash Collision):** Mặc dù về mặt lý thuyết toán học thuần túy, mã băm không phải là tuyệt đối duy nhất 100% cho vô hạn chuỗi ký tự, nhưng **khả năng/xác suất để tìm được một chuỗi mật khẩu bất kỳ khác mà khi băm ra lại cho kết quả trùng khớp (hiện tượng đụng độ - Hash Collision) là vô cùng cực kỳ thấp** (tỷ lệ dưới 1 trên hàng tỷ tỷ tỷ trường hợp). Do đó, hệ thống hoàn toàn đảm bảo tính an toàn bảo mật tuyệt đối trên thực tế.
 >    * **Ý nghĩa của Thẻ xác thực (Access Token & Refresh Token) & Vì sao không gửi trực tiếp Mật khẩu:**
 >      - **Vì sao không dùng trực tiếp Mật khẩu ở mọi thao tác:** Nếu mỗi lần bấm nút (xem camera, đổi cấu hình) ứng dụng lại gửi kèm tên đăng nhập và mật khẩu, thông tin nhạy cảm sẽ liên tục bay trên mạng, nguy cơ bị lộ rất cao.
 >      - **Access Token (Chìa khóa thông hành tạm thời):** Là một mã điện tử có thời hạn sử dụng ngắn. Khi đăng nhập đúng, máy chủ phát cho điện thoại chiếc thẻ này. Trong các thao tác tiếp theo, ứng dụng chỉ cần trình chiếc thẻ `Access Token` mà không cần gửi lại mật khẩu.
