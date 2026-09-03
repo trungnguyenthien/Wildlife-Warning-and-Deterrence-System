@@ -175,7 +175,16 @@ _(Không có action load dữ liệu ban đầu)_
 > Quy trình xác thực bảo mật và liên kết thiết bị nhận thông báo tự động khi người dùng đăng nhập diễn ra qua **3 bước chính** như sau:
 > 
 > 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**  
->    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ. Khi thông tin chính xác, máy chủ cấp chìa khóa phiên làm việc bảo mật cho ứng dụng.
+>    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ.
+>    * **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã ngẫu nhiên cố định trước khi so sánh với dữ liệu trong hệ thống.
+>      - 💡 **Ví dụ minh họa nguyên lý "Một chiều":** Hãy tưởng tượng thuật toán băm giống như một *"Chiếc máy xay sinh tố toán học"*:
+>        + **Chiều đi (Dễ dàng):** Đưa quả cam (Mật khẩu `MatKhau123`) vào máy xay, ta lập tức có một ly nước cam ép (Chuỗi mã băm `$2b$12$eImi...`).
+>        + **Chiều ngược lại (Bất khả thi):** Cho dù kẻ xấu có đánh cắp được ly nước cam ép (chuỗi mã băm trong CSDL), họ **không bao giờ có thể làm ngược lại để khôi phục ly nước ép trở về quả cam ban đầu**.
+>        + **Cách xác nhận:** Mỗi lần người dùng đăng nhập, máy chủ chỉ việc bỏ mật khẩu vừa nhập vào "máy xay", nếu cho ra ly nước ép giống hệt ly đã lưu trong CSDL thì xác nhận đăng nhập thành công.
+>    * **Ý nghĩa của Thẻ xác thực (Access Token & Refresh Token) & Vì sao không gửi trực tiếp Mật khẩu:**
+>      - **Vì sao không dùng trực tiếp Mật khẩu ở mọi thao tác:** Nếu mỗi lần bấm nút (xem camera, đổi cấu hình) ứng dụng lại gửi kèm tên đăng nhập và mật khẩu, thông tin nhạy cảm sẽ liên tục bay trên mạng, nguy cơ bị lộ rất cao.
+>      - **Access Token (Chìa khóa thông hành tạm thời):** Là một mã điện tử có thời hạn sử dụng ngắn. Khi đăng nhập đúng, máy chủ phát cho điện thoại chiếc thẻ này. Trong các thao tác tiếp theo, ứng dụng chỉ cần trình chiếc thẻ `Access Token` mà không cần gửi lại mật khẩu.
+>      - **Refresh Token (Thẻ gia hạn phiên làm việc):** Khi chìa khóa tạm thời `Access Token` hết hạn, ứng dụng sẽ dùng chiếc thẻ gia hạn `Refresh Token` này để xin máy chủ cấp chìa khóa mới một cách tự động, giúp người dùng không phải gõ lại mật khẩu nhiều lần.
 > 
 > 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký FCM Token)**  
 >    * Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcmToken`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).

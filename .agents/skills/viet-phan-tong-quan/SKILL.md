@@ -35,6 +35,9 @@ Khi được yêu cầu viết phần tổng quan cho một tính năng bất k�
 | HTTP Status (`200 OK`, `201 Created`, `400 Bad Request`) | Kết quả xử lý (Thành công, Thêm mới hoàn tất, Cảnh báo nhập sai dữ liệu) |
 | Database / Query / SQL / Prisma | Cơ sở dữ liệu lưu trữ trung tâm |
 | Payload / Body / JSON Object | Nội dung bản tin / Thông tin yêu cầu |
+| Password Hashing (Băm mật khẩu) | Cơ chế mã hóa một chiều bảo mật mật khẩu, không bao giờ lưu chữ thô trong CSDL |
+| Access Token | Chìa khóa thông hành tạm thời (giúp thao tác ứng dụng mà không cần gửi lại mật khẩu) |
+| Refresh Token | Thẻ gia hạn phiên làm việc tự động (xin máy chủ cấp chìa khóa mới khi Access Token hết hạn) |
 | `fcmToken` | Mã địa chỉ nhận tin nhắn duy nhất của chiếc điện thoại (Địa chỉ bưu điện số) |
 | Google Firebase (FCM) | Hạ tầng bưu điện tin nhắn trung gian chuyển tải Push Notification tức thì 24/7 |
 | `cameraId` | Mã định danh riêng biệt của từng trạm camera tại hiện trường |
