@@ -312,6 +312,39 @@ fun BehaviorConfigScreen(
                         )
                     }
 
+                    // Nút phát thử âm thanh từ trạm camera
+                    var isTestingAudio by remember { mutableStateOf(false) }
+                    OutlinedButton(
+                        onClick = {
+                            isTestingAudio = true
+                            viewModel.testAudioAtStation(
+                                speciesId = speciesId,
+                                onSuccess = {
+                                    isTestingAudio = false
+                                    Toast.makeText(context, "🔊 Đã gửi lệnh phát thử âm thanh từ trạm camera thành công!", Toast.LENGTH_SHORT).show()
+                                },
+                                onError = { err ->
+                                    isTestingAudio = false
+                                    Toast.makeText(context, "❌ $err", Toast.LENGTH_LONG).show()
+                                }
+                            )
+                        },
+                        enabled = !isTestingAudio && configState.audioType != "Không",
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, if (configState.audioType == "Không") Color.LightGray else primaryGreen)
+                    ) {
+                        if (isTestingAudio) {
+                            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = primaryGreen)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Đang gửi lệnh...", color = primaryGreen, fontSize = 13.sp)
+                        } else {
+                            Icon(imageVector = Icons.Default.VolumeUp, contentDescription = null, tint = if (configState.audioType == "Không") Color.Gray else primaryGreen, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Phát thử âm thanh từ trạm (5s)", color = if (configState.audioType == "Không") Color.Gray else primaryGreen, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+
                     }
                 }
 

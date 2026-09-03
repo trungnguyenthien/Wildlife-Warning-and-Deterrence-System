@@ -79,9 +79,9 @@ class BehaviorViewModel(
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        val camera = _selectedCameraForTest.value
+        val camera = _selectedCameraForTest.value ?: _cameras.value.firstOrNull()
         if (camera == null) {
-            onError("Vui lòng chọn trạm camera để nghe thử.")
+            onError("Chưa chọn hoặc không tìm thấy trạm camera để phát thử âm thanh.")
             return
         }
         val token = tokenManager.getToken() ?: return
