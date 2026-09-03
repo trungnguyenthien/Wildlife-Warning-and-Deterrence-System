@@ -24,3 +24,11 @@
 ## 6. Nguyên Tắc Sử Dụng Đường Dẫn Trong Tài Liệu
 *   **Đường dẫn tương đối cho Anchor Links:** Khi viết hoặc cập nhật các tài liệu thiết kế (`.md`) trong dự án, tất cả các liên kết chéo nội bộ hoặc liên kết neo (anchor links) trỏ sang các tài liệu khác trong repository bắt buộc phải sử dụng đường dẫn tương đối (Relative paths, ví dụ: `[Tên](../path/to/file.md#anchor)` hoặc `[Tên](./file.md)`). Tuyệt đối không dùng đường dẫn tuyệt đối hoặc định dạng `file:///` cho các liên kết trong mã nguồn tài liệu của dự án.
 
+## 7. Nguyên Tắc Soạn Thảo Phần Tổng Quan Cho Giám Khảo (Executive Summary & Jury-Friendly Principle)
+*   **Diễn giải phi kỹ thuật cho Giám khảo:** Mỗi khi bổ sung hoặc chỉnh sửa các luồng tính năng/kiến trúc phức tạp trong bộ tài liệu `docs/`, Nô tài bắt buộc phải đính kèm một khối ghi chú **`> [!NOTE]` Diễn giải Luồng vận hành (Dành cho Giám khảo / Người đọc tổng quan)**.
+*   **Phong cách diễn đạt:** Sử dụng ngôn ngữ trực quan, dễ hiểu, không dùng từ ngữ chuyên môn quá sâu (code, endpoint, payload). Tập trung làm nổi bật:
+    1. **Cách định danh trạm & phát hiện tại chỗ:** Nhận diện bằng AI thị giác máy tính.
+    2. **Cách ra quyết định & thực thi phòng vệ:** Nhận đúng kịch bản theo `cameraId` & `ownerId`.
+    3. **Cách định danh người nhận cảnh báo:** Qua `fcmToken` ứng dụng mobile và danh sách SĐT SMS.
+    4. **Giá trị thực tiễn:** Bảo vệ an toàn cho người dân và kiểm lâm theo thời gian thực.
+

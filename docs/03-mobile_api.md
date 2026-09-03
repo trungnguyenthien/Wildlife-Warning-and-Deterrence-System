@@ -472,6 +472,31 @@ else:
 
 ---
 
+### 5.6. `GET /cameras/{cameraId}/history`
+
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
+Lấy danh sách nhật ký phát hiện lịch sử của trạm camera cụ thể theo ngày. Mapping: màn hình `[CAMERA_VIEW_SCREEN]` (danh sách thẻ nhật ký phát hiện theo ngày ở phần dưới).
+
+**Query params**
+- `date` (string, optional): Ngày cần truy vấn theo định dạng `YYYY-MM-DD` (ví dụ: `2026-09-02`). Nếu không truyền, mặc định lấy dữ liệu ngày hôm nay (theo múi giờ GMT+7).
+
+**Response 200**
+```json
+[
+  {
+    "id": "evt-101",
+    "thumbnailUrl": "https://cdn.example.com/snap/cam001_2026-09-02T14-30-00.jpg",
+    "speciesName": "Voi",
+    "speciesNameEn": "elephant",
+    "estimatedCount": 1,
+    "confidencePercent": 92,
+    "recordedTime": "14:30:00",
+    "recordedDateLabel": "Hôm nay"
+  }
+]
+```
+
+---
 
 ## 6. Nhóm 4 — Kiểm thử thiết bị ngoại vi
 
@@ -1021,6 +1046,22 @@ Lấy thông tin chi tiết của một tin cảnh báo cụ thể.
   "estimatedCount": 1,
   "recordedAt": "10:15:00 · 22/07/2026",
   "gpsCoordinate": "10.460, 106.124"
+}
+```
+
+---
+
+### 11.3. `POST /alerts/feed/{alertId}/read`
+
+- **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
+Đánh dấu một tin tức/cảnh báo trong danh sách thông báo là đã đọc bởi người dùng hiện tại.
+
+**Response 200**
+```json
+{
+  "success": true,
+  "alertId": "alt-991",
+  "readAt": "2026-09-02T15:30:00.000Z"
 }
 ```
 

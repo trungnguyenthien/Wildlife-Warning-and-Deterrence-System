@@ -310,9 +310,9 @@ sequenceDiagram
     *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
     *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
 
-### 3.2.2. Action: Load weekly detections list (`weekly_detections_section`)
+### 3.2.2. Action: Load weekly detections list & Mark alert read (`weekly_detections_section`)
 
-- **Mô tả:** App tải danh sách các tin cảnh báo khẩn cấp/phát hiện động vật hoang dã gần đây nhất bằng cách gọi API `GET /alerts/feed`.
+- **Mô tả:** App tải danh sách các tin cảnh báo khẩn cấp/phát hiện động vật hoang dã gần đây nhất bằng cách gọi API `GET /alerts/feed`. Khi người dùng chạm vào một tin cảnh báo để đọc chi tiết, ứng dụng tự động gửi yêu cầu `POST /alerts/feed/{alertId}/read` để đánh dấu tin đó là đã đọc.
 
 ```mermaid
 sequenceDiagram
@@ -329,9 +329,20 @@ sequenceDiagram
     Mobile_Server-->>Mobile: Response 200 OK (items)
     deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị danh sách tin tức phát hiện lên giao diện
+
+    opt Người dùng nhấn chọn một tin cảnh báo để xem chi tiết
+        Mobile->>Mobile_Server: POST /alerts/feed/{alertId}/read
+        activate Mobile_Server
+        Mobile_Server->>Database: Ghi nhận trạng thái đã đọc tin (alert_reads)
+        Database-->>Mobile_Server: Lưu thành công
+        Mobile_Server-->>Mobile: Response 200 OK (success: true)
+        deactivate Mobile_Server
+        Mobile->>Mobile: Cập nhật trạng thái tin thành đã đọc trên UI (đổi icon/mờ chữ)
+    end
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
+    *   [POST /alerts/feed/{alertId}/read](./03-mobile_api.md#113-post-alertsfeedalertidread)
 
 ### 3.2.3. Action: Load trend chart & movement heatmap (`per_camera_analysis_section`)
 
@@ -358,9 +369,9 @@ sequenceDiagram
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
-### 3.3.1. Action: Load user profile
+### 3.3.1. Action: Load & Update user profile
 
-- **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung.
+- **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung bằng `GET /users/me`. Khi người dùng chỉnh sửa họ tên/số điện thoại, ứng dụng gửi yêu cầu `PATCH /users/me` để lưu cập nhật.
 
 ```mermaid
 sequenceDiagram
@@ -377,9 +388,20 @@ sequenceDiagram
     Mobile_Server-->>Mobile: Response 200 OK
     deactivate Mobile_Server
     Mobile->>Mobile: Đổ thông tin lên giao diện cài đặt cá nhân
+
+    opt Người dùng chỉnh sửa thông tin cá nhân (Họ tên, SĐT)
+        Mobile->>Mobile_Server: PATCH /users/me (fullName, phoneNumber)
+        activate Mobile_Server
+        Mobile_Server->>Database: Cập nhật thông tin tài khoản người dùng
+        Database-->>Mobile_Server: Lưu thành công
+        Mobile_Server-->>Mobile: Response 200 OK (hồ sơ mới)
+        deactivate Mobile_Server
+        Mobile->>Mobile: Cập nhật thông tin hiển thị trên UI
+    end
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /users/me](./03-mobile_api.md#91-get-usersme)
+    *   [PATCH /users/me](./03-mobile_api.md#92-patch-usersme)
 
 ### 3.3.2. Action: Logout
 
@@ -419,7 +441,7 @@ sequenceDiagram
 
 ### 4.1. Action: Load camera details & history logs
 
-- **Mô tả:** Khi người dùng chọn một camera, Mobile sẽ đồng thời tải: thông tin chi tiết camera (bao gồm thông tin trạm, ảnh snapshot gần nhất, phán đoán AI hiện tại) và danh sách lịch sử nhật ký sự kiện ghi nhận của camera đó.
+- **Mô tả:** Khi người dùng chọn một camera, Mobile sẽ đồng thời tải: thông tin chi tiết camera (bao gồm thông tin trạm, ảnh snapshot gần nhất, phán đoán AI hiện tại) và danh sách lịch sử nhật ký sự kiện ghi nhận của camera đó theo ngày chọn.
 
 ```mermaid
 sequenceDiagram
@@ -437,7 +459,14 @@ sequenceDiagram
         Database-->>Mobile_Server: Dữ liệu camera, snapshot & AI
         Mobile_Server-->>Mobile: Response 200 OK (thông tin, snapshot, currentDetection)
         deactivate Mobile_Server
-    and Tải lịch sử sự kiện của camera
+    and Tải nhật ký lịch sử phát hiện theo ngày
+        Mobile->>Mobile_Server: GET /cameras/{cameraId}/history?date=YYYY-MM-DD
+        activate Mobile_Server
+        Mobile_Server->>Database: Truy vấn danh sách sự kiện trong ngày của camera
+        Database-->>Mobile_Server: Danh sách nhật ký phát hiện (id, thumbnailUrl, speciesName, recordedTime, ...)
+        Mobile_Server-->>Mobile: Response 200 OK (mảng history items)
+        deactivate Mobile_Server
+    and Tải tất cả sự kiện hệ thống của camera
         Mobile->>Mobile_Server: GET /events?cameraId={cameraId}
         activate Mobile_Server
         Mobile_Server->>Database: Truy vấn lịch sử nhật ký sự kiện
@@ -445,10 +474,11 @@ sequenceDiagram
         Mobile_Server-->>Mobile: Response 200 OK (items)
         deactivate Mobile_Server
     end
-    Mobile->>Mobile: Hiển thị thông tin camera, ảnh lớn snapshot, phân tích AI và nhật ký sự kiện
+    Mobile->>Mobile: Hiển thị thông tin camera, ảnh lớn snapshot, phân tích AI và nhật ký sự kiện lịch sử
 ```
 *   **Chi tiết đặc tả API:**
     *   [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
+    *   [GET /cameras/{cameraId}/history](./03-mobile_api.md#56-get-camerascameraidhistory)
     *   [GET /events](./03-mobile_api.md#101-get-events)
 
 ### 4.2. Action: Update camera name
@@ -560,9 +590,9 @@ sequenceDiagram
     *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
     *   [GET /alertSounds](./03-mobile_api.md#73-get-alertsounds) — nguồn của `citizenAlertSounds` (public, không cần token)
 
-### 6.2. Action: Update species configuration
+### 6.2. Action: Update species configuration & apply preset
 
-- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình hoặc Đặt lại về mặc định.
+- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình (`PUT`), Đặt lại về mặc định (`DELETE`), hoặc chọn Áp dụng nhanh theo mức độ nguy hiểm (`POST .../apply-preset/{presetId}`).
 
 ```mermaid
 sequenceDiagram
@@ -571,18 +601,34 @@ sequenceDiagram
     participant Mobile_Server as Mobile_Server
     participant Database as Database
 
-    Note over Mobile, Database: Người dùng thay đổi thông số cấu hình và nhấn nút Lưu
-    Mobile->>Mobile_Server: PUT /response-configs/{species} (cấu hình "@DefendAction")
-    activate Mobile_Server
-    Mobile_Server->>Database: Lưu/Cập nhật cấu hình phòng vệ cho loài của người dùng
-    Database-->>Mobile_Server: Lưu thành công
-    Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
-    deactivate Mobile_Server
-    Mobile->>Mobile: Hiển thị thông báo lưu thành công & quay về màn hình trước
+    alt Người dùng tùy chỉnh thông số và nhấn nút Lưu
+        Mobile->>Mobile_Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
+        activate Mobile_Server
+        Mobile_Server->>Database: Lưu/Cập nhật cấu hình phòng vệ cho loài của người dùng
+        Database-->>Mobile_Server: Lưu thành công
+        Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
+        deactivate Mobile_Server
+    else Người dùng nhấn Đặt lại về mặc định
+        Mobile->>Mobile_Server: DELETE /response-configs/{speciesId}
+        activate Mobile_Server
+        Mobile_Server->>Database: Xóa cấu hình tùy chỉnh của loài (khôi phục preset)
+        Database-->>Mobile_Server: Thành công
+        Mobile_Server-->>Mobile: Response 200 OK
+        deactivate Mobile_Server
+    else Người dùng chọn Áp dụng preset nhanh theo mức độ nguy hiểm
+        Mobile->>Mobile_Server: POST /response-configs/{speciesId}/apply-preset/{presetId}
+        activate Mobile_Server
+        Mobile_Server->>Database: Áp dụng preset phòng vệ chuẩn cho loài
+        Database-->>Mobile_Server: Lưu thành công
+        Mobile_Server-->>Mobile: Response 200 OK (cấu hình từ preset)
+        deactivate Mobile_Server
+    end
+    Mobile->>Mobile: Hiển thị thông báo thành công & cập nhật giao diện
 ```
 *   **Chi tiết đặc tả API:**
     *   [PUT /response-configs/{speciesId}](./03-mobile_api.md#82-put-response-configsspeciesid)
     *   [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
+    *   [POST /response-configs/{speciesId}/apply-preset/{presetId}](./03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid)
 
 ### 6.3. Action: Test speaker sound at camera station (AI_SERVER)
 
@@ -708,7 +754,28 @@ sequenceDiagram
 
 ### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
-- **Mô tả:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server qua API `POST /cameras/{cameraId}/detections`, nhận cấu hình phòng vệ `@DefendAction` phẳng 8 trường (`ledFlash`, `ledColor`, `ledIntensity`, `ledFlashRate`, `speakerWarn`, `audioSampleId`, `audioIntensity`, `silentAlert`) phản hồi để thực thi phát âm thanh xua đuổi/chớp LED tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
+> [!NOTE]
+> ### 💡 Diễn giải Luồng vận hành Hệ thống (Dành cho Giám khảo / Người đọc tổng quan)
+> Để dễ hình dung toàn bộ quá trình tự động hóa từ hiện trường đến thiết bị di động mà không cần đi sâu vào chi tiết kỹ thuật lập trình, luồng xử lý khi có động vật xuất hiện diễn ra qua **4 bước chính** như sau:
+> 
+> 1. **Bước 1: Chụp ảnh & Nhận dạng Trí tuệ Nhân tạo (Tại thực địa)**  
+>    * Khi phát hiện chuyển động tại vùng ranh giới rừng, Camera tự động chụp ảnh và truyền sang Máy chủ AI (`AI_Server`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
+> 
+> 2. **Bước 2: Ra quyết định Phản ứng & Xua đuổi Tức thì (Tại chỗ)**  
+>    * Kết quả được gửi về Máy chủ Trung tâm (`Mobile_Server`).  
+>    * **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Server truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).  
+>    * Máy chủ đóng gói kịch bản phòng vệ (`@DefendAction`) vào JSON trả về ngay lập tức cho kết nối của trạm camera đó, giúp Loa và Đèn LED tại đúng trạm đó phát ra âm thanh và ánh sáng xua đuổi lập tức.
+> 
+> 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp Đa kênh (Push Notification & SMS)**  
+>    * Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.  
+>    * **Cách định danh người dùng sẽ nhận thông báo:**
+>      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcmToken` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcmToken` này.
+>      - **Gửi tin nhắn SMS khẩn cấp:** Máy chủ truy vấn danh sách số điện thoại chính của tài khoản và các số điện thoại người dân lân cận đã được đăng ký trước (tối đa 3 số/tài khoản) để gửi tin nhắn SMS cảnh báo tức thời.
+> 
+> 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**  
+>    * Hình ảnh thực địa, thời gian xuất hiện và nhật ký xua đuổi được lưu vào Cơ sở dữ liệu. Ứng dụng di động của người dùng tự động làm mới giao diện, giúp kiểm lâm và người dân dễ dàng theo dõi tình hình trực quan trên bản đồ và danh sách camera.
+
+- **Mô tả kỹ thuật:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server qua API `POST /cameras/{cameraId}/detections`, nhận cấu hình phòng vệ `@DefendAction` phẳng 8 trường (`ledFlash`, `ledColor`, `ledIntensity`, `ledFlashRate`, `speakerWarn`, `audioSampleId`, `audioIntensity`, `silentAlert`) phản hồi để thực thi phát âm thanh xua đuổi/chớp LED tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 - **Cơ chế gửi Push Notification với Cooldown 30 giây:**
   - AI Server có thể gửi detection liên tục về Mobile Server. Để tránh spam thông báo, `Mobile_Server` áp dụng logic cooldown:
     * **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
@@ -772,3 +839,30 @@ sequenceDiagram
 ```
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
+
+### 1.2. Action: Manual snapshot upload by ranger/user (RANGER / USER)
+
+- **Mô tả:** Kiểm lâm hoặc người dùng chủ động chụp và tải tệp ảnh snapshot thực địa lên một trạm camera thông qua API `POST /cameras/{cameraId}/snapshots` (truyền multipart/form-data chứa file ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và ghi nhận vào bảng `snapshots` trong DB.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Mobile as Mobile
+    participant Mobile_Server as Mobile_Server
+    participant Cloudinary as Cloudinary / Cloud Storage
+    participant Database as Database
+
+    Note over Mobile, Mobile_Server: Người dùng/Kiểm lâm chọn tải ảnh snapshot từ ứng dụng
+    Mobile->>Mobile_Server: POST /cameras/{cameraId}/snapshots (form-data: image, userId)
+    activate Mobile_Server
+    Mobile_Server->>Mobile_Server: Validation định dạng (JPG/PNG, size ≤ 5MB) & kiểm tra cameraId, userId
+    Mobile_Server->>Cloudinary: Upload tệp ảnh snapshot thực địa
+    Cloudinary-->>Mobile_Server: Trả về URL ảnh (secureUrl)
+    Mobile_Server->>Database: Lưu bản ghi snapshot mới (cameraId, userId, url, uploadedAt)
+    Database-->>Mobile_Server: Bản ghi đã lưu thành công
+    Mobile_Server-->>Mobile: Response 201 Created (id, url, deviceId, userId, uploadedAt)
+    deactivate Mobile_Server
+    Mobile->>Mobile: Cập nhật hiển thị ảnh snapshot mới lên ứng dụng
+```
+*   **Chi tiết đặc tả API:**
+    *   [POST /cameras/{cameraId}/snapshots](./03-mobile_api.md#13a2-post-camerascameraidsnapshots)
