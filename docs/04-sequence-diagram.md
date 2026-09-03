@@ -177,11 +177,13 @@ _(Không có action load dữ liệu ban đầu)_
 > 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**  
 >    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ. Khi thông tin chính xác, máy chủ cấp chìa khóa phiên làm việc bảo mật cho ứng dụng.
 > 
-> 2. **Bước 2: Tự động Định danh Thiết bị Nhận Cảnh báo (Đăng ký FCM Token)**  
->    * Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** (dịch vụ bưu điện tin nhắn toàn cầu) để xin cấp một **`fcmToken`** (chuỗi mã định danh địa chỉ duy nhất của chiếc điện thoại đó).
->    * **Vai trò của Google Firebase & `fcmToken` trong việc phát thông báo khẩn cấp:**
->      - **`fcmToken` (Mã địa chỉ nhận tin):** Đóng vai trò như *"Địa chỉ hòm thư duy nhất"* của chiếc điện thoại. Máy chủ lưu trữ `fcmToken` này đính kèm với tài khoản người dùng (`userId`), giúp hệ thống biết chính xác cần gửi thông báo đến chiếc điện thoại nào mà không bị nhầm lẫn.
->      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò *"Bưu điện Trung gian Khẩn cấp"*, tiếp nhận yêu cầu từ máy chủ và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị trực tiếp lên màn hình điện thoại người dùng tức thì 24/7, kể cả khi ứng dụng đang đóng hay điện thoại đang tắt màn hình.
+> 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký FCM Token)**  
+>    * Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcmToken`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).
+>    * Ứng dụng lập tức **gửi mã `fcmToken` duy nhất này về lưu trữ tại Máy chủ Trung tâm (Backend Server qua API `POST /devices/push-token`)** để đính kèm trực tiếp với tài khoản người dùng (`userId`).
+>    * **Ý nghĩa & Vai trò trong việc phát thông báo khẩn cấp:**
+>      - **Gửi `fcmToken` về Backend Server:** Giúp máy chủ ghi nhớ chính xác địa chỉ liên lạc duy nhất của từng tài khoản. Bất kể lúc nào có sự kiện động vật nguy hiểm xuất hiện (dù ứng dụng di động đang mở, đang chạy ngầm hay điện thoại đang khóa/tắt màn hình), máy chủ Backend đều có thể chủ động kích hoạt và gửi cảnh báo tức thời.
+>      - **`fcmToken` (Mã địa chỉ nhận tin):** Được Google Firebase cấp riêng và là mã duy nhất tuyệt đối cho từng App trên từng Device, đóng vai trò như *"Địa chỉ hòm thư độc nhất"* của thiết bị di động đó, đảm bảo tin nhắn cảnh báo phát đúng ứng dụng, đúng người dùng mà không bao giờ bị nhầm lẫn.
+>      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò *"Bưu điện Trung gian Khẩn cấp"*, tiếp nhận lệnh từ Backend Server và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị rực sáng trên màn hình khóa điện thoại 24/7.
 > 
 > 3. **Bước 3: Hoàn tất & Chuyển vào Màn hình Điều khiển Chính**  
 >    * Khi thiết bị được ghi nhận thành công, ứng dụng lưu chìa khóa bảo mật và tự động chuyển người dùng vào màn hình chính để theo dõi danh sách trạm camera và tin tức cảnh báo theo thời gian thực.
@@ -856,29 +858,32 @@ sequenceDiagram
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
 
-### 1.2. Action: Manual snapshot upload by ranger/user (RANGER / USER)
+### 1.2. Action: Manual snapshot upload via Backend API / Testing Tools (BACKEND ONLY)
 
-- **Mô tả:** Kiểm lâm hoặc người dùng chủ động chụp và tải tệp ảnh snapshot thực địa lên một trạm camera thông qua API `POST /cameras/{cameraId}/snapshots` (truyền multipart/form-data chứa file ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và ghi nhận vào bảng `snapshots` trong DB.
+> [!IMPORTANT]
+> **Lưu ý về Thực trạng Triển khai:**
+> API `POST /cameras/{cameraId}/snapshots` hiện tại **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL, tích hợp công cụ giả lập). Ứng dụng di động Android hiện tại **KHÔNG có giao diện hay nút bấm tải ảnh snapshot thủ công**. Trên ứng dụng mobile, kiểm lâm và người dân chỉ xem (`GET`) ảnh snapshot do hệ thống cập nhật tự động từ AI Server.
+
+- **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/snapshots` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Mobile as Mobile
+    participant Client_Test as External Client (cURL / Test Script)
     participant Mobile_Server as Mobile_Server
     participant Cloudinary as Cloudinary / Cloud Storage
     participant Database as Database
 
-    Note over Mobile, Mobile_Server: Người dùng/Kiểm lâm chọn tải ảnh snapshot từ ứng dụng
-    Mobile->>Mobile_Server: POST /cameras/{cameraId}/snapshots (form-data: image, userId)
+    Note over Client_Test, Mobile_Server: Gửi tệp ảnh snapshot qua công cụ kiểm thử / cURL
+    Client_Test->>Mobile_Server: POST /cameras/{cameraId}/snapshots (form-data: image, userId)
     activate Mobile_Server
     Mobile_Server->>Mobile_Server: Validation định dạng (JPG/PNG, size ≤ 5MB) & kiểm tra cameraId, userId
     Mobile_Server->>Cloudinary: Upload tệp ảnh snapshot thực địa
     Cloudinary-->>Mobile_Server: Trả về URL ảnh (secureUrl)
     Mobile_Server->>Database: Lưu bản ghi snapshot mới (cameraId, userId, url, uploadedAt)
     Database-->>Mobile_Server: Bản ghi đã lưu thành công
-    Mobile_Server-->>Mobile: Response 201 Created (id, url, deviceId, userId, uploadedAt)
+    Mobile_Server-->>Client_Test: Response 201 Created (id, url, deviceId, userId, uploadedAt)
     deactivate Mobile_Server
-    Mobile->>Mobile: Cập nhật hiển thị ảnh snapshot mới lên ứng dụng
 ```
 *   **Chi tiết đặc tả API:**
     *   [POST /cameras/{cameraId}/snapshots](./03-mobile_api.md#13a2-post-camerascameraidsnapshots)
