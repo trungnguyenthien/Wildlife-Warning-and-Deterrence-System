@@ -276,7 +276,7 @@ export async function testDevice(req: AuthenticatedRequest, res: Response) {
   }
 
   // Validation: Thiết bị ngoại vi không được hỗ trợ
-  const validKeys = ['led', 'speaker', 'fence'];
+  const validKeys = ['led', 'speaker', 'fence', 'deterrent_audio'];
   if (!validKeys.includes(deviceKey)) {
     return res.status(404).json({ error: 'not_found_device', message: 'Thiết bị ngoại vi yêu cầu không tồn tại tại trạm camera này.' });
   }

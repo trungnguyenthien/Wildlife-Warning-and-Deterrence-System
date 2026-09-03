@@ -246,7 +246,7 @@ fun BehaviorConfigScreen(
                     var audioMenuOpen by remember { mutableStateOf(false) }
                     val audioOptions = remember(deterrentSounds) {
                         if (deterrentSounds.isEmpty()) {
-                            listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Không")
+                            listOf("Tiếng súng", "Tiếng gầm", "Tiếng chó sủa lớn", "Tiếng nổ giả lập", "Tiếng sóng dưới nước", "Không")
                         } else {
                             deterrentSounds.map { it.name } + "Không"
                         }

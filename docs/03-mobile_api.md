@@ -118,7 +118,7 @@ Cấu hình phòng vệ tiêu chuẩn được áp dụng khi phát hiện độ
 ```json
 {
   "audio": {
-    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion / A_human
+    "type": "gunshot",                   // A_gunshot / A_growl / A_dog_bark / A_explosion / A_human / A_fish
     "intensity": 75,                     // Cường độ âm thanh (1 - 100)
     "sampleId": "A_gunshot"              // ID âm thanh xua đuổi thú (bắt đầu bằng prefix 'A_')
   },
@@ -503,18 +503,18 @@ Lấy danh sách nhật ký phát hiện lịch sử của trạm camera cụ th
 ### 6.1. `POST /cameras/{cameraId}/devices/{deviceKey}/test`
 
 - **Yêu cầu chứng thực:** 👮‍♂️ Có (Authorization Header `Bearer <jwt_token>`)
-Kích hoạt lệnh kiểm thử thiết bị ngoại vi tại hiện trường (LED/Loa/Rào điện). 
+Kích hoạt lệnh kiểm thử thiết bị ngoại vi tại hiện trường (LED/Loa phát thanh/Âm thanh xua đuổi/Rào điện). Hỗ trợ `deviceKey`: `led`, `speaker`, `deterrent_audio`, `fence`.
 
 **Luồng xử lý nội bộ (Ably-based):**
 1. Mobile Server nhận yêu cầu HTTP POST, trích xuất `cameraId`, `deviceKey` và các thông số `params` (`durationSeconds`, `intensity`, `audioSampleId`).
-2. Khởi tạo `Ably.Rest` và publish sự kiện `DEVICE_COMMAND` lên kênh `user:control:{userId}`. Với thiết bị `speaker`, giá trị `audioSampleId` (nếu có) sẽ được forward nguyên vẹn trong `params` của `DEVICE_COMMAND` để AI Server phát đúng file âm thanh (id lấy từ `GET /alertSounds`).
+2. Khởi tạo `Ably.Rest` và publish sự kiện `DEVICE_COMMAND` lên kênh `user:control:{userId}`. Với thiết bị `speaker` hoặc `deterrent_audio`, giá trị `audioSampleId` (nếu có) truyền dạng ID chữ (ví dụ: `A_gunshot`, `A_growl`, `A_dog_bark`, `A_explosion`, `A_human`, `A_fish` từ `GET /audio-samples` hoặc ID từ `GET /alertSounds`) sẽ được forward nguyên vẹn trong `params` của `DEVICE_COMMAND` để trạm camera phát âm thanh tại chỗ.
 3. Đồng thời đăng ký lắng nghe trên kênh `user:ack:{userId}` để đợi phản hồi xác nhận từ camera.
 4. Nếu nhận được bản tin phản hồi `COMMAND_ACK` từ camera trong vòng **5 giây**, Mobile Server trả về kết quả `200 OK`.
 5. Nếu quá 5 giây mà không nhận được phản hồi, trả về lỗi `504 Gateway Timeout` (trạm camera offline hoặc mất kết nối).
 
 **Ví dụ:**
 ```
-POST /cameras/cam-001/devices/led/test
+POST /cameras/cam-001/devices/speaker/test
 ```
 
 **Request body**
@@ -522,7 +522,7 @@ POST /cameras/cam-001/devices/led/test
 {
   "intensity": 80, // Cường độ (1-100), áp dụng cho Loa (volume) và LED (brightness)
   "durationSeconds": 5, // Thời gian kích hoạt thử nghiệm
-  "audioSampleId": "A_gunshot" // File âm thanh thử nghiệm (nếu deviceKey là speaker)
+  "audioSampleId": "A_fish" // ID mẫu âm thanh thử nghiệm (ví dụ: A_gunshot, A_growl, A_dog_bark, A_explosion, A_human, A_fish)
 }
 ```
 
@@ -591,7 +591,9 @@ Lấy danh sách các file âm thanh xua đuổi và các mẫu phát loa thông
     { "id": "A_gunshot",    "name": "Tiếng súng nổ đe dọa",   "file": null },
     { "id": "A_growl",      "name": "Tiếng gầm đe dọa",       "file": null },
     { "id": "A_dog_bark",   "name": "Tiếng chó sủa dữ dội",   "file": null },
-    { "id": "A_explosion",  "name": "Tiếng nổ giả lập",       "file": null }
+    { "id": "A_explosion",  "name": "Tiếng nổ giả lập",       "file": null },
+    { "id": "A_human",      "name": "Tiếng người xua đuổi",   "file": null },
+    { "id": "A_fish",       "name": "Tiếng sóng dưới nước (Đuổi cá)", "file": null }
   ],
   "citizenAlertSounds": [
     { "id": "deer",       "name": "Tiếng Nai",     "file": "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3" },

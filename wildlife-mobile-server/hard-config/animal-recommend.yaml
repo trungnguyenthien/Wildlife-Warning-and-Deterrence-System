@@ -100,6 +100,7 @@
   displayName: "Cá"
   inheritPreset: "@medium_danger"
   override:
-    audioIntensity: 0
-    silentAlert: true
+    audioSampleId: "A_fish"
+    audioIntensity: 50
+    silentAlert: false
 

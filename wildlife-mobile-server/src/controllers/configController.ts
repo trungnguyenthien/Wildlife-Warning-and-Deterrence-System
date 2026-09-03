@@ -300,7 +300,8 @@ export async function listAudioSamples(req: Request, res: Response) {
     { id: 'A_growl', name: 'Tiếng gầm đe dọa', file: `${baseUrl}/assets/alert/A_growl.mp3` },
     { id: 'A_dog_bark', name: 'Tiếng chó sủa dữ dội', file: `${baseUrl}/assets/alert/A_dog_bark.mp3` },
     { id: 'A_explosion', name: 'Tiếng nổ giả lập', file: `${baseUrl}/assets/alert/A_explosion.mp3` },
-    { id: 'A_human', name: 'Tiếng người xua đuổi', file: `${baseUrl}/assets/alert/A_human.mp3` }
+    { id: 'A_human', name: 'Tiếng người xua đuổi', file: `${baseUrl}/assets/alert/A_human.mp3` },
+    { id: 'A_fish', name: 'Tiếng sóng dưới nước (Đuổi cá)', file: `${baseUrl}/assets/alert/A_fish.mp3` }
   ];
 
   const citizenAlertSounds = loadAlertSounds().map(sound => {

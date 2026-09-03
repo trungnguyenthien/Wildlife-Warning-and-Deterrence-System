@@ -171,7 +171,8 @@ class FakeConfigApi : ConfigApi {
                 AudioSampleItem("A_gunshot", "Tiếng súng"),
                 AudioSampleItem("A_growl", "Tiếng gầm"),
                 AudioSampleItem("A_dog_bark", "Tiếng chó sủa lớn"),
-                AudioSampleItem("A_explosion", "Tiếng nổ giả lập")
+                AudioSampleItem("A_explosion", "Tiếng nổ giả lập"),
+                AudioSampleItem("A_fish", "Tiếng sóng dưới nước")
             ),
             citizenAlertSounds = listOf(
                 AlertSoundItem("deer", "Tiếng Nai", "https://.../deer.mp3"),

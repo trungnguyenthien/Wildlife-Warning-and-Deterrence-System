@@ -287,6 +287,7 @@ class BehaviorViewModel(
             "Tiếng chó sủa lớn", "Tiếng chó sủa dữ dội", "Chó sủa lớn" -> "A_dog_bark"
             "Tiếng nổ giả lập", "Tiếng còi hú khẩn cấp" -> "A_explosion"
             "Tiếng người xua đuổi", "Tiếng nói xua đuổi" -> "A_human"
+            "Tiếng sóng dưới nước", "Tiếng sóng dưới nước (Đuổi cá)", "Âm thanh đuổi cá" -> "A_fish"
             else -> null
         }
     }
@@ -301,6 +302,7 @@ class BehaviorViewModel(
             "A_dog_bark" -> "Chó sủa lớn"
             "A_explosion" -> "Tiếng nổ giả lập"
             "A_human" -> "Tiếng người xua đuổi"
+            "A_fish" -> "Tiếng sóng dưới nước"
             else -> "Không"
         }
     }
