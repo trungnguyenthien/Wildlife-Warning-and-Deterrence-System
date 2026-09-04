@@ -20,59 +20,33 @@ Tài liệu này mô tả chi tiết luồng tương tác giữa các thành ph�
 Để gửi thông báo đẩy (Push Notification) đến thiết bị di động của kiểm lâm và người dân vùng lân cận qua FCM, `Mobile_Server` cần xác thực với Google Firebase API sử dụng chứng chỉ dịch vụ (`serviceAccountKey.json`).
 
 Nhằm đảm bảo an toàn tuyệt đối và tuân thủ nguyên tắc triển khai Serverless (như Vercel):
-* **Tuyệt đối không lưu trữ file** `serviceAccountKey.json` trực tiếp trong mã nguồn (để tránh rò rỉ mã nguồn lên các kho lưu trữ công khai như GitHub).
-* **Tuyệt đối không ghi file tạm** chứa khóa này lên đĩa cứng của máy chủ/môi trường Serverless trong quá trình chạy.
-* **Cách quản lý và trích xuất:**
+
+- **Tuyệt đối không lưu trữ file** `serviceAccountKey.json` trực tiếp trong mã nguồn (để tránh rò rỉ mã nguồn lên các kho lưu trữ công khai như GitHub).
+- **Tuyệt đối không ghi file tạm** chứa khóa này lên đĩa cứng của máy chủ/môi trường Serverless trong quá trình chạy.
+- **Cách quản lý và trích xuất:**
   1. Người quản trị thực hiện chuyển đổi nội dung file `serviceAccountKey.json` sang định dạng chuỗi mã hóa **Base64**:
      ```bash
      cat serviceAccountKey.json | base64 | tr -d '\n'
      ```
   2. Lưu chuỗi Base64 vừa trích xuất vào biến môi trường tên là `PUSH_SERVICE_ACCOUNT_KEY_JSON` trên trang quản lý của Vercel (hoặc tệp cấu hình môi trường cục bộ `.env.local` / `.env.production`).
   3. Khi server khởi chạy hoặc khi xử lý yêu cầu gửi thông báo, `Mobile_Server` sẽ đọc chuỗi từ biến môi trường, thực hiện giải mã trực tiếp trong bộ nhớ RAM và truyền Object thu được vào hàm khởi tạo của Firebase Admin SDK:
+
      ```typescript
      const base64Key = process.env.PUSH_SERVICE_ACCOUNT_KEY_JSON;
      if (base64Key) {
-       const decodedJson = Buffer.from(base64Key, 'base64').toString('utf8');
+       const decodedJson = Buffer.from(base64Key, "base64").toString("utf8");
        const serviceAccount = JSON.parse(decodedJson);
-       
+
        // Khởi tạo SDK trực tiếp từ RAM, không ghi file ra đĩa
        admin.initializeApp({
-         credential: admin.credential.cert(serviceAccount)
+         credential: admin.credential.cert(serviceAccount),
        });
      }
      ```
 
 ### Sơ đồ Kiến trúc Tương tác Tổng quan
 
-```mermaid
-graph TD
-    classDef main fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef ext fill:#f5f5f5,stroke:#616161,stroke-width:2px;
-
-    Camera[Camera]:::main
-    AI_Server[AI_Server]:::main
-    Mobile_Server[Mobile_Server]:::main
-    Mobile[Mobile]:::main
-
-    FCM[FCM]:::ext
-    Ably[Ably Cloud Broker]:::ext
-
-    %% Connections
-    Camera -- "1. Sends raw image on motion" --> AI_Server
-    AI_Server -- "2. Sends image & detection results (REST)" --> Mobile_Server
-
-    %% Realtime warning paths
-    Mobile_Server -- "3. Sends Push Request" --> FCM
-    FCM -- "4. Pushes Realtime Alert" --> Mobile
-
-    %% User Actions
-    Mobile -- "5. API Requests (REST)" --> Mobile_Server
-    Mobile_Server -- "6. Publish control (REST)" --> Ably
-    Ably -- "7. Broadcast command (WS)" --> AI_Server
-    AI_Server -- "8. Controls physically" --> Camera
-    AI_Server -- "9. Publish ACK (WS)" --> Ably
-    Ably -- "10. Deliver ACK" --> Mobile_Server
-```
+<img src="https://i.ibb.co/9mXPrg0Q/wildlife-2.jpg"/>
 
 ---
 
@@ -142,7 +116,7 @@ sequenceDiagram
     Note over Mobile, Database: Tiến trình Đăng ký tài khoản mới
     Mobile->>Mobile_Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
     activate Mobile_Server
-    
+
     rect rgb(240, 240, 240)
         Note over Mobile_Server: Kiểm tra dữ liệu đầu vào
         alt Gửi kèm id hoặc userId từ Client
@@ -159,8 +133,9 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị thông báo & chuyển về màn đăng nhập
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /auth/register](./03-mobile_api.md#31-post-authregister)
+
+- **Chi tiết đặc tả API:**
+  - [POST /auth/register](./03-mobile_api.md#31-post-authregister)
 
 ---
 
@@ -171,32 +146,32 @@ _(Không có action load dữ liệu ban đầu)_
 ### 2.1. Action: Login & Register Push Token
 
 > [!NOTE]
+>
 > ### 💡 Diễn giải Luồng vận hành (Dành cho Giám khảo / Người đọc tổng quan)
+>
 > Quy trình xác thực bảo mật và liên kết thiết bị nhận thông báo tự động khi người dùng đăng nhập diễn ra qua **3 bước chính** như sau:
-> 
-> 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**  
->    * Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ.
->    * **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã cố định độc đáo trước khi so sánh với dữ liệu trong hệ thống.
+>
+> 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**
+>    - Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ.
+>    - **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã cố định độc đáo trước khi so sánh với dữ liệu trong hệ thống.
 >      - 💡 **Ví dụ minh họa nguyên lý "Trộn màu sơn một chiều":**
->        + **Chiều đi (Rất dễ):** Khi hòa trộn các màu sơn theo tỉ lệ nhất định (Mật khẩu `MatKhau123`), ta thu được một màu sơn Xanh Ngọc duy nhất (Mã băm `$2b$12$eImi...`).
->        + **Chiều ngược lại (Bất khả thi):** Cho một hũ màu Xanh Ngọc đã trộn sẵn, không ai có thể dùng công cụ nào để "tách ngược" nó trở lại chính xác từng giọt màu ban đầu. Dù kẻ xấu có đánh cắp được chuỗi mã băm trong Cơ sở dữ liệu, họ cũng không thể giải mã ngược để biết mật khẩu gốc là gì.
->        + **Cách xác nhận:** Mỗi lần đăng nhập, máy chủ chỉ việc đem mật khẩu vừa nhập đi "trộn màu", nếu ra đúng màu Xanh Ngọc đã lưu thì xác nhận đúng mật khẩu.
+>        - **Chiều đi (Rất dễ):** Khi hòa trộn các màu sơn theo tỉ lệ nhất định (Mật khẩu `MatKhau123`), ta thu được một màu sơn Xanh Ngọc duy nhất (Mã băm `$2b$12$eImi...`).
+>        - **Chiều ngược lại (Bất khả thi):** Cho một hũ màu Xanh Ngọc đã trộn sẵn, không ai có thể dùng công cụ nào để "tách ngược" nó trở lại chính xác từng giọt màu ban đầu. Dù kẻ xấu có đánh cắp được chuỗi mã băm trong Cơ sở dữ liệu, họ cũng không thể giải mã ngược để biết mật khẩu gốc là gì.
+>        - **Cách xác nhận:** Mỗi lần đăng nhập, máy chủ chỉ việc đem mật khẩu vừa nhập đi "trộn màu", nếu ra đúng màu Xanh Ngọc đã lưu thì xác nhận đúng mật khẩu.
 >      - 🛡️ **Độ tin cậy & Tỷ lệ trùng mã băm (Hash Collision):** Mặc dù về mặt lý thuyết toán học thuần túy, mã băm không phải là tuyệt đối duy nhất 100% cho vô hạn chuỗi ký tự, nhưng **khả năng/xác suất để tìm được một chuỗi mật khẩu bất kỳ khác mà khi băm ra lại cho kết quả trùng khớp (hiện tượng đụng độ - Hash Collision) là vô cùng cực kỳ thấp** (tỷ lệ dưới 1 trên hàng tỷ tỷ tỷ trường hợp). Do đó, hệ thống hoàn toàn đảm bảo tính an toàn bảo mật tuyệt đối trên thực tế.
->    * **Ý nghĩa của Thẻ xác thực (Access Token & Refresh Token) & Vì sao không gửi trực tiếp Mật khẩu:**
+>    - **Ý nghĩa của Thẻ xác thực (Access Token & Refresh Token) & Vì sao không gửi trực tiếp Mật khẩu:**
 >      - **Vì sao không dùng trực tiếp Mật khẩu ở mọi thao tác:** Nếu mỗi lần bấm nút (xem camera, đổi cấu hình) ứng dụng lại gửi kèm tên đăng nhập và mật khẩu, thông tin nhạy cảm sẽ liên tục bay trên mạng, nguy cơ bị lộ rất cao.
 >      - **Access Token (Chìa khóa thông hành tạm thời):** Là một mã điện tử có thời hạn sử dụng ngắn. Khi đăng nhập đúng, máy chủ phát cho điện thoại chiếc thẻ này. Trong các thao tác tiếp theo, ứng dụng chỉ cần trình chiếc thẻ `Access Token` mà không cần gửi lại mật khẩu.
 >      - **Refresh Token (Thẻ gia hạn phiên làm việc):** Khi chìa khóa tạm thời `Access Token` hết hạn, ứng dụng sẽ dùng chiếc thẻ gia hạn `Refresh Token` này để xin máy chủ cấp chìa khóa mới một cách tự động, giúp người dùng không phải gõ lại mật khẩu nhiều lần.
-> 
-> 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký FCM Token)**  
->    * Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcmToken`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).
->    * Ứng dụng lập tức **gửi mã `fcmToken` duy nhất này về lưu trữ tại Máy chủ Trung tâm (Backend Server qua API `POST /devices/push-token`)** để đính kèm trực tiếp với tài khoản người dùng (`userId`).
->    * **Ý nghĩa & Vai trò trong việc phát thông báo khẩn cấp:**
+> 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký FCM Token)**
+>    - Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcmToken`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).
+>    - Ứng dụng lập tức **gửi mã `fcmToken` duy nhất này về lưu trữ tại Máy chủ Trung tâm (Backend Server qua API `POST /devices/push-token`)** để đính kèm trực tiếp với tài khoản người dùng (`userId`).
+>    - **Ý nghĩa & Vai trò trong việc phát thông báo khẩn cấp:**
 >      - **Gửi `fcmToken` về Backend Server:** Giúp máy chủ ghi nhớ chính xác địa chỉ liên lạc duy nhất của từng tài khoản. Bất kể lúc nào có sự kiện động vật nguy hiểm xuất hiện (dù ứng dụng di động đang mở, đang chạy ngầm hay điện thoại đang khóa/tắt màn hình), máy chủ Backend đều có thể chủ động kích hoạt và gửi cảnh báo tức thời.
->      - **`fcmToken` (Mã địa chỉ nhận tin):** Được Google Firebase cấp riêng và là mã duy nhất tuyệt đối cho từng App trên từng Device, đóng vai trò như *"Địa chỉ hòm thư độc nhất"* của thiết bị di động đó, đảm bảo tin nhắn cảnh báo phát đúng ứng dụng, đúng người dùng mà không bao giờ bị nhầm lẫn.
->      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò *"Bưu điện Trung gian Khẩn cấp"*, tiếp nhận lệnh từ Backend Server và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị rực sáng trên màn hình khóa điện thoại 24/7.
-> 
-> 3. **Bước 3: Hoàn tất & Chuyển vào Màn hình Điều khiển Chính**  
->    * Khi thiết bị được ghi nhận thành công, ứng dụng lưu chìa khóa bảo mật và tự động chuyển người dùng vào màn hình chính để theo dõi danh sách trạm camera và tin tức cảnh báo theo thời gian thực.
+>      - **`fcmToken` (Mã địa chỉ nhận tin):** Được Google Firebase cấp riêng và là mã duy nhất tuyệt đối cho từng App trên từng Device, đóng vai trò như _"Địa chỉ hòm thư độc nhất"_ của thiết bị di động đó, đảm bảo tin nhắn cảnh báo phát đúng ứng dụng, đúng người dùng mà không bao giờ bị nhầm lẫn.
+>      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò _"Bưu điện Trung gian Khẩn cấp"_, tiếp nhận lệnh từ Backend Server và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị rực sáng trên màn hình khóa điện thoại 24/7.
+> 3. **Bước 3: Hoàn tất & Chuyển vào Màn hình Điều khiển Chính**
+>    - Khi thiết bị được ghi nhận thành công, ứng dụng lưu chìa khóa bảo mật và tự động chuyển người dùng vào màn hình chính để theo dõi danh sách trạm camera và tin tức cảnh báo theo thời gian thực.
 
 - **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
 
@@ -231,9 +206,10 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Chuyển hướng người dùng vào màn hình chính [MAIN_SCREEN]
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /auth/login](./03-mobile_api.md#32-post-authlogin)
-    *   [POST /devices/push-token](./03-mobile_api.md#41-post-devicespush-token)
+
+- **Chi tiết đặc tả API:**
+  - [POST /auth/login](./03-mobile_api.md#32-post-authlogin)
+  - [POST /devices/push-token](./03-mobile_api.md#41-post-devicespush-token)
 
 ---
 
@@ -261,8 +237,9 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị danh sách trạm & ảnh thumbnail snapshot
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
+
+- **Chi tiết đặc tả API:**
+  - [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
 ### 3.1.2. Action: Auto-Polling (Smart Polling) cập nhật danh sách camera
 
@@ -289,9 +266,10 @@ sequenceDiagram
         end
     end
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /cameras/heartbeat](./03-mobile_api.md#55-get-camerasheartbeat)
-    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
+
+- **Chi tiết đặc tả API:**
+  - [GET /cameras/heartbeat](./03-mobile_api.md#55-get-camerasheartbeat)
+  - [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
 ### 3.2. Tab Thống kê (`[STATISTICS_TAB]`)
 
@@ -333,10 +311,11 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Vẽ lại biểu đồ và heatmap theo bộ lọc mới
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /species](./03-mobile_api.md#81-get-species)
-    *   [GET /cameras](./03-mobile_api.md#51-get-cameras)
-    *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
+
+- **Chi tiết đặc tả API:**
+  - [GET /species](./03-mobile_api.md#81-get-species)
+  - [GET /cameras](./03-mobile_api.md#51-get-cameras)
+  - [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
 
 ### 3.2.2. Action: Load weekly detections list & Mark alert read (`weekly_detections_section`)
 
@@ -368,9 +347,10 @@ sequenceDiagram
         Mobile->>Mobile: Cập nhật trạng thái tin thành đã đọc trên UI (đổi icon/mờ chữ)
     end
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
-    *   [POST /alerts/feed/{alertId}/read](./03-mobile_api.md#113-post-alertsfeedalertidread)
+
+- **Chi tiết đặc tả API:**
+  - [GET /alerts/feed](./03-mobile_api.md#111-get-alertsfeed)
+  - [POST /alerts/feed/{alertId}/read](./03-mobile_api.md#113-post-alertsfeedalertidread)
 
 ### 3.2.3. Action: Load trend chart & movement heatmap (`per_camera_analysis_section`)
 
@@ -392,8 +372,9 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Vẽ biểu đồ xu hướng (Line Chart) và sơ đồ nhiệt di chuyển (Heatmap)
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
+
+- **Chi tiết đặc tả API:**
+  - [GET /stats/summary](./03-mobile_api.md#102-get-statssummary)
 
 ### 3.3. Tab Cài đặt (`[SETTING_TAB]`)
 
@@ -427,9 +408,10 @@ sequenceDiagram
         Mobile->>Mobile: Cập nhật thông tin hiển thị trên UI
     end
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /users/me](./03-mobile_api.md#91-get-usersme)
-    *   [PATCH /users/me](./03-mobile_api.md#92-patch-usersme)
+
+- **Chi tiết đặc tả API:**
+  - [GET /users/me](./03-mobile_api.md#91-get-usersme)
+  - [PATCH /users/me](./03-mobile_api.md#92-patch-usersme)
 
 ### 3.3.2. Action: Logout
 
@@ -459,9 +441,10 @@ sequenceDiagram
 
     Mobile->>Mobile: Xóa tokens khỏi bộ nhớ máy & chuyển về màn đăng nhập
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /auth/logout](./03-mobile_api.md#33-post-authlogout)
-    *   [DELETE /devices/push-token](./03-mobile_api.md#42-delete-devicespush-token)
+
+- **Chi tiết đặc tả API:**
+  - [POST /auth/logout](./03-mobile_api.md#33-post-authlogout)
+  - [DELETE /devices/push-token](./03-mobile_api.md#42-delete-devicespush-token)
 
 ---
 
@@ -504,10 +487,11 @@ sequenceDiagram
     end
     Mobile->>Mobile: Hiển thị thông tin camera, ảnh lớn snapshot, phân tích AI và nhật ký sự kiện lịch sử
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
-    *   [GET /cameras/{cameraId}/history](./03-mobile_api.md#56-get-camerascameraidhistory)
-    *   [GET /events](./03-mobile_api.md#101-get-events)
+
+- **Chi tiết đặc tả API:**
+  - [GET /cameras/{cameraId}](./03-mobile_api.md#52-get-camerascameraid)
+  - [GET /cameras/{cameraId}/history](./03-mobile_api.md#56-get-camerascameraidhistory)
+  - [GET /events](./03-mobile_api.md#101-get-events)
 
 ### 4.2. Action: Update camera name
 
@@ -529,8 +513,9 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Đóng Dialog & cập nhật tiêu đề camera trên thanh Top bar
 ```
-*   **Chi tiết đặc tả API:**
-    *   [PATCH /cameras/{cameraId}](./03-mobile_api.md#53-patch-camerascameraid)
+
+- **Chi tiết đặc tả API:**
+  - [PATCH /cameras/{cameraId}](./03-mobile_api.md#53-patch-camerascameraid)
 
 ---
 
@@ -566,9 +551,10 @@ sequenceDiagram
     end
     Mobile->>Mobile: Hiển thị danh sách loài kèm trạng thái cấu hình (Đang hoạt động/Mặc định)
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /species](./03-mobile_api.md#81-get-species)
-    *   [GET /response-configs](./03-mobile_api.md#86-get-response-configs-helper)
+
+- **Chi tiết đặc tả API:**
+  - [GET /species](./03-mobile_api.md#81-get-species)
+  - [GET /response-configs](./03-mobile_api.md#86-get-response-configs-helper)
 
 ---
 
@@ -612,11 +598,12 @@ sequenceDiagram
     Note right of Mobile: citizenAlertSounds lấy từ GET /alertSounds (nguồn hard-config/alert-sound.yaml), app không hardcode id
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /response-configs?speciesId=](./03-mobile_api.md#83-get-response-configsspeciesid)
-    *   [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
-    *   [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
-    *   [GET /alertSounds](./03-mobile_api.md#73-get-alertsounds) — nguồn của `citizenAlertSounds` (public, không cần token)
+
+- **Chi tiết đặc tả API:**
+  - [GET /response-configs?speciesId=](./03-mobile_api.md#83-get-response-configsspeciesid)
+  - [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
+  - [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
+  - [GET /alertSounds](./03-mobile_api.md#73-get-alertsounds) — nguồn của `citizenAlertSounds` (public, không cần token)
 
 ### 6.2. Action: Update species configuration & apply preset
 
@@ -653,12 +640,50 @@ sequenceDiagram
     end
     Mobile->>Mobile: Hiển thị thông báo thành công & cập nhật giao diện
 ```
-*   **Chi tiết đặc tả API:**
-    *   [PUT /response-configs/{speciesId}](./03-mobile_api.md#82-put-response-configsspeciesid)
-    *   [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
-    *   [POST /response-configs/{speciesId}/apply-preset/{presetId}](./03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid)
+
+- **Chi tiết đặc tả API:**
+  - [PUT /response-configs/{speciesId}](./03-mobile_api.md#82-put-response-configsspeciesid)
+  - [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
+  - [POST /response-configs/{speciesId}/apply-preset/{presetId}](./03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid)
 
 ### 6.3. Action: Test speaker sound at camera station (AI_SERVER)
+
+> [!NOTE]
+>
+> ### 💡 Diễn giải Luồng vận hành & Các Thuật ngữ Kỹ thuật (Dành cho Giám khảo / Người đọc tổng quan)
+>
+> Quy trình kiểm thử âm thanh xua đuổi trực tiếp tại hiện trường rừng diễn ra qua **4 bước chính** như sau:
+>
+> 1. **Bước 1: Bấm nút Phát thử trên Ứng dụng di động**
+>    - Tại màn hình Thiết lập phòng vệ, Kiểm lâm chọn loại âm thanh xua đuổi (như tiếng súng `A_gunshot`, tiếng sóng dưới nước `A_fish`...) và bấm nút _"Phát thử âm thanh từ trạm (5s)"_. Yêu cầu lập tức được gửi đến Máy chủ Trung tâm (`Mobile_Server`).
+> 2. **Bước 2: Truyền lệnh tức thì qua Trạm Bộ đàm Vệ tinh Đám mây (Ably)**
+>    - Máy chủ Trung tâm đóng gói lệnh thử nghiệm và phát qua trạm bộ đàm đám mây **Ably Broker**. Ably lập tức "bắn" ngay lệnh này xuống Trạm Camera tại rừng qua kênh truyền thời gian thực **WebSocket**.
+> 3. **Bước 3: Trạm Camera tiếp nhận & Phát âm thanh thực địa**
+>    - Trạm camera tại rừng nhận được lệnh, lập tức kích hoạt Loa công suất lớn phát âm thanh xua đuổi theo đúng loại và cường độ đã chọn trong vòng 5 giây.
+> 4. **Bước 4: Phản hồi Xác nhận (ACK) & Báo kết quả về Điện thoại**
+>    - Sau khi phát xong âm thanh, Trạm camera gửi một bản tin xác nhận (**ACK**) ngược trở lại Máy chủ. Ứng dụng di động lập tức hiển thị thông báo rực sáng: _"Đã phát thử âm thanh tại trạm camera thành công!"_.
+>
+> ---
+>
+> 🔍 **Ghi chú Diễn giải Thuật ngữ Kỹ thuật (Dành cho Giám khảo):**
+>
+> - 📡 **WebSocket là gì? (Đường dây điện thoại nghe/nói 2 chiều liên tục):**  
+>   Khác với giao thức web thông thường (giống như gửi thư tay - gửi đi rồi ngồi chờ hồi đáp), **WebSocket** là một đường kết nối điện thoại 2 chiều được mở trực tiếp và duy trì liên tục giữa máy chủ và trạm camera. Nhờ đường dây này, máy chủ có thể "nói" và truyền lệnh điều khiển tới trạm camera ngay lập tức trong vài mili-giây mà không cần trạm camera phải liên tục gửi hỏi _"Có lệnh mới nào không?"_.
+> - ☁️ **Vai trò của Ably Broker (Tổng đài Trung gian Đám mây 24/7):**  
+>   Đóng vai trò như một _"Tổng đài bưu điện đám mây chuyên trách thông tin thời gian thực"_. Do máy chủ Vercel Serverless vận hành ngắn hạn, máy chủ giao phó cho Ably chịu trách nhiệm duy trì đường truyền WebSocket liên tục 24/7 với trạm camera tại rừng, đảm bảo lệnh test truyền đi thông suốt và không bị gián đoạn.
+> - 🤝 **ACK (Acknowledge) là gì? (Giấy báo phát / Lời đáp "Đã nhận lệnh"):**  
+>   **ACK** (viết tắt của _Acknowledge_ - Xác nhận/Đã nhận) đóng vai trò như chiếc _"Giấy báo phát thành công"_ hoặc lời đáp lại của trạm camera: _"Thưa máy chủ, trạm camera chúng tôi đã nhận được lệnh và đã phát thử loa thành công rồi!"_. Nếu trong 9 giây mà máy chủ không nhận được bản tin ACK này (do mất mạng hoặc trạm camera mất điện), hệ thống sẽ báo lỗi quá thời hạn (Timeout) để kiểm lâm biết trạm đang gặp sự cố.
+>
+> 🤔 **Lý giải Kiến trúc: Vì sao chọn Ably Pub/Sub thay vì HTTP Request / Socket trực tiếp từ Mobile Server đến AI Server?**
+>
+> 1. **Phân công Trách nhiệm & Tách rời Mở rộng (Team Decoupling & Loose Coupling):**
+>    - Hệ thống gồm 2 thành phần phát triển song song: `Mobile_Server` (Cloud Backend) và `AI_Server` (Trạm thực địa/Raspberry Pi).
+>    - Việc dùng Cloud Pub/Sub Broker (Ably) giúp nhóm AI/Phần cứng không cần tự xây dựng hay duy trì một Web Server (HTTP REST/Socket Server) công khai tại thực địa (không phải xử lý routing, auth token, SSL hay phòng chống tấn công mạng). `AI_Server` chỉ đóng vai trò một **Subscriber (Client)** đơn giản — nhúng thư viện Ably để nhận tin nhắn. Điều này giúp 2 nhóm phát triển độc lập, giảm thiểu lỗi và nâng cao tốc độ tích hợp.
+> 2. **Phù hợp với Hạ tầng Serverless (Vercel):**
+>    - `Mobile_Server` triển khai trên Vercel Serverless Functions mang tính ngắn hạn (stateless). Nếu gọi HTTP Request đồng bộ trực tiếp xuống `AI_Server` và chờ phần cứng thực thi (5–9s), hàm Serverless sẽ bị treo kết nối và dễ đụng trần **Execution Timeout (10s)** của Vercel.
+>    - Dùng Ably REST API giúp `Mobile_Server` đẩy tin nhắn đi chỉ trong vài mili-giây và nhận phản hồi ACK qua kênh bất đồng bộ, tối ưu chi phí và hiệu năng máy chủ.
+> 3. **Mô hình Phân phối Đa điểm (Fan-out Pattern):**
+>    - Một bản tin phát ra từ Ably có thể đồng thời truyền tới nhiều `AI_Server` hoặc thiết bị giám sát khác mà `Mobile_Server` không phải chạy vòng lặp gửi hàng loạt HTTP Request riêng lẻ tới từng địa chỉ IP/Domain.
 
 - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
@@ -691,7 +716,7 @@ sequenceDiagram
     activate Ably
     Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK
     deactivate Ably
-    
+
     alt Nhận được ACK trong vòng 5 giây
         Mobile_Server->>Database: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vật lý (device_logs)
         Database-->>Mobile_Server: Lưu thành công
@@ -703,9 +728,10 @@ sequenceDiagram
     end
     deactivate Mobile_Server
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#61-post-camerascameraiddevicesdevicekeytest)
-    *   [GET /auth/ably-token](./03-mobile_api.md#13a3-get-authably-token)
+
+- **Chi tiết đặc tả API:**
+  - [POST /cameras/{cameraId}/devices/{deviceKey}/test](./03-mobile_api.md#61-post-camerascameraiddevicesdevicekeytest)
+  - [GET /auth/ably-token](./03-mobile_api.md#13a3-get-authably-token)
 
 ---
 
@@ -731,8 +757,9 @@ sequenceDiagram
     deactivate Mobile_Server
     Mobile->>Mobile: Đổ danh sách SĐT (tối đa 3 số) lên màn hình
 ```
-*   **Chi tiết đặc tả API:**
-    *   [GET /users/me/sms-recipients](./03-mobile_api.md#121-get-usersmesms-recipients)
+
+- **Chi tiết đặc tả API:**
+  - [GET /users/me/sms-recipients](./03-mobile_api.md#121-get-usersmesms-recipients)
 
 ### 7.2. Action: Add / Remove SMS recipient
 
@@ -770,9 +797,10 @@ sequenceDiagram
     end
     Mobile->>Mobile: Cập nhật lại danh sách SĐT hiển thị trên màn hình
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /users/me/sms-recipients](./03-mobile_api.md#122-post-usersmesms-recipients)
-    *   [DELETE /users/me/sms-recipients/{recipientId}](./03-mobile_api.md#123-delete-usersmesms-recipientsrecipientid)
+
+- **Chi tiết đặc tả API:**
+  - [POST /users/me/sms-recipients](./03-mobile_api.md#122-post-usersmesms-recipients)
+  - [DELETE /users/me/sms-recipients/{recipientId}](./03-mobile_api.md#123-delete-usersmesms-recipientsrecipientid)
 
 ---
 
@@ -783,32 +811,31 @@ sequenceDiagram
 ### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
 
 > [!NOTE]
+>
 > ### 💡 Diễn giải Luồng vận hành Hệ thống (Dành cho Giám khảo / Người đọc tổng quan)
+>
 > Để dễ hình dung toàn bộ quá trình tự động hóa từ hiện trường đến thiết bị di động mà không cần đi sâu vào chi tiết kỹ thuật lập trình, luồng xử lý khi có động vật xuất hiện diễn ra qua **4 bước chính** như sau:
-> 
-> 1. **Bước 1: Chụp ảnh & Nhận dạng Trí tuệ Nhân tạo (Tại thực địa)**  
->    * Khi phát hiện chuyển động tại vùng ranh giới rừng, Camera tự động chụp ảnh và truyền sang Máy chủ AI (`AI_Server`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
-> 
-> 2. **Bước 2: Ra quyết định Phản ứng & Xua đuổi Tức thì (Tại chỗ)**  
->    * Kết quả được gửi về Máy chủ Trung tâm (`Mobile_Server`).  
->    * **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Server truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).  
->    * Máy chủ đóng gói kịch bản phòng vệ (`@DefendAction`) vào JSON trả về ngay lập tức cho kết nối của trạm camera đó, giúp Loa và Đèn LED tại đúng trạm đó phát ra âm thanh và ánh sáng xua đuổi lập tức.
-> 
-> 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp Đa kênh (Push Notification & SMS)**  
->    * Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.  
->    * **Cách định danh người dùng sẽ nhận thông báo:**
+>
+> 1. **Bước 1: Chụp ảnh & Nhận dạng Trí tuệ Nhân tạo (Tại thực địa)**
+>    - Khi phát hiện chuyển động tại vùng ranh giới rừng, Camera tự động chụp ảnh và truyền sang Máy chủ AI (`AI_Server`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
+> 2. **Bước 2: Ra quyết định Phản ứng & Xua đuổi Tức thì (Tại chỗ)**
+>    - Kết quả được gửi về Máy chủ Trung tâm (`Mobile_Server`).
+>    - **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Server truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).
+>    - Máy chủ đóng gói kịch bản phòng vệ (`@DefendAction`) vào JSON trả về ngay lập tức cho kết nối của trạm camera đó, giúp Loa và Đèn LED tại đúng trạm đó phát ra âm thanh và ánh sáng xua đuổi lập tức.
+> 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp Đa kênh (Push Notification & SMS)**
+>    - Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.
+>    - **Cách định danh người dùng sẽ nhận thông báo:**
 >      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcmToken` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcmToken` này.
 >      - **Gửi tin nhắn SMS khẩn cấp:** Máy chủ truy vấn danh sách số điện thoại chính của tài khoản và các số điện thoại người dân lân cận đã được đăng ký trước (tối đa 3 số/tài khoản) để gửi tin nhắn SMS cảnh báo tức thời.
-> 
-> 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**  
->    * Hình ảnh thực địa, thời gian xuất hiện và nhật ký xua đuổi được lưu vào Cơ sở dữ liệu. Ứng dụng di động của người dùng tự động làm mới giao diện, giúp kiểm lâm và người dân dễ dàng theo dõi tình hình trực quan trên bản đồ và danh sách camera.
+> 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**
+>    - Hình ảnh thực địa, thời gian xuất hiện và nhật ký xua đuổi được lưu vào Cơ sở dữ liệu. Ứng dụng di động của người dùng tự động làm mới giao diện, giúp kiểm lâm và người dân dễ dàng theo dõi tình hình trực quan trên bản đồ và danh sách camera.
 
 - **Mô tả kỹ thuật:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server qua API `POST /cameras/{cameraId}/detections`, nhận cấu hình phòng vệ `@DefendAction` phẳng 8 trường (`ledFlash`, `ledColor`, `ledIntensity`, `ledFlashRate`, `speakerWarn`, `audioSampleId`, `audioIntensity`, `silentAlert`) phản hồi để thực thi phát âm thanh xua đuổi/chớp LED tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
 - **Cơ chế gửi Push Notification với Cooldown 30 giây:**
   - AI Server có thể gửi detection liên tục về Mobile Server. Để tránh spam thông báo, `Mobile_Server` áp dụng logic cooldown:
-    * **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
-    * Nếu **`isNewEvent = true`** (lần phát hiện đầu tiên / đã quá 30s kể từ event trước): Tạo `Alert` mới trong DB **và** gửi Push Notification qua FCM đến người dùng.
-    * Nếu **`isNewEvent = false`** (phát hiện liên tiếp trong cùng chuỗi ≤ 30s): **Bỏ qua** việc tạo `Alert` và gửi Push, nhưng **vẫn lưu `Snapshot`** để mobile app có thể cập nhật ảnh mới nhất qua cơ chế polling.
+    - **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
+    - Nếu **`isNewEvent = true`** (lần phát hiện đầu tiên / đã quá 30s kể từ event trước): Tạo `Alert` mới trong DB **và** gửi Push Notification qua FCM đến người dùng.
+    - Nếu **`isNewEvent = false`** (phát hiện liên tiếp trong cùng chuỗi ≤ 30s): **Bỏ qua** việc tạo `Alert` và gửi Push, nhưng **vẫn lưu `Snapshot`** để mobile app có thể cập nhật ảnh mới nhất qua cơ chế polling.
   - Khi `isNewEvent = true`, `Mobile_Server` sẽ đọc biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
   - `Mobile_Server` truy vấn danh sách `fcmToken` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
@@ -865,8 +892,9 @@ sequenceDiagram
 
     Note over Camera: Thực thi phòng vệ tại chỗ (Phát tệp âm thanh xua đuổi chọn lọc, chớp nháy LED)
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
+
+- **Chi tiết đặc tả API:**
+  - [POST /cameras/{cameraId}/detections](./03-mobile_api.md#13a1-post-camerascameraiddetections)
 
 ### 1.2. Action: Manual snapshot upload via Backend API / Testing Tools (BACKEND ONLY)
 
@@ -895,5 +923,6 @@ sequenceDiagram
     Mobile_Server-->>Client_Test: Response 201 Created (id, url, deviceId, userId, uploadedAt)
     deactivate Mobile_Server
 ```
-*   **Chi tiết đặc tả API:**
-    *   [POST /cameras/{cameraId}/image-upload](./03-mobile_api.md#13a4-post-camerascameraidimage-upload)
+
+- **Chi tiết đặc tả API:**
+  - [POST /cameras/{cameraId}/image-upload](./03-mobile_api.md#13a4-post-camerascameraidimage-upload)
