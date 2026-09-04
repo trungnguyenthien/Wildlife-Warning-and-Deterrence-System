@@ -926,3 +926,60 @@ sequenceDiagram
 
 - **Chi tiết đặc tả API:**
   - [POST /cameras/{cameraId}/image-upload](./03-mobile_api.md#13a4-post-camerascameraidimage-upload)
+
+---
+
+# III. Đánh giá Hạn chế Kiến trúc Hiện tại & Đề xuất Hướng Cải tiến Tối ưu (Architecture Assessment & Future Redesign)
+
+> [!NOTE]
+>
+> ### 💡 Diễn giải Đánh giá Kiến trúc & Hướng Phát triển (Dành cho Giám khảo / Người đọc tổng quan)
+>
+> Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, hệ thống được phân chia thành 2 nhóm chuyên trách độc lập (Nhóm Cloud/Mobile App & Nhóm AI/Phần cứng thực địa). Để thích ứng với mô hình triển khai Serverless (Vercel) và giảm thiểu độ phức tạp cho trạm AI thực địa, giải pháp Pub/Sub trung gian (Ably) đã được lựa chọn.
+>
+> Nhóm tác giả thẳng thắn chỉ ra các giới hạn của kiến trúc hiện tại và đề xuất **Mô hình Kiến trúc Tập trung Đám mây (DigitalOcean Cloud Environment & Edge Station)** cho các giai đoạn nâng cấp tiếp theo, giúp hệ thống vận hành trực tiếp, loại bỏ trung gian bên thứ ba, giảm thiểu chi phí và tối ưu độ trễ xử lý.
+
+## 1. Các Hạn chế của Kiến trúc Hiện tại
+
+1. **Phụ thuộc vào Dịch vụ Trung gian Bên thứ 3 (Cloud Broker Dependency):**  
+   Việc sử dụng Ably Pub/Sub làm trung gian truyền tin real-time tuy giải quyết được bài toán phân công giữa 2 nhóm phát triển độc lập, nhưng tạo ra sự phụ thuộc vào dịch vụ đám mây bên thứ ba (phát sinh chi phí/hạn ngạch quota tin nhắn và yêu cầu tạo Token Ably trung gian).
+2. **Độ phức tạp trong Quản lý Kênh Tin nhắn (Channel Management Overhead):**  
+   Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Server, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
+3. **Giới hạn kết nối của Hạ tầng Serverless (Vercel):**  
+   Do `Mobile_Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.
+
+---
+
+## 2. Đề xuất Kiến trúc Cải tiến Tối ưu (DigitalOcean Cloud & Safe Area Edge Station)
+
+Dựa trên sơ đồ kiến trúc cải tiến mục tiêu, hệ thống được quy hoạch làm **2 Vùng chính**: **DigitalOcean Cloud Environment** (Chứa toàn bộ Backend & AI Engine) và **Safe Area** (Trạm camera thực địa).
+
+<a href="https://ibb.co/dRtJwdC"><img src="https://i.ibb.co/WL0p4b8/wildlife-2-Page-2.jpg" alt="wildlife-2-Page-2"></a>
+
+---
+
+### 🔄 Luồng Vận hànhChi tiết trong Kiến trúc Cải tiến:
+
+1. **Luồng Nhận diện & Cảnh báo Tự động (Detection & Warning Flow):**
+   - **Tại Safe Area (Thực địa):** Khi có chuyển động, `Camera` chụp ảnh (`image`) gửi đến `Raspberry Pi`.
+   - **Đẩy ảnh lên Đám mây:** `Raspberry Pi` gửi bản tin `send image` trực tiếp lên `AI Server` đặt trên hạ tầng **DigitalOcean**.
+   - **Nhận diện GPU & Ra quyết định:** `AI Server` dùng sức mạnh GPU nhận dạng loài động vật $\rightarrow$ gửi thông tin phán đoán `send detection` sang `Mobile Server` $\rightarrow$ `Mobile Server` truy vấn kịch bản phòng vệ từ `Database` $\rightarrow$ trả về kịch bản cho `AI Server`.
+   - **Kích hoạt Phòng vệ Thực địa:** `AI Server` truyền lệnh điều khiển về `Raspberry Pi` tại Safe Area để kích hoạt ngay `Sound` (Loa còi) và `Light` (Đèn LED chớp).
+   - **Lưu trữ CDN & Thông báo Khẩn cấp:** `Mobile Server` lưu ảnh snapshot lên `Cloudinary Image Storage` và phát yêu cầu `message` qua `Google FCM` để bắn `notification` hiển thị tức thì trên `Android App` của kiểm lâm.
+
+2. **Luồng Cấu hình & Nghe thử Âm thanh (Configuration & Test Sound Flow):**
+   - **Cấu hình:** Người dùng sử dụng `Android App` để thực hiện `save configuration` gửi trực tiếp đến `Mobile Server` để lưu vào `Database`.
+   - **Phát thử âm thanh từ trạm:** Khi người dùng bấm nút _"Nghe thử"_ trên `Android App`, ứng dụng gửi yêu cầu `test sound` đến `Mobile Server` $\rightarrow$ `Mobile Server` chuyển tiếp lệnh `test sound` sang `AI Server` $\rightarrow$ `AI Server` phát lệnh xuống `Raspberry Pi` tại Safe Area $\rightarrow$ `Raspberry Pi` bật `Sound` (Loa) trong 5 giây.
+
+---
+
+### 🌟 Ưu điểm Vượt trội của Kiến trúc Cải tiến DigitalOcean:
+
+1. 🚀 **Loại bỏ hoàn toàn Dịch vụ Trung gian (Zero 3rd-party Dependency):**  
+   Xóa bỏ hoàn toàn Ably Broker, không còn tốn chi phí quota tin nhắn hay phức tạp hóa việc quản lý Token.
+2. ⚡ **Tốc độ Truyền nhận Siêu tốc (Low Latency):**  
+   `Mobile Server` và `AI Server` được đặt cùng một môi trường **DigitalOcean Environment**, giúp chi phí giao tiếp và độ trễ giữa 2 máy chủ đạt mức bằng 0 (In-Memory hoặc Local Loopback).
+3. 🛡️ **Bảo mật & Đơn giản hóa Trạm Thực địa (Safe Area):**  
+   `Raspberry Pi` tại thực địa chỉ đóng vai trò là một **Outbound Client** gửi ảnh và nhận lệnh từ DigitalOcean Cloud. Trạm thực địa không cần có IP công khai, không mở port, tuyệt đối an toàn trước các nguy cơ tấn công mạng.
+4. 💰 **Tối ưu Chi phí Thuê Hạ tầng:**  
+   Toàn bộ Backend, AI Server và Database được đóng gói chạy chung trên 01 máy chủ VPS DigitalOcean (Node Singapore), vừa tối ưu chi phí (chỉ ~$15-$25/tháng), vừa cực kỳ mượt mà cho người dùng tại Việt Nam.
