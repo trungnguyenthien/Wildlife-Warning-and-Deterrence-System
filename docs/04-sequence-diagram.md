@@ -828,15 +828,35 @@ sequenceDiagram
 >      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcmToken` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcmToken` này.
 >      - **Gửi tin nhắn SMS khẩn cấp:** Máy chủ truy vấn danh sách số điện thoại chính của tài khoản và các số điện thoại người dân lân cận đã được đăng ký trước (tối đa 3 số/tài khoản) để gửi tin nhắn SMS cảnh báo tức thời.
 > 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**
->    - Hình ảnh thực địa, thời gian xuất hiện và nhật ký xua đuổi được lưu vào Cơ sở dữ liệu. Ứng dụng di động của người dùng tự động làm mới giao diện, giúp kiểm lâm và người dân dễ dàng theo dõi tình hình trực quan trên bản đồ và danh sách camera.
+>    - Hì> [!NOTE]
+>
+> ### 💡 Diễn giải Đánh giá Kiến trúc & Hướng Phát triển (Dành cho Giám khảo / Người đọc tổng quan)
+>
+> Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, nhóm tác giả thẳng thắn nhận diện **4 hạn chế nguyên nhân cốt lõi** dẫn đến việc sử dụng giải pháp Pub/Sub trung gian (Ably):
+>
+> 1. 💰 **Hạn chế về kinh phí triển khai:** Kinh phí dự án có hạn, chưa thể thuê các máy chủ Cloud VPS mạnh và chuyên nghiệp, do đó nhóm tận dụng các nền tảng dịch vụ miễn phí (như Vercel Serverless cho Mobile Server) và máy tính cá nhân (Laptop) để làm AI Server.
+> 2. ⏳ **Hạn chế về thời gian thực hiện:** Thời gian phát triển dự án của học sinh có hạn, cần đưa sản phẩm vào thử nghiệm thực tế trong thời gian ngắn nhất.
+> 3. 🧠 **Hạn chế về kinh nghiệm thiết k> [!NOTE]
+>
+> ### 💡 Diễn giải Đánh giá Kiến trúc & Hướng Phát triển (Dành cho Giám khảo / Người đọc tổng quan)
+>
+> Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, nhóm tác giả thẳng thắn nhận diện **4 hạn chế nguyên nhân cốt lõi** dẫn đến việc sử dụng giải pháp Pub/Sub trung gian (Ably):
+>
+> 1. 💰 **Hạn chế về kinh phí triển khai:** Kinh phí dự án có hạn, chưa thể thuê các máy chủ Cloud VPS mạnh và chuyên nghiệp, do đó nhóm tận dụng các nền tảng dịch vụ miễn phí (như Vercel Serverless cho Mobile Server) và máy tính cá nhân (Laptop) để làm AI Server.
+> 2. ⏳ **Hạn chế về thời gian thực hiện:** Thời gian phát triển dự án của học sinh có hạn, cần đưa sản phẩm vào thử nghiệm thực tế trong thời gian ngắn nhất.
+> 3. 🧠 **Hạn chế về kinh nghiệm thiết kế hệ thống lớn:** Là lần đầu tiên nhóm tiếp cận, thiết kế và triển khai một hệ thống phân tán thời gian thực quy mô lớn.
+> 4. 🛠️ **Hạn chế về năng lực phát triển Backend của nhóm AI:** Nhóm chuyên trách AI/Phần cứng chưa có kinh nghiệm xây dựng AI Server thành một hệ thống máy chủ web hoàn chỉnh (REST/Socket Server). Do đó, AI Server đóng vai trò như một **Client** đơn giản và chủ động kết nối lắng nghe lệnh qua dịch vụ trung gian Ably Broker.
+>
+> Nhóm tác giả thẳng thắn chỉ ra các giới hạn của kiến trúc hiện tại và đề xuất **Mô hình Kiến trúc Tập trung Đám mây (DigitalOcean Cloud Environment & Edge Station)** cho các giai đoạn nâng cấp tiếp theo, giúp hệ thống vận hành trực tiếp, loại bỏ trung gian bên thứ ba, giảm thiểu chi phí và tối ưu độ trễ xử lý.thống vận hành trực tiếp, loại bỏ trung gian bên thứ ba, giảm thiểu chi phí và tối ưu độ trễ xử lý.
 
-- **Mô tả kỹ thuật:** Khi phát hiện có động vật hoặc chuyển động bất thường, Camera/AI_Server tải hình ảnh lên Mobile_Server qua API `POST /cameras/{cameraId}/detections`, nhận cấu hình phòng vệ `@DefendAction` phẳng 8 trường (`ledFlash`, `ledColor`, `ledIntensity`, `ledFlashRate`, `speakerWarn`, `audioSampleId`, `audioIntensity`, `silentAlert`) phản hồi để thực thi phát âm thanh xua đuổi/chớp LED tại chỗ, đồng thời kích hoạt cảnh báo đa kênh đến người dân (SMS/Push).
-- **Cơ chế gửi Push Notification với Cooldown 30 giây:**
-  - AI Server có thể gửi detection liên tục về Mobile Server. Để tránh spam thông báo, `Mobile_Server` áp dụng logic cooldown:
-    - **Xác định `isNewEvent`:** Kiểm tra trong DB xem `cameraId` này có `Event` nào được tạo trong vòng **30 giây** gần nhất không.
-    - Nếu **`isNewEvent = true`** (lần phát hiện đầu tiên / đã quá 30s kể từ event trước): Tạo `Alert` mới trong DB **và** gửi Push Notification qua FCM đến người dùng.
-    - Nếu **`isNewEvent = false`** (phát hiện liên tiếp trong cùng chuỗi ≤ 30s): **Bỏ qua** việc tạo `Alert` và gửi Push, nhưng **vẫn lưu `Snapshot`** để mobile app có thể cập nhật ảnh mới nhất qua cơ chế polling.
-  - Khi `isNewEvent = true`, `Mobile_Server` sẽ đọc biến môi trường `PUSH_SERVICE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
+## 1. Các Hạn chế của Kiến trúc Hiện tại
+
+1. **Phụ thuộc vào Dịch vụ Trung gian Bên thứ 3 (Cloud Broker Dependency):**  
+   Việc sử dụng Ably Pub/Sub làm trung gian truyền tin real-time tuy giải quyết được bài toán phân công giữa 2 nhóm phát triển độc lập, nhưng tạo ra sự phụ thuộc vào dịch vụ đám mây bên thứ ba (phát sinh chi phí/hạn ngạch quota tin nhắn và yêu cầu tạo Token Ably trung gian).
+2. **Độ phức tạp trong Quản lý Kênh Tin nhắn (Channel Management Overhead):**  
+   Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Server, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
+3. **Giới hạn kết nối của Hạ tầng Serverless (Vercel):**  
+   Do `Mobile_Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.CE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
   - `Mobile_Server` truy vấn danh sách `fcmToken` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
@@ -935,7 +955,12 @@ sequenceDiagram
 >
 > ### 💡 Diễn giải Đánh giá Kiến trúc & Hướng Phát triển (Dành cho Giám khảo / Người đọc tổng quan)
 >
-> Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, hệ thống được phân chia thành 2 nhóm chuyên trách độc lập (Nhóm Cloud/Mobile App & Nhóm AI/Phần cứng thực địa). Để thích ứng với mô hình triển khai Serverless (Vercel) và giảm thiểu độ phức tạp cho trạm AI thực địa, giải pháp Pub/Sub trung gian (Ably) đã được lựa chọn.
+> Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, nhóm tác giả thẳng thắn nhận diện **4 hạn chế nguyên nhân cốt lõi** dẫn đến việc sử dụng giải pháp Pub/Sub trung gian (Ably):
+>
+> 1. 💰 **Hạn chế về kinh phí triển khai:** Kinh phí dự án có hạn, chưa thể thuê các máy chủ Cloud VPS mạnh và chuyên nghiệp, do đó nhóm tận dụng các nền tảng dịch vụ miễn phí (như Vercel Serverless cho Mobile Server) và máy tính cá nhân (Laptop) để làm AI Server.
+> 2. ⏳ **Hạn chế về thời gian thực hiện:** Thời gian phát triển dự án của học sinh có hạn, cần đưa sản phẩm vào thử nghiệm thực tế trong thời gian ngắn nhất.
+> 3. 🧠 **Hạn chế về kinh nghiệm thiết kế hệ thống lớn:** Là lần đầu tiên nhóm tiếp cận, thiết kế và triển khai một hệ thống phân tán thời gian thực quy mô lớn.
+> 4. 🛠️ **Hạn chế về năng lực phát triển Backend của nhóm AI:** Nhóm chuyên trách AI/Phần cứng chưa có kinh nghiệm xây dựng AI Server thành một hệ thống máy chủ web hoàn chỉnh (REST/Socket Server). Do đó, AI Server đóng vai trò như một **Client** đơn giản và chủ động kết nối lắng nghe lệnh qua dịch vụ trung gian Ably Broker.
 >
 > Nhóm tác giả thẳng thắn chỉ ra các giới hạn của kiến trúc hiện tại và đề xuất **Mô hình Kiến trúc Tập trung Đám mây (DigitalOcean Cloud Environment & Edge Station)** cho các giai đoạn nâng cấp tiếp theo, giúp hệ thống vận hành trực tiếp, loại bỏ trung gian bên thứ ba, giảm thiểu chi phí và tối ưu độ trễ xử lý.
 
@@ -954,7 +979,7 @@ sequenceDiagram
 
 Dựa trên sơ đồ kiến trúc cải tiến mục tiêu, hệ thống được quy hoạch làm **2 Vùng chính**: **DigitalOcean Cloud Environment** (Chứa toàn bộ Backend & AI Engine) và **Safe Area** (Trạm camera thực địa).
 
-<a href="https://ibb.co/dRtJwdC"><img src="https://i.ibb.co/WL0p4b8/wildlife-2-Page-2.jpg" alt="wildlife-2-Page-2"></a>
+<a href="https://ibb.co/dRtJwdC"><img src="https://i.ibb.co/2TSY1DV/wildlife-2-Page-2.jpg" alt="wildlife-2-Page-2" border="0"></a>
 
 ---
 
