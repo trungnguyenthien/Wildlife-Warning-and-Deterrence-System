@@ -826,7 +826,7 @@ sequenceDiagram
 >    - Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.
 >    - **Cách định danh người dùng sẽ nhận thông báo:**
 >      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcmToken` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcmToken` này.
->      - **Gửi tin nhắn SMS khẩn cấp:** Máy chủ truy vấn danh sách số điện thoại chính của tài khoản và các số điện thoại người dân lân cận đã được đăng ký trước (tối đa 3 số/tài khoản) để gửi tin nhắn SMS cảnh báo tức thời.
+>      - **Quản lý danh sách SĐT SMS khẩn cấp:** Máy chủ truy vấn danh sách SĐT chính của tài khoản và các SĐT người dân lân cận (`sms_recipients`, tối đa 3 số/tài khoản) đã được lưu sẵn trong Database để chuẩn bị kích hoạt gửi tin nhắn SMS ở giai đoạn nâng cấp tiếp theo.
 > 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**
 >    - Hì> [!NOTE]
 >
@@ -889,13 +889,9 @@ sequenceDiagram
         Database-->>Mobile_Server: Alert đã tạo thành công
         Mobile_Server->>Database: Truy vấn danh sách Push Token & SĐT nhận SMS (device_tokens & sms_recipients)
         Database-->>Mobile_Server: Danh sách Push Tokens và SĐT
-        par Đẩy thông báo khẩn cấp qua Firebase
-            Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
-            FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
-        and Gửi tin nhắn SMS cho hộ dân
-            Mobile_Server->>SMS: Yêu cầu gửi SMS cảnh báo đến danh sách SĐT đăng ký lân cận
-            SMS-->>Mobile: Người dân nhận tin nhắn SMS cảnh báo khẩn cấp
-        end
+        Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
+        FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
+        Note over Mobile_Server, Database: Danh sách SĐT sms_recipients đã được lưu sẵn để sẵn sàng cho tích hợp SMS Gateway ở giai đoạn sau.
     else isNewEvent = false (Phát hiện liên tiếp ≤ 30s)
         Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push/SMS để tránh spam. Snapshot đã được lưu để polling cập nhật ảnh.
     end
