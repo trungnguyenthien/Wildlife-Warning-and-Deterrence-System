@@ -143,7 +143,7 @@ sequenceDiagram
 
 _(Không có action load dữ liệu ban đầu)_
 
-### 2.1. Action: Login & Register Push Token
+### 2.1. Action: Login & Register fcm-push-token
 
 > [!NOTE]
 >
@@ -163,17 +163,17 @@ _(Không có action load dữ liệu ban đầu)_
 >      - **Vì sao không dùng trực tiếp Mật khẩu ở mọi thao tác:** Nếu mỗi lần bấm nút (xem camera, đổi cấu hình) ứng dụng lại gửi kèm tên đăng nhập và mật khẩu, thông tin nhạy cảm sẽ liên tục bay trên mạng, nguy cơ bị lộ rất cao.
 >      - **Access Token (Chìa khóa thông hành tạm thời):** Là một mã điện tử có thời hạn sử dụng ngắn. Khi đăng nhập đúng, máy chủ phát cho điện thoại chiếc thẻ này. Trong các thao tác tiếp theo, ứng dụng chỉ cần trình chiếc thẻ `Access Token` mà không cần gửi lại mật khẩu.
 >      - **Refresh Token (Thẻ gia hạn phiên làm việc):** Khi chìa khóa tạm thời `Access Token` hết hạn, ứng dụng sẽ dùng chiếc thẻ gia hạn `Refresh Token` này để xin máy chủ cấp chìa khóa mới một cách tự động, giúp người dùng không phải gõ lại mật khẩu nhiều lần.
-> 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký FCM Token)**
->    - Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcmToken`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).
->    - Ứng dụng lập tức **gửi mã `fcmToken` duy nhất này về lưu trữ tại Máy chủ Trung tâm (Backend Server qua API `POST /devices/push-token`)** để đính kèm trực tiếp với tài khoản người dùng (`userId`).
+> 2. **Bước 2: Tự động Định danh & Gửi Mã Thiết bị về Máy chủ Trung tâm (Đăng ký fcm-push-token)**
+>    - Ngay sau khi đăng nhập thành công, ứng dụng di động tự động liên hệ với hạ tầng **Google Firebase** để xin cấp một **`fcm-push-token`**. Chuỗi mã này do Google Firebase khởi tạo riêng biệt và là **mã duy nhất tuyệt đối dành riêng cho từng Ứng dụng trên từng Thiết bị di động cụ thể** (không bao giờ bị trùng lặp trên toàn thế giới).
+>    - Ứng dụng lập tức **gửi mã `fcm-push-token` duy nhất này về lưu trữ tại Máy chủ Trung tâm (Backend Server qua API `POST /devices/push-token`)** để đính kèm trực tiếp với tài khoản người dùng (`userId`).
 >    - **Ý nghĩa & Vai trò trong việc phát thông báo khẩn cấp:**
->      - **Gửi `fcmToken` về Backend Server:** Giúp máy chủ ghi nhớ chính xác địa chỉ liên lạc duy nhất của từng tài khoản. Bất kể lúc nào có sự kiện động vật nguy hiểm xuất hiện (dù ứng dụng di động đang mở, đang chạy ngầm hay điện thoại đang khóa/tắt màn hình), máy chủ Backend đều có thể chủ động kích hoạt và gửi cảnh báo tức thời.
->      - **`fcmToken` (Mã địa chỉ nhận tin):** Được Google Firebase cấp riêng và là mã duy nhất tuyệt đối cho từng App trên từng Device, đóng vai trò như _"Địa chỉ hòm thư độc nhất"_ của thiết bị di động đó, đảm bảo tin nhắn cảnh báo phát đúng ứng dụng, đúng người dùng mà không bao giờ bị nhầm lẫn.
+>      - **Gửi `fcm-push-token` về Backend Server:** Giúp máy chủ ghi nhớ chính xác địa chỉ liên lạc duy nhất của từng tài khoản. Bất kể lúc nào có sự kiện động vật nguy hiểm xuất hiện (dù ứng dụng di động đang mở, đang chạy ngầm hay điện thoại đang khóa/tắt màn hình), máy chủ Backend đều có thể chủ động kích hoạt và gửi cảnh báo tức thời.
+>      - **`fcm-push-token` (Mã địa chỉ nhận tin):** Được Google Firebase cấp riêng và là mã duy nhất tuyệt đối cho từng App trên từng Device, đóng vai trò như _"Địa chỉ hòm thư độc nhất"_ của thiết bị di động đó, đảm bảo tin nhắn cảnh báo phát đúng ứng dụng, đúng người dùng mà không bao giờ bị nhầm lẫn.
 >      - **Google Firebase (Hạ tầng dịch vụ tin nhắn):** Đóng vai trò _"Bưu điện Trung gian Khẩn cấp"_, tiếp nhận lệnh từ Backend Server và chịu trách nhiệm đưa thông báo đẩy (Push Notification) hiển thị rực sáng trên màn hình khóa điện thoại 24/7.
 > 3. **Bước 3: Hoàn tất & Chuyển vào Màn hình Điều khiển Chính**
 >    - Khi thiết bị được ghi nhận thành công, ứng dụng lưu chìa khóa bảo mật và tự động chuyển người dùng vào màn hình chính để theo dõi danh sách trạm camera và tin tức cảnh báo theo thời gian thực.
 
-- **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy FCM Token từ Firebase SDK và tự động gửi lên server để liên kết thiết bị.
+- **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy fcm-push-token từ FCM và tự động gửi lên server để liên kết thiết bị.
 
 ```mermaid
 sequenceDiagram
@@ -181,7 +181,7 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Mobile_Server as Mobile_Server
     participant Database as Database
-    participant FCM_SDK as FCM_SDK
+    participant FCM as FCM
 
     Note over Mobile, Database: Tiến trình Đăng nhập tài khoản
     Mobile->>Mobile_Server: POST /auth/login (username, password)
@@ -195,12 +195,12 @@ sequenceDiagram
 
     Mobile->>Mobile: Lưu Access Token & Refresh Token bảo mật
 
-    Note over Mobile, FCM_SDK: Tự động đăng ký FCM Push Token sau khi đăng nhập
-    Mobile->>FCM_SDK: Gọi lấy FCM Push Token
-    FCM_SDK-->>Mobile: fcmToken
-    Mobile->>Mobile_Server: POST /devices/push-token (fcmToken, deviceModel, osVersion)
+    Note over Mobile, FCM: Tự động đăng ký fcm-push-token sau khi đăng nhập
+    Mobile->>FCM: Gọi lấy fcm-push-token
+    FCM-->>Mobile: fcm-push-token
+    Mobile->>Mobile_Server: POST /devices/push-token (fcm-push-token, deviceModel, osVersion)
     activate Mobile_Server
-    Mobile_Server->>Database: Lưu/Cập nhật FCM Token liên kết với userId
+    Mobile_Server->>Database: Lưu/Cập nhật fcm-push-token liên kết với userId
     Database-->>Mobile_Server: Lưu thành công
     Mobile_Server-->>Mobile: Response 201 Created
     deactivate Mobile_Server
@@ -415,7 +415,7 @@ sequenceDiagram
 
 ### 3.3.2. Action: Logout
 
-- **Mô tả:** Người dùng nhấn nút Đăng xuất, app gửi yêu cầu hủy session trên server, đồng thời hủy FCM Push Token trên thiết bị để ngưng nhận thông báo và đưa người dùng trở lại màn hình đăng nhập.
+- **Mô tả:** Người dùng nhấn nút Đăng xuất, app gửi yêu cầu hủy session trên server, đồng thời hủy fcm-push-token trên thiết bị để ngưng nhận thông báo và đưa người dùng trở lại màn hình đăng nhập.
 
 ```mermaid
 sequenceDiagram
@@ -434,7 +434,7 @@ sequenceDiagram
 
     Mobile->>Mobile_Server: DELETE /devices/push-token
     activate Mobile_Server
-    Mobile_Server->>Database: Xóa bản ghi Token liên kết thiết bị này
+    Mobile_Server->>Database: Xóa bản ghi fcm-push-token liên kết thiết bị này
     Database-->>Mobile_Server: Thành công
     Mobile_Server-->>Mobile: Response 204 No Content
     deactivate Mobile_Server
@@ -825,7 +825,7 @@ sequenceDiagram
 > 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp Đa kênh (Push Notification & SMS)**
 >    - Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.
 >    - **Cách định danh người dùng sẽ nhận thông báo:**
->      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcmToken` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcmToken` này.
+>      - **Gửi Push Notification qua App:** Khi đăng nhập trên điện thoại, ứng dụng di động tự động lấy Mã định danh thiết bị duy nhất (`fcm-push-token` từ Google Firebase) gửi lên lưu vào máy chủ đính kèm theo tài khoản `userId`. Khi có sự kiện, máy chủ gửi thông báo trực tiếp đến các `fcm-push-token` này.
 >      - **Quản lý danh sách SĐT SMS khẩn cấp:** Máy chủ truy vấn danh sách SĐT chính của tài khoản và các SĐT người dân lân cận (`sms_recipients`, tối đa 3 số/tài khoản) đã được lưu sẵn trong Database để chuẩn bị kích hoạt gửi tin nhắn SMS ở giai đoạn nâng cấp tiếp theo.
 > 4. **Bước 4: Cập nhật Nhật ký & Hiển thị Thời gian thực trên Ứng dụng**
 >    - Hì> [!NOTE]
@@ -857,7 +857,7 @@ sequenceDiagram
    Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Server, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
 3. **Giới hạn kết nối của Hạ tầng Serverless (Vercel):**  
    Do `Mobile_Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.CE_ACCOUNT_KEY_JSON`, giải mã từ Base64 sang Object JSON **trực tiếp trong RAM** để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
-  - `Mobile_Server` truy vấn danh sách `fcmToken` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
+  - `Mobile_Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
 sequenceDiagram
@@ -887,8 +887,8 @@ sequenceDiagram
         Mobile_Server->>Mobile_Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
         Mobile_Server->>Database: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
         Database-->>Mobile_Server: Alert đã tạo thành công
-        Mobile_Server->>Database: Truy vấn danh sách Push Token & SĐT nhận SMS (device_tokens & sms_recipients)
-        Database-->>Mobile_Server: Danh sách Push Tokens và SĐT
+        Mobile_Server->>Database: Truy vấn danh sách fcm-push-token & SĐT nhận SMS (device_tokens & sms_recipients)
+        Database-->>Mobile_Server: Danh sách fcm-push-token và SĐT
         Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
         FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
         Note over Mobile_Server, Database: Danh sách SĐT sms_recipients đã được lưu sẵn để sẵn sàng cho tích hợp SMS Gateway ở giai đoạn sau.
