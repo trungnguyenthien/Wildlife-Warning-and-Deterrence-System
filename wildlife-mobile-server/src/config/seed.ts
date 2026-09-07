@@ -152,6 +152,15 @@ export async function runSeed(prisma: PrismaClient) {
       htmlDescription: '<p>Các loài cá di chuyển theo đàn gần khu vực lòng hồ thủy điện hoặc sông ngòi biên giới.</p>',
       aggressionLevel: 5,
       recommendAction: 'Hệ thống chỉ ghi nhận thông tin theo dõi hệ sinh thái thủy sản và không bật các chế độ xua đuổi.'
+    },
+    {
+      id: 'dog',
+      displayName: 'Chó',
+      dangerLevel: DangerLevel.MEDIUM,
+      isHuman: false,
+      htmlDescription: '<p>Chó nhà hoặc chó săn di chuyển gần khu vực nương rẫy, nhà dân.</p>',
+      aggressionLevel: 35,
+      recommendAction: 'Cảnh báo nhẹ, sử dụng còi hú vừa phải hoặc hệ thống đèn chớp vàng để xua đuổi.'
     }
   ];
 
@@ -173,7 +182,7 @@ export async function runSeed(prisma: PrismaClient) {
       create: s
     });
   }
-  console.log(`[Species] Đã nạp danh mục 10 loài động vật chuẩn.`);
+  console.log(`[Species] Đã nạp danh mục 11 loài động vật chuẩn.`);
 
   // 3. Tạo 2 Trạm Camera (Camera)
   await prisma.camera.deleteMany({});

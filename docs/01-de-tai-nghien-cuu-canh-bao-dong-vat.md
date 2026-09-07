@@ -264,7 +264,7 @@ Cho phép người dùng thực hiện các tùy chỉnh cá nhân:
 
 Màn hình này cho phép người dùng tùy biến và thiết lập trước kịch bản phòng vệ tự động theo sự kết hợp của tài khoản kiểm lâm và từng loài động vật. Khi mô hình AI phát hiện loài tương ứng tại bất kỳ camera nào do kiểm lâm đó quản lý, hệ thống sẽ kích hoạt các thiết lập phòng vệ đã được cấu hình cho loài đó.
 
-- **Danh sách chọn loài động vật (Animal Selector Chips):** Hiển thị danh sách các loài có sẵn trong hệ thống: _Cá sấu, Nai, Voi, Hươu cao cổ, Báo, Khỉ, Tê giác, Rắn, Hổ_. Người dùng nhấp chọn vào một loài để cấu hình. Loài được chọn sẽ được làm nổi bật (Highlight).
+- **Danh sách chọn loài động vật (Animal Selector Chips):** Hiển thị danh sách các loài có sẵn trong hệ thống: _Cá sấu, Nai, Chó, Voi, Hươu cao cổ, Báo, Khỉ, Tê giác, Rắn, Hổ_. Người dùng nhấp chọn vào một loài để cấu hình. Loài được chọn sẽ được làm nổi bật (Highlight).
 - **Luồng thiết lập:** Người dùng chọn loài động vật -> Cấu hình các nhóm cài đặt chi tiết bên dưới.
 - **Các nhóm cài đặt chi tiết (Defense Parameter Configurations):**
   - **Âm thanh xua đuổi:**

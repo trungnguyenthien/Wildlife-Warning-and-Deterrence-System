@@ -770,6 +770,16 @@ Mapping: danh sách các loài dạng chip chọn tại màn hình `[SPECIES_CON
     "aggressionLevel": 15,
     "recommendAction": "Sử dụng đèn LED chớp vàng và còi chó sủa cường độ vừa phải để điều hướng nai ra khỏi rẫy.",
     "createdAt": "2026-08-11T00:00:00.000Z"
+  },
+  {
+    "id": "dog",
+    "displayName": "Chó",
+    "dangerLevel": "MEDIUM",
+    "isHuman": false,
+    "htmlDescription": "<p>Chó thả rông hoặc chó hoang di chuyển gần khu vực bảo tồn và vùng đệm ven rừng.</p>",
+    "aggressionLevel": 35,
+    "recommendAction": "Phát âm thanh tần số cao hoặc còi nhẹ kèm đèn LED cảnh báo để xua đuổi chó khỏi khu vực bảo vệ.",
+    "createdAt": "2026-08-11T00:00:00.000Z"
   }
 ]
 ```

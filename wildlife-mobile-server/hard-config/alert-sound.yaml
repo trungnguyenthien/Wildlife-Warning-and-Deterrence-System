@@ -18,6 +18,10 @@
   name: "Tiếng Nai"
   file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/deer.mp3"
 
+- id: "dog"
+  name: "Tiếng Chó"
+  file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/dog.mp3"
+
 - id: "elephant"
   name: "Tiếng Voi"
   file: "https://wildlife-warning-and-deterrence-sys.vercel.app/assets/alert/elephant.mp3"

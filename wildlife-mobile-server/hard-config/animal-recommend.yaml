@@ -104,3 +104,12 @@
     audioIntensity: 50
     silentAlert: false
 
+- speciesId: "dog"
+  displayName: "Chó"
+  inheritPreset: "@medium_danger"
+  override:
+    ledColor: "YELLOW"
+    audioSampleId: "A_dog_bark"
+    silentAlert: false
+
+
