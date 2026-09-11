@@ -8,9 +8,9 @@ Tài liệu này mô tả chi tiết luồng tương tác giữa các thành ph�
 
 - **Mobile:** Ứng dụng di động (Android Client) cài đặt trên điện thoại người dùng và kiểm lâm để tương tác với hệ thống.
 - **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
-- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Mobile_Server` và `AI_Server` thay thế cho WebSocket trực tiếp.
-- **AI_Server:** Máy chủ trí tuệ nhân tạo chạy mô hình nhận diện (YOLOv8), nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
-- **Rasp_PI:** Thiết bị trạm thực địa (Raspberry Pi) điều khiển camera chụp ảnh (chỉ gửi ảnh về `AI_Server` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
+- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Mobile_Server` và `AI_Client` thay thế cho WebSocket trực tiếp.
+- **AI_Client:** Ứng dụng trí tuệ nhân tạo nhận diện (YOLOv8) chạy tại trạm thực địa, nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
+- **Rasp_PI:** Thiết bị trạm thực địa (Raspberry Pi) điều khiển camera chụp ảnh (chỉ gửi ảnh về `AI_Client` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
 - **FCM (Firebase Cloud Messaging):** Dịch vụ trung gian gửi thông báo đẩy (Push notification) thời gian thực đến `Mobile`.
 - **SMS Gateway:** Hệ thống gửi tin nhắn SMS cảnh báo khẩn cấp đến các số điện thoại đã đăng ký.
 
@@ -538,7 +538,7 @@ sequenceDiagram
   - [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
   - [POST /response-configs/{speciesId}/apply-preset/{presetId}](./03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid)
 
-### 6.3. Action: Test speaker sound at camera station (AI_SERVER)
+### 6.3. Action: Test speaker sound at camera station (AI_CLIENT)
 
 > [!NOTE]
 >
@@ -566,16 +566,16 @@ sequenceDiagram
 > - 🤝 **ACK (Acknowledge) là gì? (Giấy báo phát / Lời đáp "Đã nhận lệnh"):**  
 >   **ACK** (viết tắt của _Acknowledge_ - Xác nhận/Đã nhận) đóng vai trò như chiếc _"Giấy báo phát thành công"_ hoặc lời đáp lại của trạm camera: _"Thưa máy chủ, trạm camera chúng tôi đã nhận được lệnh và đã phát thử loa thành công rồi!"_. Nếu trong 9 giây mà máy chủ không nhận được bản tin ACK này (do mất mạng hoặc trạm camera mất điện), hệ thống sẽ báo lỗi quá thời hạn (Timeout) để kiểm lâm biết trạm đang gặp sự cố.
 >
-> 🤔 **Lý giải Kiến trúc: Vì sao chọn Ably Pub/Sub thay vì HTTP Request / Socket trực tiếp từ Mobile Server đến AI Server?**
+> 🤔 **Lý giải Kiến trúc: Vì sao chọn Ably Pub/Sub thay vì HTTP Request / Socket trực tiếp từ Mobile Server đến AI Client?**
 >
 > 1. **Phân công Trách nhiệm & Tách rời Mở rộng (Team Decoupling & Loose Coupling):**
->    - Hệ thống gồm 2 thành phần phát triển song song: `Mobile_Server` (Cloud Backend) và `AI_Server` (Trạm thực địa/Raspberry Pi).
->    - Việc dùng Cloud Pub/Sub Broker (Ably) giúp nhóm AI/Phần cứng không cần tự xây dựng hay duy trì một Web Server (HTTP REST/Socket Server) công khai tại thực địa (không phải xử lý routing, auth token, SSL hay phòng chống tấn công mạng). `AI_Server` chỉ đóng vai trò một **Subscriber (Client)** đơn giản — nhúng thư viện Ably để nhận tin nhắn. Điều này giúp 2 nhóm phát triển độc lập, giảm thiểu lỗi và nâng cao tốc độ tích hợp.
+>    - Hệ thống gồm 2 thành phần phát triển song song: `Mobile_Server` (Cloud Backend) và `AI_Client` (Trạm thực địa/Raspberry Pi).
+>    - Việc dùng Cloud Pub/Sub Broker (Ably) giúp nhóm AI/Phần cứng không cần tự xây dựng hay duy trì một Web Server (HTTP REST/Socket Server) công khai tại thực địa (không phải xử lý routing, auth token, SSL hay phòng chống tấn công mạng). `AI_Client` chỉ đóng vai trò một **Subscriber (Client)** đơn giản — nhúng thư viện Ably để nhận tin nhắn. Điều này giúp 2 nhóm phát triển độc lập, giảm thiểu lỗi và nâng cao tốc độ tích hợp.
 > 2. **Phù hợp với Hạ tầng Serverless (Vercel):**
->    - `Mobile_Server` triển khai trên Vercel Serverless Functions mang tính ngắn hạn (stateless). Nếu gọi HTTP Request đồng bộ trực tiếp xuống `AI_Server` và chờ phần cứng thực thi (5–9s), hàm Serverless sẽ bị treo kết nối và dễ đụng trần **Execution Timeout (10s)** của Vercel.
+>    - `Mobile_Server` triển khai trên Vercel Serverless Functions mang tính ngắn hạn (stateless). Nếu gọi HTTP Request đồng bộ trực tiếp xuống `AI_Client` và chờ phần cứng thực thi (5–9s), hàm Serverless sẽ bị treo kết nối và dễ đụng trần **Execution Timeout (10s)** của Vercel.
 >    - Dùng Ably REST API giúp `Mobile_Server` đẩy tin nhắn đi chỉ trong vài mili-giây và nhận phản hồi ACK qua kênh bất đồng bộ, tối ưu chi phí và hiệu năng máy chủ.
 > 3. **Mô hình Phân phối Đa điểm (Fan-out Pattern):**
->    - Một bản tin phát ra từ Ably có thể đồng thời truyền tới nhiều `AI_Server` hoặc thiết bị giám sát khác mà `Mobile_Server` không phải chạy vòng lặp gửi hàng loạt HTTP Request riêng lẻ tới từng địa chỉ IP/Domain.
+>    - Một bản tin phát ra từ Ably có thể đồng thời truyền tới nhiều `AI_Client` hoặc thiết bị giám sát khác mà `Mobile_Server` không phải chạy vòng lặp gửi hàng loạt HTTP Request riêng lẻ tới từng địa chỉ IP/Domain.
 > 
 > - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
@@ -585,25 +585,25 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Mobile_Server as Mobile_Server
     participant Ably as Ably Broker (Cloud)
-    participant AI_Server as AI_Server
+    participant AI_Client as AI_Client
     participant Rasp_PI as Rasp_PI
 
-    Note over AI_Server, Ably: AI_Server kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
+    Note over AI_Client, Ably: AI_Client kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
     Note over Mobile, Rasp_PI: Người dùng bấm nút "Nghe thử" tại app
     Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
     activate Mobile_Server
     Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
     Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh user:ack:{userId})
     activate Ably
-    Ably-->>AI_Server: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
+    Ably-->>AI_Client: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
     deactivate Ably
-    activate AI_Server
-    AI_Server->>Rasp_PI: Ra lệnh cho Loa/LED/Rào điện thực thi thử nghiệm
+    activate AI_Client
+    AI_Client->>Rasp_PI: Ra lệnh cho Loa/LED/Rào điện thực thi thử nghiệm
     activate Rasp_PI
-    Rasp_PI-->>AI_Server: Phản hồi xác nhận thiết bị đã thực thi xong
+    Rasp_PI-->>AI_Client: Phản hồi xác nhận thiết bị đã thực thi xong
     deactivate Rasp_PI
-    AI_Server->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
-    deactivate AI_Server
+    AI_Client->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
+    deactivate AI_Client
     activate Ably
     Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK
     deactivate Ably
@@ -688,11 +688,11 @@ sequenceDiagram
 
 ---
 
-# II. Thiết bị Camera & AI Server (Server AI / Field Device)
+# II. Thiết bị Camera & AI Client (Ứng dụng AI / Field Device)
 
 ## 1. Không phân chia màn hình (Thực thi ngầm & Tích hợp)
 
-### 1.1. Action: AI Server sends detection snapshot (AI_SERVER)
+### 1.1. Action: AI Client sends detection snapshot (AI_CLIENT)
 
 > [!NOTE]
 >
@@ -701,10 +701,10 @@ sequenceDiagram
 > Để dễ hình dung toàn bộ quá trình tự động hóa từ hiện trường đến thiết bị di động mà không cần đi sâu vào chi tiết kỹ thuật lập trình, luồng xử lý khi có động vật xuất hiện diễn ra qua **4 bước chính** như sau:
 >
 > 1. **Bước 1: Chụp ảnh & Nhận dạng Trí tuệ Nhân tạo (Tại thực địa)**
->    - Khi phát hiện chuyển động tại vùng ranh giới rừng, Rasp_PI tự động chụp ảnh và truyền sang Máy chủ AI (`AI_Server`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
+>    - Khi phát hiện chuyển động tại vùng ranh giới rừng, Rasp_PI tự động chụp ảnh và truyền sang Ứng dụng AI (`AI_Client`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
 > 2. **Bước 2: Ra quyết định Phản ứng & Xua đuổi Tức thì (Tại chỗ)**
 >    - Kết quả được gửi về Máy chủ Trung tâm (`Mobile_Server`).
->    - **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Server truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).
+>    - **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Client truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).
 >    - Máy chủ đóng gói kịch bản phòng vệ (`@DefendAction`) vào JSON trả về ngay lập tức cho kết nối của trạm camera đó, giúp Loa và Đèn LED tại đúng trạm đó phát ra âm thanh và ánh sáng xua đuổi lập tức.
 > 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp (Push Notification)**
 >    - Song song với việc xua đuổi tại chỗ, nếu đây là sự kiện mới (hệ thống tự động lọc chống phát lặp lại trong 30 giây), Máy chủ lập tức gửi thông báo cảnh báo.
@@ -713,7 +713,7 @@ sequenceDiagram
 >    - Hình ảnh snapshot và nhật ký phát hiện được lưu lại trong cơ sở dữ liệu (`events`, `event_detections`, `alerts`). Ứng dụng di động cập nhật thông tin hiển thị và cảnh báo tức thì cho kiểm lâm và người dân.
 
 - **Mô tả kỹ thuật backend:**
-  - `Mobile_Server` nhận payload từ `AI_Server` tại `POST /cameras/{cameraId}/detections`.
+  - `Mobile_Server` nhận payload từ `AI_Client` tại `POST /cameras/{cameraId}/detections`.
   - Giải mã `PUSH_SERVICE_ACCOUNT_KEY_JSON` (Base64) trong RAM để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
   - `Mobile_Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
@@ -721,17 +721,17 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Rasp_PI as Rasp_PI
-    participant AI_Server as AI_Server
+    participant AI_Client as AI_Client
     participant Mobile_Server as Mobile_Server
     participant FCM as FCM (Push Notification)
     participant Mobile as Mobile
 
-    Note over Rasp_PI, AI_Server: Phát hiện chuyển động vật lý tại thực địa
-    Rasp_PI->>AI_Server: Gửi hình ảnh chụp được (File Binary)
-    activate AI_Server
-    AI_Server->>AI_Server: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
+    Note over Rasp_PI, AI_Client: Phát hiện chuyển động vật lý tại thực địa
+    Rasp_PI->>AI_Client: Gửi hình ảnh chụp được (File Binary)
+    activate AI_Client
+    AI_Client->>AI_Client: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
 
-    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
+    AI_Client->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
     activate Mobile_Server
     Mobile_Server->>Mobile_Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
     Mobile_Server->>Mobile_Server: Ghi nhận sự kiện phát hiện động vật vào DB (events & event_detections)
@@ -751,11 +751,11 @@ sequenceDiagram
 
     Mobile_Server->>Mobile_Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
 
-    Mobile_Server-->>AI_Server: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
+    Mobile_Server-->>AI_Client: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
     deactivate Mobile_Server
 
-    AI_Server->>Rasp_PI: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
-    deactivate AI_Server
+    AI_Client->>Rasp_PI: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
+    deactivate AI_Client
 
     Note over Rasp_PI: Thực thi phòng vệ tại chỗ (Phát tệp âm thanh xua đuổi chọn lọc, chớp nháy LED)
 ```
@@ -767,7 +767,7 @@ sequenceDiagram
 
 > [!IMPORTANT]
 > **Lưu ý về Thực trạng Triển khai:**
-> API `POST /cameras/{cameraId}/image-upload` hiện tại **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL, tích hợp công cụ giả lập). Ứng dụng di động Android hiện tại **KHÔNG có giao diện hay nút bấm tải ảnh snapshot thủ công**. Trên ứng dụng mobile, kiểm lâm và người dân chỉ xem (`GET`) ảnh snapshot do hệ thống cập nhật tự động từ AI Server.
+> API `POST /cameras/{cameraId}/image-upload` hiện tại **CHỈ tồn tại trên Backend Server** (phục vụ các kịch bản kiểm thử API cURL, tích hợp công cụ giả lập). Ứng dụng di động Android hiện tại **KHÔNG có giao diện hay nút bấm tải ảnh snapshot thủ công**. Trên ứng dụng mobile, kiểm lâm và người dân chỉ xem (`GET`) ảnh snapshot do hệ thống cập nhật tự động từ AI Client.
 
 - **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/image-upload` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
 
@@ -802,10 +802,10 @@ sequenceDiagram
 >
 > Khối nội dung này tổng kết góc nhìn tự đánh giá kỹ thuật một cách khách quan về hệ thống hiện tại. Trong quá trình phát triển thực tế, nhóm tác giả thẳng thắn nhận diện **4 hạn chế nguyên nhân cốt lõi** dẫn đến việc sử dụng giải pháp Pub/Sub trung gian (Ably):
 >
-> 1. 💰 **Hạn chế về kinh phí triển khai:** Kinh phí dự án có hạn, chưa thể thuê các máy chủ Cloud VPS mạnh và chuyên nghiệp, do đó nhóm tận dụng các nền tảng dịch vụ miễn phí (như Vercel Serverless cho Mobile Server) và máy tính cá nhân (Laptop) để làm AI Server.
+> 1. 💰 **Hạn chế về kinh phí triển khai:** Kinh phí dự án có hạn, chưa thể thuê các máy chủ Cloud VPS mạnh và chuyên nghiệp, do đó nhóm tận dụng các nền tảng dịch vụ miễn phí (như Vercel Serverless cho Mobile Server) và máy tính cá nhân (Laptop) để làm AI Client.
 > 2. ⏳ **Hạn chế về thời gian thực hiện:** Thời gian phát triển dự án của học sinh có hạn, cần đưa sản phẩm vào thử nghiệm thực tế trong thời gian ngắn nhất.
 > 3. 🧠 **Hạn chế về kinh nghiệm thiết kế hệ thống lớn:** Là lần đầu tiên nhóm tiếp cận, thiết kế và triển khai một hệ thống phân tán thời gian thực quy mô lớn.
-> 4. 🛠️ **Hạn chế về năng lực phát triển Backend của nhóm AI:** Nhóm chuyên trách AI/Phần cứng chưa có kinh nghiệm xây dựng AI Server thành một hệ thống máy chủ web hoàn chỉnh (REST/Socket Server). Do đó, AI Server đóng vai trò như một **Client** đơn giản và chủ động kết nối lắng nghe lệnh qua dịch vụ trung gian Ably Broker.
+> 4. 🛠️ **Hạn chế về năng lực phát triển Backend của nhóm AI:** Nhóm chuyên trách AI/Phần cứng chưa có kinh nghiệm xây dựng ứng dụng AI thành một hệ thống máy chủ web hoàn chỉnh (REST/Socket Server). Do đó, AI Client đóng vai trò như một **Client** đơn giản và chủ động kết nối lắng nghe lệnh qua dịch vụ trung gian Ably Broker.
 >
 > Nhóm tác giả thẳng thắn chỉ ra các giới hạn của kiến trúc hiện tại và đề xuất **Mô hình Kiến trúc Tập trung Đám mây (DigitalOcean Cloud Environment & Edge Station)** cho các giai đoạn nâng cấp tiếp theo, giúp hệ thống vận hành trực tiếp, loại bỏ trung gian bên thứ ba, giảm thiểu chi phí và tối ưu độ trễ xử lý.
 
@@ -814,7 +814,7 @@ sequenceDiagram
 1. **Phụ thuộc vào Dịch vụ Trung gian Bên thứ 3 (Cloud Broker Dependency):**  
    Việc sử dụng Ably Pub/Sub làm trung gian truyền tin real-time tuy giải quyết được bài toán phân công giữa 2 nhóm phát triển độc lập, nhưng tạo ra sự phụ thuộc vào dịch vụ đám mây bên thứ ba (phát sinh chi phí/hạn ngạch quota tin nhắn và yêu cầu tạo Token Ably trung gian).
 2. **Độ phức tạp trong Quản lý Kênh Tin nhắn (Channel Management Overhead):**  
-   Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Server, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
+   Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Client, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
 3. **Giới hạn kết nối của Hạ tầng Serverless (Vercel):**  
    Do `Mobile_Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.
 
@@ -832,14 +832,14 @@ Dựa trên sơ đồ kiến trúc cải tiến mục tiêu, hệ thống đư�
 
 1. **Luồng Nhận diện & Cảnh báo Tự động (Detection & Warning Flow):**
    - **Tại Safe Area (Thực địa):** Khi có chuyển động, `Camera` chụp ảnh (`image`) gửi đến `Raspberry Pi`.
-   - **Đẩy ảnh lên Đám mây:** `Raspberry Pi` gửi bản tin `send image` trực tiếp lên `AI Server` đặt trên hạ tầng **DigitalOcean**.
-   - **Nhận diện GPU & Ra quyết định:** `AI Server` dùng sức mạnh GPU nhận dạng loài động vật $\rightarrow$ gửi thông tin phán đoán `send detection` sang `Mobile Server` $\rightarrow$ `Mobile Server` truy vấn kịch bản phòng vệ từ `Database` $\rightarrow$ trả về kịch bản cho `AI Server`.
-   - **Kích hoạt Phòng vệ Thực địa:** `AI Server` truyền lệnh điều khiển về `Raspberry Pi` tại Safe Area để kích hoạt ngay `Sound` (Loa còi) và `Light` (Đèn LED chớp).
+   - **Đẩy ảnh lên Đám mây:** `Raspberry Pi` gửi bản tin `send image` trực tiếp lên `AI Client` đặt trên hạ tầng **DigitalOcean**.
+   - **Nhận diện GPU & Ra quyết định:** `AI Client` dùng sức mạnh GPU nhận dạng loài động vật $\rightarrow$ gửi thông tin phán đoán `send detection` sang `Mobile Server` $\rightarrow$ `Mobile Server` truy vấn kịch bản phòng vệ từ `Database` $\rightarrow$ trả về kịch bản cho `AI Client`.
+   - **Kích hoạt Phòng vệ Thực địa:** `AI Client` truyền lệnh điều khiển về `Raspberry Pi` tại Safe Area để kích hoạt ngay `Sound` (Loa còi) và `Light` (Đèn LED chớp).
    - **Lưu trữ CDN & Thông báo Khẩn cấp:** `Mobile Server` lưu ảnh snapshot lên `Cloudinary Image Storage` và phát yêu cầu `message` qua `Google FCM` để bắn `notification` hiển thị tức thì trên `Android App` của kiểm lâm.
 
 2. **Luồng Cấu hình & Nghe thử Âm thanh (Configuration & Test Sound Flow):**
    - **Cấu hình:** Người dùng sử dụng `Android App` để thực hiện `save configuration` gửi trực tiếp đến `Mobile Server` để lưu vào `Database`.
-   - **Phát thử âm thanh từ trạm:** Khi người dùng bấm nút _"Nghe thử"_ trên `Android App`, ứng dụng gửi yêu cầu `test sound` đến `Mobile Server` $\rightarrow$ `Mobile Server` chuyển tiếp lệnh `test sound` sang `AI Server` $\rightarrow$ `AI Server` phát lệnh xuống `Raspberry Pi` tại Safe Area $\rightarrow$ `Raspberry Pi` bật `Sound` (Loa) trong 5 giây.
+   - **Phát thử âm thanh từ trạm:** Khi người dùng bấm nút _"Nghe thử"_ trên `Android App`, ứng dụng gửi yêu cầu `test sound` đến `Mobile Server` $\rightarrow$ `Mobile Server` chuyển tiếp lệnh `test sound` sang `AI Client` $\rightarrow$ `AI Client` phát lệnh xuống `Raspberry Pi` tại Safe Area $\rightarrow$ `Raspberry Pi` bật `Sound` (Loa) trong 5 giây.
 
 ---
 
@@ -848,8 +848,8 @@ Dựa trên sơ đồ kiến trúc cải tiến mục tiêu, hệ thống đư�
 1. 🚀 **Loại bỏ hoàn toàn Dịch vụ Trung gian (Zero 3rd-party Dependency):**  
    Xóa bỏ hoàn toàn Ably Broker, không còn tốn chi phí quota tin nhắn hay phức tạp hóa việc quản lý Token.
 2. ⚡ **Tốc độ Truyền nhận Siêu tốc (Low Latency):**  
-   `Mobile Server` và `AI Server` được đặt cùng một môi trường **DigitalOcean Environment**, giúp chi phí giao tiếp và độ trễ giữa 2 máy chủ đạt mức bằng 0 (In-Memory hoặc Local Loopback).
+   `Mobile Server` và `AI Client` được đặt cùng một môi trường **DigitalOcean Environment**, giúp chi phí giao tiếp và độ trễ giữa 2 máy chủ đạt mức bằng 0 (In-Memory hoặc Local Loopback).
 3. 🛡️ **Bảo mật & Đơn giản hóa Trạm Thực địa (Safe Area):**  
    `Raspberry Pi` tại thực địa chỉ đóng vai trò là một **Outbound Client** gửi ảnh và nhận lệnh từ DigitalOcean Cloud. Trạm thực địa không cần có IP công khai, không mở port, tuyệt đối an toàn trước các nguy cơ tấn công mạng.
 4. 💰 **Tối ưu Chi phí Thuê Hạ tầng:**  
-   Toàn bộ Backend, AI Server và Database được đóng gói chạy chung trên 01 máy chủ VPS DigitalOcean (Node Singapore), vừa tối ưu chi phí (chỉ ~$15-$25/tháng), vừa cực kỳ mượt mà cho người dùng tại Việt Nam.
+   Toàn bộ Backend, AI Client và Database được đóng gói chạy chung trên 01 máy chủ VPS DigitalOcean (Node Singapore), vừa tối ưu chi phí (chỉ ~$15-$25/tháng), vừa cực kỳ mượt mà cho người dùng tại Việt Nam.
