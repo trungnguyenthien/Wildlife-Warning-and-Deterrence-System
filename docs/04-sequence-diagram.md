@@ -7,16 +7,16 @@ Tài liệu này mô tả chi tiết luồng tương tác giữa các thành ph�
 ## Các Thành phần Hệ thống (Standardized Participants)
 
 - **Mobile:** Ứng dụng di động (Android Client) cài đặt trên điện thoại người dùng và kiểm lâm để tương tác với hệ thống.
-- **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
-- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Mobile_Server` và `AI_Client` thay thế cho WebSocket trực tiếp.
-- **AI_Client:** Ứng dụng trí tuệ nhân tạo nhận diện (YOLOv8) chạy tại trạm thực địa, nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
+- **Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
+- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Server` và `AI_Client` thay thế cho WebSocket trực tiếp.
+- **AI_Client:** Ứng dụng trí tuệ nhân tạo nhận diện (YOLOv8) chạy tại trạm thực địa, nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
 - **Rasp_PI:** Thiết bị trạm thực địa (Raspberry Pi) điều khiển camera chụp ảnh (chỉ gửi ảnh về `AI_Client` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
 - **FCM (Firebase Cloud Messaging):** Dịch vụ trung gian gửi thông báo đẩy (Push notification) thời gian thực đến `Mobile`.
 - **SMS Gateway:** Hệ thống gửi tin nhắn SMS cảnh báo khẩn cấp đến các số điện thoại đã đăng ký.
 
 ### Cơ chế quản lý serviceAccountKey.json cho Firebase Cloud Messaging (FCM)
 
-Để gửi thông báo đẩy (Push Notification) đến thiết bị di động của kiểm lâm và người dân vùng lân cận qua FCM, `Mobile_Server` cần xác thực với Google Firebase API sử dụng chứng chỉ dịch vụ (`serviceAccountKey.json`).
+Để gửi thông báo đẩy (Push Notification) đến thiết bị di động của kiểm lâm và người dân vùng lân cận qua FCM, `Server` cần xác thực với Google Firebase API sử dụng chứng chỉ dịch vụ (`serviceAccountKey.json`).
 
 Nhằm đảm bảo an toàn tuyệt đối và tuân thủ nguyên tắc triển khai Serverless (như Vercel):
 
@@ -28,7 +28,7 @@ Nhằm đảm bảo an toàn tuyệt đối và tuân thủ nguyên tắc triể
      cat serviceAccountKey.json | base64 | tr -d '\n'
      ```
   2. Lưu chuỗi Base64 vừa trích xuất vào biến môi trường tên là `PUSH_SERVICE_ACCOUNT_KEY_JSON` trên trang quản lý của Vercel (hoặc tệp cấu hình môi trường cục bộ `.env.local` / `.env.production`).
-  3. Khi server khởi chạy hoặc khi xử lý yêu cầu gửi thông báo, `Mobile_Server` sẽ đọc chuỗi từ biến môi trường, thực hiện giải mã trực tiếp trong bộ nhớ RAM và truyền Object thu được vào hàm khởi tạo của Firebase Admin SDK:
+  3. Khi server khởi chạy hoặc khi xử lý yêu cầu gửi thông báo, `Server` sẽ đọc chuỗi từ biến môi trường, thực hiện giải mã trực tiếp trong bộ nhớ RAM và truyền Object thu được vào hàm khởi tạo của Firebase Admin SDK:
 
      ```typescript
      const base64Key = process.env.PUSH_SERVICE_ACCOUNT_KEY_JSON;
@@ -109,24 +109,24 @@ _(Không có action load dữ liệu ban đầu)_
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Tiến trình Đăng ký tài khoản mới
-    Mobile->>Mobile_Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
-    activate Mobile_Server
+    Note over Mobile, Server: Tiến trình Đăng ký tài khoản mới
+    Mobile->>Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
+    activate Server
 
     rect rgb(240, 240, 240)
-        Note over Mobile_Server: Kiểm tra dữ liệu đầu vào
+        Note over Server: Kiểm tra dữ liệu đầu vào
         alt Gửi kèm id hoặc userId từ Client
-            Mobile_Server-->>Mobile: Response 400 Bad Request (id_not_allowed_from_client)
+            Server-->>Mobile: Response 400 Bad Request (id_not_allowed_from_client)
         end
     end
 
-    Mobile_Server->>Mobile_Server: Truy vấn DB kiểm tra tên đăng nhập / số điện thoại trùng lặp
-    Mobile_Server->>Mobile_Server: Băm mật khẩu (Bcrypt/Argon2) & Sinh mã ID hex 4 ký tự ngẫu nhiên
-    Mobile_Server->>Mobile_Server: Lưu bản ghi người dùng mới vào DB (mã hex 4 ký tự)
-    Mobile_Server-->>Mobile: Response 201 Created (Đăng ký thành công)
-    deactivate Mobile_Server
+    Server->>Server: Truy vấn DB kiểm tra tên đăng nhập / số điện thoại trùng lặp
+    Server->>Server: Băm mật khẩu (Bcrypt/Argon2) & Sinh mã ID hex 4 ký tự ngẫu nhiên
+    Server->>Server: Lưu bản ghi người dùng mới vào DB (mã hex 4 ký tự)
+    Server-->>Mobile: Response 201 Created (Đăng ký thành công)
+    deactivate Server
     Mobile->>Mobile: Hiển thị thông báo & chuyển về màn đăng nhập
 ```
 
@@ -148,7 +148,7 @@ _(Không có action load dữ liệu ban đầu)_
 > Quy trình xác thực bảo mật và liên kết thiết bị nhận thông báo tự động khi người dùng đăng nhập diễn ra qua **3 bước chính** như sau:
 >
 > 1. **Bước 1: Nhập thông tin & Xác thực Tài khoản (Đăng nhập)**
->    - Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Mobile_Server`) để kiểm tra tính hợp lệ.
+>    - Kiểm lâm hoặc Người dân nhập tên đăng nhập và mật khẩu trên ứng dụng di động. Yêu cầu được gửi về Máy chủ Trung tâm (`Server`) để kiểm tra tính hợp lệ.
 >    - **Cơ chế xác thực mật khẩu an toàn (Băm mật khẩu một chiều):** Máy chủ tuyệt đối không bao giờ lưu mật khẩu dạng chữ thô. Mật khẩu người dùng gửi lên được máy chủ chạy qua hàm toán học một chiều (Băm - Password Hashing) để biến đổi thành một chuỗi mã cố định độc đáo trước khi so sánh với dữ liệu trong hệ thống.
 >      - 💡 **Ví dụ minh họa nguyên lý "Trộn màu sơn một chiều":**
 >        - **Chiều đi (Rất dễ):** Khi hòa trộn các màu sơn theo tỉ lệ nhất định (Mật khẩu `MatKhau123`), ta thu được một màu sơn Xanh Ngọc duy nhất (Mã băm `$2b$12$eImi...`).
@@ -175,28 +175,28 @@ _(Không có action load dữ liệu ban đầu)_
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
     participant FCM as FCM
 
-    Note over Mobile, Mobile_Server: Tiến trình Đăng nhập tài khoản
-    Mobile->>Mobile_Server: POST /auth/login (username, password)
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Truy vấn DB lấy mật khẩu băm & thông tin người dùng
-    Mobile_Server->>Mobile_Server: Xác thực mật khẩu
-    Mobile_Server->>Mobile_Server: Tạo JWT Access Token & Refresh Token
-    Mobile_Server-->>Mobile: Response 200 OK (accessToken, refreshToken, expiresIn)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Tiến trình Đăng nhập tài khoản
+    Mobile->>Server: POST /auth/login (username, password)
+    activate Server
+    Server->>Server: Truy vấn DB lấy mật khẩu băm & thông tin người dùng
+    Server->>Server: Xác thực mật khẩu
+    Server->>Server: Tạo JWT Access Token & Refresh Token
+    Server-->>Mobile: Response 200 OK (accessToken, refreshToken, expiresIn)
+    deactivate Server
 
     Mobile->>Mobile: Lưu Access Token & Refresh Token bảo mật
 
     Note over Mobile, FCM: Tự động đăng ký fcm-push-token sau khi đăng nhập
     Mobile->>FCM: Gọi lấy fcm-push-token
     FCM-->>Mobile: fcm-push-token
-    Mobile->>Mobile_Server: POST /devices/push-token (fcm-push-token, deviceModel, osVersion)
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lưu/Cập nhật fcm-push-token liên kết với userId vào DB
-    Mobile_Server-->>Mobile: Response 201 Created
-    deactivate Mobile_Server
+    Mobile->>Server: POST /devices/push-token (fcm-push-token, deviceModel, osVersion)
+    activate Server
+    Server->>Server: Lưu/Cập nhật fcm-push-token liên kết với userId vào DB
+    Server-->>Mobile: Response 201 Created
+    deactivate Server
     Mobile->>Mobile: Chuyển hướng người dùng vào màn hình chính [MAIN_SCREEN]
 ```
 
@@ -218,14 +218,14 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Khởi động Mobile / Vào tab Danh sách Camera
-    Mobile->>Mobile_Server: GET /cameras
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lấy danh sách các trạm camera từ DB
-    Mobile_Server-->>Mobile: Response 200 OK (items)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Khởi động Mobile / Vào tab Danh sách Camera
+    Mobile->>Server: GET /cameras
+    activate Server
+    Server->>Server: Lấy danh sách các trạm camera từ DB
+    Server-->>Mobile: Response 200 OK (items)
+    deactivate Server
     Mobile->>Mobile: Hiển thị danh sách trạm & ảnh thumbnail snapshot
 ```
 
@@ -240,15 +240,15 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng đang mở màn hình Camera (Danh sách / Chi tiết)
+    Note over Mobile, Server: Người dùng đang mở màn hình Camera (Danh sách / Chi tiết)
     loop Định kỳ kiểm tra (Mỗi 5 giây)
-        Mobile->>Mobile_Server: GET /cameras/heartbeat
-        Mobile_Server-->>Mobile: Trả về lastUpdatedAt (Thời điểm cập nhật mới nhất)
+        Mobile->>Server: GET /cameras/heartbeat
+        Server-->>Mobile: Trả về lastUpdatedAt (Thời điểm cập nhật mới nhất)
         alt Có dữ liệu cập nhật mới
-            Mobile->>Mobile_Server: GET /cameras
-            Mobile_Server-->>Mobile: Trả về danh sách camera mới nhất (thumbnail, status, currentDetection)
+            Mobile->>Server: GET /cameras
+            Server-->>Mobile: Trả về danh sách camera mới nhất (thumbnail, status, currentDetection)
             Mobile->>Mobile: Cập nhật giao diện và ảnh snapshot mới nhất
         else Không có thay đổi
             Note over Mobile: Giữ nguyên giao diện hiện tại
@@ -270,30 +270,30 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: A. Khởi tạo bộ lọc (Tải danh mục dropdowns)
+    Note over Mobile, Server: A. Khởi tạo bộ lọc (Tải danh mục dropdowns)
     par Tải danh mục loài
-        Mobile->>Mobile_Server: GET /species
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Truy vấn danh sách loài từ DB
-        Mobile_Server-->>Mobile: Response 200 OK
-        deactivate Mobile_Server
+        Mobile->>Server: GET /species
+        activate Server
+        Server->>Server: Truy vấn danh sách loài từ DB
+        Server-->>Mobile: Response 200 OK
+        deactivate Server
     and Tải danh sách trạm camera
-        Mobile->>Mobile_Server: GET /cameras
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Truy vấn danh sách trạm camera từ DB
-        Mobile_Server-->>Mobile: Response 200 OK
-        deactivate Mobile_Server
+        Mobile->>Server: GET /cameras
+        activate Server
+        Server->>Server: Truy vấn danh sách trạm camera từ DB
+        Server-->>Mobile: Response 200 OK
+        deactivate Server
     end
 
-    Note over Mobile, Mobile_Server: B. Khi thay đổi bộ lọc
+    Note over Mobile, Server: B. Khi thay đổi bộ lọc
     Mobile->>Mobile: Chọn camera_id, species_id, thời gian (from, to)
-    Mobile->>Mobile_Server: GET /stats/summary?cameraId={camId}&speciesId={specId}&from={from}&to={to}
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lấy thống kê & heatmap theo bộ lọc từ DB
-    Mobile_Server-->>Mobile: Response 200 OK (data summary)
-    deactivate Mobile_Server
+    Mobile->>Server: GET /stats/summary?cameraId={camId}&speciesId={specId}&from={from}&to={to}
+    activate Server
+    Server->>Server: Lấy thống kê & heatmap theo bộ lọc từ DB
+    Server-->>Mobile: Response 200 OK (data summary)
+    deactivate Server
     Mobile->>Mobile: Vẽ lại biểu đồ và heatmap theo bộ lọc mới
 ```
 
@@ -310,22 +310,22 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Tải danh sách phát hiện trong tuần
-    Mobile->>Mobile_Server: GET /alerts/feed?page=0&size=20
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Truy vấn danh sách tin tức cảnh báo gần đây từ DB
-    Mobile_Server-->>Mobile: Response 200 OK (items)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Tải danh sách phát hiện trong tuần
+    Mobile->>Server: GET /alerts/feed?page=0&size=20
+    activate Server
+    Server->>Server: Truy vấn danh sách tin tức cảnh báo gần đây từ DB
+    Server-->>Mobile: Response 200 OK (items)
+    deactivate Server
     Mobile->>Mobile: Hiển thị danh sách tin tức phát hiện lên giao diện
 
     opt Người dùng nhấn chọn một tin cảnh báo để xem chi tiết
-        Mobile->>Mobile_Server: POST /alerts/feed/{alertId}/read
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Ghi nhận trạng thái đã đọc tin vào DB (alert_reads)
-        Mobile_Server-->>Mobile: Response 200 OK (success: true)
-        deactivate Mobile_Server
+        Mobile->>Server: POST /alerts/feed/{alertId}/read
+        activate Server
+        Server->>Server: Ghi nhận trạng thái đã đọc tin vào DB (alert_reads)
+        Server-->>Mobile: Response 200 OK (success: true)
+        deactivate Server
         Mobile->>Mobile: Cập nhật trạng thái tin thành đã đọc trên UI (đổi icon/mờ chữ)
     end
 ```
@@ -342,14 +342,14 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Tải dữ liệu tổng hợp phân tích theo trạm
-    Mobile->>Mobile_Server: GET /stats/summary
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Truy vấn số lần xuất hiện, tọa độ di chuyển từ DB
-    Mobile_Server-->>Mobile: Response 200 OK (summary data)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Tải dữ liệu tổng hợp phân tích theo trạm
+    Mobile->>Server: GET /stats/summary
+    activate Server
+    Server->>Server: Truy vấn số lần xuất hiện, tọa độ di chuyển từ DB
+    Server-->>Mobile: Response 200 OK (summary data)
+    deactivate Server
     Mobile->>Mobile: Vẽ biểu đồ xu hướng (Line Chart) và sơ đồ nhiệt di chuyển (Heatmap)
 ```
 
@@ -366,22 +366,22 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Chuyển sang tab Cài đặt
-    Mobile->>Mobile_Server: GET /users/me
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Truy vấn hồ sơ cá nhân người dùng từ DB
-    Mobile_Server-->>Mobile: Response 200 OK
-    deactivate Mobile_Server
+    Note over Mobile, Server: Chuyển sang tab Cài đặt
+    Mobile->>Server: GET /users/me
+    activate Server
+    Server->>Server: Truy vấn hồ sơ cá nhân người dùng từ DB
+    Server-->>Mobile: Response 200 OK
+    deactivate Server
     Mobile->>Mobile: Đổ thông tin lên giao diện cài đặt cá nhân
 
     opt Người dùng chỉnh sửa thông tin cá nhân (Họ tên, SĐT)
-        Mobile->>Mobile_Server: PATCH /users/me (fullName, phoneNumber)
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Cập nhật thông tin tài khoản vào DB
-        Mobile_Server-->>Mobile: Response 200 OK (hồ sơ mới)
-        deactivate Mobile_Server
+        Mobile->>Server: PATCH /users/me (fullName, phoneNumber)
+        activate Server
+        Server->>Server: Cập nhật thông tin tài khoản vào DB
+        Server-->>Mobile: Response 200 OK (hồ sơ mới)
+        deactivate Server
         Mobile->>Mobile: Cập nhật thông tin hiển thị trên UI
     end
 ```
@@ -398,20 +398,20 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng bấm nút Đăng xuất
-    Mobile->>Mobile_Server: POST /auth/logout
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Vô hiệu hóa Access/Refresh Token trong DB
-    Mobile_Server-->>Mobile: Response 200 OK
-    deactivate Mobile_Server
+    Note over Mobile, Server: Người dùng bấm nút Đăng xuất
+    Mobile->>Server: POST /auth/logout
+    activate Server
+    Server->>Server: Vô hiệu hóa Access/Refresh Token trong DB
+    Server-->>Mobile: Response 200 OK
+    deactivate Server
 
-    Mobile->>Mobile_Server: DELETE /devices/push-token
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Xóa bản ghi fcm-push-token của thiết bị trong DB
-    Mobile_Server-->>Mobile: Response 200 OK
-    deactivate Mobile_Server
+    Mobile->>Server: DELETE /devices/push-token
+    activate Server
+    Server->>Server: Xóa bản ghi fcm-push-token của thiết bị trong DB
+    Server-->>Mobile: Response 200 OK
+    deactivate Server
 
     Mobile->>Mobile: Xóa Token & Thông tin User lưu tại địa phương, chuyển về màn hình Login
 ```
@@ -432,22 +432,22 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng mở màn hình Danh sách cấu hình loài
-    Note over Mobile, Mobile_Server: Gửi các yêu cầu tải dữ liệu song song
+    Note over Mobile, Server: Người dùng mở màn hình Danh sách cấu hình loài
+    Note over Mobile, Server: Gửi các yêu cầu tải dữ liệu song song
     par Tải danh sách loài động vật
-        Mobile->>Mobile_Server: GET /species
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lấy danh sách loài từ DB
-        Mobile_Server-->>Mobile: Response 200 OK (items)
-        deactivate Mobile_Server
+        Mobile->>Server: GET /species
+        activate Server
+        Server->>Server: Lấy danh sách loài từ DB
+        Server-->>Mobile: Response 200 OK (items)
+        deactivate Server
     and Tải các cấu hình đang hoạt động của Ranger
-        Mobile->>Mobile_Server: GET /response-configs
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lấy các cấu hình phòng vệ hiện tại từ DB
-        Mobile_Server-->>Mobile: Response 200 OK (items)
-        deactivate Mobile_Server
+        Mobile->>Server: GET /response-configs
+        activate Server
+        Server->>Server: Lấy các cấu hình phòng vệ hiện tại từ DB
+        Server-->>Mobile: Response 200 OK (items)
+        deactivate Server
     end
     Mobile->>Mobile: Hiển thị danh sách loài kèm trạng thái cấu hình (Đang hoạt động/Mặc định)
 ```
@@ -468,28 +468,28 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng mở màn hình Thiết lập phòng vệ theo loài
-    Note over Mobile, Mobile_Server: Gửi các yêu cầu tải cấu hình & danh mục mẫu
+    Note over Mobile, Server: Người dùng mở màn hình Thiết lập phòng vệ theo loài
+    Note over Mobile, Server: Gửi các yêu cầu tải cấu hình & danh mục mẫu
     par Tải cấu hình phòng vệ hiện tại
-        Mobile->>Mobile_Server: GET /response-configs?speciesId={species}
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lấy cấu hình ứng phó từ DB
-        Mobile_Server-->>Mobile: Response 200 OK (payload)
-        deactivate Mobile_Server
+        Mobile->>Server: GET /response-configs?speciesId={species}
+        activate Server
+        Server->>Server: Lấy cấu hình ứng phó từ DB
+        Server-->>Mobile: Response 200 OK (payload)
+        deactivate Server
     and Tải 3 preset phòng vệ mẫu
-        Mobile->>Mobile_Server: GET /control/presets
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lấy danh sách presets mẫu từ DB
-        Mobile_Server-->>Mobile: Response 200 OK (items)
-        deactivate Mobile_Server
+        Mobile->>Server: GET /control/presets
+        activate Server
+        Server->>Server: Lấy danh sách presets mẫu từ DB
+        Server-->>Mobile: Response 200 OK (items)
+        deactivate Server
     and Tải danh mục âm thanh & mẫu phát loa
-        Mobile->>Mobile_Server: GET /audio-samples (chứa animalDeterrentSounds + citizenAlertSounds)
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lấy danh sách âm thanh & mẫu phát loa từ DB
-        Mobile_Server-->>Mobile: Response 200 OK (items)
-        deactivate Mobile_Server
+        Mobile->>Server: GET /audio-samples (chứa animalDeterrentSounds + citizenAlertSounds)
+        activate Server
+        Server->>Server: Lấy danh sách âm thanh & mẫu phát loa từ DB
+        Server-->>Mobile: Response 200 OK (items)
+        deactivate Server
     end
     Note right of Mobile: citizenAlertSounds nạp từ GET /audio-samples (nguồn hard-config/alert-sound.yaml), app không hardcode id
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
@@ -508,14 +508,14 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng tùy chỉnh thông số (hoặc chọn Preset) và bấm Lưu
-    Mobile->>Mobile_Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lưu/Cập nhật cấu hình phòng vệ vào DB
-    Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Người dùng tùy chỉnh thông số (hoặc chọn Preset) và bấm Lưu
+    Mobile->>Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
+    activate Server
+    Server->>Server: Lưu/Cập nhật cấu hình phòng vệ vào DB
+    Server-->>Mobile: Response 200 OK (cấu hình mới)
+    deactivate Server
     Mobile->>Mobile: Hiển thị thông báo thành công & cập nhật giao diện
 ```
 
@@ -531,7 +531,7 @@ sequenceDiagram
 > Quy trình kiểm thử âm thanh xua đuổi trực tiếp tại hiện trường rừng diễn ra qua **4 bước chính** như sau:
 >
 > 1. **Bước 1: Bấm nút Phát thử trên Ứng dụng di động**
->    - Tại màn hình Thiết lập phòng vệ, Kiểm lâm chọn loại âm thanh xua đuổi (như tiếng súng `A_gunshot`, tiếng sóng dưới nước `A_fish`...) và bấm nút _"Phát thử âm thanh từ trạm (5s)"_. Yêu cầu lập tức được gửi đến Máy chủ Trung tâm (`Mobile_Server`).
+>    - Tại màn hình Thiết lập phòng vệ, Kiểm lâm chọn loại âm thanh xua đuổi (như tiếng súng `A_gunshot`, tiếng sóng dưới nước `A_fish`...) và bấm nút _"Phát thử âm thanh từ trạm (5s)"_. Yêu cầu lập tức được gửi đến Máy chủ Trung tâm (`Server`).
 > 2. **Bước 2: Truyền lệnh tức thì qua Trạm Bộ đàm Vệ tinh Đám mây (Ably)**
 >    - Máy chủ Trung tâm đóng gói lệnh thử nghiệm và phát qua trạm bộ đàm đám mây **Ably Broker**. Ably lập tức "bắn" ngay lệnh này xuống Trạm Camera tại rừng qua kênh truyền thời gian thực **WebSocket**.
 > 3. **Bước 3: Trạm Camera tiếp nhận & Phát âm thanh thực địa**
@@ -553,13 +553,13 @@ sequenceDiagram
 > 🤔 **Lý giải Kiến trúc: Vì sao chọn Ably Pub/Sub thay vì HTTP Request / Socket trực tiếp từ Mobile Server đến AI Client?**
 >
 > 1. **Phân công Trách nhiệm & Tách rời Mở rộng (Team Decoupling & Loose Coupling):**
->    - Hệ thống gồm 2 thành phần phát triển song song: `Mobile_Server` (Cloud Backend) và `AI_Client` (Trạm thực địa/Raspberry Pi).
+>    - Hệ thống gồm 2 thành phần phát triển song song: `Server` (Cloud Backend) và `AI_Client` (Trạm thực địa/Raspberry Pi).
 >    - Việc dùng Cloud Pub/Sub Broker (Ably) giúp nhóm AI/Phần cứng không cần tự xây dựng hay duy trì một Web Server (HTTP REST/Socket Server) công khai tại thực địa (không phải xử lý routing, auth token, SSL hay phòng chống tấn công mạng). `AI_Client` chỉ đóng vai trò một **Subscriber (Client)** đơn giản — nhúng thư viện Ably để nhận tin nhắn. Điều này giúp 2 nhóm phát triển độc lập, giảm thiểu lỗi và nâng cao tốc độ tích hợp.
 > 2. **Phù hợp với Hạ tầng Serverless (Vercel):**
->    - `Mobile_Server` triển khai trên Vercel Serverless Functions mang tính ngắn hạn (stateless). Nếu gọi HTTP Request đồng bộ trực tiếp xuống `AI_Client` và chờ phần cứng thực thi (5–9s), hàm Serverless sẽ bị treo kết nối và dễ đụng trần **Execution Timeout (10s)** của Vercel.
->    - Dùng Ably REST API giúp `Mobile_Server` đẩy tin nhắn đi chỉ trong vài mili-giây và nhận phản hồi ACK qua kênh bất đồng bộ, tối ưu chi phí và hiệu năng máy chủ.
+>    - `Server` triển khai trên Vercel Serverless Functions mang tính ngắn hạn (stateless). Nếu gọi HTTP Request đồng bộ trực tiếp xuống `AI_Client` và chờ phần cứng thực thi (5–9s), hàm Serverless sẽ bị treo kết nối và dễ đụng trần **Execution Timeout (10s)** của Vercel.
+>    - Dùng Ably REST API giúp `Server` đẩy tin nhắn đi chỉ trong vài mili-giây và nhận phản hồi ACK qua kênh bất đồng bộ, tối ưu chi phí và hiệu năng máy chủ.
 > 3. **Mô hình Phân phối Đa điểm (Fan-out Pattern):**
->    - Một bản tin phát ra từ Ably có thể đồng thời truyền tới nhiều `AI_Client` hoặc thiết bị giám sát khác mà `Mobile_Server` không phải chạy vòng lặp gửi hàng loạt HTTP Request riêng lẻ tới từng địa chỉ IP/Domain.
+>    - Một bản tin phát ra từ Ably có thể đồng thời truyền tới nhiều `AI_Client` hoặc thiết bị giám sát khác mà `Server` không phải chạy vòng lặp gửi hàng loạt HTTP Request riêng lẻ tới từng địa chỉ IP/Domain.
 > 
 > - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
@@ -567,17 +567,17 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
     participant Ably as Ably Broker (Cloud)
     participant AI_Client as AI_Client
     participant Rasp_PI as Rasp_PI
 
     Note over AI_Client, Ably: AI_Client kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
     Note over Mobile, Rasp_PI: Người dùng bấm nút "Nghe thử" tại app
-    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
-    activate Mobile_Server
-    Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
-    Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh user:ack:{userId})
+    Mobile->>Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
+    activate Server
+    Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
+    Note over Server, Ably: (Đồng thời Server subscribe nhận ACK từ kênh user:ack:{userId})
     activate Ably
     Ably-->>AI_Client: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
     deactivate Ably
@@ -589,18 +589,18 @@ sequenceDiagram
     AI_Client->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
     deactivate AI_Client
     activate Ably
-    Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK
+    Ably-->>Server: Đẩy tin nhắn phản hồi COMMAND_ACK
     deactivate Ably
 
     alt Nhận được ACK trong vòng 5 giây
-        Mobile_Server->>Mobile_Server: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vào DB (device_logs)
-        Mobile_Server-->>Mobile: Response 200 OK (SUCCESS)
+        Server->>Server: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vào DB (device_logs)
+        Server-->>Mobile: Response 200 OK (SUCCESS)
         Mobile->>Mobile: Hiển thị thông báo "Kích hoạt thiết bị kiểm thử thành công"
     else Quá 5 giây không nhận được ACK (Timeout)
-        Mobile_Server-->>Mobile: Response 504 Gateway Timeout (camera_offline)
+        Server-->>Mobile: Response 504 Gateway Timeout (camera_offline)
         Mobile->>Mobile: Hiển thị thông báo lỗi "Không thể kết nối tới camera hiện trường"
     end
-    deactivate Mobile_Server
+    deactivate Server
 ```
 
 - **Chi tiết đặc tả API:**
@@ -619,14 +619,14 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
-    Note over Mobile, Mobile_Server: Người dùng mở màn hình Quản lý SĐT nhận SMS
-    Mobile->>Mobile_Server: GET /users/me/sms-recipients
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lấy danh sách số điện thoại nhận tin nhắn của người dùng từ DB
-    Mobile_Server-->>Mobile: Response 200 OK (items)
-    deactivate Mobile_Server
+    Note over Mobile, Server: Người dùng mở màn hình Quản lý SĐT nhận SMS
+    Mobile->>Server: GET /users/me/sms-recipients
+    activate Server
+    Server->>Server: Lấy danh sách số điện thoại nhận tin nhắn của người dùng từ DB
+    Server-->>Mobile: Response 200 OK (items)
+    deactivate Server
     Mobile->>Mobile: Đổ danh sách SĐT (tối đa 3 số) lên màn hình
 ```
 
@@ -641,27 +641,27 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
 
     %% THÊM SĐT
     rect rgb(240, 248, 255)
-        Note over Mobile, Mobile_Server: Người dùng nhập SĐT mới và bấm Lưu
-        Mobile->>Mobile_Server: POST /users/me/sms-recipients (fullName, phoneNumber, relation)
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Đếm số lượng SĐT đã đăng ký của user trong DB
-        Mobile_Server->>Mobile_Server: Thêm bản ghi SĐT nhận tin mới vào DB (nếu < 3)
-        Mobile_Server-->>Mobile: Response 201 Created (SĐT mới)
-        deactivate Mobile_Server
+        Note over Mobile, Server: Người dùng nhập SĐT mới và bấm Lưu
+        Mobile->>Server: POST /users/me/sms-recipients (fullName, phoneNumber, relation)
+        activate Server
+        Server->>Server: Đếm số lượng SĐT đã đăng ký của user trong DB
+        Server->>Server: Thêm bản ghi SĐT nhận tin mới vào DB (nếu < 3)
+        Server-->>Mobile: Response 201 Created (SĐT mới)
+        deactivate Server
     end
 
     %% XÓA SĐT
     rect rgb(255, 240, 245)
-        Note over Mobile, Mobile_Server: Người dùng nhấn nút xóa (icon thùng rác) cạnh SĐT
-        Mobile->>Mobile_Server: DELETE /users/me/sms-recipients/{id}
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Xóa bản ghi SĐT nhận tin theo id trong DB
-        Mobile_Server-->>Mobile: Response 204 No Content
-        deactivate Mobile_Server
+        Note over Mobile, Server: Người dùng nhấn nút xóa (icon thùng rác) cạnh SĐT
+        Mobile->>Server: DELETE /users/me/sms-recipients/{id}
+        activate Server
+        Server->>Server: Xóa bản ghi SĐT nhận tin theo id trong DB
+        Server-->>Mobile: Response 204 No Content
+        deactivate Server
     end
     Mobile->>Mobile: Cập nhật lại danh sách SĐT hiển thị trên màn hình
 ```
@@ -687,7 +687,7 @@ sequenceDiagram
 > 1. **Bước 1: Chụp ảnh & Nhận dạng Trí tuệ Nhân tạo (Tại thực địa)**
 >    - Khi phát hiện chuyển động tại vùng ranh giới rừng, Rasp_PI tự động chụp ảnh và truyền sang Ứng dụng AI (`AI_Client`). Mô hình AI thị giác máy tính sẽ "nhìn" bức ảnh để nhận biết chính xác loài động vật (như Voi, Hổ, Lợn rừng, Gấu...) kèm độ tin cậy nhận diện.
 > 2. **Bước 2: Ra quyết định Phản ứng & Xua đuổi Tức thì (Tại chỗ)**
->    - Kết quả được gửi về Máy chủ Trung tâm (`Mobile_Server`).
+>    - Kết quả được gửi về Máy chủ Trung tâm (`Server`).
 >    - **Cách trạm camera nhận đúng cấu hình phòng vệ:** Mỗi trạm camera có một mã định danh duy nhất (`cameraId`). Khi gửi phán đoán, AI Client truyền đúng `cameraId` này trên đường dẫn URL. Máy chủ xác định người quản lý trạm đó (`ownerId`) và truy vấn chính xác kịch bản phòng vệ mà người đó đã cài đặt riêng cho loài vừa xuất hiện (nếu chưa cài riêng, hệ thống lấy kịch bản khuyên dùng mặc định theo cấp độ nguy hiểm).
 >    - Máy chủ đóng gói kịch bản phòng vệ (`@DefendAction`) vào JSON trả về ngay lập tức cho kết nối của trạm camera đó, giúp Loa và Đèn LED tại đúng trạm đó phát ra âm thanh và ánh sáng xua đuổi lập tức.
 > 3. **Bước 3: Kích hoạt Cảnh báo Khẩn cấp (Push Notification)**
@@ -697,16 +697,16 @@ sequenceDiagram
 >    - Hình ảnh snapshot và nhật ký phát hiện được lưu lại trong cơ sở dữ liệu (`events`, `event_detections`, `alerts`). Ứng dụng di động cập nhật thông tin hiển thị và cảnh báo tức thì cho kiểm lâm và người dân.
 
 - **Mô tả kỹ thuật backend:**
-  - `Mobile_Server` nhận payload từ `AI_Client` tại `POST /cameras/{cameraId}/detections`.
+  - `Server` nhận payload từ `AI_Client` tại `POST /cameras/{cameraId}/detections`.
   - Giải mã `PUSH_SERVICE_ACCOUNT_KEY_JSON` (Base64) trong RAM để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
-  - `Mobile_Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
+  - `Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant Rasp_PI as Rasp_PI
     participant AI_Client as AI_Client
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
     participant FCM as FCM (Push Notification)
     participant Mobile as Mobile
 
@@ -715,28 +715,28 @@ sequenceDiagram
     activate AI_Client
     AI_Client->>AI_Client: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
 
-    AI_Client->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
-    Mobile_Server->>Mobile_Server: Ghi nhận sự kiện phát hiện động vật vào DB (events & event_detections)
-    Mobile_Server->>Mobile_Server: Truy vấn cấu hình phòng vệ từ DB (response_configs: "@DefendAction")
+    AI_Client->>Server: POST /cameras/{cameraId}/detections (image, detections)
+    activate Server
+    Server->>Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
+    Server->>Server: Ghi nhận sự kiện phát hiện động vật vào DB (events & event_detections)
+    Server->>Server: Truy vấn cấu hình phòng vệ từ DB (response_configs: "@DefendAction")
 
-    Note over Mobile_Server: Kiểm tra cooldown 30s: Có Event nào từ cameraId này trong 30s vừa qua không?
+    Note over Server: Kiểm tra cooldown 30s: Có Event nào từ cameraId này trong 30s vừa qua không?
     alt isNewEvent = true (Lần đầu / Đã quá 30s)
-        Mobile_Server->>Mobile_Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
-        Mobile_Server->>Mobile_Server: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
-        Mobile_Server->>Mobile_Server: Truy vấn danh sách fcm-push-token từ DB (device_tokens)
-        Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
+        Server->>Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
+        Server->>Server: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
+        Server->>Server: Truy vấn danh sách fcm-push-token từ DB (device_tokens)
+        Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
         FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
     else isNewEvent = false (Phát hiện liên tiếp ≤ 30s)
-        Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để ứng dụng tự động cập nhật.
+        Note over Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để ứng dụng tự động cập nhật.
     end
-    Mobile_Server-->>Mobile: Cập nhật dữ liệu camera mới nhất cho điện thoại
+    Server-->>Mobile: Cập nhật dữ liệu camera mới nhất cho điện thoại
 
-    Mobile_Server->>Mobile_Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
+    Server->>Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
 
-    Mobile_Server-->>AI_Client: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
-    deactivate Mobile_Server
+    Server-->>AI_Client: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
+    deactivate Server
 
     AI_Client->>Rasp_PI: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
     deactivate AI_Client
@@ -759,18 +759,18 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Client_Test as External Client (cURL / Test Script)
-    participant Mobile_Server as Mobile_Server
+    participant Server as Server
     participant Cloudinary as Cloudinary / Cloud Storage
 
-    Note over Client_Test, Mobile_Server: Gửi tệp ảnh snapshot qua công cụ kiểm thử / cURL
-    Client_Test->>Mobile_Server: POST /cameras/{cameraId}/image-upload (form-data: image, userId)
-    activate Mobile_Server
-    Mobile_Server->>Mobile_Server: Validation định dạng (JPG/PNG, size ≤ 5MB) & kiểm tra cameraId, userId
-    Mobile_Server->>Cloudinary: Upload tệp ảnh snapshot thực địa
-    Cloudinary-->>Mobile_Server: Trả về URL ảnh (secureUrl)
-    Mobile_Server->>Mobile_Server: Lưu bản ghi snapshot mới vào DB (cameraId, userId, url, uploadedAt)
-    Mobile_Server-->>Client_Test: Response 201 Created (id, url, deviceId, userId, uploadedAt)
-    deactivate Mobile_Server
+    Note over Client_Test, Server: Gửi tệp ảnh snapshot qua công cụ kiểm thử / cURL
+    Client_Test->>Server: POST /cameras/{cameraId}/image-upload (form-data: image, userId)
+    activate Server
+    Server->>Server: Validation định dạng (JPG/PNG, size ≤ 5MB) & kiểm tra cameraId, userId
+    Server->>Cloudinary: Upload tệp ảnh snapshot thực địa
+    Cloudinary-->>Server: Trả về URL ảnh (secureUrl)
+    Server->>Server: Lưu bản ghi snapshot mới vào DB (cameraId, userId, url, uploadedAt)
+    Server-->>Client_Test: Response 201 Created (id, url, deviceId, userId, uploadedAt)
+    deactivate Server
 ```
 
 - **Chi tiết đặc tả API:**
@@ -800,7 +800,7 @@ sequenceDiagram
 2. **Độ phức tạp trong Quản lý Kênh Tin nhắn (Channel Management Overhead):**  
    Hệ thống phải duy trì các cặp kênh Ably (`user:control:{userId}`, `user:ack:{userId}`) và cơ chế bất đồng bộ Await ACK giữa Vercel Serverless Function và AI Client, làm tăng độ phức tạp trong luồng code xử lý lỗi timeout.
 3. **Giới hạn kết nối của Hạ tầng Serverless (Vercel):**  
-   Do `Mobile_Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.
+   Do `Server` chạy trên Vercel dưới dạng Serverless Functions (stateless), máy chủ không thể tự duy trì các kết nối WebSocket 24/7 trực tiếp tới thiết bị thực địa mà phải ủy thác cho Cloud Broker.
 
 ---
 
