@@ -232,11 +232,9 @@ sequenceDiagram
 - **Chi tiết đặc tả API:**
   - [GET /cameras](./03-mobile_api.md#51-get-cameras)
 
-### 3.1.2. Action: Auto-Polling (Smart Polling) cập nhật danh sách camera
+### 3.1.2. Action: Cập nhật tự động danh sách camera
 
-- **Mô tả:** Song song với việc tải danh sách lần đầu, ứng dụng khởi động một vòng lặp coroutine (Smart Polling) chạy ngầm. Sau mỗi **5 giây**, vòng lặp tự động gọi nhẹ `GET /cameras/heartbeat` để kiểm tra `lastUpdatedAt` trong toàn hệ thống. Nếu `lastUpdatedAt` lớn hơn thời điểm cập nhật gần nhất của client, ứng dụng mới gọi `GET /cameras` để lấy toàn bộ dữ liệu danh sách camera và ảnh snapshot mới nhất.
-
-> **Cơ chế Smart Polling tối ưu:** Giúp giảm thiểu tối đa băng thông và tải serverless của Vercel mà vẫn đảm bảo cập nhật trạng thái báo động thời gian thực.
+- **Mô tả:** Khi người dùng mở màn hình danh sách camera, ứng dụng thực hiện kiểm tra định kỳ trạng thái dữ liệu mới qua API `GET /cameras/heartbeat`. Nếu hệ thống có dữ liệu cập nhật mới, ứng dụng tự động gọi `GET /cameras` để tải danh sách camera mới nhất và cập nhật giao diện.
 
 ```mermaid
 sequenceDiagram
@@ -244,16 +242,16 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Mobile_Server as Mobile_Server
 
-    Note over Mobile, Mobile_Server: Người dùng ở màn hình Camera (Danh sách / Chi tiết) ở chế độ Foreground
-    loop Mỗi 5 giây (Smart Polling)
-        Mobile->>Mobile_Server: GET /cameras/heartbeat (Authorization: Bearer token)
-        Mobile_Server-->>Mobile: { lastUpdatedAt: "T" }
-        alt T > lastKnownUpdatedAt (Có sự kiện mới hoặc thay đổi)
-            Mobile->>Mobile_Server: GET /cameras (Authorization: Bearer token)
-            Mobile_Server-->>Mobile: Danh sách camera mới nhất (thumbnail, status, currentDetection)
-            Mobile->>Mobile: Cập nhật UI, làm mới ảnh snapshot và cập nhật lastKnownUpdatedAt = T
-        else T <= lastKnownUpdatedAt (Không có thay đổi)
-            Note over Mobile: Không gọi GET /cameras, giữ nguyên trạng thái UI hiện tại
+    Note over Mobile, Mobile_Server: Người dùng đang mở màn hình Camera (Danh sách / Chi tiết)
+    loop Định kỳ kiểm tra (Mỗi 5 giây)
+        Mobile->>Mobile_Server: GET /cameras/heartbeat
+        Mobile_Server-->>Mobile: Trả về lastUpdatedAt (Thời điểm cập nhật mới nhất)
+        alt Có dữ liệu cập nhật mới
+            Mobile->>Mobile_Server: GET /cameras
+            Mobile_Server-->>Mobile: Trả về danh sách camera mới nhất (thumbnail, status, currentDetection)
+            Mobile->>Mobile: Cập nhật giao diện và ảnh snapshot mới nhất
+        else Không có thay đổi
+            Note over Mobile: Giữ nguyên giao diện hiện tại
         end
     end
 ```
@@ -747,9 +745,9 @@ sequenceDiagram
         Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
         FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
     else isNewEvent = false (Phát hiện liên tiếp ≤ 30s)
-        Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để polling cập nhật ảnh.
+        Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để ứng dụng tự động cập nhật.
     end
-    Mobile_Server-->>Mobile: Đẩy camera-update qua cơ chế polling (Snapshot mới nhất)
+    Mobile_Server-->>Mobile: Cập nhật dữ liệu camera mới nhất cho điện thoại
 
     Mobile_Server->>Mobile_Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
 
