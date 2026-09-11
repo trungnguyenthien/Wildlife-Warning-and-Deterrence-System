@@ -85,7 +85,7 @@ sequenceDiagram
     activate VM
     VM->>VM: viewModelScope.launch { } (Dispatcher.Main)
     par Nạp danh mục âm thanh & loài & cấu hình
-        VM->>API: suspend getAudioSamples() / getAlertSounds() / getSpecies() / getConfigs()
+        VM->>API: suspend getAudioSamples() / getSpecies() / getConfigs()
         Note right of API: I/O mạng chạy trên OkHttp thread, không block Main
         API-->>VM: Response JSON
     end
@@ -462,7 +462,7 @@ sequenceDiagram
 
 ### 6.1. Action: Load species configuration & sample lists
 
-- **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi `animalDeterrentSounds` và âm thanh cảnh báo qua loa `citizenAlertSounds` — nguồn là `GET /alertSounds`) để phục vụ dropdown lựa chọn của người dùng. Các id âm thanh hoàn toàn lấy từ API, không hardcode trong app.
+- **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi `animalDeterrentSounds` và âm thanh cảnh báo qua loa `citizenAlertSounds` lấy qua `GET /audio-samples`) để phục vụ dropdown lựa chọn của người dùng. Các id âm thanh hoàn toàn lấy từ API, không hardcode trong app.
 
 ```mermaid
 sequenceDiagram
@@ -491,7 +491,7 @@ sequenceDiagram
         Mobile_Server-->>Mobile: Response 200 OK (items)
         deactivate Mobile_Server
     end
-    Note right of Mobile: citizenAlertSounds lấy từ GET /alertSounds (nguồn hard-config/alert-sound.yaml), app không hardcode id
+    Note right of Mobile: citizenAlertSounds nạp từ GET /audio-samples (nguồn hard-config/alert-sound.yaml), app không hardcode id
     Mobile->>Mobile: Đổ dữ liệu lên các dropdown chọn preset, âm thanh và mẫu phát loa
 ```
 
@@ -499,11 +499,10 @@ sequenceDiagram
   - [GET /response-configs?speciesId=](./03-mobile_api.md#83-get-response-configsspeciesid)
   - [GET /control/presets](./03-mobile_api.md#71-get-controlpresets)
   - [GET /audio-samples](./03-mobile_api.md#72-get-audio-samples)
-  - [GET /alertSounds](./03-mobile_api.md#73-get-alertsounds) — nguồn của `citizenAlertSounds` (public, không cần token)
 
-### 6.2. Action: Update species configuration & apply preset
+### 6.2. Action: Update species configuration
 
-- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) cho một loài động vật cụ thể và nhấn Lưu cấu hình (`PUT`), Đặt lại về mặc định (`DELETE`), hoặc chọn Áp dụng nhanh theo mức độ nguy hiểm (`POST .../apply-preset/{presetId}`).
+- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) hoặc chọn Preset phòng vệ mẫu (áp dụng local trên ViewModel), sau đó nhấn **Lưu cấu hình** để gửi yêu cầu cập nhật (`PUT /response-configs/{speciesId}`) lên máy chủ.
 
 ```mermaid
 sequenceDiagram
@@ -511,32 +510,17 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Mobile_Server as Mobile_Server
 
-    alt Người dùng tùy chỉnh thông số và nhấn nút Lưu
-        Mobile->>Mobile_Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Lưu/Cập nhật cấu hình phòng vệ vào DB
-        Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
-        deactivate Mobile_Server
-    else Người dùng nhấn Đặt lại về mặc định
-        Mobile->>Mobile_Server: DELETE /response-configs/{speciesId}
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Xóa cấu hình tùy chỉnh của loài trong DB (khôi phục preset)
-        Mobile_Server-->>Mobile: Response 200 OK
-        deactivate Mobile_Server
-    else Người dùng chọn Áp dụng preset nhanh theo mức độ nguy hiểm
-        Mobile->>Mobile_Server: POST /response-configs/{speciesId}/apply-preset/{presetId}
-        activate Mobile_Server
-        Mobile_Server->>Mobile_Server: Áp dụng preset phòng vệ chuẩn vào DB
-        Mobile_Server-->>Mobile: Response 200 OK (cấu hình từ preset)
-        deactivate Mobile_Server
-    end
+    Note over Mobile, Mobile_Server: Người dùng tùy chỉnh thông số (hoặc chọn Preset) và bấm Lưu
+    Mobile->>Mobile_Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
+    activate Mobile_Server
+    Mobile_Server->>Mobile_Server: Lưu/Cập nhật cấu hình phòng vệ vào DB
+    Mobile_Server-->>Mobile: Response 200 OK (cấu hình mới)
+    deactivate Mobile_Server
     Mobile->>Mobile: Hiển thị thông báo thành công & cập nhật giao diện
 ```
 
 - **Chi tiết đặc tả API:**
   - [PUT /response-configs/{speciesId}](./03-mobile_api.md#82-put-response-configsspeciesid)
-  - [DELETE /response-configs/{speciesId}](./03-mobile_api.md#84-delete-response-configsspeciesid)
-  - [POST /response-configs/{speciesId}/apply-preset/{presetId}](./03-mobile_api.md#85-post-response-configsspeciesidapply-presetpresetid)
 
 ### 6.3. Action: Test speaker sound at camera station (AI_CLIENT)
 
