@@ -75,6 +75,36 @@ Phần này mô tả **mô hình xử lý/threading bên trong** ứng dụng An
 ### 0.3. Luồng xử lý điển hình (Ví dụ: Màn hình Cấu hình phòng vệ theo loài)
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant UI as Compose UI (Screen)
@@ -106,6 +136,36 @@ _(Không có action load dữ liệu ban đầu)_
 - **Mô tả:** Người dùng nhập các thông tin đăng ký (tên đăng nhập, họ tên, số điện thoại, mật khẩu, vai trò, và email tùy chọn) để tạo tài khoản mới trong hệ thống.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -115,7 +175,7 @@ sequenceDiagram
     Mobile->>Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
     activate Server
 
-    rect rgb(240, 240, 240)
+    rect rgb(238, 242, 255)
         Note over Server: Kiểm tra dữ liệu đầu vào
         alt Gửi kèm id hoặc userId từ Client
             Server-->>Mobile: Response 400 Bad Request (id_not_allowed_from_client)
@@ -172,6 +232,36 @@ _(Không có action load dữ liệu ban đầu)_
 - **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy fcm-push-token từ FCM và tự động gửi lên server để liên kết thiết bị.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -215,6 +305,36 @@ sequenceDiagram
 - **Mô tả:** Khi mở tab hoặc vào màn hình chính, app tự động gọi API lấy danh sách các trạm camera trực thuộc quyền quản lý kèm theo trạng thái hoạt động và ảnh snapshot thumbnail gần nhất để hiển thị.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -237,6 +357,36 @@ sequenceDiagram
 - **Mô tả:** Khi người dùng mở màn hình danh sách camera, ứng dụng thực hiện kiểm tra định kỳ trạng thái dữ liệu mới qua API `GET /cameras/heartbeat`. Nếu hệ thống có dữ liệu cập nhật mới, ứng dụng tự động gọi `GET /cameras` để tải danh sách camera mới nhất và cập nhật giao diện.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -267,6 +417,36 @@ sequenceDiagram
 - **Mô tả:** Khi mở tab Thống kê, app thực hiện tải danh sách loài và trạm camera để đổ vào các dropdown bộ lọc. Khi người dùng thay đổi bộ lọc (Thời gian, Loài, Camera), app gọi lại API lấy dữ liệu thống kê tổng hợp để vẽ lại biểu đồ/heatmap.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -307,6 +487,36 @@ sequenceDiagram
 - **Mô tả:** App tải danh sách các tin cảnh báo khẩn cấp/phát hiện động vật hoang dã gần đây nhất bằng cách gọi API `GET /alerts/feed`. Khi người dùng chạm vào một tin cảnh báo để đọc chi tiết, ứng dụng tự động gửi yêu cầu `POST /alerts/feed/{alertId}/read` để đánh dấu tin đó là đã đọc.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -339,6 +549,36 @@ sequenceDiagram
 - **Mô tả:** Tải dữ liệu phân tích thống kê tổng hợp (tổng số lần xuất hiện, tọa độ di chuyển) để vẽ biểu đồ đường xu hướng và sơ đồ nhiệt (heatmap) phân bố động vật.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -363,6 +603,36 @@ sequenceDiagram
 - **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung bằng `GET /users/me`. Khi người dùng chỉnh sửa họ tên/số điện thoại, ứng dụng gửi yêu cầu `PATCH /users/me` để lưu cập nhật.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -395,6 +665,36 @@ sequenceDiagram
 - **Mô tả:** Người dùng nhấn nút Đăng xuất, app gửi yêu cầu hủy session trên server, đồng thời hủy fcm-push-token trên thiết bị để ngưng nhận thông báo và đưa người dùng trở lại màn hình đăng nhập.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -429,6 +729,36 @@ sequenceDiagram
 - **Mô tả:** Tải danh sách loài động vật và trạng thái cấu hình tương ứng khi mở màn hình quản lý cấu hình loài.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -465,6 +795,36 @@ sequenceDiagram
 - **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi `animalDeterrentSounds` và âm thanh cảnh báo qua loa `citizenAlertSounds` lấy qua `GET /audio-samples`) để phục vụ dropdown lựa chọn của người dùng. Các id âm thanh hoàn toàn lấy từ API, không hardcode trong app.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -505,6 +865,36 @@ sequenceDiagram
 - **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) hoặc chọn Preset phòng vệ mẫu (áp dụng local trên ViewModel), sau đó nhấn **Lưu cấu hình** để gửi yêu cầu cập nhật (`PUT /response-configs/{speciesId}`) lên máy chủ.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -564,6 +954,36 @@ sequenceDiagram
 > - **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -616,6 +1036,36 @@ sequenceDiagram
 - **Mô tả:** Tải danh sách tối đa 3 số điện thoại đăng ký nhận cảnh báo bổ sung khi mở màn hình quản lý SMS.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -638,6 +1088,36 @@ sequenceDiagram
 - **Mô tả:** Người dùng thực hiện thêm số điện thoại mới (qua dialog) hoặc nhấn xóa một số điện thoại khỏi danh sách nhận cảnh báo. Mỗi tài khoản người dùng được thêm tối đa 3 số điện thoại nhận tin.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
@@ -702,6 +1182,36 @@ sequenceDiagram
   - `Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Rasp_PI as Rasp_PI
@@ -756,6 +1266,36 @@ sequenceDiagram
 - **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/image-upload` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
 
 ```mermaid
+%%{init: {
+  'theme': 'default',
+  'sequence': {
+    'rightAngles': true,
+    'messageAlign': 'left',
+    'messageMargin': 40,
+    'actorMargin': 80
+  },
+  'themeVariables': {
+    'primaryColor': '#EEF2FF',
+    'primaryTextColor': '#1E1B4B',
+    'primaryBorderColor': '#6366F1',
+    'lineColor': '#4F46E5',
+    'secondaryColor': '#F0FDFA',
+    'actorBkg': '#EEF2FF',
+    'actorBorder': '#4F46E5',
+    'actorTextColor': '#1E1B4B',
+    'signalColor': '#4F46E5',
+    'signalTextColor': '#1E1B4B',
+    'labelBoxBkgColor': '#F8FAFC',
+    'labelBoxBorderColor': '#818CF8',
+    'labelTextColor': '#0F172A',
+    'loopTextColor': '#4F46E5',
+    'noteBkgColor': '#FEF3C7',
+    'noteTextColor': '#78350F',
+    'noteBorderColor': '#F59E0B',
+    'activationBkgColor': '#C7D2FE',
+    'sequenceNumberColor': '#FFFFFF'
+  }
+}}%%
 sequenceDiagram
     autonumber
     participant Client_Test as External Client (cURL / Test Script)
