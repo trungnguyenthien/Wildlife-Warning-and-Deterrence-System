@@ -136,8 +136,8 @@ class LoginViewModelTest {
 
         viewModel.resetState()
 
-        assertEquals("", viewModel.uiState.value.usernameText)
-        assertEquals("", viewModel.uiState.value.passwordText)
+        assertEquals("ranger_demo", viewModel.uiState.value.usernameText)
+        assertEquals("DemoPassword123!", viewModel.uiState.value.passwordText)
         assertFalse(viewModel.uiState.value.loginSuccess)
     }
 }

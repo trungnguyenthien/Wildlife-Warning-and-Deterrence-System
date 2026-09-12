@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class LoginUiState(
-    val usernameText: String = "",
+    val usernameText: String = "ranger_demo",
     val usernameError: String? = null,
-    val passwordText: String = "",
+    val passwordText: String = "DemoPassword123!",
     val passwordError: String? = null,
     val isLoading: Boolean = false,
     val loginError: String? = null,
