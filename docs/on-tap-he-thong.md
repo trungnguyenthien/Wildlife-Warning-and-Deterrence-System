@@ -20,19 +20,19 @@
 
 ## 📖 BẢNG GIẢI THÍCH KHÁI NIỆM & THUẬT NGỮ CỐT LÕI
 
-| Thuật ngữ / Khái niệm                                             | Giải thích ngắn gọn dễ hiểu                                                                                                                                   | Vai trò & Giá trị trong Hệ thống                                                                                                                                                                                                                       |
-| :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔑 **FCM Push Token**                                             | Nó là token do Google Firebase cấp. Dùng để định danh một **Ứng dụng di động (App) cài trên một Thiết bị (Device)** cụ thể. Thời hạn sử dụng dài hạn (đến khi gỡ app/xóa bộ nhớ). | Chức năng: Đóng vai trò như _"Địa chỉ hòm thư nhận tin độc nhất"_, giúp máy chủ Backend phát thông báo đẩy khẩn cấp (Push Notification) đến đúng thiết bị di động.                                                                                    |
+| Thuật ngữ / Khái niệm                                             | Giải thích ngắn gọn dễ hiểu                                                                                                                                                                                                   | Vai trò & Giá trị trong Hệ thống                                                                                                                                                                                                                       |
+| :---------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔑 **FCM Push Token**                                             | Nó là token do Google Firebase cấp. Dùng để định danh một **Ứng dụng di động (App) cài trên một Thiết bị (Device)** cụ thể. Thời hạn sử dụng dài hạn (đến khi gỡ app/xóa bộ nhớ).                                             | Chức năng: Đóng vai trò như _"Địa chỉ hòm thư nhận tin độc nhất"_, giúp máy chủ Backend phát thông báo đẩy khẩn cấp (Push Notification) đến đúng thiết bị di động.                                                                                     |
 | 🛡️ **Access Token**                                               | Nó là token chìa khóa thông hành điện tử (mã hóa JWT) do Backend cấp khi đăng nhập. Dùng để định danh **Người dùng (`userId`), Thiết bị (`deviceId`) và Ứng dụng (`appId`)**. Thời hạn sử dụng ngắn hạn (vài giờ đến 1 ngày). | Chức năng: Đính kèm vào HTTP Header (`Authorization: Bearer <token>`) ở mọi API để xác thực quyền truy cập dữ liệu an toàn mà không cần gửi lại mật khẩu.                                                                                              |
-| 🔄 **Refresh Token**                                              | Nó là token gia hạn phiên làm việc do Backend cấp song song với Access Token. Dùng để định danh **Phiên làm việc hợp lệ (User Session)** của tài khoản trên thiết bị. Thời hạn sử dụng dài hạn (vài tuần đến vài tháng). | Chức năng: Dùng để xin Máy chủ Backend cấp lại một `Access Token` mới một cách tự động khi `Access Token` cũ hết hạn, giúp duy trì trạng thái đăng nhập liền mạch cho người dùng.                                                                     |
-| 💓 **Heartbeat (Heartbeat Check)**                                | Cơ chế _"Bắt mạch"_ kiểm tra định kỳ (mỗi 5 giây) bằng gói tin siêu nhẹ.                                                                                      | Máy chủ trả về mốc thời gian cập nhật mới nhất (`lastUpdatedAt`), Mobile Client tự so sánh với mốc thời gian lưu cục bộ để quyết định có gọi lại API `GET /cameras` tải dữ liệu mới hay không $\rightarrow$ tiết kiệm pin và giảm 90% tải cho máy chủ. |
-| ⏱️ **Cooldown (Thời gian chờ 30s)**                               | Cơ chế lọc thời gian thông minh giữa 2 lần phát cảnh báo liên tiếp tại cùng 1 trạm.                                                                           | Khi động vật đứng yên trước camera nhiều phút, ảnh snapshot vẫn được lưu liên tục nhưng thông báo đẩy khẩn cấp chỉ gửi **1 lần mỗi 30 giây** $\rightarrow$ chống spam thông báo cho kiểm lâm.                                                          |
-| 🔒 **Băm Mật Khẩu (Password Hashing / Bcrypt)**                   | Hàm toán học một chiều biến đổi mật khẩu thành một chuỗi mã băm cố định độc nhất (_nguyên lý "Trộn màu sơn một chiều"_).                                      | Máy chủ tuyệt đối không lưu mật khẩu thô trong DB. Kẻ xấu dù đánh cắp được mã băm trong DB cũng không thể giải mã ngược lại mật khẩu gốc.                                                                                                              |
-| 🌐 **WebSocket & Ably Broker**                                    | Đường truyền dữ liệu 2 chiều liên tục (như kết nối điện thoại trực tiếp) qua kênh đám mây Ably.                                                               | Giúp Máy chủ Cloud (Vercel Serverless) có thể bắn lệnh điều khiển trực tiếp xuống thiết bị thực địa (Loa/LED) tại rừng chỉ trong vài mili-giây mà không bị ngắt kết nối.                                                                               |
-| 🌐 **HTTP Method (Phương thức HTTP)**                             | Các _"Động từ hành động"_ (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) trong giao thức truyền tải Web API.                                                       | Định nghĩa rõ mục đích thao tác của Client đối với tài nguyên dữ liệu trên Máy chủ (Ví dụ: `GET` để Đọc, `POST` để Tạo mới/Gửi lệnh, `PUT`/`PATCH` để Cập nhật, `DELETE` để Xóa).                                                                      |
-| 📑 **HTTP Header (Tiêu đề HTTP)**                                 | Các cặp thông tin ngữ cảnh (`Key: Value`) được đính kèm ở phần đầu gói tin trao đổi giữa Client và Server.                                                    | Truyền tải thông tin phụ quan trọng như chìa khóa xác thực (`Authorization: Bearer <token>`), định dạng dữ liệu gửi lên/nhận về (`Content-Type: application/json`), thông tin thiết bị (`User-Agent`).                                                 |
-| 🚥 **HTTP Status Code (Mã trạng thái HTTP)**                      | Mã số 3 chữ số do Máy chủ trả về cho Client để báo cáo kết quả xử lý yêu cầu.                                                                                 | Giúp App di động nhận biết trạng thái kết quả: `200 OK` (Thành công), `201 Created` (Tạo mới thành công), `400 Bad Request` (Dữ liệu lỗi), `401 Unauthorized` (Sai MK / Chưa đăng nhập), `504 Gateway Timeout` (Quá giờ chờ kết nối trạm).             |
-| 🔑 **Push Service Account Key (`PUSH_SERVICE_ACCOUNT_KEY_JSON`)** | Chứng chỉ dịch vụ riêng tư (`serviceAccountKey.json`) do Google Firebase phát cho Máy chủ Backend.                                                            | Cho phép Backend Server xác thực với Google Firebase API để gửi Push Notification. Để bảo mật và phù hợp Serverless, file JSON được mã hóa sang **Base64**, lưu trong biến môi trường và giải mã trực tiếp trong RAM khi dùng (không lưu file ra đĩa). |
+| 🔄 **Refresh Token**                                              | Nó là token gia hạn phiên làm việc do Backend cấp song song với Access Token. Dùng để định danh **Phiên làm việc hợp lệ (User Session)** của tài khoản trên thiết bị. Thời hạn sử dụng dài hạn (vài tuần đến vài tháng).      | Chức năng: Dùng để xin Máy chủ Backend cấp lại một `Access Token` mới một cách tự động khi `Access Token` cũ hết hạn, giúp duy trì trạng thái đăng nhập liền mạch cho người dùng.                                                                      |
+| 💓 **Heartbeat (Heartbeat Check)**                                | Cơ chế _"Bắt mạch"_ kiểm tra định kỳ (mỗi 5 giây) bằng gói tin siêu nhẹ.                                                                                                                                                      | Máy chủ trả về mốc thời gian cập nhật mới nhất (`lastUpdatedAt`), Mobile Client tự so sánh với mốc thời gian lưu cục bộ để quyết định có gọi lại API `GET /cameras` tải dữ liệu mới hay không $\rightarrow$ tiết kiệm pin và giảm 90% tải cho máy chủ. |
+| ⏱️ **Cooldown (Thời gian chờ 30s)**                               | Cơ chế lọc thời gian thông minh giữa 2 lần phát cảnh báo liên tiếp tại cùng 1 trạm.                                                                                                                                           | Khi động vật đứng yên trước camera nhiều phút, ảnh snapshot vẫn được lưu liên tục nhưng thông báo đẩy khẩn cấp chỉ gửi **1 lần mỗi 30 giây** $\rightarrow$ chống spam thông báo cho kiểm lâm.                                                          |
+| 🔒 **Băm Mật Khẩu (Password Hashing / Bcrypt)**                   | Hàm toán học một chiều biến đổi mật khẩu thành một chuỗi mã băm cố định độc nhất (_nguyên lý "Trộn màu sơn một chiều"_).                                                                                                      | Máy chủ tuyệt đối không lưu mật khẩu thô trong DB. Kẻ xấu dù đánh cắp được mã băm trong DB cũng không thể giải mã ngược lại mật khẩu gốc.                                                                                                              |
+| 🌐 **WebSocket & Ably Broker**                                    | Đường truyền dữ liệu 2 chiều liên tục (như kết nối điện thoại trực tiếp) qua kênh đám mây Ably.                                                                                                                               | Giúp Máy chủ Cloud (Vercel Serverless) có thể bắn lệnh điều khiển trực tiếp xuống thiết bị thực địa (Loa/LED) tại rừng chỉ trong vài mili-giây mà không bị ngắt kết nối.                                                                               |
+| 🌐 **HTTP Method (Phương thức HTTP)**                             | Các _"Động từ hành động"_ (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) trong giao thức truyền tải Web API.                                                                                                                       | Định nghĩa rõ mục đích thao tác của Client đối với tài nguyên dữ liệu trên Máy chủ (Ví dụ: `GET` để Đọc, `POST` để Tạo mới/Gửi lệnh, `PUT`/`PATCH` để Cập nhật, `DELETE` để Xóa).                                                                      |
+| 📑 **HTTP Header (Tiêu đề HTTP)**                                 | Các cặp thông tin ngữ cảnh (`Key: Value`) được đính kèm ở phần đầu gói tin trao đổi giữa Client và Server.                                                                                                                    | Truyền tải thông tin phụ quan trọng như chìa khóa xác thực (`Authorization: Bearer <token>`), định dạng dữ liệu gửi lên/nhận về (`Content-Type: application/json`), thông tin thiết bị (`User-Agent`).                                                 |
+| 🚥 **HTTP Status Code (Mã trạng thái HTTP)**                      | Mã số 3 chữ số do Máy chủ trả về cho Client để báo cáo kết quả xử lý yêu cầu.                                                                                                                                                 | Giúp App di động nhận biết trạng thái kết quả: `200 OK` (Thành công), `201 Created` (Tạo mới thành công), `400 Bad Request` (Dữ liệu lỗi), `401 Unauthorized` (Sai MK / Chưa đăng nhập), `504 Gateway Timeout` (Quá giờ chờ kết nối trạm).             |
+| 🔑 **Push Service Account Key (`PUSH_SERVICE_ACCOUNT_KEY_JSON`)** | Chứng chỉ dịch vụ riêng tư (`serviceAccountKey.json`) do Google Firebase phát cho Máy chủ Backend.                                                                                                                            | Cho phép Backend Server xác thực với Google Firebase API để gửi Push Notification. Để bảo mật và phù hợp Serverless, file JSON được mã hóa sang **Base64**, lưu trong biến môi trường và giải mã trực tiếp trong RAM khi dùng (không lưu file ra đĩa). |
 
 ---
 
@@ -42,7 +42,7 @@
    - **Bản chất:** Nó là token định danh thiết bị do dịch vụ hạ tầng Google Firebase Cloud Messaging (FCM) khởi tạo và cấp cho ứng dụng di động.
    - **Định danh:** Token này dùng để định danh duy nhất một **Ứng dụng di động (App) cài đặt trên một Thiết bị di động (Device)** cụ thể.
    - **Thời hạn sử dụng:** Thời hạn sử dụng token dài hạn (tồn tại liên tục cho đến khi gỡ ứng dụng, xóa bộ nhớ app hoặc Firebase chủ động cấp lại).
-   - **Chức năng:** Chức năng của token này làm *"Địa chỉ hòm thư nhận tin độc nhất"*, giúp Máy chủ Backend gửi thông báo đẩy cảnh báo khẩn cấp (Push Notification) đến đúng thiết bị di động của người dùng.
+   - **Chức năng:** Chức năng của token này làm _"Địa chỉ hòm thư nhận tin độc nhất"_, giúp Máy chủ Backend gửi thông báo đẩy cảnh báo khẩn cấp (Push Notification) đến đúng thiết bị di động của người dùng.
 
 2. **🛡️ Access Token:**
    - **Bản chất:** Nó là token chìa khóa thông hành điện tử (chuỗi mã hóa JWT) do Máy chủ Backend tạo ra và phát cho App sau khi xác thực đăng nhập thành công.
@@ -59,6 +59,8 @@
 ---
 
 ## Action 1.1: Register a new account (`POST /auth/register`)
+
+- **Mô tả:** Người dùng nhập các thông tin đăng ký (tên đăng nhập, họ tên, số điện thoại, mật khẩu, vai trò, và email tùy chọn) để tạo tài khoản mới trong hệ thống.
 
 ```mermaid
 %%{init: {
@@ -118,6 +120,8 @@ sequenceDiagram
 ---
 
 ## Action 2.1: Login & Register fcm-push-token (`POST /auth/login` & `POST /devices/push-token`)
+
+- **Mô tả kỹ thuật:** Người dùng đăng nhập bằng tên đăng nhập và mật khẩu. Sau khi nhận accessToken từ server, Android Client lấy fcm-push-token từ FCM và tự động gửi lên server để liên kết thiết bị.
 
 ```mermaid
 %%{init: {
@@ -182,6 +186,8 @@ sequenceDiagram
 
 ## Action 3.1.1: Load camera list & initial snapshots (`GET /cameras`)
 
+- **Mô tả:** Khi mở tab hoặc vào màn hình chính, app tự động gọi API lấy danh sách các trạm camera trực thuộc quyền quản lý kèm theo trạng thái hoạt động và ảnh snapshot thumbnail gần nhất để hiển thị.
+
 ```mermaid
 %%{init: {
   'theme': 'default',
@@ -218,18 +224,20 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Server as Server
 
-    Note over Mobile, Server: Mở tab Danh sách Camera [CAMERA_LIST_TAB]
-    Mobile->>Server: GET /cameras (Header: Authorization: Bearer <token>)
+    Note over Mobile, Server: Khởi động Mobile / Vào tab Danh sách Camera
+    Mobile->>Server: GET /cameras
     activate Server
-    Server->>Server: Truy vấn danh sách camera thuộc quyền quản lý của Ranger từ DB
-    Server-->>Mobile: Response 200 OK (Danh sách camera + snapshot gần nhất)
+    Server->>Server: Lấy danh sách các trạm camera từ DB
+    Server-->>Mobile: Response 200 OK (items)
     deactivate Server
-    Mobile->>Mobile: Đổ dữ liệu trạm camera & hiển thị ảnh thumbnail snapshot lên danh sách
+    Mobile->>Mobile: Hiển thị danh sách trạm & ảnh thumbnail snapshot
 ```
 
 ---
 
-## Action 3.1.2: Auto-polling / Heartbeat (`GET /cameras/heartbeat`)
+## Action 3.1.2: Cập nhật tự động danh sách camera (`GET /cameras/heartbeat` & `GET /cameras`)
+
+- **Mô tả:** Khi người dùng mở màn hình danh sách camera, ứng dụng thực hiện kiểm tra định kỳ trạng thái dữ liệu mới qua API `GET /cameras/heartbeat`. Nếu hệ thống có dữ liệu cập nhật mới, ứng dụng tự động gọi `GET /cameras` để tải danh sách camera mới nhất và cập nhật giao diện.
 
 ```mermaid
 %%{init: {
@@ -267,26 +275,25 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Server as Server
 
-    loop Định kỳ mỗi 5 giây (Polling Loop)
+    Note over Mobile, Server: Người dùng đang mở màn hình Camera (Danh sách / Chi tiết)
+    loop Định kỳ kiểm tra (Mỗi 5 giây)
         Mobile->>Server: GET /cameras/heartbeat
-        activate Server
-        Server->>Server: Kiểm tra mốc thời gian cập nhật camera gần nhất
-        alt Có dữ liệu thay đổi mới (hasChanges = true)
-            Server-->>Mobile: Response 200 OK (hasChanges: true)
+        Server-->>Mobile: Trả về lastUpdatedAt (Thời điểm cập nhật mới nhất)
+        alt Có dữ liệu cập nhật mới
             Mobile->>Server: GET /cameras
-            Server-->>Mobile: Response 200 OK (Danh sách camera mới nhất)
-            Mobile->>Mobile: Cập nhật giao diện danh sách camera
-        else Không có thay đổi (hasChanges = false)
-            Server-->>Mobile: Response 200 OK (hasChanges: false)
+            Server-->>Mobile: Trả về danh sách camera mới nhất (thumbnail, status, currentDetection)
+            Mobile->>Mobile: Cập nhật giao diện và ảnh snapshot mới nhất
+        else Không có thay đổi
             Note over Mobile: Giữ nguyên giao diện hiện tại
         end
-        deactivate Server
     end
 ```
 
 ---
 
-## Action 3.2.3: Load analytics summary & species heatmap (`GET /analytics/summary`)
+## Action 3.2.3: Load trend chart & movement heatmap (`GET /stats/summary`)
+
+- **Mô tả:** Tải dữ liệu phân tích thống kê tổng hợp (tổng số lần xuất hiện, tọa độ di chuyển) để vẽ biểu đồ đường xu hướng và sơ đồ nhiệt (heatmap) phân bố động vật.
 
 ```mermaid
 %%{init: {
@@ -324,18 +331,20 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Server as Server
 
-    Note over Mobile, Server: Mở màn hình Thống kê chuyên sâu
-    Mobile->>Server: GET /analytics/summary?period=30d&speciesId={speciesId}&cameraId={cameraId}
+    Note over Mobile, Server: Tải dữ liệu tổng hợp phân tích theo trạm
+    Mobile->>Server: GET /stats/summary
     activate Server
-    Server->>Server: Truy vấn tổng hợp dữ liệu xuất hiện động vật theo thời gian & tọa độ từ DB
-    Server-->>Mobile: Response 200 OK (trendSeries, heatmapPoints)
+    Server->>Server: Truy vấn số lần xuất hiện, tọa độ di chuyển từ DB
+    Server-->>Mobile: Response 200 OK (summary data)
     deactivate Server
-    Mobile->>Mobile: Vẽ Biểu đồ xu hướng xuất hiện & Sơ đồ nhiệt di chuyển (Heatmap)
+    Mobile->>Mobile: Vẽ biểu đồ xu hướng (Line Chart) và sơ đồ nhiệt di chuyển (Heatmap)
 ```
 
 ---
 
-## Action 3.3.1: View & edit user profile (`GET /users/me` & `PATCH /users/me`)
+## Action 3.3.1: Load & Update user profile (`GET /users/me` & `PATCH /users/me`)
+
+- **Mô tả:** Tải thông tin tài khoản hiện tại (họ tên, vai trò, số điện thoại đăng nhập) để hiển thị lên form cài đặt chung bằng `GET /users/me`. Khi người dùng chỉnh sửa họ tên/số điện thoại, ứng dụng gửi yêu cầu `PATCH /users/me` để lưu cập nhật.
 
 ```mermaid
 %%{init: {
@@ -373,26 +382,29 @@ sequenceDiagram
     participant Mobile as Mobile
     participant Server as Server
 
-    Note over Mobile, Server: Mở tab Cá nhân [PROFILE_TAB]
+    Note over Mobile, Server: Chuyển sang tab Cài đặt
     Mobile->>Server: GET /users/me
     activate Server
-    Server->>Server: Lấy thông tin tài khoản người dùng hiện tại từ DB
-    Server-->>Mobile: Response 200 OK (fullName, role, phoneNumber, email)
+    Server->>Server: Truy vấn hồ sơ cá nhân người dùng từ DB
+    Server-->>Mobile: Response 200 OK
     deactivate Server
-    Mobile->>Mobile: Đổ thông tin người dùng lên form hiển thị
+    Mobile->>Mobile: Đổ thông tin lên giao diện cài đặt cá nhân
 
-    Note over Mobile, Server: Người dùng chỉnh sửa thông tin cá nhân và bấm "Lưu"
-    Mobile->>Server: PATCH /users/me (fullName, phoneNumber)
-    activate Server
-    Server->>Server: Cập nhật thông tin người dùng trong DB
-    Server-->>Mobile: Response 200 OK (Thông tin cập nhật)
-    deactivate Server
-    Mobile->>Mobile: Hiển thị thông báo cập nhật hồ sơ thành công
+    opt Người dùng chỉnh sửa thông tin cá nhân (Họ tên, SĐT)
+        Mobile->>Server: PATCH /users/me (fullName, phoneNumber)
+        activate Server
+        Server->>Server: Cập nhật thông tin tài khoản vào DB
+        Server-->>Mobile: Response 200 OK (hồ sơ mới)
+        deactivate Server
+        Mobile->>Mobile: Cập nhật thông tin hiển thị trên UI
+    end
 ```
 
 ---
 
 ## Action 5.1: Load species & config statuses (`GET /species` & `GET /response-configs`)
+
+- **Mô tả:** Tải danh sách loài động vật và trạng thái cấu hình tương ứng khi mở màn hình quản lý cấu hình loài.
 
 ```mermaid
 %%{init: {
@@ -451,6 +463,8 @@ sequenceDiagram
 ---
 
 ## Action 6.1: Load species configuration & sample lists (`GET /response-configs?speciesId=`, `GET /control/presets`, `GET /audio-samples`)
+
+- **Mô tả:** Khi chọn một loài để cấu hình chi tiết, app tải cấu hình phòng vệ hiện tại đang lưu trên DB, đồng thời tải danh sách 3 preset phòng vệ mẫu và danh sách âm thanh mẫu (bao gồm cả âm thanh xua đuổi `animalDeterrentSounds` và âm thanh cảnh báo qua loa `citizenAlertSounds` lấy qua `GET /audio-samples`) để phục vụ dropdown lựa chọn của người dùng. Các id âm thanh hoàn toàn lấy từ API, không hardcode trong app.
 
 ```mermaid
 %%{init: {
@@ -517,6 +531,8 @@ sequenceDiagram
 
 ## Action 6.2: Update species configuration (`PUT /response-configs/{speciesId}`)
 
+- **Mô tả:** Người dùng tùy biến các tham số (âm thanh, đèn LED nháy, còi báo động, mẫu phát loa, chế độ silent) hoặc chọn Preset phòng vệ mẫu (áp dụng local trên ViewModel), sau đó nhấn **Lưu cấu hình** để gửi yêu cầu cập nhật (`PUT /response-configs/{speciesId}`) lên máy chủ.
+
 ```mermaid
 %%{init: {
   'theme': 'default',
@@ -565,6 +581,8 @@ sequenceDiagram
 ---
 
 ## Action 6.3: Test speaker sound at camera station (`POST /cameras/{cameraId}/devices/{deviceKey}/test`)
+
+- **Mô tả:** Người dùng chọn loại âm thanh còi báo và nhấn "Nghe thử" để phát thử nghiệm trực tiếp tại hiện trường nhằm căn chỉnh âm lượng.
 
 ```mermaid
 %%{init: {
@@ -639,6 +657,11 @@ sequenceDiagram
 ---
 
 ## Action 1.1 AI: AI Client sends detection snapshot (`POST /cameras/{cameraId}/detections`)
+
+- **Mô tả kỹ thuật backend:**
+  - `Server` nhận payload từ `AI_Client` tại `POST /cameras/{cameraId}/detections`.
+  - Giải mã `PUSH_SERVICE_ACCOUNT_KEY_JSON` (Base64) trong RAM để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
+  - `Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
 %%{init: {
@@ -716,6 +739,8 @@ sequenceDiagram
 ---
 
 ## Action 1.2 AI: Manual snapshot upload via Backend API / Testing Tools (`POST /cameras/{cameraId}/image-upload`)
+
+- **Mô tả kỹ thuật backend:** Công cụ kiểm thử (cURL / Postman / Integration Test Script) gửi tệp ảnh snapshot thực địa lên trạm camera qua API `POST /cameras/{cameraId}/image-upload` (truyền multipart/form-data chứa tệp ảnh JPEG/PNG ≤ 5MB và `userId`). Máy chủ tải ảnh lên Cloud Storage/Cloudinary và lưu bản ghi vào cơ sở dữ liệu.
 
 ```mermaid
 %%{init: {
