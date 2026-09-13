@@ -37,28 +37,6 @@
 
 ---
 
-### 🔑 Cấu Trúc Định Nghĩa Thống Nhất Các Loại Token Trong Hệ Thống
-
-1. **🔑 FCM Push Token:**
-   - **Bản chất:** Nó là token định danh thiết bị do dịch vụ hạ tầng Google Firebase Cloud Messaging (FCM) khởi tạo và cấp cho ứng dụng di động.
-   - **Định danh:** Token này dùng để định danh duy nhất một **Ứng dụng di động (App) cài đặt trên một Thiết bị di động (Device)** cụ thể.
-   - **Thời hạn sử dụng:** Thời hạn sử dụng token dài hạn (tồn tại liên tục cho đến khi gỡ ứng dụng, xóa bộ nhớ app hoặc Firebase chủ động cấp lại).
-   - **Chức năng:** Chức năng của token này làm _"Địa chỉ hòm thư nhận tin độc nhất"_, giúp Máy chủ Backend gửi thông báo đẩy cảnh báo khẩn cấp (Push Notification) đến đúng thiết bị di động của người dùng.
-
-2. **🛡️ Access Token:**
-   - **Bản chất:** Nó là token chìa khóa thông hành điện tử (chuỗi mã hóa JWT) do Máy chủ Backend tạo ra và phát cho App sau khi xác thực đăng nhập thành công.
-   - **Định danh:** Token này dùng để định danh đồng thời **Tài khoản người dùng (`userId`)**, **Thiết bị (`deviceId`)** và **Ứng dụng (`appId`)** đang thực hiện các yêu cầu.
-   - **Thời hạn sử dụng:** Thời hạn sử dụng token ngắn hạn (vài giờ đến 1 ngày) nhằm tối ưu an toàn bảo mật và giảm thiểu rủi ro khi bị rò rỉ.
-   - **Chức năng:** Chức năng của token này đính kèm vào tiêu đề HTTP Header (`Authorization: Bearer <token>`) ở mọi yêu cầu API tiếp theo để máy chủ xác thực quyền truy cập dữ liệu an toàn mà không bắt người dùng gửi lại tên đăng nhập và mật khẩu.
-
-3. **🔄 Refresh Token:**
-   - **Bản chất:** Nó là token gia hạn phiên làm việc do Máy chủ Backend cấp song song với Access Token khi đăng nhập.
-   - **Định danh:** Token này dùng để định danh **Phiên làm việc hợp lệ (User Session)** của tài khoản trên thiết bị di động đã được xác thực trước đó.
-   - **Thời hạn sử dụng:** Thời hạn sử dụng token dài hạn (vài tuần đến vài tháng).
-   - **Chức năng:** Chức năng của token này dùng để xin Máy chủ Backend cấp lại một `Access Token` mới một cách hoàn toàn tự động ngay khi `Access Token` cũ hết hạn, giúp duy trì trạng thái đăng nhập liền mạch mà người dùng không phải gõ lại mật khẩu nhiều lần.
-
----
-
 ## Action 1.1: Register a new account (`POST /auth/register`)
 
 - **Mô tả:** Người dùng nhập các thông tin đăng ký (tên đăng nhập, họ tên, số điện thoại, mật khẩu, vai trò, và email tùy chọn) để tạo tài khoản mới trong hệ thống.
