@@ -1,17 +1,33 @@
 package com.wildlife.deterrence.data
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.google.gson.Gson
 
 open class TokenManager(context: Context?) {
-  private val sharedPreferences = context?.let {
+  private val sharedPreferences: SharedPreferences? = context?.let { ctx ->
+    try {
+      createEncryptedPrefs(ctx)
+    } catch (e: Exception) {
+      android.util.Log.e("TokenManager", "Failed to create EncryptedSharedPreferences, resetting...", e)
+      try {
+        ctx.deleteSharedPreferences("secure_prefs")
+        createEncryptedPrefs(ctx)
+      } catch (e2: Exception) {
+        android.util.Log.e("TokenManager", "Fallback to standard SharedPreferences", e2)
+        ctx.getSharedPreferences("secure_prefs_fallback", Context.MODE_PRIVATE)
+      }
+    }
+  }
+
+  private fun createEncryptedPrefs(context: Context): SharedPreferences {
     val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-    EncryptedSharedPreferences.create(
+    return EncryptedSharedPreferences.create(
       "secure_prefs",
       masterKeyAlias,
-      it,
+      context,
       EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
       EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )

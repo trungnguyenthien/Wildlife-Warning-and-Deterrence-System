@@ -70,7 +70,11 @@ object NotificationChannels {
             ).apply {
                 description = "Phát hiện động vật nguy cấp cần xử lý ngay"
                 enableVibration(true)
-                setBypassDnd(true)
+                try {
+                    setBypassDnd(true)
+                } catch (e: SecurityException) {
+                    android.util.Log.w("NotifChannel", "Cannot setBypassDnd: ${e.message}")
+                }
                 val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
                 val audioAttributes = AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -94,8 +98,12 @@ object NotificationChannels {
                 setSound(soundUri, audioAttributes)
             }
 
-            manager.createNotificationChannel(criticalChannel)
-            manager.createNotificationChannel(defaultChannel)
+            try {
+                manager.createNotificationChannel(criticalChannel)
+                manager.createNotificationChannel(defaultChannel)
+            } catch (e: Exception) {
+                android.util.Log.e("NotifChannel", "Error creating notification channels", e)
+            }
         }
     }
 }
