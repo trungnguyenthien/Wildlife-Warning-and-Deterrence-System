@@ -338,6 +338,11 @@ export async function processDetection(req: Request, res: Response) {
           snapshotUrl: imageUrl
         }
       });
+      // Làm sạch các nhận dạng của khung hình cũ trong phiên sự kiện này,
+      // đảm bảo event_detections luôn lưu đúng số lượng cá thể thực tế của khung hình mới nhất
+      await prisma.eventDetection.deleteMany({
+        where: { eventId }
+      });
     } else {
       // Khoảng cách trên 30 giây: Tạo mới hoàn toàn phiên sự kiện
       eventId = `evt-${Date.now()}`;
