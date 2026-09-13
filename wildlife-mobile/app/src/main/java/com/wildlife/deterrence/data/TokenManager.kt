@@ -10,13 +10,15 @@ open class TokenManager(context: Context?) {
   private val sharedPreferences: SharedPreferences? = context?.let { ctx ->
     try {
       createEncryptedPrefs(ctx)
-    } catch (e: Exception) {
-      android.util.Log.e("TokenManager", "Failed to create EncryptedSharedPreferences, resetting...", e)
+    } catch (t: Throwable) {
+      android.util.Log.e("TokenManager", "EncryptedSharedPreferences failed, wiping Tink keysets...", t)
       try {
         ctx.deleteSharedPreferences("secure_prefs")
+        ctx.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_key_keyset__")
+        ctx.deleteSharedPreferences("__androidx_security_crypto_encrypted_prefs_value_keyset__")
         createEncryptedPrefs(ctx)
-      } catch (e2: Exception) {
-        android.util.Log.e("TokenManager", "Fallback to standard SharedPreferences", e2)
+      } catch (t2: Throwable) {
+        android.util.Log.e("TokenManager", "Fallback to standard SharedPreferences", t2)
         ctx.getSharedPreferences("secure_prefs_fallback", Context.MODE_PRIVATE)
       }
     }
