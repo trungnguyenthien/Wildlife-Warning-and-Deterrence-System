@@ -396,10 +396,10 @@ sequenceDiagram
     loop Định kỳ kiểm tra (Mỗi 5 giây)
         Mobile->>Server: GET /cameras/heartbeat
         Server-->>Mobile: Trả về lastUpdatedAt (Thời điểm cập nhật mới nhất)
-        alt Có dữ liệu cập nhật mới
+        alt Có dữ liệu cập nhật mới (lastUpdatedAt > lastKnownUpdatedAt)
             Mobile->>Server: GET /cameras
             Server-->>Mobile: Trả về danh sách camera mới nhất (thumbnail, status, currentDetection)
-            Mobile->>Mobile: Cập nhật giao diện và ảnh snapshot mới nhất
+            Mobile->>Mobile: Cập nhật giao diện & gán lastKnownUpdatedAt = lastUpdatedAt
         else Không có thay đổi
             Note over Mobile: Giữ nguyên giao diện hiện tại
         end
