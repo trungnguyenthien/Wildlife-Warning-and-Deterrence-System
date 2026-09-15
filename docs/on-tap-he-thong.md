@@ -34,7 +34,6 @@
 | 📑 **HTTP Header (Tiêu đề HTTP)**                                 | Các cặp thông tin ngữ cảnh (`Key: Value`) được đính kèm ở phần đầu gói tin trao đổi giữa Client và Server.                                                                                                                                                                                 | Truyền tải thông tin phụ quan trọng như chìa khóa xác thực (`Authorization: Bearer <token>`), định dạng dữ liệu gửi lên/nhận về (`Content-Type: application/json`), thông tin thiết bị (`User-Agent`).                                                                    |
 | 🚥 **HTTP Status Code (Mã trạng thái HTTP)**                      | Mã số 3 chữ số do Máy chủ trả về cho Client để báo cáo kết quả xử lý yêu cầu.                                                                                                                                                                                                              | Giúp App di động nhận biết trạng thái kết quả: `200 OK` (Thành công), `201 Created` (Tạo mới thành công), `400 Bad Request` (Dữ liệu lỗi), `401 Unauthorized` (Sai MK / Chưa đăng nhập), `504 Gateway Timeout` (Quá giờ chờ kết nối trạm).                                |
 | 🔑 **Push Service Account Key (`PUSH_SERVICE_ACCOUNT_KEY_JSON`)** | Chứng chỉ dịch vụ riêng tư (`serviceAccountKey.json`) do Google Firebase phát cho Máy chủ Backend.                                                                                                                                                                                         | Cho phép Backend Server xác thực với Google Firebase API để gửi Push Notification. Để bảo mật và phù hợp Serverless, file JSON được mã hóa sang **Base64**, lưu trong biến môi trường và giải mã trực tiếp trong RAM khi dùng (không lưu file ra đĩa).                    |
-| 🗺️ **Heatmap (Sơ đồ nhiệt di chuyển)**                            | Công cụ trực quan hóa mật độ xuất hiện và tần suất di chuyển của động vật hoang dã / đối tượng xâm nhập theo không gian địa lý trên bản đồ dựa trên tọa độ GPS từ các trạm camera. Tông màu nóng (Đỏ/Cam) thể hiện khu vực mật độ cao, tông màu lạnh (Xanh) thể hiện khu vực ít xuất hiện. | Giúp Kiểm lâm nhận diện chính xác các **hành lang di chuyển tự nhiên** của thú rừng, từ đó chủ động bố trí lực lượng tuần tra trọng điểm và điều chỉnh vị trí các trạm cảnh báo/xua đuổi phù hợp.                                                                         |
 
 ---
 
@@ -275,12 +274,9 @@ sequenceDiagram
 
 - **Mô tả:** Tải dữ liệu phân tích thống kê tổng hợp (tổng số lần xuất hiện, tọa độ di chuyển) để vẽ biểu đồ đường xu hướng và sơ đồ nhiệt (heatmap) phân bố động vật.
 
-> [!NOTE] Diễn giải Luồng vận hành & Khái niệm Heatmap (Dành cho Giám khảo / Người đọc tổng quan)
+> [!NOTE] Diễn giải Luồng vận hành (Dành cho Giám khảo / Người đọc tổng quan)
 >
-> - **Khái niệm Sơ đồ nhiệt (Heatmap):** Là công cụ trực quan hóa mật độ xuất hiện và tần suất di chuyển của động vật hoang dã / đối tượng xâm nhập theo không gian địa lý trên bản đồ khu vực bảo tồn dựa trên dữ liệu tọa độ GPS từ các trạm camera.
->   - **Tông màu nóng (Đỏ / Cam):** Thể hiện các "điểm nóng" có mật độ xuất hiện dày đặc, động vật tập trung nhiều hoặc di chuyển qua liên tục.
->   - **Tông màu lạnh (Xanh lá / Xanh dương):** Thể hiện khu vực ít hoặc hiếm khi ghi nhận sự xuất hiện của đối tượng.
-> - **Giá trị thực tiễn:** Giúp lực lượng Kiểm lâm nhận diện chính xác các **hành lang di chuyển tự nhiên** của thú rừng, từ đó chủ động bố trí lực lượng tuần tra trọng điểm và điều chỉnh vị trí các trạm cảnh báo/xua đuổi phù hợp.
+> - **Luồng vận hành & Giá trị thực tiễn:** Tải dữ liệu mật độ xuất hiện và tọa độ di chuyển giúp lực lượng Kiểm lâm nhận diện chính xác các **hành lang di chuyển tự nhiên** của thú rừng trên bản đồ khu vực bảo tồn, từ đó chủ động bố trí lực lượng tuần tra trọng điểm và điều chỉnh vị trí các trạm cảnh báo/xua đuổi phù hợp.
 
 ```mermaid
 %%{init: {
