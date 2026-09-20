@@ -138,7 +138,7 @@ fun MainScreen(
                 tonalElevation = 8.dp
             ) {
                 val items = listOf(
-                    Triple("Camera", Icons.Default.Videocam, 0),
+                    Triple("Trạm Camera", Icons.Default.Videocam, 0),
                     Triple("Thống kê", Icons.Default.BarChart, 1),
                     Triple("Cài đặt", Icons.Default.Settings, 2)
                 )

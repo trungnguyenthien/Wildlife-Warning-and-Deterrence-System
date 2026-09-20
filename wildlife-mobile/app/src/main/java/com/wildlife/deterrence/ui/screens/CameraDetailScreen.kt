@@ -468,12 +468,12 @@ fun LiveSnapshotContainer(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "CAM ID: ${snapshot.camId}",
+                text = "MÃ CAM: ${snapshot.camId}",
                 color = Color.White,
                 fontSize = 9.sp
             )
             Text(
-                text = "MOTION: ${if (snapshot.motionDetected) "ACTIVE" else "IDLE"}",
+                text = "CHUYỂN ĐỘNG: ${if (snapshot.motionDetected) "PHÁT HIỆN" else "BÌNH THƯỜNG"}",
                 color = if (snapshot.motionDetected) Color.Green else Color.Gray,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold
@@ -484,12 +484,12 @@ fun LiveSnapshotContainer(
                 fontSize = 9.sp
             )
             Text(
-                text = "SD: ${snapshot.sdCardSpace}",
+                text = "THẺ NHỚ: ${snapshot.sdCardSpace}",
                 color = Color.White,
                 fontSize = 9.sp
             )
             Text(
-                text = "ZOOM: ${snapshot.zoomText}",
+                text = "THU PHÓNG: ${snapshot.zoomText}",
                 color = Color.White,
                 fontSize = 9.sp
             )

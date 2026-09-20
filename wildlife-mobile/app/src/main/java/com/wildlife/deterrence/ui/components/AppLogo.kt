@@ -49,15 +49,19 @@ fun AppLogo(modifier: Modifier = Modifier) {
     }
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-      text = "Wildlife Warning",
-      fontSize = 24.sp,
+      text = "HỆ THỐNG NHẬN DIỆN",
+      fontSize = 20.sp,
       fontWeight = FontWeight.Bold,
-      color = MaterialTheme.colorScheme.onBackground
+      color = MaterialTheme.colorScheme.onBackground,
+      textAlign = androidx.compose.ui.text.style.TextAlign.Center
     )
+    Spacer(modifier = Modifier.height(4.dp))
     Text(
-      text = "Deterrence System",
-      fontSize = 14.sp,
-      color = MaterialTheme.colorScheme.secondary
+      text = "ĐỘNG VẬT HOANG DÃ VÀ CON NGƯỜI",
+      fontSize = 12.sp,
+      fontWeight = FontWeight.Medium,
+      color = MaterialTheme.colorScheme.secondary,
+      textAlign = androidx.compose.ui.text.style.TextAlign.Center
     )
   }
 }

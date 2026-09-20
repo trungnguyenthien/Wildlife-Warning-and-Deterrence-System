@@ -48,12 +48,12 @@ fun CameraStatusBadge(
     }
 
     val labelText = if (isOnline) {
-        "Online"
+        "Trực tuyến"
     } else {
         if (offlineDurationSeconds >= 30) {
-            "Offline (${offlineDurationSeconds}s)"
+            "Ngoại tuyến (${offlineDurationSeconds}s)"
         } else {
-            "Offline"
+            "Ngoại tuyến"
         }
     }
 

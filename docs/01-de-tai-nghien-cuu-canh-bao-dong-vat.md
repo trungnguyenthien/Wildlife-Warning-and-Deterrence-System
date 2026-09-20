@@ -1,8 +1,6 @@
 # ỨNG DỤNG HỆ THỐNG CẢNH BÁO VÀ XUA ĐUỔI ĐỘNG VẬT HOANG DÃ
 
 - **Lĩnh vực dự thi:** Phần mềm hệ thống / Robotics và phần mềm thông minh
-- **Tác giả:** Nguyễn Văn A, Trần Thị B
-- **Lớp:** 11A1, Trường THPT Nguyễn Hữu Huân
 - **Giáo viên hướng dẫn:** TS. Nguyễn Thị Phương Thảo
 - **Năm học:** 2025 - 2026
 
