@@ -96,3 +96,18 @@ dependencies {
   // Security
   implementation(libs.androidx.security.crypto)
 }
+
+tasks.register<Delete>("cleanMipmapPngs") {
+    delete(fileTree("src/main/res") {
+        include("mipmap-*/*.png")
+    })
+}
+
+tasks.register<Exec>("generateAdaptiveIcon") {
+    workingDir = project.rootDir
+    commandLine = listOf("python3", "build_icon.py")
+}
+
+tasks.named("preBuild") {
+    dependsOn("cleanMipmapPngs", "generateAdaptiveIcon")
+}

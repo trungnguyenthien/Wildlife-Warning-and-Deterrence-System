@@ -35,30 +35,29 @@ fun AppLogo(modifier: Modifier = Modifier) {
   ) {
     Box(
       modifier = Modifier
-        .size(96.dp)
+        .size(108.dp)
         .clip(RoundedCornerShape(24.dp))
-        .background(logoBgColor)
-        .padding(16.dp),
+        .background(Color(0xFF27AE60)),
       contentAlignment = Alignment.Center
     ) {
       Image(
-        painter = painterResource(id = R.drawable.elephant),
-        contentDescription = "Hệ thống Cảnh báo Động vật",
+        painter = painterResource(id = R.drawable.fawn_logo),
+        contentDescription = "FAWN Logo",
         modifier = Modifier.fillMaxSize()
       )
     }
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-      text = "HỆ THỐNG NHẬN DIỆN",
-      fontSize = 20.sp,
+      text = "FAWN",
+      fontSize = 32.sp,
       fontWeight = FontWeight.Bold,
       color = MaterialTheme.colorScheme.onBackground,
       textAlign = androidx.compose.ui.text.style.TextAlign.Center
     )
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-      text = "ĐỘNG VẬT HOANG DÃ VÀ CON NGƯỜI",
-      fontSize = 12.sp,
+      text = "Mạng Lưới Cảnh Báo Rừng & Động Vật",
+      fontSize = 14.sp,
       fontWeight = FontWeight.Medium,
       color = MaterialTheme.colorScheme.secondary,
       textAlign = androidx.compose.ui.text.style.TextAlign.Center
