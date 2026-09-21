@@ -56,7 +56,7 @@ fun AppLogo(modifier: Modifier = Modifier) {
     )
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-      text = "Mạng Lưới Cảnh Báo Rừng & Động Vật",
+      text = "Thần Giữ Rừng",
       fontSize = 14.sp,
       fontWeight = FontWeight.Medium,
       color = MaterialTheme.colorScheme.secondary,

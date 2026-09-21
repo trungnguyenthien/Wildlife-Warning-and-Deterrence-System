@@ -1,43 +1,41 @@
 import os
 from PIL import Image
 
-src_path = '/Users/trungnguyen/.gemini/antigravity-ide/brain/cad5b52a-90d5-4cfb-a1b9-84ce8091f2e7/.user_uploaded/media_1789962023976.jpg'
+src_path = '/Users/trungnguyen/.gemini/antigravity-ide/brain/cad5b52a-90d5-4cfb-a1b9-84ce8091f2e7/.user_uploaded/media_1789978241727.png'
 res_dir = 'app/src/main/res'
 
 img = Image.open(src_path).convert('RGBA')
-datas = img.getdata()
+width, height = img.size
 
-# Extract white deer head, making green background transparent
-newData = []
-for item in datas:
-    r, g, b, a = item
-    # Green background check
-    if g > 100 and g > r + 20 and g > b + 20:
-        newData.append((255, 255, 255, 0))
-    else:
-        newData.append((255, 255, 255, 255))
+# 1. Tách hình chú hươu sừng kiêu hãnh và chuyển sang màu trắng tinh trên nền trong suốt cho Launcher Foreground
+white_deer = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+pixels = img.load()
+w_pixels = white_deer.load()
 
-img.putdata(newData)
+for y in range(height):
+    for x in range(width):
+        r, g, b, a = pixels[x, y]
+        luminance = (r + g + b) // 3
+        # Điểm ảnh hươu màu xanh thẫm / tối
+        if a > 10 and luminance < 150 and r < 130 and g < 145:
+            w_pixels[x, y] = (255, 255, 255, 255)
 
-# Generate foreground launcher icon (deer head centered in 108x108 safe zone)
-deer = img.resize((68, 68), Image.Resampling.LANCZOS)
+# Resize chú hươu kiêu hãnh vào vùng an toàn 76x76 px trong khung 108x108 px
+deer_fg = white_deer.resize((76, 76), Image.Resampling.LANCZOS)
 fg_108 = Image.new('RGBA', (108, 108), (0, 0, 0, 0))
-fg_108.paste(deer, ((108 - 68) // 2, (108 - 68) // 2), deer)
+fg_108.paste(deer_fg, ((108 - 76) // 2, (108 - 76) // 2), deer_fg)
 
-# Save to drawable/ic_launcher_fg.png
 drawable_dir = os.path.join(res_dir, 'drawable')
 os.makedirs(drawable_dir, exist_ok=True)
 fg_108.save(os.path.join(drawable_dir, 'ic_launcher_fg.png'), 'PNG')
 
-# Remove old default robot ic_launcher_foreground.xml if present
-xml_fg = os.path.join(drawable_dir, 'ic_launcher_foreground.xml')
-if os.path.exists(xml_fg):
-    os.remove(xml_fg)
+# 2. Tạo logo 512x512 trên nền xanh lá #27AE60 phục vụ giao diện ứng dụng
+logo_bg = Image.new('RGBA', (512, 512), (39, 174, 96, 255))
+w_deer_512 = white_deer.resize((380, 380), Image.Resampling.LANCZOS)
+logo_bg.paste(w_deer_512, ((512 - 380) // 2, (512 - 380) // 2), w_deer_512)
 
-# Also update fawn_logo.png, app_icon.png, elephant.png
-img_original = Image.open(src_path)
-img_original.resize((512, 512), Image.Resampling.LANCZOS).save(os.path.join(drawable_dir, 'fawn_logo.png'), 'PNG')
-img_original.resize((512, 512), Image.Resampling.LANCZOS).save(os.path.join(drawable_dir, 'app_icon.png'), 'PNG')
-img_original.resize((512, 512), Image.Resampling.LANCZOS).save(os.path.join(drawable_dir, 'elephant.png'), 'PNG')
+logo_bg.save(os.path.join(drawable_dir, 'fawn_logo.png'), 'PNG')
+logo_bg.save(os.path.join(drawable_dir, 'app_icon.png'), 'PNG')
+logo_bg.save(os.path.join(drawable_dir, 'elephant.png'), 'PNG')
 
-print('SUCCESS UPDATED DEER ICON FG')
+print('STANDING STAG DEER ICON BUILT SUCCESSFULLY')
