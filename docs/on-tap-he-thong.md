@@ -12,10 +12,10 @@
 ## Các Thành phần Hệ thống (Standardized Participants)
 
 - **Mobile:** Ứng dụng di động (Android Client) cài đặt trên điện thoại người dùng và kiểm lâm để tương tác với hệ thống.
-- **Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
-- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Server` và `AI_Client` thay thế cho WebSocket trực tiếp.
-- **AI_Client:** Ứng dụng trí tuệ nhân tạo nhận diện (YOLOv8) chạy tại trạm thực địa, nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
-- **Rasp_PI:** Thiết bị trạm thực địa (Raspberry Pi) điều khiển camera chụp ảnh (chỉ gửi ảnh về `AI_Client` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
+- **Mobile_Server:** Máy chủ trung tâm lưu trữ dữ liệu, xử lý logic, quản lý phiên làm việc, lưu cấu hình ứng phó và giao tiếp với `Mobile` (qua REST / SSE) và `Ably` (qua REST).
+- **Ably:** Dịch vụ đám mây Pub/Sub trung gian (Cloud Broker) phân phối tin nhắn thời gian thực giữa `Mobile_Server` và `AI_Server` thay thế cho WebSocket trực tiếp.
+- **AI_Server:** Ứng dụng trí tuệ nhân tạo nhận diện (YOLOv8) chạy tại trạm thực địa, nhận hình ảnh từ `Rasp_PI` để phân tích, gửi kết quả nhận diện lên `Mobile_Server` (qua REST) và kết nối với `Ably` (qua WebSocket) để nhận lệnh điều khiển.
+- **Rasp_PI:** Thiết bị trạm thực địa (Raspberry Pi) điều khiển camera chụp ảnh (chỉ gửi ảnh về `AI_Server` khi phát hiện chuyển động) và các thiết bị xua đuổi vật lý (Loa phát thanh, Đèn LED chớp, còi hú báo động).
 - **FCM (Firebase Cloud Messaging):** Dịch vụ trung gian gửi thông báo đẩy (Push notification) thời gian thực đến `Mobile`. Nhận lệnh từ Máy chủ Backend và đánh thức ứng dụng di động hiển thị **Push Notification** rực sáng trên màn hình điện thoại (kể cả khi tắt/khóa màn hình).
 
 ## 📖 BẢNG GIẢI THÍCH KHÁI NIỆM & THUẬT NGỮ CỐT LÕI
@@ -23,12 +23,12 @@
 | Thuật ngữ / Khái niệm                                             | Giải thích ngắn gọn dễ hiểu                                                                                                                                                                                                                                                                | Vai trò & Giá trị trong Hệ thống                                                                                                                                                                                                                                          |
 | :---------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 🔑 **FCM Push Token**                                             | Nó là token do Google Firebase cấp. Dùng để định danh một **Ứng dụng di động (App) cài trên một Thiết bị (Device)** cụ thể. Thời hạn sử dụng dài hạn (đến khi gỡ app/xóa bộ nhớ).                                                                                                          | Chức năng: Đóng vai trò như _"Địa chỉ hòm thư nhận tin độc nhất"_, giúp máy chủ Backend phát thông báo đẩy khẩn cấp (Push Notification) đến đúng thiết bị di động.                                                                                                        |
-| 🛡️ **Access Token**                                               | Nó là token do Backend cấp khi đăng nhập. Dùng để định danh **Người dùng (`userId`), Thiết bị (`deviceId`) và Ứng dụng (`appId`)**. Thời hạn sử dụng ngắn hạn (vài giờ đến 1 ngày).                                                                                                        | Chức năng: Đính kèm vào HTTP Header (`Authorization: Bearer <token>`) ở mọi API để xác thực quyền truy cập dữ liệu an toàn mà không cần gửi lại mật khẩu.                                                                                                                 |
+| 🛡️ **Access Token**                                               | Nó là token do Backend cấp khi đăng nhập. Dùng để định danh **Người dùng (`userId`), Thiết bị (`deviceId`) và Ứng dụng (`appId`)**. Thời hạn sử dụng ngắn hạn (vài giờ đến 1 ngày).                                                                                              me          | Chức năng: Đính kèm vào HTTP Header (`Authorization: Bearer <token>`) ở mọi API để xác thực quyền truy cập dữ liệu an toàn mà không cần gửi lại mật khẩu.                                                                                                                 |
 | 🔄 **Refresh Token**                                              | Nó là token gia hạn phiên làm việc do Backend cấp song song với Access Token. Dùng để định danh **Phiên làm việc hợp lệ (User Session)** của tài khoản trên thiết bị. Thời hạn sử dụng dài hạn (vài tuần đến vài tháng).                                                                   | Chức năng: Dùng để xin Máy chủ Backend cấp lại một `Access Token` mới một cách tự động khi `Access Token` cũ hết hạn, giúp duy trì trạng thái đăng nhập liền mạch cho người dùng.                                                                                         |
 | 💓 **Heartbeat (Heartbeat Check)**                                | Cơ chế định kỳ (mỗi 5 giây) App gửi một câu hỏi siêu nhẹ lên Máy chủ: *"Hệ thống có thông tin gì mới không?"*.                                                                                                                                           | Thay vì liên tục tải lại toàn bộ danh sách camera nặng nề, Máy chủ chỉ trả về 1 con số thời gian (`lastUpdatedAt`). Nếu có thay đổi App mới tải dữ liệu mới; nếu không có gì thay đổi App giữ nguyên giao diện $\rightarrow$ giúp tiết kiệm pin và giảm 90% tải cho máy chủ. |
-| ⏱️ **Cooldown (Thời gian chờ 30s)**                               | Cơ chế lọc thời gian thông minh giữa 2 lần phát cảnh báo liên tiếp tại cùng 1 trạm.                                                                                                                                                                                                        | Khi động vật đứng yên trước camera nhiều phút, ảnh snapshot vẫn được lưu liên tục nhưng thông báo đẩy khẩn cấp chỉ gửi **1 lần mỗi 30 giây** $\rightarrow$ chống spam thông báo cho kiểm lâm.                                                                             |
+| ⏱️ **Cooldown (Thời gian chờ 30s)**                               | Cơ chế lọc thời gian thông minh giữa 2 lần phát cảnh báo liên tiếp tại cùng 1 trạm.                                                                                                                                                                                                        | Khi động vật đứng yên trước camera nhiều phút, ảnh snapshot vẫn được lưu liên tục nhưng thông báo đẩy khẩn cấp chỉ gửi **1 lần mỗi 30 giây** $\rightarrow$ chống spam thông báo cho kiểm lâm.                                                               me              |
 | 🔒 **Băm Mật Khẩu (Password Hashing / Bcrypt)**                   | Hàm toán học một chiều biến đổi mật khẩu thành một chuỗi mã băm cố định độc nhất (_nguyên lý "Trộn màu sơn một chiều"_).                                                                                                                                                                   | Máy chủ tuyệt đối không lưu mật khẩu thô trong DB. Kẻ xấu dù đánh cắp được mã băm trong DB cũng không thể giải mã ngược lại mật khẩu gốc.                                                                                                                                 |
-| 🌐 **Giao thức WebSocket**                                        | Giao thức mạng truyền dữ liệu 2 chiều thời gian thực (như kết nối điện thoại trực tiếp). AI Client đóng vai trò là Client (không phải máy chủ) kết nối WebSocket tới đám mây Ably Broker để nhận lệnh điều khiển và kết nối tới Raspberry Pi để gửi lệnh thực thi thiết bị. | Cho phép AI Client nhận tức thì lệnh điều khiển phòng vệ/nghe thử từ máy chủ qua Ably Broker và truyền thẳng tới mạch điều khiển Raspberry Pi để phát loa/bật đèn xua đuổi thực địa với độ trễ cực thấp (chỉ vài mili-giây). |
+| 🌐 **Giao thức WebSocket**                                        | Giao thức mạng truyền dữ liệu 2 chiều thời gian thực (như kết nối điện thoại trực tiếp). AI Server đóng vai trò là Client (không phải máy chủ) kết nối WebSocket tới đám mây Ably Broker để nhận lệnh điều khiển và kết nối tới Raspberry Pi để gửi lệnh thực thi thiết bị. | Cho phép AI Server nhận tức thì lệnh điều khiển phòng vệ/nghe thử từ máy chủ qua Ably Broker và truyền thẳng tới mạch điều khiển Raspberry Pi để phát loa/bật đèn xua đuổi thực địa với độ trễ cực thấp (chỉ vài mili-giây). |
 | ☁️ **Ably Broker (Ably Realtime Cloud)**                          | Dịch vụ trung gian chuyển tiếp tin nhắn thời gian thực (Pub/Sub Message Broker) trên nền đám mây.                                                                                                                                                                                          | Giải quyết triệt để hạn chế của kiến trúc Serverless (Serverless Vercel Backend không giữ được kết nối WebSocket lâu dài): Backend phát lệnh dạng REST API lên Ably, Ably chuyển tiếp ngay lập tức qua kết nối WebSocket xuống thiết bị thực địa `user:control:{userId}`. |
 | 🌐 **HTTP Method (Phương thức HTTP)**                             | Các _"Động từ hành động"_ (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`) trong giao thức truyền tải Web API.                                                                                                                                                                                    | Định nghĩa rõ mục đích thao tác của Client đối với tài nguyên dữ liệu trên Máy chủ (Ví dụ: `GET` để Đọc, `POST` để Tạo mới/Gửi lệnh, `PUT`/`PATCH` để Cập nhật, `DELETE` để Xóa).                                                                                         |
 | 📑 **HTTP Header (Tiêu đề HTTP)**                                 | Các cặp thông tin ngữ cảnh (`Key: Value`) được đính kèm ở phần đầu gói tin trao đổi giữa Client và Server.                                                                                                                                                                                 | Truyền tải thông tin phụ quan trọng như chìa khóa xác thực (`Authorization: Bearer <token>`), định dạng dữ liệu gửi lên/nhận về (`Content-Type: application/json`), thông tin thiết bị (`User-Agent`).                                                                    |
@@ -75,7 +75,7 @@
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Tiến trình Đăng ký tài khoản mới
     Mobile->>Server: POST /auth/register (username, fullName, phoneNumber, password, role, email?)
@@ -136,7 +136,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
     participant FCM as FCM
 
     Note over Mobile, Server: Tiến trình Đăng nhập tài khoản
@@ -201,7 +201,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Khởi động Mobile / Vào tab Danh sách Camera
     Mobile->>Server: GET /cameras
@@ -252,7 +252,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Người dùng đang mở màn hình Camera (Danh sách / Chi tiết)
     loop Định kỳ kiểm tra (Mỗi 5 giây)
@@ -312,7 +312,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Tải dữ liệu tổng hợp phân tích theo trạm
     Mobile->>Server: GET /stats/summary
@@ -363,7 +363,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Chuyển sang tab Cài đặt
     Mobile->>Server: GET /users/me
@@ -423,7 +423,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Người dùng mở màn hình Danh sách cấu hình loài
     Note over Mobile, Server: Gửi các yêu cầu tải dữ liệu song song
@@ -483,7 +483,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Người dùng mở màn hình Thiết lập phòng vệ theo loài
     Note over Mobile, Server: Gửi các yêu cầu tải cấu hình & danh mục mẫu
@@ -550,7 +550,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
 
     Note over Mobile, Server: Người dùng tùy chỉnh thông số (hoặc chọn Preset) và bấm Lưu
     Mobile->>Server: PUT /response-configs/{speciesId} (cấu hình "@DefendAction")
@@ -601,50 +601,50 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Mobile as Mobile
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
     participant Ably as Ably Broker (Cloud)
-    participant AI_Client as AI_Client
+    participant AI_Server as AI_Server
     participant Rasp_PI as Rasp_PI
 
-    Note over AI_Client, Ably: AI_Client kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
+    Note over AI_Server, Ably: AI_Server kết nối và subscribe kênh user:control:{userId} (qua WebSocket)
     Note over Mobile, Rasp_PI: Người dùng bấm nút "Nghe thử" tại app
-    Mobile->>Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
-    activate Server
-    Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
-    Note over Server, Ably: (Đồng thời Server subscribe nhận ACK từ kênh user:ack:{userId})
+    Mobile->>Mobile_Server: POST /cameras/{cameraId}/devices/{deviceKey}/test (intensity, durationSeconds, audioSampleId)
+    activate Mobile_Server
+    Mobile_Server->>Ably: REST: Publish DEVICE_COMMAND lên kênh user:control:{userId}
+    Note over Mobile_Server, Ably: (Đồng thời Mobile_Server subscribe nhận ACK từ kênh user:ack:{userId})
     activate Ably
-    Ably-->>AI_Client: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
+    Ably-->>AI_Server: Đẩy tin nhắn DEVICE_COMMAND qua WebSocket
     deactivate Ably
-    activate AI_Client
-    AI_Client->>Rasp_PI: Ra lệnh cho Loa/LED/Rào điện thực thi thử nghiệm
+    activate AI_Server
+    AI_Server->>Rasp_PI: Ra lệnh cho Loa/LED/Rào điện thực thi thử nghiệm
     activate Rasp_PI
-    Rasp_PI-->>AI_Client: Phản hồi xác nhận thiết bị đã thực thi xong
+    Rasp_PI-->>AI_Server: Phản hồi xác nhận thiết bị đã thực thi xong
     deactivate Rasp_PI
-    AI_Client->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
-    deactivate AI_Client
+    AI_Server->>Ably: WebSocket: Publish phản hồi COMMAND_ACK lên kênh user:ack:{userId} (SUCCESS)
+    deactivate AI_Server
     activate Ably
-    Ably-->>Server: Đẩy tin nhắn phản hồi COMMAND_ACK
+    Ably-->>Mobile_Server: Đẩy tin nhắn phản hồi COMMAND_ACK
     deactivate Ably
 
     alt Nhận được ACK trong vòng 5 giây
-        Server->>Server: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vào DB (device_logs)
-        Server-->>Mobile: Response 200 OK (SUCCESS)
+        Mobile_Server->>Mobile_Server: Ghi nhật ký kích hoạt thử nghiệm thiết bị ngoại vi vào DB (device_logs)
+        Mobile_Server-->>Mobile: Response 200 OK (SUCCESS)
         Mobile->>Mobile: Hiển thị thông báo "Kích hoạt thiết bị kiểm thử thành công"
     else Quá 5 giây không nhận được ACK (Timeout)
-        Server-->>Mobile: Response 504 Gateway Timeout (camera_offline)
+        Mobile_Server-->>Mobile: Response 504 Gateway Timeout (camera_offline)
         Mobile->>Mobile: Hiển thị thông báo lỗi "Không thể kết nối tới camera hiện trường"
     end
-    deactivate Server
+    deactivate Mobile_Server
 ```
 
 ---
 
-## Action 1.1 AI: AI Client sends detection snapshot (`POST /cameras/{cameraId}/detections`)
+## Action 1.1 AI: AI Server sends detection snapshot (`POST /cameras/{cameraId}/detections`)
 
 - **Mô tả kỹ thuật backend:**
-  - `Server` nhận payload từ `AI_Client` tại `POST /cameras/{cameraId}/detections`.
+  - `Mobile_Server` nhận payload từ `AI_Server` tại `POST /cameras/{cameraId}/detections`.
   - Giải mã `PUSH_SERVICE_ACCOUNT_KEY_JSON` (Base64) trong RAM để khởi tạo Firebase Admin SDK (nếu chưa được khởi tạo).
-  - `Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
+  - `Mobile_Server` truy vấn danh sách `fcm-push-token` từ bảng `device_tokens` rồi gửi Push Notification thông qua Firebase Cloud Messaging.
 
 ```mermaid
 %%{init: {
@@ -680,41 +680,41 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Rasp_PI as Rasp_PI
-    participant AI_Client as AI_Client
-    participant Server as Server
+    participant AI_Server as AI_Server
+    participant Mobile_Server as Mobile_Server
     participant FCM as FCM (Push Notification)
     participant Mobile as Mobile
 
-    Note over Rasp_PI, AI_Client: Phát hiện chuyển động vật lý tại thực địa
-    Rasp_PI->>AI_Client: Gửi hình ảnh chụp được (File Binary)
-    activate AI_Client
-    AI_Client->>AI_Client: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
+    Note over Rasp_PI, AI_Server: Phát hiện chuyển động vật lý tại thực địa
+    Rasp_PI->>AI_Server: Gửi hình ảnh chụp được (File Binary)
+    activate AI_Server
+    AI_Server->>AI_Server: Phân tích hình ảnh bằng mô hình YOLOv8 (Nhận dạng danh sách loài, độ tin cậy)
 
-    AI_Client->>Server: POST /cameras/{cameraId}/detections (image, detections)
-    activate Server
-    Server->>Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
-    Server->>Server: Ghi nhận sự kiện phát hiện động vật vào DB (events & event_detections)
-    Server->>Server: Truy vấn cấu hình phòng vệ từ DB (response_configs: "@DefendAction")
+    AI_Server->>Mobile_Server: POST /cameras/{cameraId}/detections (image, detections)
+    activate Mobile_Server
+    Mobile_Server->>Mobile_Server: Lưu trữ ảnh snapshot lên CDN / Cloud Storage
+    Mobile_Server->>Mobile_Server: Ghi nhận sự kiện phát hiện động vật vào DB (events & event_detections)
+    Mobile_Server->>Mobile_Server: Truy vấn cấu hình phòng vệ từ DB (response_configs: "@DefendAction")
 
-    Note over Server: Kiểm tra cooldown 30s: Có Event nào từ cameraId này trong 30s vừa qua không?
+    Note over Mobile_Server: Kiểm tra cooldown 30s: Có Event nào từ cameraId này trong 30s vừa qua không?
     alt isNewEvent = true (Lần đầu / Đã quá 30s)
-        Server->>Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
-        Server->>Server: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
-        Server->>Server: Truy vấn danh sách fcm-push-token từ DB (device_tokens)
-        Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
+        Mobile_Server->>Mobile_Server: Giải mã PUSH_SERVICE_ACCOUNT_KEY_JSON (Base64) trong RAM → khởi tạo Firebase Admin SDK
+        Mobile_Server->>Mobile_Server: Tạo Alert mới trong DB (type, title, dangerLevel, cameraId, eventId)
+        Mobile_Server->>Mobile_Server: Truy vấn danh sách fcm-push-token từ DB (device_tokens)
+        Mobile_Server->>FCM: Gửi push alert (speciesName, cameraId, eventId, dangerLevel)
         FCM-->>Mobile: Hiển thị Push Notification khẩn cấp lên màn hình khóa
     else isNewEvent = false (Phát hiện liên tiếp ≤ 30s)
-        Note over Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để ứng dụng tự động cập nhật.
+        Note over Mobile_Server: Bỏ qua tạo Alert & gửi Push Notification để tránh spam. Snapshot đã được lưu để ứng dụng tự động cập nhật.
     end
-    Server-->>Mobile: Cập nhật dữ liệu camera mới nhất cho điện thoại
+    Mobile_Server-->>Mobile: Cập nhật dữ liệu camera mới nhất cho điện thoại
 
-    Server->>Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
+    Mobile_Server->>Mobile_Server: Ghi nhật ký tự động kích hoạt thiết bị ngoại vi vào DB (device_logs)
 
-    Server-->>AI_Client: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
-    deactivate Server
+    Mobile_Server-->>AI_Server: Response 201/200 (eventId, detections, responseAction: "@DefendAction" phẳng 8 trường)
+    deactivate Mobile_Server
 
-    AI_Client->>Rasp_PI: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
-    deactivate AI_Client
+    AI_Server->>Rasp_PI: Truyền lệnh điều khiển thiết bị vật lý (phát audioSampleId, chớp LED theo ledFlashRate)
+    deactivate AI_Server
 
     Note over Rasp_PI: Thực thi phòng vệ tại chỗ (Phát tệp âm thanh xua đuổi chọn lọc, chớp nháy LED)
 ```
@@ -759,7 +759,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     participant Client_Test as External Client (cURL / Test Script)
-    participant Server as Server
+    participant Mobile_Server as Mobile_Server
     participant Cloudinary as Cloudinary / Cloud Storage
 
     Note over Client_Test, Server: Gửi tệp ảnh snapshot qua công cụ kiểm thử / cURL

@@ -71,8 +71,8 @@ Chúng em xin bày tỏ lòng biết ơn sâu sắc đến Ban Giám hiệu Trư
 Hệ thống được thiết kế theo mô hình kiến trúc phân tán gồm 4 thành phần cốt lõi nhằm tối ưu hóa khả năng phản ứng và quản trị:
 
 - **Hệ thống camera kèm cảnh báo tại hiện trường:** Đảm nhận việc thu thập hình ảnh hồng ngoại thời gian thực và trực tiếp kích hoạt các thiết bị cảnh báo/xua đuổi tại chỗ (loa phát, đèn chớp nhấp nháy, còi hú báo động và các thiết bị xua đuổi).
-- **Server nhận dạng thú:** Nhận luồng dữ liệu hình ảnh từ hiện trường và chạy mô hình học sâu học máy (YOLOv8) để phân tích, nhận dạng loài, số lượng và độ tin cậy.
-- **Server Mobile:** Máy chủ dịch vụ di động đóng vai trò ghi nhận thông tin điều khiển ứng phó từ người dùng, quản lý tài khoản (Login/Đăng ký), lưu trữ và phân phối log lịch sử cũng như hình ảnh snapshot sự kiện.
+- **AI Server (Server nhận dạng thú):** Nhận luồng dữ liệu hình ảnh từ hiện trường và chạy mô hình học sâu học máy (YOLOv8) để phân tích, nhận dạng loài, số lượng và độ tin cậy.
+- **Mobile Server:** Máy chủ dịch vụ di động đóng vai trò ghi nhận thông tin điều khiển ứng phó từ người dùng, quản lý tài khoản (Login/Đăng ký), lưu trữ và phân phối log lịch sử cũng như hình ảnh snapshot sự kiện.
 - **Ứng dụng di động Android (Android Mobile App):** Giao diện người dùng thực địa hỗ trợ đăng ký/đăng nhập, thực hiện điều khiển cấu hình phòng vệ từ xa và truy xuất xem log lịch sử trực quan.
 
 **Hình 1: Sơ đồ kiến trúc hệ thống**
@@ -86,11 +86,11 @@ flowchart TB
     end
 
     subgraph AIServerBox["Hệ thống Máy chủ AI (AI Server)"]
-        AIServer["Server nhận dạng thú\n(Nhận diện YOLOv8)"]
+        AIServer["AI Server\n(Nhận diện YOLOv8)"]
     end
 
     subgraph MobileServerBox["Hệ thống Máy chủ Di động (Mobile Server)"]
-        MobileServer["Server Mobile\n(Ghi nhận điều khiển ứng phó,\nLogin/Đăng ký, lưu log & hình ảnh)"]
+        MobileServer["Mobile Server\n(Ghi nhận điều khiển ứng phó,\nLogin/Đăng ký, lưu log & hình ảnh)"]
     end
 
     subgraph Android["Giao diện di động (Android App)"]
@@ -116,9 +116,9 @@ flowchart TD
     Scan --> CheckMotion{"Có chuyển động đáng kể?"}
 
     CheckMotion -- No --> Scan
-    CheckMotion -- Yes --> SendImage["Gửi khung hình có chuyển động lên Server AI"]
+    CheckMotion -- Yes --> SendImage["Gửi khung hình có chuyển động lên AI Server"]
 
-    SendImage --> RunAI["Server AI quét nhận dạng (tần suất 2s/lần)"]
+    SendImage --> RunAI["AI Server quét nhận dạng (tần suất 2s/lần)"]
     RunAI --> CheckDetect{"Có phát hiện động vật hoang dã?"}
 
     CheckDetect -- No --> Scan
@@ -176,29 +176,31 @@ Sơ đồ dưới đây mô tả quá trình tương tác giữa các thiết b�
 ```mermaid
 sequenceDiagram
     participant Cam as Trạm Camera & Thiết bị ngoại vi
+    participant AIServer as AI_Server (Nhận diện YOLOv8)
+    participant MobileServer as Mobile_Server (Backend & FCM)
     participant App as Ứng dụng Android (Mobile App)
-    participant Server as Server Điều khiển (Backend & AI)
     participant Ranger as Trạm Kiểm lâm / Người dân / Ban quản lý cao tốc / Biên phòng
 
-    Cam->>Server: Gửi khung hình khi phát hiện chuyển động
-    Server->>Server: Quét nhận dạng AI trên server (tần suất 2s/lần, Độ tin cậy >= 50%)
-    Note over Server: Phân tích loài & Mức độ nguy hiểm (Chờ 10s xác nhận)
+    Cam->>AIServer: Gửi khung hình khi phát hiện chuyển động
+    AIServer->>AIServer: Quét nhận dạng AI trên server (tần suất 2s/lần, Độ tin cậy >= 50%)
+    AIServer->>MobileServer: Gửi kết quả nhận dạng & ảnh snapshot
+    Note over MobileServer: Phân tích loài & Mức độ nguy hiểm (Chờ 10s xác nhận)
 
     alt Động vật nguy hiểm cao (Voi, Cọp, Hổ, Báo, Rắn, Cá sấu...)
-        Server->>Ranger: Gửi cảnh báo âm thầm (Push FCM / SMS) để người dân di tản
+        MobileServer->>Ranger: Gửi cảnh báo âm thầm (Push FCM / SMS) để người dân di tản
         Note over Cam: Không kích hoạt loa/ngoại vi tại chỗ để tránh kích động thú dữ
     else Phát hiện thú lớn gần cao tốc
-        Server->>Ranger: Gửi cảnh báo khẩn cấp tới Ban quản lý đường cao tốc
+        MobileServer->>Ranger: Gửi cảnh báo khẩn cấp tới Ban quản lý đường cao tốc
     else Phát hiện con người vùng biên giới
-        Server->>Ranger: Gửi cảnh báo khẩn cấp tới Lực lượng Bộ đội Biên phòng
+        MobileServer->>Ranger: Gửi cảnh báo khẩn cấp tới Lực lượng Bộ đội Biên phòng
     else Động vật ít nguy hiểm (Khỉ, Nai...)
-        Server->>Cam: Kích hoạt chuông báo, LED nhấp nháy, còi hú nhẹ để xua đuổi
-        Server-->>Ranger: Gửi SMS/Push thông báo trạng thái
+        MobileServer->>Cam: Kích hoạt chuông báo, LED nhấp nháy, còi hú nhẹ để xua đuổi
+        MobileServer-->>Ranger: Gửi SMS/Push thông báo trạng thái
     end
 
-    Server-->>App: Cập nhật hình ảnh cuối cùng/Live feed lên tab CAMERA_LIST và log lịch sử lên tab THONG_KE
-    App->>Server: Người dùng thay đổi cấu hình xua đuổi tại Tab DIEU_KHIEN của App chính
-    Server->>Cam: Cập nhật trạng thái bật/tắt thiết bị ngoại vi
+    MobileServer-->>App: Cập nhật hình ảnh cuối cùng/Live feed lên tab CAMERA_LIST và log lịch sử lên tab THONG_KE
+    App->>MobileServer: Người dùng thay đổi cấu hình xua đuổi tại Tab DIEU_KHIEN của App chính
+    MobileServer->>Cam: Cập nhật trạng thái bật/tắt thiết bị ngoại vi
 ```
 
 ### 7.4. Thiết kế các màn hình chức năng của ứng dụng Android
